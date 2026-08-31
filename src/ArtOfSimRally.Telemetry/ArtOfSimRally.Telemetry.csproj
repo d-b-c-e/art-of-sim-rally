@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    netstandard2.0 is the constraint, not a preference: this assembly is loaded
+    into art of rally by Unity Mod Manager, running on Unity 2019.4's Mono
+    runtime. Targeting net8.0 here would build fine and then fail to load in the
+    game. Nothing in this project may reference Unity or UMM - that separation is
+    what lets the packet encoder be unit-tested on modern .NET without a game.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>ArtOfSimRally.Telemetry</AssemblyName>
+    <RootNamespace>ArtOfSimRally.Telemetry</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Deterministic>true</Deterministic>
+    <!--
+      CS1591 (missing XML comment) is off: TelemetryFrame is a wire-format mirror
+      whose fields are named exactly after the Forza fields they encode. A doc
+      comment on every one of ~60 self-describing floats would bury the handful
+      that actually carry information (units, ranges, wheel ordering).
+    -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+</Project>
