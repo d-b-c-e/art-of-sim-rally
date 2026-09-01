@@ -59,12 +59,23 @@ static bool                 g_lockInit = false;
 // logging
 // --------------------------------------------------------------------------
 
+// Logging is ON by default, and AOSR_FFB_LOG=0 turns it off.
+//
+// This is deliberately inverted from the obvious design. During phase 0 the
+// question being asked is "does the game call this DLL at all", and an absent
+// log file is the answer. If logging were opt-in, an absent log would be
+// ambiguous between "the game never called us" and "the environment variable
+// did not reach the game process" - two findings that point in opposite
+// directions, and the second is easy to cause by accident (a Steam-launched
+// game does not inherit a variable set in your shell). Defaulting to on
+// collapses that ambiguity: no file means no call. The log is a few lines per
+// session, so the cost is nil.
 static bool LoggingEnabled()
 {
     if (!g_logChecked) {
         char buf[8] = {};
         DWORD n = GetEnvironmentVariableA(kLogEnv, buf, sizeof(buf));
-        g_logging = (n > 0 && buf[0] == '1');
+        g_logging = !(n > 0 && buf[0] == '0');
         g_logChecked = true;
     }
     return g_logging;
@@ -360,6 +371,13 @@ __declspec(dllexport) void FreeDirectInput(void)
 
 BOOL APIENTRY DllMain(HMODULE, DWORD reason, LPVOID)
 {
+    // The load event is the single most informative line in the log. P/Invoke
+    // binds lazily, so this fires only when the game actually calls one of our
+    // exports - which means "DLL loaded" is direct proof that the game's
+    // ForceFeedback MonoBehaviour is alive and reaching for the native side.
+    if (reason == DLL_PROCESS_ATTACH) {
+        Log("=== UnityForceFeedback.dll loaded into pid %lu ===", GetCurrentProcessId());
+    }
     if (reason == DLL_PROCESS_DETACH && g_lockInit) {
         DeleteCriticalSection(&g_lock);
         g_lockInit = false;

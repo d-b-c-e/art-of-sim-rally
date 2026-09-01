@@ -36,14 +36,18 @@ third-party binaries, nothing that would force the repo private.
 
 | Component | State |
 |---|---|
-| `UnityForceFeedback.dll` | Built, x64, 7 exports verified. **Never run in the game.** |
+| `UnityForceFeedback.dll` | Built; verified sound (LoadLibrary OK, 7 exports resolve, no VC-runtime dep). **Tested in game 2026-08-31: the game never calls it.** |
 | Telemetry encoder | Done. 24 tests pass. Round-tripped C# → UDP → Python 2026-08-31. |
 | Synth + probe | Done, verified together. |
 | UMM mod | Not started. Blocked on UMM being installed. |
 | Bonnet camera | Not started. |
 
-Phase 0 of `docs/ROADMAP.md` — does the game actually call our DLL — is
-**unanswered** and blocks the project's direction. It needs a wheel plugged in.
+Phase 0 is **answered**: the game does not call the DLL. No module load, no
+exception. So route A (free FFB by supplying the missing plugin) does not work
+as-is. Open question is whether the `ForceFeedback` component is unattached or
+merely gated — plausibly on wheel recognition, since Rewired reports the R12 as
+`Is Recognized: No`. That needs a decompiler to settle; everything so far came
+from metadata, which has no method bodies.
 
 ## Conventions
 

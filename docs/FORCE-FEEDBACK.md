@@ -120,6 +120,54 @@ Do A first — it is a day's work and it settles every open question about
 whether the game's FFB path is live. Then do B, reusing everything A taught us.
 They compose: A's logging mode is the instrumentation B needs.
 
+## Phase 0 result (2026-08-31): the game did not call the DLL
+
+Run on real hardware: MOZA R12 Base, DLL installed, a full stage driven with a
+car instantiated (`Instantiated Car: Car_F308` in Unity's `Player.log`).
+
+**Observed:**
+
+- `UnityForceFeedback.dll` never appeared in the game process's module list.
+  P/Invoke binds lazily, so this is direct proof no export was ever called.
+- No `ffb.log` was produced.
+- **No exception of any kind** in `Player.log`. A failed P/Invoke would have
+  raised `DllNotFoundException` or `EntryPointNotFoundException`. The game did
+  not try and fail - it did not try.
+
+**The DLL was ruled out as the cause.** Its only dependencies are system
+libraries (`DINPUT8`, `SHELL32`, `ole32`, `USER32`, `KERNEL32`) - notably no VC
+runtime, so nothing to be missing inside the game process - and a standalone
+`LoadLibrary` succeeds with all seven exports resolving.
+
+**Two explanations remain, and they are not yet separated:**
+
+1. The `ForceFeedback` MonoBehaviour is not attached to any live GameObject.
+   Route A is dead.
+2. It is attached but gated. The most suggestive candidate is wheel
+   recognition: `Player.log` reports
+
+   ```
+   [0] Joystick: MOZA R12 Base
+   GUID: 00000000-0000-0000-0000-000000000000
+   Is Recognized: No      Is Assigned: Yes -> Player 0
+   ```
+
+   If the game initialises force feedback only for a *recognised* racing wheel,
+   an unrecognised device would skip FFB init entirely and produce exactly this
+   result. That would make the recognition problem (see CONTROLS.md) and the
+   force feedback problem the same problem.
+
+Separating these requires reading the IL bodies of `ForceFeedback.Start()` and
+`CarDynamics`'s FFB initialisation. Everything in this repo so far came from
+assembly *metadata*, which does not include method bodies - so this is the
+first task needing a decompiler.
+
+**What survives regardless:** the DLL is a working, verified DirectInput force
+feedback output stage, and `tools/dinput-enum` confirms the R12 exposes FFB
+actuators on X and Y. Under route B - the mod computing forces from `Wheel.Mz`
+- that is precisely the component needed. Route A was the shortcut; its loss
+costs the shortcut, not the foundation.
+
 ## Phase 0: the decisive experiment
 
 The shipped DLL doubles as a probe. Set `AOSR_FFB_LOG=1` and every call is

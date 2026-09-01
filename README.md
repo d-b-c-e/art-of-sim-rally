@@ -35,15 +35,21 @@ out of the shipped assemblies, none of it from forum posts.
 
 | Component | State |
 |---|---|
-| `UnityForceFeedback.dll` — the missing native plugin | **Built**, x64, all 7 exports verified. Not yet runtime-verified in game. |
+| `UnityForceFeedback.dll` — the missing native plugin | **Built and verified sound** (loads standalone, 7 exports resolve, no VC-runtime dependency). Tested in game 2026-08-31: **the game never calls it** — see below. |
 | Forza telemetry encoder | **Done.** 324-byte FH4/5 Data Out, 24 tests passing, round-trip verified C# → UDP → Python. |
 | Synth + probe harness | **Done.** Test the whole chain with no game running. |
 | Unity Mod Manager mod | Not started — needs UMM installed. |
 | Bonnet camera | Not started. Design in [docs/CAMERA.md](docs/CAMERA.md). |
 
-The next step is [phase 0](docs/ROADMAP.md): install the DLL with logging on,
-drive a stage, and find out whether the game calls it. That single experiment
-decides the shape of everything after it.
+**Phase 0 result (2026-08-31):** the DLL was installed and a full stage driven on
+a MOZA R12. The game never loaded it — and raised no exception, so it did not try
+and fail, it did not try. Either the `ForceFeedback` component is not attached,
+or it is gated on something; the leading suspect is wheel recognition, since
+Rewired reports the R12 as `Is Recognized: No`. Separating those needs a
+decompiler. Full detail in [docs/FORCE-FEEDBACK.md](docs/FORCE-FEEDBACK.md).
+
+The DLL remains the force feedback output stage for route B, where the mod
+computes forces itself from `Wheel.Mz`.
 
 ## Getting started
 
