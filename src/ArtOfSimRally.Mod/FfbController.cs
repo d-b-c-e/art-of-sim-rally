@@ -60,6 +60,19 @@ namespace ArtOfSimRally.Mod
             if (cfg == null || !cfg.ForceFeedbackEnabled.Value) return;
             if (!FfbNative.Ready) return;
 
+            // FixedUpdate keeps running through the end-of-stage cutscene while
+            // the game steers the car itself. Without this the wheel is dragged
+            // to full lock and held there after crossing the line.
+            if (!GameState.IsDriving)
+            {
+                if (_smoothed != 0f)
+                {
+                    _smoothed = 0f;
+                    FfbNative.SetForce(0);
+                }
+                return;
+            }
+
             var axles = __instance.axles;
             if (axles == null) return;
 

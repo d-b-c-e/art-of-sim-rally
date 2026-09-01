@@ -89,7 +89,9 @@ namespace ArtOfSimRally.Mod
             var axles = cd.axles;
             var frame = new TelemetryFrame
             {
-                IsRaceOn    = true,
+                // False in menus, cutscenes, pauses and replays, so dashboards
+                // park and motion rigs stop instead of reacting to an AI-driven car.
+                IsRaceOn    = GameState.IsDriving,
                 TimestampMs = _timestampMs,
 
                 EngineMaxRpm     = _drivetrain != null ? _drivetrain.maxRPM : 0f,
@@ -142,7 +144,7 @@ namespace ArtOfSimRally.Mod
             }
 
             if (axles?.allWheels != null && axles.allWheels.Length >= 4)
-                FillWheels(ref frame, axles);
+                FillWheels(ref frame, axles, speed);
 
             return frame;
         }
@@ -150,7 +152,7 @@ namespace ArtOfSimRally.Mod
         // Forza's arrays are front-left, front-right, rear-left, rear-right. The
         // game exposes the same corners via frontAxle/rearAxle, so map explicitly
         // rather than trusting allWheels ordering.
-        private static void FillWheels(ref TelemetryFrame frame, Axles axles)
+        private static void FillWheels(ref TelemetryFrame frame, Axles axles, float speed)
         {
             var fl = axles.frontAxle?.leftWheel;
             var fr = axles.frontAxle?.rightWheel;
@@ -171,13 +173,50 @@ namespace ArtOfSimRally.Mod
                 fl.suspensionTravel, fr.suspensionTravel,
                 rl.suspensionTravel, rr.suspensionTravel);
 
+            // Compression is the normalised form Forza expects here, and it is
+            // what suspension-driven shaker effects actually read.
+            frame.NormalizedSuspensionTravel = new WheelValues(
+                Mathf.Clamp01(fl.compression), Mathf.Clamp01(fr.compression),
+                Mathf.Clamp01(rl.compression), Mathf.Clamp01(rr.compression));
+
+            frame.WheelRotationSpeed = new WheelValues(
+                fl.angularVelocity, fr.angularVelocity,
+                rl.angularVelocity, rr.angularVelocity);
+
             frame.WheelInPuddleDepth = new WheelValues(
                 fl.isOnPuddle ? 1f : 0f, fr.isOnPuddle ? 1f : 0f,
                 rl.isOnPuddle ? 1f : 0f, rr.isOnPuddle ? 1f : 0f);
+
+            // SurfaceRumble is the road-texture channel bass shakers key off. The
+            // game has no such signal, but it does classify the surface under each
+            // wheel, which on a rally stage carries most of the information -
+            // gravel and offroad should shake, dry tarmac should not. Scaled by
+            // speed so a stationary car is silent rather than buzzing.
+            float v = Mathf.Clamp01(speed / 30f);
+            frame.SurfaceRumble = new WheelValues(
+                Roughness(fl) * v, Roughness(fr) * v,
+                Roughness(rl) * v, Roughness(rr) * v);
         }
 
         private static float Combined(Wheel w)
             => Mathf.Sqrt(w.slipRatio * w.slipRatio + w.slipAngle * w.slipAngle);
+
+        // Rough surface-texture weighting. Deliberately coarse: it drives haptics,
+        // not physics, and the ordering matters far more than the exact values.
+        private static float Roughness(Wheel w)
+        {
+            switch (w.surfaceType)
+            {
+                case CarDynamics.SurfaceType.tarmacdry:
+                case CarDynamics.SurfaceType.tarmacwet: return 0.05f;
+                case CarDynamics.SurfaceType.snow:      return 0.30f;
+                case CarDynamics.SurfaceType.gravel:    return 0.55f;
+                case CarDynamics.SurfaceType.snow_off:  return 0.55f;
+                case CarDynamics.SurfaceType.grass:     return 0.65f;
+                case CarDynamics.SurfaceType.offroad:   return 0.85f;
+                default:                                return 0.30f;
+            }
+        }
 
         /// <summary>Closes the socket. Called from the plugin's teardown.</summary>
         public static void Shutdown()
