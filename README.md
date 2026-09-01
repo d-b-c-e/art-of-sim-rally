@@ -95,7 +95,17 @@ python harness/forza_probe.py
 | `tests/` | xUnit tests pinning the wire format |
 | `tools/ArtOfSimRally.Synth/` | Synthetic telemetry emitter for testing consumers |
 | `harness/` | `forza_probe.py` — listen and print what is on the wire |
-| `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CAMERA, ROADMAP |
+| `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP |
+
+## Do I need a utility to bind my wheel?
+
+No. The game has a native press-to-bind UI with split-axis support, and
+Rewired already recognises most wheels (G25/G27/G29/G920/G923, Driving Force,
+Fanatec, Thrustmaster, Moza). Bindings and calibration persist in the registry.
+
+Do **not** route the wheel through xoutput/XInput — XInput has no force
+feedback beyond rumble, and it would hide the device from the DirectInput API
+this mod depends on. Details in [docs/CONTROLS.md](docs/CONTROLS.md).
 
 ## Two things worth knowing up front
 

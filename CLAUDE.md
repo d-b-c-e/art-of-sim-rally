@@ -30,7 +30,7 @@ third-party binaries, nothing that would force the repo private.
 | `tests/ArtOfSimRally.Telemetry.Tests` | xUnit, 24 tests pinning the wire format |
 | `tools/ArtOfSimRally.Synth` | Synthetic emitter for testing consumers without the game |
 | `harness/forza_probe.py` | Listens and prints what is actually on the wire |
-| `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CAMERA, ROADMAP |
+| `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP |
 
 ## Status — do not overstate this
 
@@ -82,7 +82,13 @@ Phase 0 of `docs/ROADMAP.md` — does the game actually call our DLL — is
   machine is on `D:`, not a default path.
 - Engine: **Unity 2019.4.38f1, Mono** — ideal for modding. Not IL2CPP.
 - Input: **Rewired**, all four backends. Wheel input already works; only force
-  feedback is missing. `xoutput-redux` is very likely unnecessary.
+  feedback is missing. The game has its own press-to-bind UI (`ControlsRemapper`)
+  with split-axis support, and Rewired recognises most wheels — **no binding
+  utility is needed, and xoutput/XInput must NOT be used** because it would
+  hide the wheel from the DirectInput API the FFB route needs. See
+  `docs/CONTROLS.md`.
+- Bindings persist in PlayerPrefs at `HKCU\Software\Funselektor Labs\art of rally`.
+  That key not existing means the game has never been launched on this machine.
 - MSVC 14.44 x64 build tools and Windows SDK 10.0.26100 with `dinput8.lib` are
   installed. `cl.exe` is not on PATH — `src/UnityForceFeedback/build.bat` sets
   up the environment itself.

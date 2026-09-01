@@ -34,6 +34,10 @@ and it tells us whether route A's output is worth keeping.
 **Blocked on:** a wheel being plugged into this machine. Everything up to this
 point was doable without one; nothing past it is.
 
+First bind the wheel in game — no utility needed, see
+[CONTROLS.md](CONTROLS.md) — and confirm throttle and brake are on separate
+axes before trusting anything the FFB log says.
+
 ## Phase 1 — the Unity Mod Manager mod
 
 Stand up the UMM + Harmony mod proper, following
