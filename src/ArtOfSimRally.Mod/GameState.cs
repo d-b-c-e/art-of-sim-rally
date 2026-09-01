@@ -54,5 +54,38 @@ namespace ArtOfSimRally.Mod
                 }
             }
         }
+
+        /// <summary>
+        /// True while the player's own camera should be in control of the view.
+        /// </summary>
+        /// <remarks>
+        /// Wider than <see cref="IsDriving"/> on purpose. Sitting on the start line
+        /// and pausing are both moments where yanking the view back to a chase
+        /// camera would be jarring. The end-of-stage cinematic, replays and the
+        /// intro are the opposite: the game is directing, and a mod-mounted camera
+        /// fights it - observed as the view ending up underground after crossing
+        /// the finish line.
+        /// </remarks>
+        public static bool IsPlayerView
+        {
+            get
+            {
+                try
+                {
+                    var manager = GameEntryPoint.EventManager;
+                    if (manager == null) return false;
+                    switch (manager.status)
+                    {
+                        case EventStatusEnums.EventStatus.UNDERWAY:
+                        case EventStatusEnums.EventStatus.WAITING_TO_BEGIN:
+                        case EventStatusEnums.EventStatus.PAUSED:
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
+                catch { return false; }
+            }
+        }
     }
 }

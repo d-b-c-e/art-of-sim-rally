@@ -95,6 +95,11 @@ namespace ArtOfSimRally.Mod
                 if (cfg == null || !cfg.BonnetCameraEnabled.Value) return;
                 if (!IsActive(__instance)) { _lateralOffset = 0f; return; }
 
+                // Hand the camera back for the end-of-stage cinematic, replays and
+                // the intro. The game directs its own shots there, and continuing
+                // to mount the camera to the car puts the view underground.
+                if (!GameState.IsPlayerView) { _lateralOffset = 0f; return; }
+
                 var target = __instance.target;
                 if (target == null) return;
 
@@ -127,6 +132,10 @@ namespace ArtOfSimRally.Mod
                 // The stock UpdateFOVAndPitch rewrites fieldOfView every frame for
                 // the chase camera, so set ours after it rather than once.
                 cam.fieldOfView = cfg.BonnetFOV.Value;
+
+                // Polled here so the hotkeys are live only while looking through
+                // this camera, and never while driving a stock view or in a menu.
+                CameraTuner.Update();
             }
 
             // Average lateral slip across the wheels, which the game already

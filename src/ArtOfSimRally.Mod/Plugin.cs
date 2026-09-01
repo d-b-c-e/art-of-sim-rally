@@ -4,6 +4,7 @@ using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using UnityEngine;
 using HarmonyLib;
 
 namespace ArtOfSimRally.Mod
@@ -75,6 +76,9 @@ namespace ArtOfSimRally.Mod
     /// <summary>Typed wrapper over the BepInEx config file.</summary>
     internal sealed class ModConfig
     {
+        /// <summary>Backing file, so live camera adjustments can be saved.</summary>
+        public readonly ConfigFile File;
+
         public readonly ConfigEntry<bool> DirectSteering;
         public readonly ConfigEntry<bool> DisableSteerAssist;
         public readonly ConfigEntry<bool> ZeroAxisDeadzone;
@@ -94,12 +98,21 @@ namespace ArtOfSimRally.Mod
         public readonly ConfigEntry<float> BonnetFOV;
         public readonly ConfigEntry<float> BonnetLean;
 
+        public readonly ConfigEntry<bool>  CameraTuningKeys;
+        public readonly ConfigEntry<float> TuneMoveSpeed;
+        public readonly ConfigEntry<float> TuneAngleSpeed;
+        public readonly ConfigEntry<KeyCode> KeyUp, KeyDown, KeyForward, KeyBack;
+        public readonly ConfigEntry<KeyCode> KeyLeft, KeyRight, KeyPitchUp, KeyPitchDown;
+        public readonly ConfigEntry<KeyCode> KeyFovUp, KeyFovDown, KeyReset;
+
         public readonly ConfigEntry<bool>   TelemetryEnabled;
         public readonly ConfigEntry<string> TelemetryHost;
         public readonly ConfigEntry<int>    TelemetryPort;
 
         public ModConfig(ConfigFile file)
         {
+            File = file;
+
             DirectSteering = file.Bind("Steering", "DirectSteering", true,
                 "Removes the gamepad steering smoothing the game applies to wheels it does not " +
                 "recognise. This is exactly the code path a recognised wheel (e.g. a Logitech G29) " +
@@ -160,6 +173,29 @@ namespace ArtOfSimRally.Mod
             BonnetLean = file.Bind("Camera", "Lean", 0.1f,
                 "Lateral camera shift under cornering load, in metres at full slip. Sells the " +
                 "mounted feel, but is also the first thing to cause motion sickness. 0 disables.");
+
+            CameraTuningKeys = file.Bind("CameraTuning", "Enabled", true,
+                "Adjust the bonnet camera live with hotkeys while that view is active. Changes " +
+                "save automatically about a second after you stop pressing. Read through " +
+                "UnityEngine.Input rather than Rewired, so these cannot clash with a bound action.");
+
+            TuneMoveSpeed = file.Bind("CameraTuning", "MoveSpeed", 0.4f,
+                "Metres per second while a position key is held.");
+
+            TuneAngleSpeed = file.Bind("CameraTuning", "AngleSpeed", 20f,
+                "Degrees per second while a pitch or FOV key is held.");
+
+            KeyUp        = file.Bind("CameraTuning", "KeyUp",        KeyCode.Keypad8, "Raise the camera.");
+            KeyDown      = file.Bind("CameraTuning", "KeyDown",      KeyCode.Keypad2, "Lower the camera.");
+            KeyForward   = file.Bind("CameraTuning", "KeyForward",   KeyCode.Keypad9, "Move forward.");
+            KeyBack      = file.Bind("CameraTuning", "KeyBack",      KeyCode.Keypad7, "Move back.");
+            KeyLeft      = file.Bind("CameraTuning", "KeyLeft",      KeyCode.Keypad4, "Move left.");
+            KeyRight     = file.Bind("CameraTuning", "KeyRight",     KeyCode.Keypad6, "Move right.");
+            KeyPitchDown = file.Bind("CameraTuning", "KeyPitchDown", KeyCode.Keypad1, "Tilt down.");
+            KeyPitchUp   = file.Bind("CameraTuning", "KeyPitchUp",   KeyCode.Keypad3, "Tilt up.");
+            KeyFovUp     = file.Bind("CameraTuning", "KeyFovUp",     KeyCode.KeypadPlus,  "Widen field of view.");
+            KeyFovDown   = file.Bind("CameraTuning", "KeyFovDown",   KeyCode.KeypadMinus, "Narrow field of view.");
+            KeyReset     = file.Bind("CameraTuning", "KeyReset",     KeyCode.Keypad0, "Reset camera to defaults.");
 
             TelemetryEnabled = file.Bind("Telemetry", "Enabled", false,
                 "Emit Forza Horizon-compatible UDP telemetry, readable by SimHub, dashboards, " +
