@@ -122,15 +122,32 @@ They compose: A's logging mode is the instrumentation B needs.
 
 ## Phase 0: the decisive experiment
 
-The shipped DLL doubles as a probe. Set `AOSR_FFB_LOG=1` before launching and
-every call is traced to `%LOCALAPPDATA%\ArtOfSimRally\ffb.log`.
+The shipped DLL doubles as a probe. Set `AOSR_FFB_LOG=1` and every call is
+traced to `%LOCALAPPDATA%\ArtOfSimRally\ffb.log`.
+
+**The variable must reach the game process, not just your shell.** A game
+launched from Steam inherits Steam's environment, so setting it in a terminal
+and then pressing Play in Steam produces an empty log - which reads exactly
+like "the game never calls our DLL" and would send you down route B for no
+reason. Set it at user scope and restart Steam:
 
 ```powershell
 .\src\UnityForceFeedback\build.ps1 -Install
-$env:AOSR_FFB_LOG = "1"
-# launch art of rally, drive a stage, quit
+[Environment]::SetEnvironmentVariable('AOSR_FFB_LOG', '1', 'User')
+# fully exit Steam, start it again, then launch art of rally and drive a stage
 Get-Content "$env:LOCALAPPDATA\ArtOfSimRally\ffb.log"
 ```
+
+Or bypass Steam's launcher entirely (Steam must still be running for the
+Steamworks init):
+
+```powershell
+$env:AOSR_FFB_LOG = "1"
+& "D:\Program Files (x86)\Steam\steamapps\common\artofrally\artofrally.exe"
+```
+
+An empty log is only meaningful once you have confirmed the variable actually
+reached the game. If in doubt, use the direct-launch form above.
 
 Read the log:
 

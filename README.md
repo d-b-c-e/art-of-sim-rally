@@ -58,11 +58,27 @@ the native DLL.
 
 **Trace what the game does with it:**
 
+The variable must reach the *game* process. Setting it in a shell is not enough
+if you launch from Steam: the game inherits Steam's environment, not your
+shell's, so the log comes back empty and you would wrongly conclude the game
+never calls the DLL. Set it at user scope and restart Steam:
+
 ```powershell
-$env:AOSR_FFB_LOG = "1"
-# launch art of rally, drive, quit
+[Environment]::SetEnvironmentVariable('AOSR_FFB_LOG', '1', 'User')
+# fully exit Steam, start it again, then launch art of rally and drive
 Get-Content "$env:LOCALAPPDATA\ArtOfSimRally\ffb.log"
 ```
+
+Or bypass Steam's launcher and start the exe from a shell that already has the
+variable (Steam itself must still be running for the Steamworks init):
+
+```powershell
+$env:AOSR_FFB_LOG = "1"
+& "D:\Program Files (x86)\Steam\steamapps\common\artofrally\artofrally.exe"
+```
+
+Turn it off again with
+`[Environment]::SetEnvironmentVariable('AOSR_FFB_LOG', $null, 'User')`.
 
 How to read that log is in
 [docs/FORCE-FEEDBACK.md](docs/FORCE-FEEDBACK.md#phase-0-the-decisive-experiment).

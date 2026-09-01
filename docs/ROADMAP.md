@@ -12,10 +12,15 @@ the game. Install it with logging on, drive a stage, read the log.
 
 ```powershell
 .\src\UnityForceFeedback\build.ps1 -Install
-$env:AOSR_FFB_LOG = "1"
-# launch art of rally, drive, quit
+[Environment]::SetEnvironmentVariable('AOSR_FFB_LOG', '1', 'User')
+# fully exit and restart Steam so the game inherits it, then drive a stage
 Get-Content "$env:LOCALAPPDATA\ArtOfSimRally\ffb.log"
 ```
+
+Restarting Steam is not optional. The game inherits Steam's environment, so a
+variable set only in your shell produces an empty log that looks identical to
+the game never calling the DLL - a false negative that would send you down
+route B for no reason.
 
 Interpretation table is in [FORCE-FEEDBACK.md](FORCE-FEEDBACK.md#phase-0-the-decisive-experiment).
 
