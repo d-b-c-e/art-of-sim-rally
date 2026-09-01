@@ -86,6 +86,14 @@ namespace ArtOfSimRally.Mod
         public readonly ConfigEntry<bool>  Invert;
         public readonly ConfigEntry<bool>  DiagnosticLogging;
 
+        public readonly ConfigEntry<bool>  BonnetCameraEnabled;
+        public readonly ConfigEntry<float> BonnetHeight;
+        public readonly ConfigEntry<float> BonnetForward;
+        public readonly ConfigEntry<float> BonnetSide;
+        public readonly ConfigEntry<float> BonnetPitch;
+        public readonly ConfigEntry<float> BonnetFOV;
+        public readonly ConfigEntry<float> BonnetLean;
+
         public readonly ConfigEntry<bool>   TelemetryEnabled;
         public readonly ConfigEntry<string> TelemetryHost;
         public readonly ConfigEntry<int>    TelemetryPort;
@@ -128,6 +136,30 @@ namespace ArtOfSimRally.Mod
 
             DiagnosticLogging = file.Bind("ForceFeedback", "DiagnosticLogging", false,
                 "Log peak aligning torque every 5 seconds, for tuning MzReference.");
+
+            BonnetCameraEnabled = file.Bind("Camera", "BonnetCamera", true,
+                "Adds a bonnet-mounted view to the game's normal view rotation. Press the " +
+                "change-view button to cycle to it; the choice persists like any other view. " +
+                "This is a bonnet camera, not a cockpit one - the cars have no interiors.");
+
+            BonnetHeight = file.Bind("Camera", "Height", 0.95f,
+                "Metres above the car's origin. Raise until the bonnet sits low in frame.");
+
+            BonnetForward = file.Bind("Camera", "Forward", 1.0f,
+                "Metres forward of the car's origin. Increase if the car body blocks the view.");
+
+            BonnetSide = file.Bind("Camera", "Side", 0f,
+                "Metres right of centre. Negative for left-hand drive framing.");
+
+            BonnetPitch = file.Bind("Camera", "Pitch", 3f,
+                "Degrees of downward tilt. Positive looks down toward the road.");
+
+            BonnetFOV = file.Bind("Camera", "FieldOfView", 75f,
+                "Field of view in degrees. Wider exaggerates speed; narrower reads more natural.");
+
+            BonnetLean = file.Bind("Camera", "Lean", 0.1f,
+                "Lateral camera shift under cornering load, in metres at full slip. Sells the " +
+                "mounted feel, but is also the first thing to cause motion sickness. 0 disables.");
 
             TelemetryEnabled = file.Bind("Telemetry", "Enabled", false,
                 "Emit Forza Horizon-compatible UDP telemetry, readable by SimHub, dashboards, " +
