@@ -45,7 +45,13 @@ namespace ArtOfSimRally.Mod
         private static void ApplyDirectSteering(CarController __instance)
         {
             var cfg = Plugin.Settings;
-            if (cfg == null || !cfg.DirectSteering.Value) return;
+            if (cfg == null) return;
+
+            // Rewired is guaranteed initialised by the time a car spawns, which
+            // is not true at BepInEx Awake.
+            WheelCalibration.Apply();
+
+            if (!cfg.DirectSteering.Value) return;
 
             // Mirrors the `if (flag)` branch in SmoothSteer exactly.
             __instance.steerTime             = 0f;

@@ -77,6 +77,7 @@ namespace ArtOfSimRally.Mod
     {
         public readonly ConfigEntry<bool> DirectSteering;
         public readonly ConfigEntry<bool> DisableSteerAssist;
+        public readonly ConfigEntry<bool> ZeroAxisDeadzone;
 
         public readonly ConfigEntry<bool>  ForceFeedbackEnabled;
         public readonly ConfigEntry<float> Gain;
@@ -100,6 +101,12 @@ namespace ArtOfSimRally.Mod
                 "Disables SteerAssistance, which reduces your steering authority as the car slides. " +
                 "Unlike DirectSteering this IS a driving aid change and alters how the car behaves. " +
                 "art of rally has online leaderboards; enable deliberately.");
+
+            ZeroAxisDeadzone = file.Bind("Steering", "ZeroAxisDeadzone", true,
+                "Clears Rewired's per-axis calibration deadzone and forces linear sensitivity. " +
+                "This is a SECOND deadzone, separate from the one in the game's options screen, " +
+                "applied inside GetAxisRaw before the game sees the value. Unrecognised wheels " +
+                "get default values for it and nothing in the UI exposes them.");
 
             ForceFeedbackEnabled = file.Bind("ForceFeedback", "Enabled", true,
                 "Enables force feedback. Requires UnityForceFeedback.dll in " +
