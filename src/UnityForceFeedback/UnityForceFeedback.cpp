@@ -55,6 +55,11 @@ struct Candidate { GUID guid; char name[MAX_PATH]; };
 static Candidate g_candidates[kMaxCandidates];
 static int       g_candidateCount = 0;
 static char      g_preferred[MAX_PATH] = {};
+static int       g_preferredIndex = -1;
+
+// Axis count the constant-force effect was actually created with. Every
+// SetParameters call must agree with it.
+static DWORD     g_effectAxes = 2;
 
 static LPDIRECTINPUT8       g_di      = nullptr;
 static LPDIRECTINPUTDEVICE8 g_device  = nullptr;
@@ -252,7 +257,16 @@ __declspec(dllexport) int InitDirectInput(int hwnd)
     // Honour a preferred name if one was set and matches; otherwise take the
     // first. Choosing explicitly beats whatever order DirectInput enumerated in.
     int chosen = 0;
-    if (g_preferred[0]) {
+    if (g_preferredIndex >= 0) {
+        if (g_preferredIndex < g_candidateCount) {
+            chosen = g_preferredIndex;
+            Log("  using index %d as requested", chosen);
+        } else {
+            Log("  requested index %d but only %d FFB device(s) present; using [0]",
+                g_preferredIndex, g_candidateCount);
+        }
+    }
+    else if (g_preferred[0]) {
         bool matched = false;
         for (int i = 0; i < g_candidateCount; ++i) {
             if (ContainsNoCase(g_candidates[i].name, g_preferred)) {
@@ -324,12 +338,17 @@ __declspec(dllexport) int InitDirectInput(int hwnd)
     effect.cbTypeSpecificParams = sizeof(DICONSTANTFORCE);
     effect.lpvTypeSpecificParams = &constant;
 
+    g_effectAxes = 2;
     hr = g_device->CreateEffect(GUID_ConstantForce, &effect, &g_effect, nullptr);
     if (FAILED(hr)) {
-        // Some wheels expose only a single FFB axis; retry with X alone.
+        // Plenty of wheels expose a single FFB axis. Retry with X alone, and
+        // remember that we did - SetParameters must describe the same number of
+        // axes the effect was created with, or every update is rejected with
+        // E_INVALIDARG and the wheel goes silently dead.
         Log("  2-axis CreateEffect failed 0x%08lX, retrying single axis", hr);
         effect.cAxes = 1;
         hr = g_device->CreateEffect(GUID_ConstantForce, &effect, &g_effect, nullptr);
+        if (SUCCEEDED(hr)) g_effectAxes = 1;
     }
     if (FAILED(hr)) {
         Log("  CreateEffect(GUID_ConstantForce) failed 0x%08lX", hr);
@@ -337,7 +356,7 @@ __declspec(dllexport) int InitDirectInput(int hwnd)
         return 0;
     }
 
-    Log("  initialised OK");
+    Log("  initialised OK (constant force on %lu axis/axes)", g_effectAxes);
     return 1;
 }
 
@@ -348,6 +367,15 @@ __declspec(dllexport) void SetPreferredDevice(const char* name)
     if (!name || !*name) { g_preferred[0] = 0; return; }
     strncpy_s(g_preferred, sizeof(g_preferred), name, _TRUNCATE);
     Log("SetPreferredDevice(\"%s\")", g_preferred);
+}
+
+// Selects by enumeration index. Necessary because product names are not unique -
+// a Fanatec rig reports two devices both called "FANATEC Wheel", which no name
+// filter can tell apart.
+__declspec(dllexport) void SetPreferredDeviceIndex(int index)
+{
+    g_preferredIndex = index;
+    Log("SetPreferredDeviceIndex(%d)", index);
 }
 
 __declspec(dllexport) void Aquire(void)
@@ -387,7 +415,10 @@ __declspec(dllexport) int SetDeviceForcesXY(int x, int y)
     DIEFFECT update      = {};
     update.dwSize        = sizeof(DIEFFECT);
     update.dwFlags       = DIEFF_CARTESIAN | DIEFF_OBJECTOFFSETS;
-    update.cAxes         = 2;
+    // MUST match the axis count the effect was created with. Hard-coding 2 here
+    // while the effect fell back to 1 axis makes every update fail with
+    // E_INVALIDARG, and the wheel simply never moves.
+    update.cAxes         = g_effectAxes;
     update.rglDirection  = direction;
     update.cbTypeSpecificParams  = sizeof(DICONSTANTFORCE);
     update.lpvTypeSpecificParams = &constant;
@@ -401,7 +432,24 @@ __declspec(dllexport) int SetDeviceForcesXY(int x, int y)
         g_device->Acquire();
         return 0;
     }
-    return SUCCEEDED(hr) ? 1 : 0;
+
+    // Log failures, rate-limited. Without this a wheel that accepts the effect
+    // and then rejects every update looks identical in the log to one that is
+    // working perfectly - which is exactly how a real bug went unnoticed until a
+    // user with different hardware reported it.
+    if (FAILED(hr)) {
+        static DWORD lastReport = 0;
+        static long  failures   = 0;
+        ++failures;
+        DWORD now = GetTickCount();
+        if (lastReport == 0 || now - lastReport > 5000) {
+            lastReport = now;
+            Log("SetParameters FAILED 0x%08lX (%ld failures so far; effect has %lu axis/axes) "
+                "- no force is reaching the wheel", hr, failures, g_effectAxes);
+        }
+        return 0;
+    }
+    return 1;
 }
 
 __declspec(dllexport) BOOL StartEffect(void)

@@ -68,6 +68,12 @@ namespace ArtOfSimRally.Mod
             "lists every device it saw. Takes effect on restart.")]
         public string PreferredDevice = "";
 
+        [Draw("Wheel index (-1 = auto)", Min = -1, Max = 7, Tooltip =
+            "Use when several devices share a name - a Fanatec rig reports two, both called " +
+            "\"FANATEC Wheel\". The log lists each with an index; put that number here. " +
+            "Takes effect on restart.")]
+        public int PreferredDeviceIndex = -1;
+
         // ---- Camera ---------------------------------------------------------
 
         [Draw("Bonnet camera", Tooltip =

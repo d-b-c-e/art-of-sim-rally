@@ -12,3 +12,4 @@ EXPORTS
     SetAutoCenter
     FreeDirectInput
     SetPreferredDevice
+    SetPreferredDeviceIndex

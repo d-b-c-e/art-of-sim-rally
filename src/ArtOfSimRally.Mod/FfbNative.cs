@@ -40,6 +40,9 @@ namespace ArtOfSimRally.Mod
         [DllImport(Dll, CharSet = CharSet.Ansi)]
         private static extern void SetPreferredDevice(string name);
 
+        [DllImport(Dll)]
+        private static extern void SetPreferredDeviceIndex(int index);
+
         /// <summary>DirectInput's nominal full-scale force.</summary>
         public const int ForceMax = 10000;
 
@@ -58,7 +61,13 @@ namespace ArtOfSimRally.Mod
         /// Substring of the wheel's product name to prefer, or empty for the first
         /// force-feedback device found. Only matters on a rig with more than one.
         /// </param>
-        public static bool Initialise(string pluginDir, string preferredDevice = null)
+        /// <param name="preferredIndex">
+        /// Zero-based index from the log's device list, or -1 to choose automatically.
+        /// Needed where several devices share a product name - a Fanatec rig reports
+        /// two devices both called "FANATEC Wheel", which no name filter can separate.
+        /// </param>
+        public static bool Initialise(string pluginDir, string preferredDevice = null,
+                                      int preferredIndex = -1)
         {
             if (_initialised) return !_failed;
             _initialised = true;
@@ -78,7 +87,10 @@ namespace ArtOfSimRally.Mod
                         "relying on the default search order.");
 
                 // Must precede InitDirectInput - that is where selection happens.
-                if (!string.IsNullOrEmpty(preferredDevice))
+                // Index wins over name, being the unambiguous one.
+                if (preferredIndex >= 0)
+                    SetPreferredDeviceIndex(preferredIndex);
+                else if (!string.IsNullOrEmpty(preferredDevice))
                     SetPreferredDevice(preferredDevice);
 
                 int hwnd = GetForegroundWindow();
