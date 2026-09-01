@@ -138,16 +138,23 @@ reason. Set it at user scope and restart Steam:
 Get-Content "$env:LOCALAPPDATA\ArtOfSimRally\ffb.log"
 ```
 
-Or bypass Steam's launcher entirely (Steam must still be running for the
-Steamworks init):
+Or bypass the persistent setting by starting **Steam itself** with the variable
+- it passes down to the game it launches:
 
 ```powershell
+& "D:\Program Files (x86)\Steam\steam.exe" -shutdown
+# wait for Steam to fully exit, then:
 $env:AOSR_FFB_LOG = "1"
-& "D:\Program Files (x86)\Steam\steamapps\common\artofrally\artofrally.exe"
+& "D:\Program Files (x86)\Steam\steam.exe"
 ```
 
+**Do not try to launch `artofrally.exe` directly.** The game ships without a
+`steam_appid.txt`, so Steamworks restarts it through Steam - and the relaunched
+process is spawned by Steam, so it does not inherit a variable set in your
+shell. It looks like the game simply failed to start.
+
 An empty log is only meaningful once you have confirmed the variable actually
-reached the game. If in doubt, use the direct-launch form above.
+reached the game.
 
 Read the log:
 

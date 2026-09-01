@@ -69,13 +69,19 @@ never calls the DLL. Set it at user scope and restart Steam:
 Get-Content "$env:LOCALAPPDATA\ArtOfSimRally\ffb.log"
 ```
 
-Or bypass Steam's launcher and start the exe from a shell that already has the
-variable (Steam itself must still be running for the Steamworks init):
+Or start **Steam itself** with the variable set, which avoids any persistent
+change - it passes down to the game Steam launches:
 
 ```powershell
+& "D:\Program Files (x86)\Steam\steam.exe" -shutdown
+# wait for Steam to fully exit, then:
 $env:AOSR_FFB_LOG = "1"
-& "D:\Program Files (x86)\Steam\steamapps\common\artofrally\artofrally.exe"
+& "D:\Program Files (x86)\Steam\steam.exe"
 ```
+
+Launching `artofrally.exe` directly does **not** work: the game ships without a
+`steam_appid.txt`, so Steamworks restarts it through Steam and the relaunched
+process loses the variable. It looks like the game just failed to start.
 
 Turn it off again with
 `[Environment]::SetEnvironmentVariable('AOSR_FFB_LOG', $null, 'User')`.
