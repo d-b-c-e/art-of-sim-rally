@@ -1,173 +1,113 @@
-# art-of-sim-rally
+# art of sim rally
 
-Turn [art of rally](https://store.steampowered.com/app/550320/) into a sim rig
-game: real force feedback, Forza-compatible telemetry, and a bonnet camera.
+A mod that makes [art of rally](https://store.steampowered.com/app/550320/) work
+properly on a racing wheel.
 
-Under the isometric camera, art of rally runs a genuine load-sensitive tire
-model — per-wheel slip ratio, slip angle, and self-aligning torque (`Mz`). The
-simulation is already there. What is missing is everything that connects it to a
-wheel, a dashboard and a viewpoint.
+- **Force feedback.** The game has none. This adds it, driven by the game's own
+  tyre model.
+- **Fixes vague steering.** Two separate problems make wheels feel dead near
+  centre. Both are fixed.
+- **Bonnet camera**, added to the game's normal view rotation.
+- **Telemetry** for SimHub, dashboards, bass shakers and motion rigs.
 
-## The discovery this project is built on
+## Install
 
-**art of rally ships a complete force feedback implementation that has never
-run, because the native DLL it calls into was left out of the build.**
+1. Install [Unity Mod Manager](https://www.nexusmods.com/site/mods/21) and point
+   it at art of rally. The game is already in its supported list.
 
-The managed `ForceFeedback` class P/Invokes seven entry points from a module
-named `UnityForceFeedback`. That DLL does not exist anywhere in the 7.4 GB
-install. All five Logitech native wrappers shipped; the one generic force
-feedback wrapper did not.
+2. Download the latest release zip.
 
-```
-Wheel.Mz, suspension, surface
-   → CarDynamics.forceFeedback → ForceFeedback.Update() → SetDeviceForcesXY()
-       → ✗ UnityForceFeedback.dll — NOT SHIPPED
-```
+3. Drag the zip onto Unity Mod Manager's **Mods** tab.
 
-So the first thing in this repo is a clean-room implementation of that missing
-DLL. Drop it into the game's plugin folder and the game's own force feedback
-wakes up with no game code patched at all.
+4. Open the zip yourself and copy this one file into your game folder — Unity Mod
+   Manager will not place it for you:
 
-Full evidence in [docs/FINDINGS.md](docs/FINDINGS.md) — all of it read directly
-out of the shipped assemblies, none of it from forum posts.
+   ```
+   artofrally_Data\Plugins\x86_64\UnityForceFeedback.dll
+   ```
 
-## Status
+   Without it, force feedback silently does nothing.
 
-| Component | State |
+5. Launch the game. Press **Ctrl+F10** for settings.
+
+## Settings
+
+Everything is in the Ctrl+F10 panel and adjustable while driving.
+
+**Force feedback** — start with **Reference torque**. Lower is stronger. The
+default is a guess and will need changing for your wheel. Turn on *Log peak
+torque*, drive for a minute, and the log tells you what to set it to.
+
+**Camera** — press your change-view button to cycle onto the bonnet view, then
+adjust it with the numpad while looking through it:
+
+| Key | |
 |---|---|
-| `UnityForceFeedback.dll` — the missing native plugin | **Built and verified sound** (loads standalone, 7 exports resolve, no VC-runtime dependency). Tested in game 2026-08-31: **the game never calls it** — see below. |
-| Forza telemetry encoder | **Done.** 324-byte FH4/5 Data Out, 24 tests passing, round-trip verified C# → UDP → Python. |
-| Synth + probe harness | **Done.** Test the whole chain with no game running. |
-| The mod (BepInEx) | **Working in game.** Direct steering + Rewired deadzone fix confirmed to transform wheel feel; FFB device opens successfully. |
-| Bonnet camera | Not started. Design in [docs/CAMERA.md](docs/CAMERA.md). |
+| `8` / `2` | up / down |
+| `7` / `9` | back / forward |
+| `4` / `6` | left / right |
+| `1` / `3` | tilt |
+| `+` / `-` | field of view |
+| `0` | reset |
 
-**Phase 0 is answered (2026-08-31), and the answer is better than a working
-shortcut would have been.** Decompilation shows art of rally's force feedback was
-built from both ends and never joined in the middle:
+Changes save automatically.
 
-- The consumer is complete — `ForceFeedback.Update()` scales a value and calls
-  `SetDeviceForcesXY`. It is simply never attached to anything.
-- The physics is real but switched off — `Wheel` computes self-aligning torque
-  via `CalcAligningForce`, but only `if (cardynamics.enableForceFeedback)`, which
-  nothing ever sets. So `Mz` is currently always zero.
-- **`CarDynamics.forceFeedback` is never assigned anywhere in the assembly.** The
-  link between the two ends was never written.
+**Telemetry** — off by default. Turn it on and point SimHub at a **Forza
+Horizon 5** profile on UDP port **8000**.
 
-So the mod's job is small and well-defined: flip `enableForceFeedback` on, compute
-a force from the steered wheels' `Mz`, and feed it out through this DLL. Their own
-constants even tell us the target range. Full detail in
-[docs/FORCE-FEEDBACK.md](docs/FORCE-FEEDBACK.md).
+## Worth knowing
 
-## Getting started
+**Steering assist is a separate switch.** *Direct steering* and *Clear hidden axis
+deadzone* only restore what the game already gives wheels it recognises, so they
+change nothing about the car. *Disable steering assist* does change how the car
+behaves, and is off by default. The game has online leaderboards.
 
-Requires the .NET SDK, and Visual Studio Build Tools with the C++ workload for
-the native DLL.
+**Bonnet, not cockpit.** The cars have no modelled interiors, so a cockpit view
+isn't possible.
 
-**Build and install the force feedback plugin:**
+**Tested on one wheel**, a MOZA R12 Base. It should work with any wheel that does
+force feedback, but that's untested. If you have more than one force-feedback
+device, set *Preferred wheel*.
 
-```powershell
-.\src\UnityForceFeedback\build.ps1 -Install
+## Why the steering felt wrong
+
+Two things, both invisible from the options screen:
+
+1. **Rewired applies a 10% deadzone to any controller it doesn't recognise**, and
+   its hardware database predates every modern direct-drive wheel. The deadzone in
+   the game's options is a *different* one — you can set it to zero and still have
+   a dead band. On a 270° wheel this was 27° of nothing at centre.
+
+2. **The game has a direct-steering mode that only activates for wheels it
+   recognises.** Everyone else gets the gamepad smoothing filter, which works out
+   around 1.6 seconds lock-to-lock at speed.
+
+## Force feedback
+
+art of rally has a complete force feedback implementation that never ran. The
+physics are there, the output code is there, and nothing connects them — the value
+linking the two is never assigned, and the native plugin it calls into isn't in
+the shipped build.
+
+This mod supplies the missing piece and the missing plugin.
+
+Full technical detail, including how to read any of this out of the game yourself,
+is in [docs/](docs/) — start with [FINDINGS.md](docs/FINDINGS.md).
+
+## Building
+
+Needs the .NET SDK and Visual Studio Build Tools with the C++ workload.
+
+```
+dotnet build ArtOfSimRally.sln -c Release
+tools\package\package.ps1
 ```
 
-**Trace what the game does with it:**
+Referencing the game's assemblies requires art of rally installed; override
+`GameDir` if it isn't in the default Steam location. Unity Mod Manager's
+assemblies go in `lib/umm`. Neither is committed.
 
-The variable must reach the *game* process. Setting it in a shell is not enough
-if you launch from Steam: the game inherits Steam's environment, not your
-shell's, so the log comes back empty and you would wrongly conclude the game
-never calls the DLL. Set it at user scope and restart Steam:
+## Licence
 
-```powershell
-[Environment]::SetEnvironmentVariable('AOSR_FFB_LOG', '1', 'User')
-# fully exit Steam, start it again, then launch art of rally and drive
-Get-Content "$env:LOCALAPPDATA\ArtOfSimRally\ffb.log"
-```
-
-Or start **Steam itself** with the variable set, which avoids any persistent
-change - it passes down to the game Steam launches:
-
-```powershell
-& "D:\Program Files (x86)\Steam\steam.exe" -shutdown
-# wait for Steam to fully exit, then:
-$env:AOSR_FFB_LOG = "1"
-& "D:\Program Files (x86)\Steam\steam.exe"
-```
-
-Launching `artofrally.exe` directly does **not** work: the game ships without a
-`steam_appid.txt`, so Steamworks restarts it through Steam and the relaunched
-process loses the variable. It looks like the game just failed to start.
-
-Turn it off again with
-`[Environment]::SetEnvironmentVariable('AOSR_FFB_LOG', $null, 'User')`.
-
-How to read that log is in
-[docs/FORCE-FEEDBACK.md](docs/FORCE-FEEDBACK.md#phase-0-the-decisive-experiment).
-
-**Run the telemetry tests:**
-
-```powershell
-dotnet test ArtOfSimRally.sln
-```
-
-**Test a dashboard with no game running** — emits a scripted drive, 0→130→0 mph,
-five gears, RPM sawtooth:
-
-```powershell
-dotnet run --project tools/ArtOfSimRally.Synth
-```
-
-**See what is actually being sent** (close SimHub first, it holds the port):
-
-```bash
-python harness/forza_probe.py
-```
-
-## Project structure
-
-| Path | Contents |
-|---|---|
-| `src/UnityForceFeedback/` | C++ x64 DirectInput plugin — the DLL the game is missing |
-| `src/ArtOfSimRally.Telemetry/` | Forza Data Out encoder + UDP sender. netstandard2.0, no Unity or UMM dependency |
-| `tests/` | xUnit tests pinning the wire format |
-| `tools/ArtOfSimRally.Synth/` | Synthetic telemetry emitter for testing consumers |
-| `harness/` | `forza_probe.py` — listen and print what is on the wire |
-| `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP |
-
-## Confirmed: a hidden 10% deadzone on every unrecognised wheel
-
-Measured in game on a MOZA R12: **Rewired applies a 10% deadzone to every axis of
-a controller it does not recognise**, and nothing in art of rally's options screen
-exposes it — the game's own deadzone setting is a separate, innocent one. On a
-270° wheel that is a 27° dead band at centre.
-
-Rewired's shipped hardware database predates every modern direct-drive base, so
-this likely affects Moza, Simagic, Simucube, Fanatec DD and Asetek owners alike.
-The mod zeroes it. Combined with restoring the game's own direct-steering path,
-this is the single biggest improvement to how the game feels on a wheel.
-
-Details in [docs/CONTROLS.md](docs/CONTROLS.md).
-
-## Do I need a utility to bind my wheel?
-
-No. The game has a native press-to-bind UI with split-axis support, and
-Rewired already recognises most wheels (G25/G27/G29/G920/G923, Driving Force,
-Fanatec, Thrustmaster, Moza). Bindings and calibration persist in the registry.
-
-Do **not** route the wheel through xoutput/XInput — XInput has no force
-feedback beyond rumble, and it would hide the device from the DirectInput API
-this mod depends on. Details in [docs/CONTROLS.md](docs/CONTROLS.md).
-
-## Two things worth knowing up front
-
-**This is a bonnet camera, not a cockpit camera.** The cars have no modelled
-interiors and the world is authored for a distant view. A cockpit view is an art
-project, not a mod. See [docs/CAMERA.md](docs/CAMERA.md).
-
-**No physics or assist changes.** art of rally has online leaderboards. Force
-feedback, camera and telemetry are fair-play neutral; grip and assists are not.
-
-## Credit
-
-The Forza packet offsets were validated against SimHub by the sibling
-`cruisn-collection` project, whose synth/probe harness pattern this repo reuses.
-The Unity Mod Manager route follows
-[`MMike17/ArtOfRally_ModBase`](https://github.com/MMike17/ArtOfRally_ModBase).
+MIT. No game files are redistributed. `UnityForceFeedback.dll` is an original
+implementation of a documented DirectInput API.
