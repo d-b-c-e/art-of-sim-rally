@@ -30,6 +30,10 @@ namespace ArtOfSimRally.Mod
             "Clears Rewired's hidden 10% deadzone. Not the one in game options.")]
         public bool ZeroAxisDeadzone = true;
 
+        [Draw("Bind any device", Tooltip =
+            "Rebind the device you touch, not just the first joystick.")]
+        public bool BindAnyDevice = true;
+
         [Draw("Disable steering assist", Tooltip =
             "CHANGES THE CAR. Off by default. Affects leaderboards.")]
         public bool DisableSteerAssist = false;
