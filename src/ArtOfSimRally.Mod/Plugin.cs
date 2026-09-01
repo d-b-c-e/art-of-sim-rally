@@ -1,0 +1,136 @@
+using System;
+using System.IO;
+using System.Reflection;
+using BepInEx;
+using BepInEx.Configuration;
+using BepInEx.Logging;
+using HarmonyLib;
+
+namespace ArtOfSimRally.Mod
+{
+    /// <summary>
+    /// BepInEx entry point for art-of-sim-rally.
+    /// </summary>
+    /// <remarks>
+    /// The loader-specific surface is deliberately confined to this one file.
+    /// Everything else talks to <see cref="ModConfig"/> and <see cref="Log"/>,
+    /// so adding a Unity Mod Manager entry point later - which is what the art of
+    /// rally community actually uses for distribution - means writing a second
+    /// small entry class, not touching the patches.
+    /// </remarks>
+    [BepInPlugin(PluginGuid, "art of sim rally", "0.1.0")]
+    public sealed class Plugin : BaseUnityPlugin
+    {
+        public const string PluginGuid = "com.dbce.artofsimrally";
+
+        internal static ManualLogSource Log { get; private set; }
+        internal static ModConfig Settings { get; private set; }
+
+        private Harmony _harmony;
+
+        private void Awake()
+        {
+            Log = Logger;
+            Settings = new ModConfig(base.Config);
+
+            string pluginDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            if (Settings.ForceFeedbackEnabled.Value)
+                FfbNative.Initialise(pluginDir);
+
+            try
+            {
+                _harmony = new Harmony(PluginGuid);
+                _harmony.PatchAll(Assembly.GetExecutingAssembly());
+                Log.LogInfo("Patches applied.");
+            }
+            catch (Exception ex)
+            {
+                // A failed patch must not take the game down. Report loudly and
+                // let the player keep driving without the mod's features.
+                Log.LogError($"Harmony patching failed: {ex}");
+            }
+
+            Log.LogInfo(
+                $"art of sim rally loaded - directSteering={Settings.DirectSteering.Value}, " +
+                $"ffb={Settings.ForceFeedbackEnabled.Value}, telemetry={Settings.TelemetryEnabled.Value}");
+        }
+
+        private void OnDestroy()
+        {
+            TelemetryPump.Shutdown();
+            FfbNative.Shutdown();
+            _harmony?.UnpatchSelf();
+        }
+
+        private void OnApplicationQuit()
+        {
+            // Release the wheel explicitly. Leaving a constant force applied on
+            // an exclusively-acquired device can leave it pulling after exit.
+            FfbNative.SetForce(0);
+            FfbNative.Shutdown();
+        }
+    }
+
+    /// <summary>Typed wrapper over the BepInEx config file.</summary>
+    internal sealed class ModConfig
+    {
+        public readonly ConfigEntry<bool> DirectSteering;
+        public readonly ConfigEntry<bool> DisableSteerAssist;
+
+        public readonly ConfigEntry<bool>  ForceFeedbackEnabled;
+        public readonly ConfigEntry<float> Gain;
+        public readonly ConfigEntry<float> MzReference;
+        public readonly ConfigEntry<float> Smoothing;
+        public readonly ConfigEntry<bool>  Invert;
+        public readonly ConfigEntry<bool>  DiagnosticLogging;
+
+        public readonly ConfigEntry<bool>   TelemetryEnabled;
+        public readonly ConfigEntry<string> TelemetryHost;
+        public readonly ConfigEntry<int>    TelemetryPort;
+
+        public ModConfig(ConfigFile file)
+        {
+            DirectSteering = file.Bind("Steering", "DirectSteering", true,
+                "Removes the gamepad steering smoothing the game applies to wheels it does not " +
+                "recognise. This is exactly the code path a recognised wheel (e.g. a Logitech G29) " +
+                "already gets, so it is not an advantage - it is a device fix.");
+
+            DisableSteerAssist = file.Bind("Steering", "DisableSteerAssist", false,
+                "Disables SteerAssistance, which reduces your steering authority as the car slides. " +
+                "Unlike DirectSteering this IS a driving aid change and alters how the car behaves. " +
+                "art of rally has online leaderboards; enable deliberately.");
+
+            ForceFeedbackEnabled = file.Bind("ForceFeedback", "Enabled", true,
+                "Enables force feedback. Requires UnityForceFeedback.dll in " +
+                "artofrally_Data/Plugins/x86_64 (the game ships without it).");
+
+            Gain = file.Bind("ForceFeedback", "Gain", 1.0f,
+                "Overall force multiplier applied after normalisation.");
+
+            MzReference = file.Bind("ForceFeedback", "MzReference", 150f,
+                "Self-aligning torque treated as full force. Lower = stronger. Set " +
+                "DiagnosticLogging true and drive; the log reports the peak |Mz| observed, " +
+                "which is the number to put here.");
+
+            Smoothing = file.Bind("ForceFeedback", "Smoothing", 0.2f,
+                "0 = raw and detailed but noisy over rough surfaces, 0.9 = heavily damped.");
+
+            Invert = file.Bind("ForceFeedback", "Invert", false,
+                "Flip force direction if the wheel pulls the wrong way.");
+
+            DiagnosticLogging = file.Bind("ForceFeedback", "DiagnosticLogging", false,
+                "Log peak aligning torque every 5 seconds, for tuning MzReference.");
+
+            TelemetryEnabled = file.Bind("Telemetry", "Enabled", false,
+                "Emit Forza Horizon-compatible UDP telemetry, readable by SimHub, dashboards, " +
+                "motion rigs and bass shakers.");
+
+            TelemetryHost = file.Bind("Telemetry", "Host", "127.0.0.1",
+                "Destination address.");
+
+            TelemetryPort = file.Bind("Telemetry", "Port", 8000,
+                "Destination UDP port. 8000 is SimHub's default for Forza.");
+        }
+    }
+}
