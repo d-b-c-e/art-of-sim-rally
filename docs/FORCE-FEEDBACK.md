@@ -120,53 +120,86 @@ Do A first — it is a day's work and it settles every open question about
 whether the game's FFB path is live. Then do B, reusing everything A taught us.
 They compose: A's logging mode is the instrumentation B needs.
 
-## Phase 0 result (2026-08-31): the game did not call the DLL
+## Phase 0 result (2026-08-31): ANSWERED - the feature is half-built
 
-Run on real hardware: MOZA R12 Base, DLL installed, a full stage driven with a
-car instantiated (`Instantiated Car: Car_F308` in Unity's `Player.log`).
+Tested on real hardware (MOZA R12 Base), DLL installed, full stage driven with
+a car instantiated. The DLL never loaded, and `Player.log` held no exception -
+the game did not try and fail, it did not try. The DLL itself was ruled out:
+system dependencies only (no VC runtime), `LoadLibrary` succeeds standalone,
+all seven exports resolve.
 
-**Observed:**
+Decompilation then settled *why*, and it is more interesting than "not
+attached". **art of rally's force feedback was built from both ends and never
+joined in the middle.**
 
-- `UnityForceFeedback.dll` never appeared in the game process's module list.
-  P/Invoke binds lazily, so this is direct proof no export was ever called.
-- No `ffb.log` was produced.
-- **No exception of any kind** in `Player.log`. A failed P/Invoke would have
-  raised `DllNotFoundException` or `EntryPointNotFoundException`. The game did
-  not try and fail - it did not try.
+### The consumer exists and is complete
 
-**The DLL was ruled out as the cause.** Its only dependencies are system
-libraries (`DINPUT8`, `SHELL32`, `ole32`, `USER32`, `KERNEL32`) - notably no VC
-runtime, so nothing to be missing inside the game process - and a standalone
-`LoadLibrary` succeeds with all seven exports resolving.
+```csharp
+public void Start() {
+    cardynamics = GetComponent<CarDynamics>();
+    InitialiseForceFeedback();          // no gate, no condition
+    SetAutoCenter(autoCentre: false);
+}
+public void Update() {
+    forceFeedback = cardynamics.forceFeedback;
+    if (Mathf.Abs(forceFeedback) > clampValue)
+        forceFeedback = clampValue * Mathf.Sign(forceFeedback);
+    force = (int)(forceFeedback * multiplier) * factor * sign;
+    SetDeviceForcesXY(force, 0);
+}
+```
 
-**Two explanations remain, and they are not yet separated:**
+Note `Start()` has **no recognition check and no enable flag** - an earlier
+hypothesis that FFB was gated on Rewired recognising the wheel is disproven. If
+this component were attached to a live object it would have called our DLL.
 
-1. The `ForceFeedback` MonoBehaviour is not attached to any live GameObject.
-   Route A is dead.
-2. It is attached but gated. The most suggestive candidate is wheel
-   recognition: `Player.log` reports
+### The physics exists, but is gated off
 
-   ```
-   [0] Joystick: MOZA R12 Base
-   GUID: 00000000-0000-0000-0000-000000000000
-   Is Recognized: No      Is Assigned: Yes -> Player 0
-   ```
+In `Wheel`, the self-aligning torque that real FFB is built from:
 
-   If the game initialises force feedback only for a *recognised* racing wheel,
-   an unrecognised device would skip FFB init entirely and produce exactly this
-   result. That would make the recognition problem (see CONTROLS.md) and the
-   force feedback problem the same problem.
+```csharp
+if (cardynamics.enableForceFeedback && maxSteeringAngle != 0f)
+    Mz = CalcAligningForce(Fz, slipAngle, inclination);
+else
+    Mz = 0f;
+```
 
-Separating these requires reading the IL bodies of `ForceFeedback.Start()` and
-`CarDynamics`'s FFB initialisation. Everything in this repo so far came from
-assembly *metadata*, which does not include method bodies - so this is the
-first task needing a decompiler.
+`enableForceFeedback` is never set anywhere, so **`Mz` is currently always
+zero**. The aligning-torque model is real and present, but switched off.
 
-**What survives regardless:** the DLL is a working, verified DirectInput force
-feedback output stage, and `tools/dinput-enum` confirms the R12 exposes FFB
-actuators on X and Y. Under route B - the mod computing forces from `Wheel.Mz`
-- that is precisely the component needed. Route A was the shortcut; its loss
-costs the shortcut, not the foundation.
+### The middle link was never written
+
+Searching the whole decompiled assembly:
+
+- `CarDynamics.forceFeedback` is **never assigned**, anywhere. Always 0.
+- Nothing ever calls `AddComponent<ForceFeedback>()` or
+  `GetComponent<ForceFeedback>()`. The component is never created.
+
+So even had the DLL shipped, and even had the component been attached, the
+force would have been a constant zero. The missing DLL was a symptom, not the
+cause.
+
+### What this means for the mod
+
+This is a *better* outcome than a working route A, because the remaining work
+is small and well-defined. The mod must supply the missing middle:
+
+1. Set `cardynamics.enableForceFeedback = true` - this alone turns on the
+   game's own `CalcAligningForce` and gives real per-wheel `Mz`.
+2. Each physics step, compute a force from the steered wheels' `Mz` and write
+   it to `cardynamics.forceFeedback` - the link the developers never wrote.
+3. Output it, either by attaching the game's `ForceFeedback` component (which
+   then drives our DLL unmodified) or by calling `SetDeviceForcesXY` directly.
+
+**Useful calibration, free from their code:** `clampValue = 20`,
+`multiplier = 0.5`, `factor = 1000`. So `forceFeedback` was intended to live in
+roughly +/-20, mapping to +/-10000 - exactly `DI_FFNOMINALMAX`. That tells us
+the units to produce without guessing.
+
+**One flaw to route around:** `(int)(forceFeedback * multiplier) * factor`
+casts to int *before* multiplying by 1000, quantising the output to 21 discrete
+steps. That would feel notchy. Prefer calling `SetDeviceForcesXY` at full
+resolution, or Harmony-patch `Update()`.
 
 ## Phase 0: the decisive experiment
 

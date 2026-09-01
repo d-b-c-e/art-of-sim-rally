@@ -41,15 +41,22 @@ out of the shipped assemblies, none of it from forum posts.
 | Unity Mod Manager mod | Not started — needs UMM installed. |
 | Bonnet camera | Not started. Design in [docs/CAMERA.md](docs/CAMERA.md). |
 
-**Phase 0 result (2026-08-31):** the DLL was installed and a full stage driven on
-a MOZA R12. The game never loaded it — and raised no exception, so it did not try
-and fail, it did not try. Either the `ForceFeedback` component is not attached,
-or it is gated on something; the leading suspect is wheel recognition, since
-Rewired reports the R12 as `Is Recognized: No`. Separating those needs a
-decompiler. Full detail in [docs/FORCE-FEEDBACK.md](docs/FORCE-FEEDBACK.md).
+**Phase 0 is answered (2026-08-31), and the answer is better than a working
+shortcut would have been.** Decompilation shows art of rally's force feedback was
+built from both ends and never joined in the middle:
 
-The DLL remains the force feedback output stage for route B, where the mod
-computes forces itself from `Wheel.Mz`.
+- The consumer is complete — `ForceFeedback.Update()` scales a value and calls
+  `SetDeviceForcesXY`. It is simply never attached to anything.
+- The physics is real but switched off — `Wheel` computes self-aligning torque
+  via `CalcAligningForce`, but only `if (cardynamics.enableForceFeedback)`, which
+  nothing ever sets. So `Mz` is currently always zero.
+- **`CarDynamics.forceFeedback` is never assigned anywhere in the assembly.** The
+  link between the two ends was never written.
+
+So the mod's job is small and well-defined: flip `enableForceFeedback` on, compute
+a force from the steered wheels' `Mz`, and feed it out through this DLL. Their own
+constants even tell us the target range. Full detail in
+[docs/FORCE-FEEDBACK.md](docs/FORCE-FEEDBACK.md).
 
 ## Getting started
 

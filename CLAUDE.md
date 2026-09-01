@@ -42,12 +42,16 @@ third-party binaries, nothing that would force the repo private.
 | UMM mod | Not started. Blocked on UMM being installed. |
 | Bonnet camera | Not started. |
 
-Phase 0 is **answered**: the game does not call the DLL. No module load, no
-exception. So route A (free FFB by supplying the missing plugin) does not work
-as-is. Open question is whether the `ForceFeedback` component is unattached or
-merely gated — plausibly on wheel recognition, since Rewired reports the R12 as
-`Is Recognized: No`. That needs a decompiler to settle; everything so far came
-from metadata, which has no method bodies.
+Phase 0 is **answered and closed**. The game never calls the DLL, and
+decompilation shows why: the FFB feature is half-built. `ForceFeedback.Start()`
+has no gate at all (so the earlier "gated on wheel recognition" theory is
+disproven) — the component is simply never attached. `Wheel` computes `Mz` only
+`if (cardynamics.enableForceFeedback)`, which nothing sets, so `Mz` is always 0.
+And `CarDynamics.forceFeedback` is never assigned anywhere. Route A cannot work
+because the force would be a constant zero even if everything were wired.
+
+The mod supplies the missing middle: set `enableForceFeedback`, compute force
+from steered-wheel `Mz`, output via the DLL. See `docs/FORCE-FEEDBACK.md`.
 
 ## Conventions
 
