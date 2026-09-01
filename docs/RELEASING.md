@@ -54,21 +54,31 @@ fought. The port stands on the two reasons above, not on that one.
 Development originally used BepInEx because it installs unattended; UMM's installer
 is a GUI. That is a fine reason to prototype with it and a poor reason to ship it.
 
-### Porting to UMM
+### How the port stayed contained
 
-The work is contained. `Plugin.cs` is the only loader-aware file; everything else
-talks to `Plugin.Log` and `Plugin.Settings`. A UMM build needs:
+`Main.cs` is the only loader-aware file. Everything else talks to `ModLog` and a
+plain-field `Settings` class, so supporting a second loader means adding a sibling
+of `Main.cs` rather than touching a single patch. The pieces a loader entry point
+provides:
 
-1. `Info.json` with `Id`, `DisplayName`, `Version`, `AssemblyName`, `EntryMethod`.
-2. A `Load(UnityModManager.ModEntry)` entry point that creates the Harmony
-   instance and patches, mirroring `Plugin.Awake`.
-3. Settings via `UnityModManager.ModSettings` plus an `OnGUI` panel, replacing the
-   BepInEx `ConfigEntry` bindings. This is the bulk of it — UMM shows settings
-   in-game under Ctrl+F10, which is nicer than editing a file.
-4. Reference `UnityModManager.dll` from the UMM install (never commit it).
+1. `Info.json` — `Id`, `DisplayName`, `Version`, `AssemblyName`, `EntryMethod`.
+2. `Main.Load(UnityModManager.ModEntry)` — creates the Harmony instance, patches,
+   installs the watchdog.
+3. `Settings : UnityModManager.ModSettings, IDrawable` with `[Draw]` attributes,
+   giving the Ctrl+F10 panel.
+4. References to `UnityModManager.dll` and its Harmony, extracted into `lib/umm`
+   and **never committed**.
 
-Shipping both loaders is possible — two thin entry assemblies over a shared core —
-but pick one as the documented default so support questions stay simple.
+Two build notes worth keeping:
+
+- The project targets **net48**, not net472, because UMM's own assemblies are
+  built against .NET Framework 4.8 and will not resolve from a lower target.
+  Unity 2019.4's Mono runs both.
+- `IDrawable` lives in the `UnityModManagerNet` namespace directly, not nested
+  inside `UnityModManager`.
+
+Shipping both loaders remains possible — two thin entry assemblies over the shared
+core — but keep one as the documented default so support questions stay simple.
 
 ## Package contents
 
