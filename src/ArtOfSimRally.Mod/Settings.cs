@@ -62,6 +62,12 @@ namespace ArtOfSimRally.Mod
         [Draw("Log peak torque (for tuning)")]
         public bool DiagnosticLogging = false;
 
+        [Draw("Preferred wheel (optional)", Tooltip =
+            "Part of your wheel's name, e.g. \"MOZA\" or \"G29\". Only needed if you have more " +
+            "than one force-feedback device; otherwise the first one found is used. The log " +
+            "lists every device it saw. Takes effect on restart.")]
+        public string PreferredDevice = "";
+
         // ---- Camera ---------------------------------------------------------
 
         [Draw("Bonnet camera", Tooltip =

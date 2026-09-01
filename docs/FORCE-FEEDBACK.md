@@ -254,6 +254,31 @@ worth keeping and gives route B a reference to beat.
 Note the log only records `SetDeviceForcesXY` when the value *changes*, to keep
 a 60 Hz stream readable.
 
+## Wheel compatibility
+
+**Nothing in the plugin is vendor-specific.** It is plain DirectInput 8: enumerate
+`DI8DEVCLASS_GAMECTRL`, take a device advertising `DIDC_FORCEFEEDBACK`, create a
+`GUID_ConstantForce` effect, and update its magnitude. No vendor SDK, no VID/PID
+matching, no Moza-specific anything.
+
+Constant force is the most universally implemented DirectInput effect there is, so
+in principle this works with any PC wheel that does force feedback at all -
+Logitech, Thrustmaster, Fanatec, Simucube, Simagic, Asetek, Cammus, Moza.
+
+That is an argument from the API, not from testing. Only a MOZA R12 Base has
+actually run it. The things most likely to differ elsewhere:
+
+| Risk | Detail |
+|---|---|
+| **Multiple FFB devices** | Addressed: the plugin now logs every FFB device it finds and takes the first unless a preferred name is set in the mod settings. Previously it silently grabbed whichever DirectInput listed first. |
+| **Exclusive acquisition** | FFB needs `DISCL_EXCLUSIVE` while Rewired already holds the wheel. Fine on this stack; other driver stacks may refuse. The log says so explicitly if it happens. |
+| **Force scaling** | `MzReference` is per-wheel. A strong direct-drive base and a gear-driven Logitech want very different numbers. This is tuning, not compatibility. |
+| **Axis assignment** | Force is applied on X, which is steering on every wheel that follows the convention. A device that reports steering elsewhere would need the effect axis changed. |
+| **Driver compatibility modes** | Some bases can present in a mode that hides or limits DirectInput FFB. If the log shows the wheel with no FFB capability, that is where to look. |
+
+`tools/dinput-enum` answers the first question for any machine without launching the
+game: it lists every DirectInput controller and whether it reports force feedback.
+
 ## Known risk: fighting Rewired for the device
 
 Force feedback requires `DISCL_EXCLUSIVE`. Rewired already holds the wheel for

@@ -36,6 +36,10 @@ namespace ArtOfSimRally.Mod
         [DllImport(Dll)] private static extern bool SetAutoCenter(bool autoCentre);
         [DllImport(Dll)] private static extern void FreeDirectInput();
 
+        // Eighth export, ours rather than the game's. The game never calls it.
+        [DllImport(Dll, CharSet = CharSet.Ansi)]
+        private static extern void SetPreferredDevice(string name);
+
         /// <summary>DirectInput's nominal full-scale force.</summary>
         public const int ForceMax = 10000;
 
@@ -50,7 +54,11 @@ namespace ArtOfSimRally.Mod
         /// </summary>
         /// <param name="pluginDir">Folder holding the plugin, used to locate the native DLL.</param>
         /// <returns>True if force feedback is live.</returns>
-        public static bool Initialise(string pluginDir)
+        /// <param name="preferredDevice">
+        /// Substring of the wheel's product name to prefer, or empty for the first
+        /// force-feedback device found. Only matters on a rig with more than one.
+        /// </param>
+        public static bool Initialise(string pluginDir, string preferredDevice = null)
         {
             if (_initialised) return !_failed;
             _initialised = true;
@@ -68,6 +76,10 @@ namespace ArtOfSimRally.Mod
                     ModLog.Warning(
                         "Could not preload UnityForceFeedback.dll by path; " +
                         "relying on the default search order.");
+
+                // Must precede InitDirectInput - that is where selection happens.
+                if (!string.IsNullOrEmpty(preferredDevice))
+                    SetPreferredDevice(preferredDevice);
 
                 int hwnd = GetForegroundWindow();
                 if (InitDirectInput(hwnd) == 0)

@@ -11,3 +11,4 @@ EXPORTS
     StopEffect
     SetAutoCenter
     FreeDirectInput
+    SetPreferredDevice

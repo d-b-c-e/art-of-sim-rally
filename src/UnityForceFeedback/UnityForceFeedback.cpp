@@ -34,6 +34,7 @@
 #include <cstdio>
 #include <cstdarg>
 #include <cstring>
+#include <cctype>
 
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
@@ -45,6 +46,15 @@
 // already scaled and clamped (ForceFeedback.clampValue), but never trust it.
 static const int  kForceMax = DI_FFNOMINALMAX;   // 10000
 static const char kLogEnv[] = "AOSR_FFB_LOG";
+
+// Enough for any realistic rig; more FFB devices than this and the user has
+// bigger problems than picking one.
+static const int kMaxCandidates = 8;
+
+struct Candidate { GUID guid; char name[MAX_PATH]; };
+static Candidate g_candidates[kMaxCandidates];
+static int       g_candidateCount = 0;
+static char      g_preferred[MAX_PATH] = {};
 
 static LPDIRECTINPUT8       g_di      = nullptr;
 static LPDIRECTINPUTDEVICE8 g_device  = nullptr;
@@ -124,12 +134,34 @@ static void Log(const char* fmt, ...)
 // device discovery
 // --------------------------------------------------------------------------
 
-// Prefer a wheel, but accept any force-feedback-capable game controller. Devices
-// without FFB are skipped outright: acquiring one exclusively would steal input
-// from Rewired for no benefit.
+// Case-insensitive substring test, for matching a user-supplied device name
+// against DirectInput's product string.
+static bool ContainsNoCase(const char* haystack, const char* needle)
+{
+    if (!haystack || !needle || !*needle) return false;
+    size_t hn = strlen(haystack), nn = strlen(needle);
+    if (nn > hn) return false;
+    for (size_t i = 0; i + nn <= hn; ++i) {
+        size_t j = 0;
+        while (j < nn && tolower((unsigned char)haystack[i + j]) ==
+                         tolower((unsigned char)needle[j])) ++j;
+        if (j == nn) return true;
+    }
+    return false;
+}
+
+// Enumerates every force-feedback-capable controller rather than stopping at the
+// first. Two reasons: a rig can easily have more than one FFB device (a wheel
+// plus an FFB joystick, say) and silently grabbing whichever DirectInput happened
+// to list first is a coin flip; and logging all of them turns "force feedback
+// didn't work" into a diagnosable report of what was actually present.
+//
+// Devices without FFB are skipped outright - acquiring one exclusively would take
+// input away from Rewired for no benefit.
 static BOOL CALLBACK EnumDeviceCallback(const DIDEVICEINSTANCE* inst, VOID* ctx)
 {
     (void)ctx;
+    if (g_candidateCount >= kMaxCandidates) return DIENUM_STOP;
 
     LPDIRECTINPUTDEVICE8 candidate = nullptr;
     if (FAILED(g_di->CreateDevice(inst->guidInstance, &candidate, nullptr)))
@@ -138,16 +170,19 @@ static BOOL CALLBACK EnumDeviceCallback(const DIDEVICEINSTANCE* inst, VOID* ctx)
     DIDEVCAPS caps = {};
     caps.dwSize = sizeof(caps);
     if (FAILED(candidate->GetCapabilities(&caps)) || !(caps.dwFlags & DIDC_FORCEFEEDBACK)) {
-        Log("  skip (no FFB): %s", inst->tszProductName);
+        Log("  skip (no force feedback): %s", inst->tszProductName);
         candidate->Release();
         return DIENUM_CONTINUE;
     }
 
-    Log("  using FFB device: %s (%u axes, %u buttons)",
-        inst->tszProductName, caps.dwAxes, caps.dwButtons);
+    Candidate& c = g_candidates[g_candidateCount++];
+    c.guid = inst->guidInstance;
+    strncpy_s(c.name, sizeof(c.name), inst->tszProductName, _TRUNCATE);
+    Log("  found FFB device [%d]: %s (%u axes, %u buttons)",
+        g_candidateCount - 1, c.name, caps.dwAxes, caps.dwButtons);
 
-    g_device = candidate;
-    return DIENUM_STOP;
+    candidate->Release();
+    return DIENUM_CONTINUE;
 }
 
 // The game truncates GetForegroundWindow() into an int. HWND values fit in 32
@@ -205,9 +240,39 @@ __declspec(dllexport) int InitDirectInput(int hwnd)
                                     IID_IDirectInput8, (VOID**)&g_di, nullptr);
     if (FAILED(hr)) { Log("  DirectInput8Create failed 0x%08lX", hr); return 0; }
 
+    g_candidateCount = 0;
     g_di->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumDeviceCallback, nullptr, DIEDFL_ATTACHEDONLY);
-    if (!g_device) {
+
+    if (g_candidateCount == 0) {
         Log("  no force-feedback device found");
+        g_di->Release(); g_di = nullptr;
+        return 0;
+    }
+
+    // Honour a preferred name if one was set and matches; otherwise take the
+    // first. Choosing explicitly beats whatever order DirectInput enumerated in.
+    int chosen = 0;
+    if (g_preferred[0]) {
+        bool matched = false;
+        for (int i = 0; i < g_candidateCount; ++i) {
+            if (ContainsNoCase(g_candidates[i].name, g_preferred)) {
+                chosen = i; matched = true; break;
+            }
+        }
+        if (!matched)
+            Log("  preferred device '%s' not found among %d FFB device(s); using the first",
+                g_preferred, g_candidateCount);
+    }
+    else if (g_candidateCount > 1) {
+        Log("  %d FFB devices present and no preference set - using [0] '%s'. "
+            "Set the preferred wheel in the mod settings if this is wrong.",
+            g_candidateCount, g_candidates[0].name);
+    }
+
+    Log("  using: %s", g_candidates[chosen].name);
+
+    if (FAILED(g_di->CreateDevice(g_candidates[chosen].guid, &g_device, nullptr)) || !g_device) {
+        Log("  could not open the chosen device");
         g_di->Release(); g_di = nullptr;
         return 0;
     }
@@ -274,6 +339,15 @@ __declspec(dllexport) int InitDirectInput(int hwnd)
 
     Log("  initialised OK");
     return 1;
+}
+
+// Not part of the game's original contract - an eighth export the mod calls
+// before InitDirectInput. Harmless to the game, which never calls it.
+__declspec(dllexport) void SetPreferredDevice(const char* name)
+{
+    if (!name || !*name) { g_preferred[0] = 0; return; }
+    strncpy_s(g_preferred, sizeof(g_preferred), name, _TRUNCATE);
+    Log("SetPreferredDevice(\"%s\")", g_preferred);
 }
 
 __declspec(dllexport) void Aquire(void)

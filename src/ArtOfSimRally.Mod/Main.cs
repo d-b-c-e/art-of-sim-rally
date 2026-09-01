@@ -50,7 +50,7 @@ namespace ArtOfSimRally.Mod
             modEntry.OnUnload    = OnUnload;
 
             if (Settings.ForceFeedbackEnabled)
-                FfbNative.Initialise(Path.GetDirectoryName(modEntry.Path));
+                FfbNative.Initialise(Path.GetDirectoryName(modEntry.Path), Settings.PreferredDevice);
 
             try
             {
