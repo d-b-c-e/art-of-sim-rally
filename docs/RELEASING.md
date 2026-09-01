@@ -46,10 +46,20 @@ Reasons, in order of weight:
    while driving, and the alternative is quitting to edit a text file for every
    adjustment.
 
-An earlier version of this document claimed BepInEx and UMM would collide over
-`winhttp.dll` because both use Doorstop. That was wrong for this game — the entry
-above is assembly injection, not Doorstop, so they would not necessarily have
-fought. The port stands on the two reasons above, not on that one.
+3. **It would have collided with BepInEx.** Verified after installing: UMM's
+   installer wrote Doorstop to the game root, exactly as BepInEx does.
+
+   ```ini
+   ; <game>/doorstop_config.ini, alongside <game>/winhttp.dll
+   target_assembly = artofrally_Data\Managed\UnityModManager\UnityModManager.dll
+   ```
+
+   Worth recording how this got muddled, because the trap is easy to fall into
+   twice. UMM's game database defines an `EntryPoint` for art of rally that looks
+   like assembly injection, and reading that alone led to retracting a correct
+   claim. UMM supports both mechanisms and its installer chose Doorstop here.
+   **A config file describes a capability; only the install shows which one was
+   actually used.**
 
 Development originally used BepInEx because it installs unattended; UMM's installer
 is a GUI. That is a fine reason to prototype with it and a poor reason to ship it.
