@@ -25,20 +25,34 @@ The config is grouped by feature so this reads clearly to a user:
 [Telemetry]  Enabled, Host, Port
 ```
 
-## The loader problem — read this before shipping
+## Loader: Unity Mod Manager (done)
 
-Development so far uses **BepInEx**, chosen because it installs unattended and
-Unity 2019.4 Mono is its native target. **That is probably the wrong thing to
-ship**, for a concrete reason rather than a stylistic one.
+Shipping for **Unity Mod Manager**, which has official art of rally support in its
+own game database:
 
-BepInEx and Unity Mod Manager both install Doorstop, and both drop it at the game
-root as `winhttp.dll`. The established art of rally mod ecosystem is UMM — the
-Nexus camera mod requires it — so a user who already has UMM installed and then
-installs our BepInEx build has two loaders contending for the same file. UMM does
-offer an assembly-injection mode that may sidestep it, but "may" is not a good
-install experience.
+```xml
+<GameInfo Name="Art of Rally">
+  <EntryPoint>[UnityEngine.UIModule.dll]UnityEngine.Canvas.cctor:Before</EntryPoint>
+  <StartingPoint>[Assembly-CSharp.dll]GameEntryPoint.Start:After</StartingPoint>
+</GameInfo>
+```
 
-Shipping for UMM means our mod coexists with what people already run.
+Reasons, in order of weight:
+
+1. **It is what the community already runs.** The Nexus camera mod requires it, so
+   most people who would install this already have it.
+2. **In-game settings.** UMM draws a settings panel at Ctrl+F10. That matters more
+   than usual here: force feedback strength and the camera mount can only be judged
+   while driving, and the alternative is quitting to edit a text file for every
+   adjustment.
+
+An earlier version of this document claimed BepInEx and UMM would collide over
+`winhttp.dll` because both use Doorstop. That was wrong for this game — the entry
+above is assembly injection, not Doorstop, so they would not necessarily have
+fought. The port stands on the two reasons above, not on that one.
+
+Development originally used BepInEx because it installs unattended; UMM's installer
+is a GUI. That is a fine reason to prototype with it and a poor reason to ship it.
 
 ### Porting to UMM
 
