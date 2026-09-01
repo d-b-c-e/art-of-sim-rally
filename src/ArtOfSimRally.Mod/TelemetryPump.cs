@@ -39,16 +39,16 @@ namespace ArtOfSimRally.Mod
         [HarmonyPostfix]
         private static void Emit(CarDynamics __instance)
         {
-            var cfg = Plugin.Settings;
-            if (cfg == null || !cfg.TelemetryEnabled.Value || _senderFailed) return;
+            var cfg = Main.Settings;
+            if (!Main.Enabled || cfg == null || !cfg.TelemetryEnabled || _senderFailed) return;
 
             try
             {
                 if (_sender == null)
                 {
-                    _sender = new TelemetrySender(cfg.TelemetryHost.Value, cfg.TelemetryPort.Value);
-                    Plugin.Log.LogInfo(
-                        $"Telemetry -> udp://{cfg.TelemetryHost.Value}:{cfg.TelemetryPort.Value}");
+                    _sender = new TelemetrySender(cfg.TelemetryHost, cfg.TelemetryPort);
+                    ModLog.Info(
+                        $"Telemetry -> udp://{cfg.TelemetryHost}:{cfg.TelemetryPort}");
                 }
 
                 if (!ReferenceEquals(_cachedFor, __instance))
@@ -65,7 +65,7 @@ namespace ArtOfSimRally.Mod
             catch (Exception ex)
             {
                 // Telemetry must never break the game. One report, then stay quiet.
-                Plugin.Log.LogError($"Telemetry disabled after error: {ex.Message}");
+                ModLog.Error($"Telemetry disabled after error: {ex.Message}");
                 _senderFailed = true;
             }
         }
@@ -218,7 +218,32 @@ namespace ArtOfSimRally.Mod
             }
         }
 
-        /// <summary>Closes the socket. Called from the plugin's teardown.</summary>
+        /// <summary>
+        /// Sends a single zeroed, race-off frame so consumers park instead of
+        /// freezing on the last real values.
+        /// </summary>
+        /// <remarks>
+        /// UDP has no delivery guarantee and no close notification, so a consumer
+        /// that simply stops hearing from us keeps showing whatever arrived last -
+        /// a dashboard stuck at the speed the game quit at. An explicit empty frame
+        /// is the only way to tell it we are done. Sent more than once because a
+        /// single dropped packet would undo it.
+        /// </remarks>
+        public static void Park()
+        {
+            if (_sender == null || _senderFailed) return;
+            try
+            {
+                var parked = new TelemetryFrame { IsRaceOn = false, TimestampMs = _timestampMs };
+                for (int i = 0; i < 3; i++) _sender.Send(parked);
+            }
+            catch
+            {
+                // Best effort on the way out; nothing useful to do if it fails.
+            }
+        }
+
+        /// <summary>Closes the socket. Called from the mod's teardown.</summary>
         public static void Shutdown()
         {
             _sender?.Dispose();

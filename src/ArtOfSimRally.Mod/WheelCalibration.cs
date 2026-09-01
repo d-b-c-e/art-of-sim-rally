@@ -49,15 +49,15 @@ namespace ArtOfSimRally.Mod
             if (_applied) return;
             _applied = true;
 
-            var cfg = Plugin.Settings;
-            if (cfg == null) return;
+            var cfg = Main.Settings;
+            if (!Main.Enabled || cfg == null) return;
 
             try
             {
                 var joysticks = ReInput.controllers.Joysticks;
                 if (joysticks == null || joysticks.Count == 0)
                 {
-                    Plugin.Log.LogInfo("No joysticks present; skipping calibration.");
+                    ModLog.Info("No joysticks present; skipping calibration.");
                     return;
                 }
 
@@ -76,7 +76,7 @@ namespace ArtOfSimRally.Mod
 
                         before.Append($"[{i}] dz={axis.deadZone:F3} sens={axis.sensitivity:F2}  ");
 
-                        if (cfg.ZeroAxisDeadzone.Value)
+                        if (cfg.ZeroAxisDeadzone)
                         {
                             axis.deadZone = 0f;
                             // Linear response. A non-1 sensitivity bends the input
@@ -89,17 +89,17 @@ namespace ArtOfSimRally.Mod
                         after.Append($"[{i}] dz={axis.deadZone:F3} sens={axis.sensitivity:F2}  ");
                     }
 
-                    Plugin.Log.LogInfo(
+                    ModLog.Info(
                         $"Rewired calibration for '{joystick.name}' " +
                         $"(recognised={joystick.hardwareTypeGuid != System.Guid.Empty})");
-                    Plugin.Log.LogInfo($"  before: {before}");
-                    if (cfg.ZeroAxisDeadzone.Value)
-                        Plugin.Log.LogInfo($"  after : {after}");
+                    ModLog.Info($"  before: {before}");
+                    if (cfg.ZeroAxisDeadzone)
+                        ModLog.Info($"  after : {after}");
                 }
             }
             catch (System.Exception ex)
             {
-                Plugin.Log.LogError($"Could not adjust Rewired calibration: {ex.Message}");
+                ModLog.Error($"Could not adjust Rewired calibration: {ex.Message}");
             }
         }
     }

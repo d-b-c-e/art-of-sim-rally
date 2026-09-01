@@ -1,12 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    net472 targets the Mono runtime Unity 2019.4 ships. The game assemblies are
+    net48 to match Unity Mod Manager's own assemblies, which are built against
+    .NET Framework 4.8; referencing them from 4.7.2 fails to resolve. Unity
+    2019.4's Mono runs both. The game assemblies are
     referenced straight from the local Steam install and are never committed -
     they are copyrighted and large. Override GameDir if your install differs.
   -->
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AssemblyName>ArtOfSimRally.Mod</AssemblyName>
     <RootNamespace>ArtOfSimRally.Mod</RootNamespace>
@@ -20,7 +22,8 @@
   <PropertyGroup>
     <GameDir Condition="'$(GameDir)' == ''">D:\Program Files (x86)\Steam\steamapps\common\artofrally</GameDir>
     <ManagedDir>$(GameDir)\artofrally_Data\Managed</ManagedDir>
-    <BepInExCore>$(GameDir)\BepInEx\core</BepInExCore>
+    <!-- UnityModManager.dll and its Harmony are extracted into lib/umm (git-ignored). -->
+    <UmmDir>$(MSBuildThisFileDirectory)..\..\lib\umm</UmmDir>
   </PropertyGroup>
 
   <ItemGroup>
@@ -54,12 +57,16 @@
       <HintPath>$(ManagedDir)\Rewired_Core.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="BepInEx">
-      <HintPath>$(BepInExCore)\BepInEx.dll</HintPath>
+    <Reference Include="UnityModManager">
+      <HintPath>$(UmmDir)\UnityModManager.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="0Harmony">
-      <HintPath>$(BepInExCore)\0Harmony.dll</HintPath>
+      <HintPath>$(UmmDir)\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(ManagedDir)\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>

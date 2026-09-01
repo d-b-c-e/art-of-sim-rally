@@ -1,16 +1,18 @@
 <#
 .SYNOPSIS
-    Builds a distributable art-of-sim-rally release zip.
+    Builds a distributable art-of-sim-rally release zip for Unity Mod Manager.
 
 .DESCRIPTION
-    Produces dist/ArtOfSimRally-<version>.zip containing the managed plugin, the
-    telemetry encoder and the native force feedback plugin.
+    Produces dist/ArtOfSimRally-<version>.zip.
 
-    Note the two install locations: the managed DLLs go under BepInEx/plugins,
-    but UnityForceFeedback.dll must land in artofrally_Data/Plugins/x86_64 beside
-    the game's own native plugins. Putting it in the wrong place fails silently
-    with no force feedback and no error message, so the zip mirrors the game's
-    folder layout to make the copy unambiguous.
+    There are two install locations and only one of them is automatic. The mod
+    itself goes under Mods/ for Unity Mod Manager, which can install it straight
+    from this zip. UnityForceFeedback.dll is a native plugin and must land in
+    artofrally_Data/Plugins/x86_64 beside the game's own; UMM will not place it,
+    and anywhere else means force feedback silently does nothing with no error.
+
+    The zip therefore mirrors the game's folder layout, so the manual half of the
+    copy is unambiguous.
 
 .EXAMPLE
     .\tools\package\package.ps1 -Version 0.1.0
@@ -21,73 +23,92 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$dist = Join-Path $root 'dist'
+$root  = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$dist  = Join-Path $root 'dist'
 $stage = Join-Path $dist "stage-$Version"
 
-Write-Host "Building..." -ForegroundColor Cyan
+Write-Host "Building managed mod..." -ForegroundColor Cyan
 & dotnet build (Join-Path $root 'src\ArtOfSimRally.Mod\ArtOfSimRally.Mod.csproj') -c Release -v q --nologo
 if ($LASTEXITCODE -ne 0) { throw "Managed build failed" }
 
+Write-Host "Building native plugin..." -ForegroundColor Cyan
 & cmd.exe /c (Join-Path $root 'src\UnityForceFeedback\build.bat')
 if ($LASTEXITCODE -ne 0) { throw "Native build failed" }
 
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
-$pluginDir = Join-Path $stage 'BepInEx\plugins\ArtOfSimRally'
+$modDir    = Join-Path $stage 'Mods\ArtOfSimRally'
 $nativeDir = Join-Path $stage 'artofrally_Data\Plugins\x86_64'
-New-Item -ItemType Directory -Force -Path $pluginDir, $nativeDir | Out-Null
+New-Item -ItemType Directory -Force -Path $modDir, $nativeDir | Out-Null
 
-Copy-Item (Join-Path $root 'src\ArtOfSimRally.Mod\bin\Release\ArtOfSimRally.Mod.dll')       $pluginDir
-Copy-Item (Join-Path $root 'src\ArtOfSimRally.Mod\bin\Release\ArtOfSimRally.Telemetry.dll') $pluginDir
-Copy-Item (Join-Path $root 'src\UnityForceFeedback\build\UnityForceFeedback.dll')           $nativeDir
+$bin = Join-Path $root 'src\ArtOfSimRally.Mod\bin\Release'
+Copy-Item (Join-Path $bin 'ArtOfSimRally.Mod.dll')       $modDir
+Copy-Item (Join-Path $bin 'ArtOfSimRally.Telemetry.dll') $modDir
+Copy-Item (Join-Path $root 'src\ArtOfSimRally.Mod\Info.json') $modDir
+Copy-Item (Join-Path $root 'src\UnityForceFeedback\build\UnityForceFeedback.dll') $nativeDir
 Copy-Item (Join-Path $root 'LICENSE') $stage
 
-@"
-art of sim rally $Version
-=========================
+$readme = @'
+art of sim rally
+================
 
 Turns art of rally into something you can drive on a wheel: real force feedback,
 a bonnet camera, Forza-compatible telemetry, and two fixes for steering that the
-game applies only to wheels it recognises.
+game only applies to wheels it recognises.
 
 INSTALL
 -------
-1. Install BepInEx 5 (x64) into your art of rally folder, run the game once, quit.
-2. Copy BOTH folders from this zip into your art of rally folder, merging them:
+1. Install Unity Mod Manager and point it at art of rally. The game is already in
+   UMM's supported list.  https://www.nexusmods.com/site/mods/21
 
-     BepInEx\plugins\ArtOfSimRally\   -> the mod
-     artofrally_Data\Plugins\x86_64\  -> UnityForceFeedback.dll
+2. Install the mod, either way:
+     - drag this zip onto Unity Mod Manager's Mods tab, or
+     - copy the "Mods" folder from this zip into your art of rally folder.
 
-   The second one matters. UnityForceFeedback.dll must sit beside the game's own
-   native plugins. Anywhere else and force feedback silently does nothing.
+3. IMPORTANT, and not automatic - copy this by hand into your game folder:
 
-3. Run the game once more to generate the config, then tune:
-     BepInEx\config\com.dbce.artofsimrally.cfg
+       artofrally_Data\Plugins\x86_64\UnityForceFeedback.dll
+
+   It is a native plugin and has to sit beside the game's own. Unity Mod Manager
+   will not place it for you, and anywhere else means force feedback silently
+   does nothing, with no error anywhere.
+
+4. Launch the game. Press Ctrl+F10 for the settings panel.
 
 FIRST THINGS TO CHECK
 ---------------------
-* Steering should feel direct immediately. If it still feels vague, set
-  DiagnosticLogging = true and check BepInEx\LogOutput.log.
-* Force feedback strength is set by MzReference - LOWER is STRONGER. The default
-  of 150 is a starting guess and will need tuning for your wheel.
-* The bonnet camera is added to the normal view rotation - press your change-view
-  button to cycle to it. Adjust it live with the numpad while looking through it;
-  changes save automatically.
-* Telemetry is off by default. Enable it and point SimHub at a Forza Horizon 5
-  profile on UDP 8000.
+* Steering should feel direct straight away.
+
+* Force feedback strength is "Reference torque", and LOWER IS STRONGER. The
+  default of 150 is a starting guess that will need tuning for your wheel. Turn
+  on "Log peak torque", drive for a minute, and the log reports the number to
+  put there.
+
+* The bonnet camera is added to the game's normal view rotation - press your
+  change-view button to cycle onto it. Adjust it live on the numpad while you
+  are looking through it: 8/2 up-down, 7/9 back-forward, 4/6 left-right,
+  1/3 tilt, +/- field of view, 0 resets. Changes save on their own.
+
+* Telemetry is off by default. Switch it on and point SimHub at a Forza
+  Horizon 5 profile on UDP port 8000.
 
 KNOWN LIMITS
 ------------
-* Developed and tested on a MOZA R12 Base only.
-* This is a bonnet camera, not a cockpit camera. art of rally's cars have no
-  modelled interiors.
-* DisableSteerAssist is OFF by default and genuinely changes how the car behaves.
-  The other steering fixes only restore what a recognised wheel already gets.
-  art of rally has online leaderboards - enable it deliberately.
+* Developed and tested on a MOZA R12 Base only. The steering and deadzone fixes
+  should apply to any wheel Rewired does not recognise, which is likely most
+  modern direct-drive bases, but that is reasoning rather than testing.
 
-Source, full technical write-up and issues:
+* This is a bonnet camera, not a cockpit camera. art of rally's cars have no
+  modelled interiors, so there is nothing to sit inside of.
+
+* "Disable steering assist" is OFF by default and genuinely changes how the car
+  behaves. The other steering options only restore what a recognised wheel
+  already gets. art of rally has online leaderboards - enable it deliberately.
+
+Source, the full technical write-up, and issues:
 https://github.com/d-b-c-e/art-of-sim-rally
-"@ | Set-Content (Join-Path $stage 'README.txt') -Encoding UTF8
+'@
+
+$readme | Set-Content (Join-Path $stage 'README.txt') -Encoding UTF8
 
 $zip = Join-Path $dist "ArtOfSimRally-$Version.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }

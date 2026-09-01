@@ -62,8 +62,8 @@ namespace ArtOfSimRally.Mod
             [HarmonyPostfix]
             private static void Append(CarCameras __instance)
             {
-                var cfg = Plugin.Settings;
-                if (cfg == null || !cfg.BonnetCameraEnabled.Value) return;
+                var cfg = Main.Settings;
+                if (cfg == null || !cfg.BonnetCameraEnabled) return;
                 var list = AnglesList(__instance);
                 if (list == null) return;
 
@@ -78,7 +78,7 @@ namespace ArtOfSimRally.Mod
                 _bonnetAngle = new CameraAngle(0f, 0f, 0f, CameraAngle.CameraAngles.CAMERA1);
                 list.Add(_bonnetAngle);
 
-                Plugin.Log.LogInfo(
+                ModLog.Info(
                     $"Bonnet camera added as view {list.Count} of {list.Count} in the rotation.");
             }
         }
@@ -91,8 +91,8 @@ namespace ArtOfSimRally.Mod
             [HarmonyPostfix]
             private static void Mount(CarCameras __instance)
             {
-                var cfg = Plugin.Settings;
-                if (cfg == null || !cfg.BonnetCameraEnabled.Value) return;
+                var cfg = Main.Settings;
+                if (cfg == null || !cfg.BonnetCameraEnabled) return;
                 if (!IsActive(__instance)) { _lateralOffset = 0f; return; }
 
                 // Hand the camera back for the end-of-stage cinematic, replays and
@@ -114,24 +114,24 @@ namespace ArtOfSimRally.Mod
                 // so it is configurable down to zero. Smoothed because raw lateral
                 // acceleration is noisy on gravel.
                 float lean = 0f;
-                if (cfg.BonnetLean.Value > 0f)
+                if (cfg.BonnetLean > 0f)
                 {
                     float lateral = Mathf.Clamp(GetLateralLoad(__instance), -1f, 1f);
                     _lateralOffset = Mathf.Lerp(_lateralOffset, lateral, 0.1f);
-                    lean = _lateralOffset * cfg.BonnetLean.Value;
+                    lean = _lateralOffset * cfg.BonnetLean;
                 }
 
                 var offset = new Vector3(
-                    cfg.BonnetSide.Value + lean,
-                    cfg.BonnetHeight.Value,
-                    cfg.BonnetForward.Value);
+                    cfg.BonnetSide + lean,
+                    cfg.BonnetHeight,
+                    cfg.BonnetForward);
 
                 cam.transform.position = target.position + rot * offset;
-                cam.transform.rotation = rot * Quaternion.Euler(cfg.BonnetPitch.Value, 0f, 0f);
+                cam.transform.rotation = rot * Quaternion.Euler(cfg.BonnetPitch, 0f, 0f);
 
                 // The stock UpdateFOVAndPitch rewrites fieldOfView every frame for
                 // the chase camera, so set ours after it rather than once.
-                cam.fieldOfView = cfg.BonnetFOV.Value;
+                cam.fieldOfView = cfg.BonnetFOV;
 
                 // Polled here so the hotkeys are live only while looking through
                 // this camera, and never while driving a stock view or in a menu.

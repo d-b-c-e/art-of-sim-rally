@@ -56,8 +56,8 @@ namespace ArtOfSimRally.Mod
         [HarmonyPostfix]
         private static void DriveWheel(CarDynamics __instance)
         {
-            var cfg = Plugin.Settings;
-            if (cfg == null || !cfg.ForceFeedbackEnabled.Value) return;
+            var cfg = Main.Settings;
+            if (!Main.Enabled || cfg == null || !cfg.ForceFeedbackEnabled) return;
             if (!FfbNative.Ready) return;
 
             // FixedUpdate keeps running through the end-of-stage cutscene while
@@ -90,14 +90,14 @@ namespace ArtOfSimRally.Mod
             // CalcAligningForce is not documented anywhere and varies by car;
             // DiagnosticLogging prints the observed peak so it can be tuned
             // against real driving rather than guessed.
-            float normalised = mz / Mathf.Max(1f, cfg.MzReference.Value);
-            normalised *= cfg.Gain.Value;
-            if (cfg.Invert.Value) normalised = -normalised;
+            float normalised = mz / Mathf.Max(1f, cfg.MzReference);
+            normalised *= cfg.Gain;
+            if (cfg.Invert) normalised = -normalised;
             normalised = Mathf.Clamp(normalised, -1f, 1f);
 
             // First-order smoothing. Raw per-step Mz is noisy over kerbs and
             // rocks, and an unfiltered signal reads as rattle rather than detail.
-            float a = Mathf.Clamp01(cfg.Smoothing.Value);
+            float a = Mathf.Clamp01(cfg.Smoothing);
             _smoothed = Mathf.Lerp(normalised, _smoothed, a);
 
             // Publish in the game's own units so anything reading this field -
@@ -107,7 +107,7 @@ namespace ArtOfSimRally.Mod
 
             FfbNative.SetForce((int)(_smoothed * FfbNative.ForceMax));
 
-            if (cfg.DiagnosticLogging.Value) Diagnose(mz);
+            if (cfg.DiagnosticLogging) Diagnose(mz);
         }
 
         // Reports the peak aligning torque seen in each window, which is the
@@ -120,9 +120,9 @@ namespace ArtOfSimRally.Mod
             if (Time.unscaledTime < _nextDiagnostic) return;
             _nextDiagnostic = Time.unscaledTime + 5f;
 
-            Plugin.Log.LogInfo(
+            ModLog.Info(
                 $"FFB peak |Mz| over last 5s: {_peakMz:F1} " +
-                $"(MzReference={Plugin.Settings.MzReference.Value:F0}, " +
+                $"(MzReference={Main.Settings.MzReference:F0}, " +
                 $"output={_smoothed:F2})");
             _peakMz = 0f;
         }

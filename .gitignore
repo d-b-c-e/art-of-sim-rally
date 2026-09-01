@@ -443,3 +443,6 @@ results/
 
 # Release packaging output
 dist/
+
+# UMM assemblies extracted locally for compilation - never commit these
+lib/

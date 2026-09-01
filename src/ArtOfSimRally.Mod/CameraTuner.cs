@@ -3,7 +3,7 @@ using UnityEngine;
 namespace ArtOfSimRally.Mod
 {
     /// <summary>
-    /// Live camera adjustment by hotkey, persisted back to the config file.
+    /// Live camera adjustment by hotkey, persisted back to the mod's settings.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -34,70 +34,64 @@ namespace ArtOfSimRally.Mod
         /// </summary>
         public static void Update()
         {
-            var cfg = Plugin.Settings;
-            if (cfg == null || !cfg.CameraTuningKeys.Value) return;
+            var cfg = Main.Settings;
+            if (!Main.Enabled || cfg == null || !cfg.CameraTuningKeys) return;
 
             // Per-second rates, scaled by real time so behaviour does not change
             // with frame rate or when the game is paused.
             float dt   = Time.unscaledDeltaTime;
-            float move = cfg.TuneMoveSpeed.Value * dt;
-            float ang  = cfg.TuneAngleSpeed.Value * dt;
+            float move = cfg.TuneMoveSpeed * dt;
+            float ang  = cfg.TuneAngleSpeed * dt;
 
             bool changed = false;
 
-            changed |= Nudge(cfg.BonnetHeight,  cfg.KeyUp.Value,      cfg.KeyDown.Value,     move);
-            changed |= Nudge(cfg.BonnetForward, cfg.KeyForward.Value, cfg.KeyBack.Value,     move);
-            changed |= Nudge(cfg.BonnetSide,    cfg.KeyRight.Value,   cfg.KeyLeft.Value,     move);
-            changed |= Nudge(cfg.BonnetPitch,   cfg.KeyPitchDown.Value, cfg.KeyPitchUp.Value, ang);
-            changed |= Nudge(cfg.BonnetFOV,     cfg.KeyFovUp.Value,   cfg.KeyFovDown.Value,  ang);
+            changed |= Nudge(ref cfg.BonnetHeight,  cfg.KeyUp,        cfg.KeyDown,     move);
+            changed |= Nudge(ref cfg.BonnetForward, cfg.KeyForward,   cfg.KeyBack,     move);
+            changed |= Nudge(ref cfg.BonnetSide,    cfg.KeyRight,     cfg.KeyLeft,     move);
+            changed |= Nudge(ref cfg.BonnetPitch,   cfg.KeyPitchDown, cfg.KeyPitchUp,  ang);
+            changed |= Nudge(ref cfg.BonnetFOV,     cfg.KeyFovUp,     cfg.KeyFovDown,  ang);
 
-            if (Input.GetKeyDown(cfg.KeyReset.Value))
+            if (Input.GetKeyDown(cfg.KeyReset))
             {
-                cfg.BonnetHeight.Value  = (float)cfg.BonnetHeight.DefaultValue;
-                cfg.BonnetForward.Value = (float)cfg.BonnetForward.DefaultValue;
-                cfg.BonnetSide.Value    = (float)cfg.BonnetSide.DefaultValue;
-                cfg.BonnetPitch.Value   = (float)cfg.BonnetPitch.DefaultValue;
-                cfg.BonnetFOV.Value     = (float)cfg.BonnetFOV.DefaultValue;
+                // A fresh instance carries the field initialisers, which are the
+                // single source of truth for defaults now that there is no config
+                // framework holding them separately.
+                var defaults = new Settings();
+                cfg.BonnetHeight  = defaults.BonnetHeight;
+                cfg.BonnetForward = defaults.BonnetForward;
+                cfg.BonnetSide    = defaults.BonnetSide;
+                cfg.BonnetPitch   = defaults.BonnetPitch;
+                cfg.BonnetFOV     = defaults.BonnetFOV;
                 changed = true;
-                Plugin.Log.LogInfo("Bonnet camera reset to defaults.");
+                ModLog.Info("Bonnet camera reset to defaults.");
             }
 
             if (changed)
             {
                 _dirty = true;
                 _saveDueAt = Time.unscaledTime + 1f;
-                Plugin.Log.LogInfo(
-                    $"Camera  height={cfg.BonnetHeight.Value:F2}  forward={cfg.BonnetForward.Value:F2}  " +
-                    $"side={cfg.BonnetSide.Value:F2}  pitch={cfg.BonnetPitch.Value:F1}  " +
-                    $"fov={cfg.BonnetFOV.Value:F0}");
+                ModLog.Info(
+                    $"Camera  height={cfg.BonnetHeight:F2}  forward={cfg.BonnetForward:F2}  " +
+                    $"side={cfg.BonnetSide:F2}  pitch={cfg.BonnetPitch:F1}  " +
+                    $"fov={cfg.BonnetFOV:F0}");
             }
 
             if (_dirty && Time.unscaledTime >= _saveDueAt)
             {
                 _dirty = false;
-                try
-                {
-                    cfg.File.Save();
-                    Plugin.Log.LogInfo("Camera settings saved.");
-                }
-                catch (System.Exception ex)
-                {
-                    // A failed save costs the tweak, not the session.
-                    Plugin.Log.LogWarning($"Could not save camera settings: {ex.Message}");
-                }
+                Main.SaveSettings();
+                ModLog.Info("Camera settings saved.");
             }
         }
 
-        private static bool Nudge(
-            BepInEx.Configuration.ConfigEntry<float> entry,
-            KeyCode increase, KeyCode decrease, float step)
+        private static bool Nudge(ref float value, KeyCode increase, KeyCode decrease, float step)
         {
             float delta = 0f;
             if (Input.GetKey(increase)) delta += step;
             if (Input.GetKey(decrease)) delta -= step;
             if (delta == 0f) return false;
 
-            entry.Value += delta;
+            value += delta;
             return true;
         }
     }

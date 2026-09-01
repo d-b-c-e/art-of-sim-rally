@@ -1,0 +1,11 @@
+{
+  "Id": "ArtOfSimRally",
+  "DisplayName": "art of sim rally",
+  "Author": "d-b-c-e",
+  "Version": "0.1.0",
+  "ManagerVersion": "0.27.0",
+  "AssemblyName": "ArtOfSimRally.Mod.dll",
+  "EntryMethod": "ArtOfSimRally.Mod.Main.Load",
+  "HomePage": "https://github.com/d-b-c-e/art-of-sim-rally",
+  "Repository": "https://github.com/d-b-c-e/art-of-sim-rally"
+}

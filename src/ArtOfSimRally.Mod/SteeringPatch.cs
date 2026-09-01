@@ -44,14 +44,14 @@ namespace ArtOfSimRally.Mod
         [HarmonyPostfix]
         private static void ApplyDirectSteering(CarController __instance)
         {
-            var cfg = Plugin.Settings;
-            if (cfg == null) return;
+            var cfg = Main.Settings;
+            if (!Main.Enabled || cfg == null) return;
 
             // Rewired is guaranteed initialised by the time a car spawns, which
-            // is not true at BepInEx Awake.
+            // is not true when the mod first loads.
             WheelCalibration.Apply();
 
-            if (!cfg.DirectSteering.Value) return;
+            if (!cfg.DirectSteering) return;
 
             // Mirrors the `if (flag)` branch in SmoothSteer exactly.
             __instance.steerTime             = 0f;
@@ -66,10 +66,10 @@ namespace ArtOfSimRally.Mod
             // escape this - it is a genuine driving aid, not a device fix, and
             // turning it off changes how the car behaves. Off by default and
             // clearly labelled, because art of rally has online leaderboards.
-            if (cfg.DisableSteerAssist.Value)
+            if (cfg.DisableSteerAssist)
                 __instance.steerAssistance = false;
 
-            Plugin.Log.LogInfo(
+            ModLog.Info(
                 $"Direct steering applied to {__instance.GetType().Name} " +
                 $"(steerAssistance={__instance.steerAssistance})");
         }

@@ -59,20 +59,20 @@ namespace ArtOfSimRally.Mod
             {
                 // Preload by absolute path before the first P/Invoke binds. Unity
                 // resolves native plugins out of <Data>/Plugins/x86_64, but a
-                // BepInEx plugin is not a Unity-managed assembly and does not
-                // reliably inherit that search path. Loading it explicitly makes
+                // mod assembly loaded by Unity Mod Manager is not a Unity-managed
+                // plugin and does not reliably inherit that search path. Loading it explicitly makes
                 // the later DllImport bind to an already-resident module, and
                 // turns "wrong folder" into a clear log line instead of a
                 // DllNotFoundException from inside a physics callback.
                 if (LoadLibraryW(ResolveDllPath(pluginDir)) == IntPtr.Zero)
-                    Plugin.Log.LogWarning(
+                    ModLog.Warning(
                         "Could not preload UnityForceFeedback.dll by path; " +
                         "relying on the default search order.");
 
                 int hwnd = GetForegroundWindow();
                 if (InitDirectInput(hwnd) == 0)
                 {
-                    Plugin.Log.LogError(
+                    ModLog.Error(
                         "InitDirectInput failed - no force-feedback device found, or " +
                         "another process holds it exclusively. See " +
                         "%LOCALAPPDATA%\\ArtOfSimRally\\ffb.log.");
@@ -83,7 +83,7 @@ namespace ArtOfSimRally.Mod
                 Aquire();
                 StartEffect();
                 SetAutoCenter(false);   // autocentre fights every effect we apply
-                Plugin.Log.LogInfo("Force feedback device initialised.");
+                ModLog.Info("Force feedback device initialised.");
                 return true;
             }
             catch (Exception ex)
@@ -91,7 +91,7 @@ namespace ArtOfSimRally.Mod
                 // A DllNotFoundException here is the expected failure when the
                 // native plugin was never built. Degrade to no FFB rather than
                 // taking the game down with us.
-                Plugin.Log.LogError($"Force feedback unavailable: {ex.Message}");
+                ModLog.Error($"Force feedback unavailable: {ex.Message}");
                 _failed = true;
                 return false;
             }
@@ -109,7 +109,7 @@ namespace ArtOfSimRally.Mod
             try { SetDeviceForcesXY(x, 0); }
             catch (Exception ex)
             {
-                Plugin.Log.LogError($"SetDeviceForcesXY failed, disabling FFB: {ex.Message}");
+                ModLog.Error($"SetDeviceForcesXY failed, disabling FFB: {ex.Message}");
                 _failed = true;
             }
         }
@@ -119,7 +119,7 @@ namespace ArtOfSimRally.Mod
         {
             if (!Ready) return;
             try { StopEffect(); FreeDirectInput(); }
-            catch (Exception ex) { Plugin.Log.LogWarning($"FFB shutdown: {ex.Message}"); }
+            catch (Exception ex) { ModLog.Warning($"FFB shutdown: {ex.Message}"); }
             _failed = true;
         }
 
