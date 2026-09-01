@@ -3,13 +3,14 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Rewired;
 using UnityEngine;
 
 namespace ArtOfSimRally.Mod
 {
     /// <summary>
     /// Writes a single text file with everything needed to diagnose a force
-    /// feedback problem, for a user to attach to a bug report.
+    /// feedback OR a binding problem, for a user to attach to a bug report.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -25,6 +26,14 @@ namespace ArtOfSimRally.Mod
     /// statistics. Range and sign balance answer the first question in any FFB
     /// report — is the mod computing forces at all, or is the device rejecting
     /// them — which are opposite problems that look identical from the outside.
+    /// </para>
+    /// <para>
+    /// Binding problems needed a second pass, because logs are the wrong source
+    /// for them. The game prints its controller list once at startup, which in a
+    /// real session is tens of thousands of lines back, and what is actually bound
+    /// is never printed at all. So the controller and binding sections are read
+    /// live from Rewired when the button is pressed, and the mod's own log is
+    /// collected from UMM rather than assumed to be in Unity's.
     /// </para>
     /// </remarks>
     internal static class SupportBundle
@@ -43,7 +52,10 @@ namespace ArtOfSimRally.Mod
                 var sb = new StringBuilder();
                 WriteHeader(sb);
                 WriteSettings(sb);
+                WriteControllers(sb);
+                WriteBindings(sb);
                 WriteFfbLog(sb);
+                WriteModLog(sb);
                 WriteUnityLog(sb);
 
                 string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
@@ -92,6 +104,129 @@ namespace ArtOfSimRally.Mod
                 try { v = f.GetValue(s); } catch { v = "<unreadable>"; }
                 sb.AppendLine("  " + f.Name.PadRight(24) + " = " + v);
             }
+            sb.AppendLine();
+        }
+
+        // Live Rewired state, read at the moment the user presses the button.
+        // Far more reliable than scraping it back out of a log: the game prints
+        // its controller list once at startup, and by the time anyone thinks to
+        // collect diagnostics that is tens of thousands of lines in the past.
+        private static void WriteControllers(StringBuilder sb)
+        {
+            sb.AppendLine("--- controllers (live) ---");
+            try
+            {
+                if (!ReInput.isReady) { sb.AppendLine("Rewired not ready"); sb.AppendLine(); return; }
+
+                var player = PadManager.GetPlayer();
+                var joysticks = ReInput.controllers.Joysticks;
+                sb.AppendLine("joysticks attached : " + (joysticks?.Count ?? 0));
+                sb.AppendLine("assigned to player : " + (player?.controllers.joystickCount ?? 0));
+                sb.AppendLine();
+
+                if (joysticks == null) { sb.AppendLine(); return; }
+
+                for (int i = 0; i < joysticks.Count; i++)
+                {
+                    var j = joysticks[i];
+                    bool assigned = player != null && player.controllers.ContainsController(j);
+                    bool recognised = j.hardwareTypeGuid != Guid.Empty;
+
+                    sb.AppendLine("[" + i + "] " + j.name);
+                    sb.AppendLine("     recognised by Rewired : " + (recognised ? "yes" : "NO"));
+                    sb.AppendLine("     assigned to player    : " + (assigned ? "yes" : "NO"));
+                    sb.AppendLine("     axes / buttons        : " + j.axisCount + " / " + j.buttonCount);
+                    sb.AppendLine("     hardware id           : " + j.hardwareIdentifier);
+
+                    // Deadzone matters because an unrecognised device gets
+                    // Rewired's 0.1 default, which the game's own options screen
+                    // cannot see or change.
+                    var map = j.calibrationMap;
+                    if (map != null && map.axisCount > 0)
+                    {
+                        var dz = new StringBuilder();
+                        for (int a = 0; a < map.axisCount && a < 12; a++)
+                        {
+                            var axis = map.GetAxis(a);
+                            if (axis != null) dz.Append(axis.deadZone.ToString("F3")).Append(' ');
+                        }
+                        sb.AppendLine("     axis deadzones        : " + dz);
+                    }
+                    sb.AppendLine();
+                }
+
+                if (joysticks.Count > 1)
+                {
+                    sb.AppendLine("NOTE: more than one joystick is present. The game's own controls");
+                    sb.AppendLine("screen only ever binds Joysticks[0], so without 'Bind any device'");
+                    sb.AppendLine("the others cannot be configured, and where two share a name it is");
+                    sb.AppendLine("not obvious which one index 0 is.");
+                    sb.AppendLine();
+                }
+            }
+            catch (Exception ex) { sb.AppendLine("failed: " + ex.Message); sb.AppendLine(); }
+        }
+
+        // What is actually bound. The single most useful thing for a "my wheel
+        // does nothing" report, and impossible to infer from any log.
+        private static void WriteBindings(StringBuilder sb)
+        {
+            sb.AppendLine("--- bindings (live) ---");
+            try
+            {
+                if (!ReInput.isReady) { sb.AppendLine("Rewired not ready"); sb.AppendLine(); return; }
+
+                var player = PadManager.GetPlayer();
+                if (player == null) { sb.AppendLine("no player"); sb.AppendLine(); return; }
+
+                int total = 0;
+                foreach (var j in player.controllers.Joysticks)
+                {
+                    sb.AppendLine(j.name + ":");
+                    int n = 0;
+                    foreach (var map in player.controllers.maps.GetMaps<JoystickMap>(j.id))
+                    {
+                        if (map == null) continue;
+                        foreach (var aem in map.AllMaps)
+                        {
+                            sb.AppendLine("    " + aem.actionDescriptiveName.PadRight(24) +
+                                          " <- " + aem.elementIdentifierName);
+                            n++; total++;
+                        }
+                    }
+                    if (n == 0) sb.AppendLine("    (nothing bound to this device)");
+                    sb.AppendLine();
+                }
+
+                if (total == 0)
+                {
+                    sb.AppendLine("READING: nothing is bound to any joystick. The wheel will not");
+                    sb.AppendLine("control the car regardless of force feedback. Bind it in the");
+                    sb.AppendLine("game's controls screen first.");
+                    sb.AppendLine();
+                }
+            }
+            catch (Exception ex) { sb.AppendLine("failed: " + ex.Message); sb.AppendLine(); }
+        }
+
+        // UMM's log, which is where every ModLog line from this mod ends up -
+        // including the Rewired calibration before/after dump and the binding
+        // target messages.
+        private static void WriteModLog(StringBuilder sb)
+        {
+            sb.AppendLine("--- mod log (tail) ---");
+            string path = Path.Combine(
+                Path.GetDirectoryName(Application.dataPath) ?? "",
+                @"artofrally_Data\Managed\UnityModManager\Log.txt");
+
+            if (!File.Exists(path)) { sb.AppendLine("not found at " + path); sb.AppendLine(); return; }
+            try
+            {
+                var lines = File.ReadAllLines(path);
+                int start = Math.Max(0, lines.Length - 200);
+                for (int i = start; i < lines.Length; i++) sb.AppendLine(lines[i]);
+            }
+            catch (Exception ex) { sb.AppendLine("could not read: " + ex.Message); }
             sb.AppendLine();
         }
 
@@ -186,6 +321,26 @@ namespace ArtOfSimRally.Mod
             try
             {
                 var lines = File.ReadAllLines(path);
+
+                // The controller enumeration is printed once at startup. In a real
+                // session that is tens of thousands of lines back - measured at
+                // line 57,693 of 58,365 on this machine - so a plain tail misses
+                // the single most useful block in the file. Find it instead.
+                int rewired = -1;
+                for (int i = lines.Length - 1; i >= 0; i--)
+                {
+                    if (lines[i].IndexOf("Rewired version", StringComparison.OrdinalIgnoreCase) >= 0)
+                    { rewired = i; break; }
+                }
+                if (rewired >= 0)
+                {
+                    sb.AppendLine("[controller enumeration at line " + (rewired + 1) + "]");
+                    for (int i = rewired; i < Math.Min(lines.Length, rewired + 40); i++)
+                        sb.AppendLine(lines[i]);
+                    sb.AppendLine();
+                }
+
+                sb.AppendLine("[tail]");
                 int start = Math.Max(0, lines.Length - 120);
                 for (int i = start; i < lines.Length; i++) sb.AppendLine(lines[i]);
             }
