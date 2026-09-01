@@ -23,62 +23,53 @@ namespace ArtOfSimRally.Mod
         // ---- Steering -------------------------------------------------------
 
         [Draw("Direct steering", Tooltip =
-            "Removes the gamepad steering smoothing the game applies to wheels it does not " +
-            "recognise. This is the same code path a recognised wheel already gets.")]
+            "Removes gamepad steering smoothing applied to unrecognised wheels.")]
         public bool DirectSteering = true;
 
         [Draw("Clear hidden axis deadzone", Tooltip =
-            "Clears Rewired's own 10% per-axis deadzone, which is separate from the one in " +
-            "the game's options and is not exposed anywhere in the UI.")]
+            "Clears Rewired's hidden 10% deadzone. Not the one in game options.")]
         public bool ZeroAxisDeadzone = true;
 
         [Draw("Disable steering assist", Tooltip =
-            "CHANGES HOW THE CAR BEHAVES. The game reduces your steering authority as the car " +
-            "slides. Unlike the options above this is a driving aid, not a device fix, and the " +
-            "game has online leaderboards.")]
+            "CHANGES THE CAR. Off by default. Affects leaderboards.")]
         public bool DisableSteerAssist = false;
 
         // ---- Force feedback -------------------------------------------------
 
         [Draw("Force feedback", Tooltip =
-            "Requires UnityForceFeedback.dll in artofrally_Data/Plugins/x86_64.")]
+            "Needs UnityForceFeedback.dll in artofrally_Data/Plugins/x86_64.")]
         public bool ForceFeedbackEnabled = true;
 
         [Draw("Strength", Min = 0f, Max = 5f, Precision = 2)]
         public float Gain = 1.0f;
 
         [Draw("Reference torque (lower = stronger)", Min = 10f, Max = 1000f, Precision = 0, Tooltip =
-            "Self-aligning torque treated as full force. Enable diagnostics and drive; the log " +
-            "reports the peak seen, which is the number to put here.")]
+            "Lower is stronger. See help at the bottom of this panel.")]
         public float MzReference = 150f;
 
         [Draw("Smoothing", Min = 0f, Max = 0.95f, Precision = 2, Tooltip =
-            "0 is raw and detailed but noisy on rough surfaces.")]
+            "0 is raw and detailed, higher is damped.")]
         public float Smoothing = 0.2f;
 
-        [Draw("Invert force", Tooltip = "Flip if the wheel pulls the wrong way.")]
+        [Draw("Invert force", Tooltip =
+            "Flip if the wheel pulls the wrong way.")]
         public bool Invert = false;
 
         [Draw("Log peak torque (for tuning)")]
         public bool DiagnosticLogging = false;
 
         [Draw("Preferred wheel (optional)", Tooltip =
-            "Part of your wheel's name, e.g. \"MOZA\" or \"G29\". Only needed if you have more " +
-            "than one force-feedback device; otherwise the first one found is used. The log " +
-            "lists every device it saw. Takes effect on restart.")]
+            "Part of your wheel's name. Only needed if you have several.")]
         public string PreferredDevice = "";
 
         [Draw("Wheel index (-1 = auto)", Min = -1, Max = 7, Tooltip =
-            "Use when several devices share a name - a Fanatec rig reports two, both called " +
-            "\"FANATEC Wheel\". The log lists each with an index; put that number here. " +
-            "Takes effect on restart.")]
+            "Index from the log. Use when wheels share a name.")]
         public int PreferredDeviceIndex = -1;
 
         // ---- Camera ---------------------------------------------------------
 
         [Draw("Bonnet camera", Tooltip =
-            "Adds a bonnet view to the game's normal view rotation. Press your change-view " +
-            "button to cycle to it. Bonnet, not cockpit - the cars have no interiors.")]
+            "Adds a bonnet view to the normal view rotation.")]
         public bool BonnetCameraEnabled = true;
 
         [Draw("Height (m)", Min = -1f, Max = 3f, Precision = 2)]
@@ -97,13 +88,11 @@ namespace ArtOfSimRally.Mod
         public float BonnetFOV = 75f;
 
         [Draw("Cornering lean", Min = 0f, Max = 1f, Precision = 2, Tooltip =
-            "Lateral camera shift under load. Sells the mounted feel, but is also the first " +
-            "thing to cause motion sickness. 0 disables.")]
+            "Lateral shift under cornering load. 0 disables.")]
         public float BonnetLean = 0.1f;
 
         [Draw("Numpad camera hotkeys", Tooltip =
-            "Adjust the bonnet camera live while looking through it. 8/2 up-down, 7/9 " +
-            "back-forward, 4/6 left-right, 1/3 tilt, +/- field of view, 0 resets.")]
+            "Numpad adjusts the camera while looking through it.")]
         public bool CameraTuningKeys = true;
 
         // Rates for the hotkeys. Not drawn: tuning the tuner is a rabbit hole, and
@@ -126,8 +115,7 @@ namespace ArtOfSimRally.Mod
         // ---- Telemetry ------------------------------------------------------
 
         [Draw("Telemetry (Forza-compatible UDP)", Tooltip =
-            "Readable by SimHub, dashboards, motion rigs and bass shakers. Use a Forza " +
-            "Horizon 5 profile.")]
+            "Forza-compatible UDP. Use a Forza Horizon 5 profile.")]
         public bool TelemetryEnabled = false;
 
         [Draw("Host")]

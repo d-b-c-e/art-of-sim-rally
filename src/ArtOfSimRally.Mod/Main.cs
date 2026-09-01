@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using HarmonyLib;
+using UnityEngine;
 using UnityModManagerNet;
 
 namespace ArtOfSimRally.Mod
@@ -95,7 +96,37 @@ namespace ArtOfSimRally.Mod
         }
 
         private static void OnGUI(UnityModManager.ModEntry modEntry)
-            => Settings.Draw(modEntry);
+        {
+            Settings.Draw(modEntry);
+
+            GUILayout.Space(12);
+            GUILayout.Label("<b>Having trouble?</b>");
+
+            // Long explanations live here rather than in [Draw] tooltips. UMM
+            // renders a tooltip to the left of its "?" marker with no option to
+            // change side, so anything more than a few words runs off the panel
+            // and is unreadable. Visible wrapped text has no such limit and does
+            // not need hovering to find.
+            var wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
+            GUILayout.Label(
+                "Force feedback strength is 'Reference torque' - LOWER IS STRONGER. Turn on " +
+                "'Log peak torque', drive a minute, and the log reports the number to use.",
+                wrap);
+            GUILayout.Label(
+                "If several wheels share a name, the log lists each with an index - put that " +
+                "number in 'Wheel index'.", wrap);
+
+            GUILayout.Space(6);
+            if (GUILayout.Button("Create support file on Desktop", GUILayout.Width(260)))
+                SupportBundle.Create();
+
+            if (!string.IsNullOrEmpty(SupportBundle.LastResult))
+                GUILayout.Label(SupportBundle.LastResult, wrap);
+            else
+                GUILayout.Label(
+                    "Collects your settings, the force feedback log and the game's log into one " +
+                    "file to attach to a bug report.", wrap);
+        }
 
         private static void OnSaveGUI(UnityModManager.ModEntry modEntry)
             => Settings.Save(modEntry);
