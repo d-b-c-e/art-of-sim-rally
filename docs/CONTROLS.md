@@ -78,6 +78,42 @@ Multi-function Stalk - and `ControlsRemapper` exposes `joystick` (singular),
 time**. If it defaults to the shifter or the stalk, the wheel produces nothing.
 **Check for a device selector on that screen before concluding anything else.**
 
+### CONFIRMED root cause: Rewired's hidden 10% axis deadzone
+
+Measured in game on 2026-08-31, MOZA R12 Base. The mod logs every axis before
+touching it:
+
+```
+Rewired calibration for 'MOZA R12 Base' (recognised=False)
+  before: [0] dz=0.100 sens=1.00  [1] dz=0.100 ...  (all 32 axes)
+  after : [0] dz=0.000 sens=1.00  [1] dz=0.000 ...
+```
+
+**Rewired applies a 10% deadzone to every axis of an unrecognised controller.**
+On a wheel set to 270 degrees that is +/-13.5 degrees - a 27 degree dead band
+at centre.
+
+There are two independent deadzones, and the options screen only reaches one:
+
+1. **The game's.** `AxisCarController.GetInput` calls
+   `ProcessDeadzoneForInput(GetAxisRaw(steerAxis), SettingsManager.GetSteeringDeadzone())`.
+   That function is a plain cutoff and does nothing at 0. This is what the UI sets,
+   and it is innocent.
+2. **Rewired's.** `AxisCalibration.deadZone`, applied *inside* `GetAxisRaw`
+   before the game sees a number - "raw" means unsmoothed, not uncalibrated.
+   Nothing in the game's UI exposes it, and an unrecognised device has no
+   hardware profile to override the 0.1 default.
+
+This is why the wheel feels fine in every other game: they do not route it
+through Rewired's unrecognised-device defaults.
+
+Fixed by `WheelCalibration` in the mod, which zeroes the deadzone and forces
+linear sensitivity. Reported as a large improvement in feel.
+
+Because Rewired's shipped database predates every modern direct-drive base,
+this very likely affects Moza, Simagic, Simucube, Fanatec DD and Asetek users
+equally - not just this one wheel.
+
 ### Options, cheapest first
 
 1. Cycle the remapper to the MOZA R12 Base.

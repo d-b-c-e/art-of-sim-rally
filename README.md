@@ -38,7 +38,7 @@ out of the shipped assemblies, none of it from forum posts.
 | `UnityForceFeedback.dll` — the missing native plugin | **Built and verified sound** (loads standalone, 7 exports resolve, no VC-runtime dependency). Tested in game 2026-08-31: **the game never calls it** — see below. |
 | Forza telemetry encoder | **Done.** 324-byte FH4/5 Data Out, 24 tests passing, round-trip verified C# → UDP → Python. |
 | Synth + probe harness | **Done.** Test the whole chain with no game running. |
-| Unity Mod Manager mod | Not started — needs UMM installed. |
+| The mod (BepInEx) | **Working in game.** Direct steering + Rewired deadzone fix confirmed to transform wheel feel; FFB device opens successfully. |
 | Bonnet camera | Not started. Design in [docs/CAMERA.md](docs/CAMERA.md). |
 
 **Phase 0 is answered (2026-08-31), and the answer is better than a working
@@ -131,6 +131,20 @@ python harness/forza_probe.py
 | `tools/ArtOfSimRally.Synth/` | Synthetic telemetry emitter for testing consumers |
 | `harness/` | `forza_probe.py` — listen and print what is on the wire |
 | `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP |
+
+## Confirmed: a hidden 10% deadzone on every unrecognised wheel
+
+Measured in game on a MOZA R12: **Rewired applies a 10% deadzone to every axis of
+a controller it does not recognise**, and nothing in art of rally's options screen
+exposes it — the game's own deadzone setting is a separate, innocent one. On a
+270° wheel that is a 27° dead band at centre.
+
+Rewired's shipped hardware database predates every modern direct-drive base, so
+this likely affects Moza, Simagic, Simucube, Fanatec DD and Asetek owners alike.
+The mod zeroes it. Combined with restoring the game's own direct-steering path,
+this is the single biggest improvement to how the game feels on a wheel.
+
+Details in [docs/CONTROLS.md](docs/CONTROLS.md).
 
 ## Do I need a utility to bind my wheel?
 
