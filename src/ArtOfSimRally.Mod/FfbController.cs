@@ -38,6 +38,7 @@ namespace ArtOfSimRally.Mod
 
         private static float _smoothed;
         private static float _peakMz;
+        private static float _peakSpeedKmh;
         private static float _nextDiagnostic;
 
         /// <summary>
@@ -107,24 +108,29 @@ namespace ArtOfSimRally.Mod
 
             FfbNative.SetForce((int)(_smoothed * FfbNative.ForceMax));
 
-            if (cfg.DiagnosticLogging) Diagnose(mz);
+            if (cfg.DiagnosticLogging) Diagnose(mz, __instance.velo * 3.6f);
         }
 
         // Reports the peak aligning torque seen in each window, which is the
         // number MzReference should be set near.
-        private static void Diagnose(float mz)
+        private static void Diagnose(float mz, float speedKmh)
         {
             float abs = Mathf.Abs(mz);
             if (abs > _peakMz) _peakMz = abs;
+            if (speedKmh > _peakSpeedKmh) _peakSpeedKmh = speedKmh;
 
             if (Time.unscaledTime < _nextDiagnostic) return;
             _nextDiagnostic = Time.unscaledTime + 5f;
 
+            // Speed matters as much as torque here. A near-zero peak while parked
+            // is expected; the same figure at 90 km/h means something is wrong,
+            // and without speed the two readings are indistinguishable.
             ModLog.Info(
-                $"FFB peak |Mz| over last 5s: {_peakMz:F1} " +
-                $"(MzReference={Main.Settings.MzReference:F0}, " +
+                $"FFB peak |Mz| {_peakMz:F1} over 5s at up to {_peakSpeedKmh:F0} km/h " +
+                $"(reference={Main.Settings.MzReference:F0}, strength={Main.Settings.Strength}, " +
                 $"output={_smoothed:F2})");
             _peakMz = 0f;
+            _peakSpeedKmh = 0f;
         }
 
         /// <summary>Clears filter state between stages so a stale force is not carried over.</summary>

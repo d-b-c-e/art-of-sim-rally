@@ -471,8 +471,15 @@ __declspec(dllexport) int GetAnyDeviceName(int index, char* buffer, int size)
 // it exclusively would stop anything else - including the game - from seeing it.
 __declspec(dllexport) int OpenAuxDevice(int index)
 {
-    if (index < 0 || index >= g_auxCount) { Log("OpenAuxDevice(%d): out of range", index); return 0; }
-    if (!g_di) { if (EnumerateAllDevices() <= 0) return 0; }
+    // Enumerate if we have not yet, rather than only when DirectInput itself is
+    // missing. Force feedback initialises first and leaves g_di set, so keying off
+    // that skipped enumeration entirely and every open failed as "out of range".
+    if (g_auxCount == 0) { if (EnumerateAllDevices() <= 0) return 0; }
+
+    if (index < 0 || index >= g_auxCount) {
+        Log("OpenAuxDevice(%d): out of range (%d devices)", index, g_auxCount);
+        return 0;
+    }
 
     if (g_auxDevice) { g_auxDevice->Unacquire(); g_auxDevice->Release(); g_auxDevice = nullptr; }
 
