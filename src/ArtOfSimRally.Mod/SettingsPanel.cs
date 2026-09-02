@@ -164,6 +164,18 @@ namespace ArtOfSimRally.Mod
                 string port = GUILayout.TextField(cfg.TelemetryPort.ToString(), GUILayout.Width(70));
                 if (int.TryParse(port, out int p) && p > 0 && p <= 65535) cfg.TelemetryPort = p;
                 GUILayout.EndHorizontal();
+
+                // Live confirmation, so changing the port can be verified here
+                // instead of by alt-tabbing to whatever is meant to receive it.
+                // Changes apply immediately - no restart.
+                string active = TelemetryPump.ActiveEndpoint;
+                GUILayout.Label(active == null
+                    ? "      Not sending yet - starts when you drive."
+                    : "      Sending to " + active + "   (" + TelemetryPump.PacketsSent + " packets)",
+                    Wrap);
+
+                Help("Changing the host or port takes effect straight away. Useful if something " +
+                     "else already owns the port - point the game at a spare one and forward it.");
             }
 
             End();

@@ -26,6 +26,13 @@ namespace ArtOfSimRally.Mod
         private static TelemetrySender _sender;
         private static bool _senderFailed;
 
+        // What the live socket was actually created with. Compared against the
+        // settings each step so editing the host or port takes effect straight
+        // away - a destination you cannot change without relaunching is no use
+        // when you are working out which port is free.
+        private static string _senderHost;
+        private static int _senderPort;
+
         // Components live on the same GameObject as CarDynamics but are private
         // there, so fetch them once rather than reflecting every physics step.
         private static CarDynamics _cachedFor;
@@ -44,11 +51,26 @@ namespace ArtOfSimRally.Mod
 
             try
             {
+                bool changed = _sender != null &&
+                               (_senderPort != cfg.TelemetryPort ||
+                                !string.Equals(_senderHost, cfg.TelemetryHost, StringComparison.Ordinal));
+
+                if (changed)
+                {
+                    // Park the old destination before moving, or whatever was
+                    // listening there sits frozen on the last packet forever.
+                    Park();
+                    Shutdown();
+                }
+
                 if (_sender == null)
                 {
+                    if (string.IsNullOrEmpty(cfg.TelemetryHost)) return;
                     _sender = new TelemetrySender(cfg.TelemetryHost, cfg.TelemetryPort);
-                    ModLog.Info(
-                        $"Telemetry -> udp://{cfg.TelemetryHost}:{cfg.TelemetryPort}");
+                    _senderHost = cfg.TelemetryHost;
+                    _senderPort = cfg.TelemetryPort;
+                    _senderFailed = false;
+                    ModLog.Info($"Telemetry -> udp://{cfg.TelemetryHost}:{cfg.TelemetryPort}");
                 }
 
                 if (!ReferenceEquals(_cachedFor, __instance))
@@ -243,11 +265,20 @@ namespace ArtOfSimRally.Mod
             }
         }
 
+        /// <summary>Where packets are going right now, or null if not sending.</summary>
+        public static string ActiveEndpoint =>
+            _sender == null ? null : _senderHost + ":" + _senderPort;
+
+        /// <summary>Packets successfully sent on the current socket.</summary>
+        public static long PacketsSent => _sender?.PacketsSent ?? 0;
+
         /// <summary>Closes the socket. Called from the mod's teardown.</summary>
         public static void Shutdown()
         {
             _sender?.Dispose();
             _sender = null;
+            _senderHost = null;
+            _senderPort = 0;
             _cachedFor = null;
         }
     }
