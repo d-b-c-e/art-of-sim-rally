@@ -208,28 +208,17 @@ namespace ArtOfSimRally.Mod
             if (cfg == null || !cfg.ShifterEnabled) return;
 
             var wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
-            GUILayout.Label("<b>Shifter</b>");
-
             if (!_allDevicesListed) { _allDevices = Shifter.ListDevices(); _allDevicesListed = true; }
 
-            if (_allDevices == null || _allDevices.Length == 0)
+            int picked = DeviceDropdown.Draw(
+                "shifter", "Shifter device", _allDevices, cfg.ShifterDeviceIndex,
+                "No controllers found.");
+            if (picked >= 0)
             {
-                GUILayout.Label("No controllers found.", wrap);
-                if (GUILayout.Button("Look again", GUILayout.Width(140))) _allDevicesListed = false;
-                return;
-            }
-
-            GUILayout.Label("Which device is your shifter?", wrap);
-            for (int i = 0; i < _allDevices.Length; i++)
-            {
-                bool chosen = cfg.ShifterDeviceIndex == i;
-                if (GUILayout.Toggle(chosen, "  " + _allDevices[i]) && !chosen)
-                {
-                    cfg.ShifterDeviceIndex = i;
-                    cfg.ShifterDeviceName = _allDevices[i];
-                    Shifter.Open(i);
-                    SaveSettings();
-                }
+                cfg.ShifterDeviceIndex = picked;
+                cfg.ShifterDeviceName = _allDevices[picked];
+                Shifter.Open(picked);
+                SaveSettings();
             }
 
             if (cfg.ShifterDeviceIndex < 0) return;
@@ -299,45 +288,38 @@ namespace ArtOfSimRally.Mod
 
         private static void DrawDevicePicker()
         {
+            if (!_devicesListed) { _devices = FfbNative.ListDevices(); _devicesListed = true; }
+
+            int chosen = DeviceDropdown.Draw(
+                "wheel", "Force feedback wheel", _devices, Settings.PreferredDeviceIndex,
+                "No force-feedback device found. Check the wheel is on and not in use by " +
+                "another program.");
+
+            if (chosen >= 0)
+            {
+                Settings.PreferredDeviceIndex = chosen;
+                Settings.PreferredDevice = _devices[chosen];
+                SaveSettings();
+                ModLog.Info("Force feedback device set to [" + chosen + "] " + _devices[chosen]);
+            }
+
             var wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
-            GUILayout.Label("<b>Force feedback device</b>");
-
-            if (!_devicesListed)
+            if (_devices != null && _devices.Length > 0)
             {
-                _devices = FfbNative.ListDevices();
-                _devicesListed = true;
+                // With one device the choice is made for us, but showing the
+                // dropdown anyway keeps the panel consistent with the shifter.
+                if (Settings.PreferredDeviceIndex < 0)
+                    GUILayout.Label("Using " + _devices[0] + " by default.", wrap);
+                else
+                    GUILayout.Label("Takes effect next time you start the game.", wrap);
             }
 
-            if (_devices == null || _devices.Length == 0)
+            if (GUILayout.Button("Rescan devices", GUILayout.Width(160)))
             {
-                GUILayout.Label("No force-feedback device found. Check the wheel is on and " +
-                                "not in use by another program.", wrap);
-                if (GUILayout.Button("Look again", GUILayout.Width(140))) _devicesListed = false;
-                return;
+                _devicesListed = false;
+                _allDevicesListed = false;
+                DeviceDropdown.CloseAll();
             }
-
-            if (_devices.Length == 1)
-            {
-                GUILayout.Label("Using: " + _devices[0], wrap);
-                Settings.PreferredDevice = _devices[0];
-                Settings.PreferredDeviceIndex = -1;
-                return;
-            }
-
-            GUILayout.Label("You have more than one. Pick your wheel:", wrap);
-            for (int i = 0; i < _devices.Length; i++)
-            {
-                bool chosen = Settings.PreferredDeviceIndex == i;
-                bool now = GUILayout.Toggle(chosen, "  " + _devices[i] + "   (device " + i + ")");
-                if (now && !chosen)
-                {
-                    Settings.PreferredDeviceIndex = i;
-                    Settings.PreferredDevice = _devices[i];
-                    SaveSettings();
-                    ModLog.Info("Force feedback device set to [" + i + "] " + _devices[i]);
-                }
-            }
-            GUILayout.Label("Takes effect next time you start the game.", wrap);
         }
 
         private static void OnSaveGUI(UnityModManager.ModEntry modEntry)

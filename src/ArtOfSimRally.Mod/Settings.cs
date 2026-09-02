@@ -30,6 +30,10 @@ namespace ArtOfSimRally.Mod
             "Clears Rewired's hidden 10% deadzone. Not the one in game options.", VisibleOn = "ShowAdvanced|true")]
         public bool ZeroAxisDeadzone = true;
 
+        [Draw("Show button names when no icon exists", VisibleOn = "ShowAdvanced|true", Tooltip =
+            "Replaces blank glyph boxes with the button name, e.g. B12.")]
+        public bool GlyphTextFallback = true;
+
         [Draw("Bind any device", Tooltip =
             "Rebind the device you touch, not just the first joystick.", VisibleOn = "ShowAdvanced|true")]
         public bool BindAnyDevice = true;
