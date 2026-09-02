@@ -183,7 +183,13 @@ namespace ArtOfSimRally.Mod
 
             if (!upEdge && !downEdge) return;
 
-            int target = drivetrain.gear + (upEdge ? 1 : -1);
+            int step = upEdge ? 1 : -1;
+            int target = drivetrain.gear + step;
+
+            // Step over neutral rather than stopping on it, so reverse to first is
+            // one press instead of two.
+            if (cfg.SkipNeutral && target == Neutral) target += step;
+
             if (!GearExists(drivetrain, target)) return;
             drivetrain.Shift(target, true);
         }

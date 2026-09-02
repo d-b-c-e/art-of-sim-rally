@@ -110,7 +110,14 @@ namespace ArtOfSimRally.Mod
                 "Reads a shifter directly, so it works even though the game's input system " +
                 "cannot see most of them.");
 
-            if (cfg.ShifterEnabled) Panel.DrawShifterBinding(cfg);
+            if (cfg.ShifterEnabled)
+            {
+                Panel.DrawShifterBinding(cfg);
+
+                if (!cfg.ShifterIsHPattern)
+                    cfg.SkipNeutral = Toggle(cfg.SkipNeutral, "Skip neutral",
+                        "Reverse to first in one press instead of stopping on neutral.");
+            }
 
             End();
         }

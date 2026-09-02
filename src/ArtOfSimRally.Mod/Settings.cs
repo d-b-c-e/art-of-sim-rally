@@ -126,6 +126,16 @@ namespace ArtOfSimRally.Mod
         // far more reliably than collections.
         // Sequential shifters have two controls, not seven gates. Kept separate
         // from the gear buttons so switching mode does not discard either set.
+        /// <summary>Step past neutral when shifting sequentially.</summary>
+        /// <remarks>
+        /// The game steps one index at a time through [reverse, neutral, 1st, ...],
+        /// exactly as its own ShiftUp/ShiftDown do, so reverse to first takes two
+        /// presses with a useless stop in between. Real sequential boxes do have
+        /// neutral there, but nobody wants to press through it, and the game
+        /// auto-clutches anyway.
+        /// </remarks>
+        public bool SkipNeutral = true;
+
         public int ShiftUpButton = -1;
         public int ShiftDownButton = -1;
 

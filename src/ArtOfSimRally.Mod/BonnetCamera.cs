@@ -44,6 +44,9 @@ namespace ArtOfSimRally.Mod
 
         private static float _lateralOffset;
 
+        // Tracks the moment we stop controlling, so the handback runs once.
+        private static bool _wasDriving;
+
         // CameraAnglesList and cardynamics are private on CarCameras. AccessTools
         // resolves them once at type-init rather than reflecting per frame.
         private static readonly AccessTools.FieldRef<CarCameras, List<CameraAngle>> AnglesList =
@@ -93,12 +96,29 @@ namespace ArtOfSimRally.Mod
             {
                 var cfg = Main.Settings;
                 if (cfg == null || !cfg.BonnetCameraEnabled) return;
-                if (!IsActive(__instance)) { _lateralOffset = 0f; return; }
+                bool shouldDrive = IsActive(__instance) && GameState.IsPlayerView;
 
-                // Hand the camera back for the end-of-stage cinematic, replays and
-                // the intro. The game directs its own shots there, and continuing
-                // to mount the camera to the car puts the view underground.
-                if (!GameState.IsPlayerView) { _lateralOffset = 0f; return; }
+                // Hand the camera back cleanly for the end-of-stage cinematic,
+                // replays and the intro.
+                //
+                // Simply stopping is not enough. The stock rig damps toward its
+                // target from wherever the camera currently is, and we leave it
+                // mounted inside the car - so it swings out through the bodywork to
+                // the chase position, which is the "goes berserk" people see after
+                // the finish line. The game has its own method for putting the
+                // camera where it belongs in one step; call that as we let go.
+                if (!shouldDrive)
+                {
+                    _lateralOffset = 0f;
+                    if (_wasDriving)
+                    {
+                        _wasDriving = false;
+                        try { __instance.SetToWantedPositionImmediate(); }
+                        catch { /* handing back is best-effort */ }
+                    }
+                    return;
+                }
+                _wasDriving = true;
 
                 var target = __instance.target;
                 if (target == null) return;
