@@ -98,26 +98,43 @@ namespace ArtOfSimRally.Mod
 
             // Polled here as well as in the physics loop so the reading is live
             // while binding, before any stage has been started.
-            Shifter.Poll();
+            Shifter.PollForBinding();
 
             GUILayout.Label(cfg.ShifterIsHPattern
                 ? "      Click Set, then move the lever into that gate."
-                : "      Click Set, then press the button for that gear.", Wrap);
+                : "      Click Set, then push the lever that way.", Wrap);
 
             if (_bindingGear != int.MinValue)
             {
                 int pressed = Shifter.PressedButton;
                 if (pressed >= 0)
                 {
-                    cfg.SetGearButton(_bindingGear, pressed);
-                    ModLog.Info("Bound " + GearLabel(_bindingGear) + " to button " + pressed);
+                    if (_bindingGear == BindUp)        cfg.ShiftUpButton = pressed;
+                    else if (_bindingGear == BindDown) cfg.ShiftDownButton = pressed;
+                    else                               cfg.SetGearButton(_bindingGear, pressed);
+
+                    ModLog.Info("Bound " +
+                        (_bindingGear == BindUp ? "shift up"
+                         : _bindingGear == BindDown ? "shift down"
+                         : GearLabel(_bindingGear)) + " to button " + pressed);
+
                     _bindingGear = int.MinValue;
                     Main.SaveSettings();
                 }
             }
 
-            GearRow(cfg, -1);
-            for (int g = 1; g <= 6; g++) GearRow(cfg, g);
+            if (cfg.ShifterIsHPattern)
+            {
+                GearRow(cfg, -1);
+                for (int g = 1; g <= 6; g++) GearRow(cfg, g);
+            }
+            else
+            {
+                // A sequential lever is two momentary switches. Offering seven
+                // gates for one would be asking the wrong question.
+                SequentialRow(cfg, true);
+                SequentialRow(cfg, false);
+            }
 
             GUILayout.Label("      Pressed now: " +
                 (Shifter.PressedButton >= 0 ? "button " + Shifter.PressedButton : "nothing"), Wrap);
@@ -138,6 +155,33 @@ namespace ArtOfSimRally.Mod
             if (button >= 0 && GUILayout.Button("clear", GUILayout.Width(60)))
             {
                 cfg.SetGearButton(gear, -1);
+                Main.SaveSettings();
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        // Sequential rows are bound the same way but stored separately, and use
+        // int.MinValue/MaxValue as their binding ids so they cannot collide with a
+        // gear number.
+        private const int BindUp = int.MaxValue;
+        private const int BindDown = int.MaxValue - 1;
+
+        private static void SequentialRow(Settings cfg, bool isUp)
+        {
+            int id = isUp ? BindUp : BindDown;
+            int button = isUp ? cfg.ShiftUpButton : cfg.ShiftDownButton;
+            bool waiting = _bindingGear == id;
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(20);
+            GUILayout.Label(isUp ? "Shift up" : "Shift down", GUILayout.Width(90));
+            GUILayout.Label(waiting ? "press it..." : (button >= 0 ? "button " + button : "-"),
+                            GUILayout.Width(90));
+            if (GUILayout.Button(waiting ? "cancel" : "set", GUILayout.Width(70)))
+                _bindingGear = waiting ? int.MinValue : id;
+            if (button >= 0 && GUILayout.Button("clear", GUILayout.Width(60)))
+            {
+                if (isUp) cfg.ShiftUpButton = -1; else cfg.ShiftDownButton = -1;
                 Main.SaveSettings();
             }
             GUILayout.EndHorizontal();

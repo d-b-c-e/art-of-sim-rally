@@ -124,6 +124,11 @@ namespace ArtOfSimRally.Mod
         // Button index per gate; -1 means unbound. Stored flat rather than as an
         // array because UnityModManager's XML settings round-trip simple fields
         // far more reliably than collections.
+        // Sequential shifters have two controls, not seven gates. Kept separate
+        // from the gear buttons so switching mode does not discard either set.
+        public int ShiftUpButton = -1;
+        public int ShiftDownButton = -1;
+
         public int GearReverseButton = -1;
         public int Gear1Button = -1;
         public int Gear2Button = -1;

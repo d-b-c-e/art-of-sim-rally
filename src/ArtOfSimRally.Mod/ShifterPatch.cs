@@ -39,7 +39,7 @@ namespace ArtOfSimRally.Mod
                 Shifter.Reset();
             }
 
-            Shifter.Apply(_drivetrain, Shifter.Poll());
+            Shifter.Update(_drivetrain);
         }
     }
 }

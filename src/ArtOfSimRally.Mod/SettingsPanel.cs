@@ -182,18 +182,51 @@ namespace ArtOfSimRally.Mod
 
         // --- widgets ----------------------------------------------------------
 
-        // A foldout header. Returns false when collapsed so the caller can skip
-        // drawing its body without an extra nesting level.
+        // A foldout header.
+        //
+        // Deliberately NOT a plain button: the device dropdowns are buttons with a
+        // triangle, and when section headers looked the same it was impossible to
+        // tell structure from control at a glance. Headers are now full-width bold
+        // text on a rule, with a small marker; dropdowns stay indented, narrower,
+        // and read as form fields.
         private static bool Section(string title, ref bool open)
         {
-            GUILayout.Space(8);
-            if (GUILayout.Button((open ? "▼  " : "▶  ") + title, GUILayout.Width(340)))
+            GUILayout.Space(10);
+            Rule();
+
+            var header = new GUIStyle(GUI.skin.label)
+            {
+                fontStyle = FontStyle.Bold,
+                fontSize = 14,
+                alignment = TextAnchor.MiddleLeft,
+                padding = new RectOffset(4, 4, 4, 4)
+            };
+            header.normal.textColor = new Color(0.95f, 0.85f, 0.55f);
+
+            // A label that responds to clicks, so the header does not look like a
+            // button while still folding.
+            if (GUILayout.Button((open ? "▾ " : "▸ ") + title.ToUpperInvariant(),
+                                 header, GUILayout.ExpandWidth(true)))
                 open = !open;
-            if (open) GUILayout.BeginVertical(GUI.skin.box);
+
+            Rule();
+            if (open) GUILayout.Space(4);
             return open;
         }
 
-        private static void End() => GUILayout.EndVertical();
+        // One-pixel separator, drawn as a stretched box.
+        private static void Rule()
+        {
+            var line = new GUIStyle(GUI.skin.box)
+            {
+                margin = new RectOffset(0, 0, 0, 0),
+                padding = new RectOffset(0, 0, 0, 0),
+                fixedHeight = 1
+            };
+            GUILayout.Box(GUIContent.none, line, GUILayout.ExpandWidth(true), GUILayout.Height(1));
+        }
+
+        private static void End() => GUILayout.Space(6);
 
         private static bool Toggle(bool value, string label, string help)
         {

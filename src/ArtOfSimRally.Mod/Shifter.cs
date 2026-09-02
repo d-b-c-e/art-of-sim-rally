@@ -52,6 +52,8 @@ namespace ArtOfSimRally.Mod
         private static readonly byte[] _buttons = new byte[MaxButtons];
         private static bool _open;
         private static int  _lastApplied = int.MinValue;
+        private static bool _lastUp;
+        private static bool _lastDown;
 
         /// <summary>True while a shifter device is open and being read.</summary>
         public static bool IsOpen => _open;
@@ -112,16 +114,22 @@ namespace ArtOfSimRally.Mod
         }
 
         /// <summary>
-        /// Polls the device. Returns the gear-ratio index the shifter is asking
-        /// for, or -1 when no gate is engaged.
+        /// Reads the shifter and applies any gear change to the car.
         /// </summary>
-        public static int Poll()
+        /// <remarks>
+        /// The two modes are genuinely different mechanisms, not one with a flag.
+        /// An H-pattern reports an absolute gate and holds it, so the gear follows
+        /// the lever and letting go means neutral. A sequential lever is two
+        /// momentary switches, so it must be edge-triggered and moves relative to
+        /// whatever gear the car is already in.
+        /// </remarks>
+        public static void Update(Drivetrain drivetrain)
         {
             PressedButton = -1;
-            if (!_open) return -1;
+            if (!_open || drivetrain == null) return;
 
             var cfg = Main.Settings;
-            if (cfg == null) return -1;
+            if (cfg == null) return;
 
             int n;
             try { n = ReadAuxButtons(_buttons, MaxButtons); }
@@ -129,72 +137,89 @@ namespace ArtOfSimRally.Mod
             {
                 ModLog.Error("Shifter read failed, closing: " + ex.Message);
                 Close();
-                return -1;
+                return;
             }
-            if (n <= 0) return -1;
+            if (n <= 0) return;
 
             for (int i = 0; i < n; i++)
                 if (_buttons[i] != 0) { PressedButton = i; break; }
 
-            // Reverse first: on many H-patterns reverse shares a gate with a
-            // forward gear plus a collar, and both buttons report together.
-            if (Held(cfg.GearReverseButton, n)) return Reverse;
+            if (cfg.ShifterIsHPattern) UpdateHPattern(cfg, drivetrain, n);
+            else UpdateSequential(cfg, drivetrain, n);
+        }
 
-            for (int gear = 1; gear <= 6; gear++)
-                if (Held(cfg.GearButton(gear), n)) return FirstGear + gear - 1;
+        private static void UpdateHPattern(Settings cfg, Drivetrain drivetrain, int n)
+        {
+            int gear = -1;
 
-            return -1;
+            // Reverse first: on many shifters reverse shares a gate with a forward
+            // gear plus a collar, and both report together.
+            if (Held(cfg.GearReverseButton, n)) gear = Reverse;
+            else
+                for (int g = 1; g <= 6; g++)
+                    if (Held(cfg.GearButton(g), n)) { gear = FirstGear + g - 1; break; }
+
+            // No gate held means the lever is between gears, which really is
+            // neutral on an H-pattern.
+            if (gear < 0) gear = Neutral;
+
+            if (gear == _lastApplied) return;
+            _lastApplied = gear;
+
+            if (!GearExists(drivetrain, gear)) return;
+            drivetrain.Shift(gear, true);
+        }
+
+        private static void UpdateSequential(Settings cfg, Drivetrain drivetrain, int n)
+        {
+            bool up = Held(cfg.ShiftUpButton, n);
+            bool down = Held(cfg.ShiftDownButton, n);
+
+            // Edge-triggered: holding the lever must not shift repeatedly.
+            bool upEdge = up && !_lastUp;
+            bool downEdge = down && !_lastDown;
+            _lastUp = up;
+            _lastDown = down;
+
+            if (!upEdge && !downEdge) return;
+
+            int target = drivetrain.gear + (upEdge ? 1 : -1);
+            if (!GearExists(drivetrain, target)) return;
+            drivetrain.Shift(target, true);
+        }
+
+        private static bool GearExists(Drivetrain drivetrain, int gear)
+        {
+            if (gear < 0) return false;
+            int max = drivetrain.gearRatios != null ? drivetrain.gearRatios.Length - 1 : 6;
+            return gear <= max;
         }
 
         private static bool Held(int button, int count)
             => button >= 0 && button < count && _buttons[button] != 0;
 
         /// <summary>
-        /// Applies a polled gear to the car, if it differs from the last one sent.
+        /// Reads buttons without changing gear, for the binding UI.
         /// </summary>
-        /// <remarks>
-        /// An H-pattern shifter reports its gate continuously, so this would
-        /// otherwise call Shift every physics step. Sending only on change also
-        /// leaves the player's own sequential paddles working normally in between.
-        /// </remarks>
-        public static void Apply(Drivetrain drivetrain, int gearIndex)
+        public static void PollForBinding()
         {
-            if (drivetrain == null) return;
-
-            var cfg = Main.Settings;
-            if (cfg == null) return;
-
-            // No gate engaged. On an H-pattern that means the lever is between
-            // gears, which is genuinely neutral; a sequential shifter rests
-            // between shifts, so it must not be forced to neutral.
-            if (gearIndex < 0)
+            PressedButton = -1;
+            if (!_open) return;
+            try
             {
-                if (cfg.ShifterIsHPattern && _lastApplied != Neutral)
-                {
-                    _lastApplied = Neutral;
-                    drivetrain.Shift(Neutral, true);
-                }
-                else if (!cfg.ShifterIsHPattern)
-                {
-                    _lastApplied = int.MinValue;   // allow the same gate to fire again
-                }
-                return;
+                int n = ReadAuxButtons(_buttons, MaxButtons);
+                for (int i = 0; i < n; i++)
+                    if (_buttons[i] != 0) { PressedButton = i; return; }
             }
-
-            if (gearIndex == _lastApplied) return;
-            _lastApplied = gearIndex;
-
-            int max = drivetrain.gearRatios != null ? drivetrain.gearRatios.Length - 1 : 6;
-            if (gearIndex > max)
-            {
-                // A 6-speed shifter on a 5-speed car. Ignore rather than stall.
-                return;
-            }
-
-            drivetrain.Shift(gearIndex, true);
+            catch { }
         }
 
         /// <summary>Clears shift state, e.g. between stages.</summary>
-        public static void Reset() => _lastApplied = int.MinValue;
+        public static void Reset()
+        {
+            _lastApplied = int.MinValue;
+            _lastUp = false;
+            _lastDown = false;
+        }
     }
 }
