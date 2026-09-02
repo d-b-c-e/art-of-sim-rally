@@ -52,9 +52,6 @@ namespace ArtOfSimRally.Mod
         {
             if (!Main.Enabled) return;
 
-            // Clears the DirectInput safety marker the moment any input arrives.
-            InputBackend.NoteInputSeen();
-
             // Independent of whether any game object is still ticking. The
             // FixedUpdate postfix normally gets here first; this exists for when
             // it cannot.
