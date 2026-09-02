@@ -46,6 +46,8 @@ namespace ArtOfSimRally.Mod
                 Settings = new Settings();
             }
 
+            InputBackend.Apply();
+
             modEntry.OnGUI       = OnGUI;
             modEntry.OnSaveGUI   = OnSaveGUI;
             modEntry.OnToggle    = OnToggle;
@@ -171,11 +173,19 @@ namespace ArtOfSimRally.Mod
                 // The setting is applied during Load, so ticking it now changes
                 // nothing until the game is restarted. Say so, rather than letting
                 // it look broken.
-                if (joysticks != null && joysticks.Count < 2)
+                bool wants = Settings != null && Settings.UseDirectInput;
+                bool active = backend ==
+                    Rewired.Platforms.WindowsStandalonePrimaryInputSource.DirectInput;
+
+                if (wants && !active)
+                    GUILayout.Label("DirectInput selected but not active yet - restart the game, " +
+                                    "then rebind. If it stops your controls working, it switches " +
+                                    "itself back off automatically next launch.", wrap);
+                else if (joysticks != null && joysticks.Count < 2)
                     GUILayout.Label("Only one device here. A shifter or handbrake missing from this " +
                                     "list cannot be bound - the game's input layer skips devices " +
-                                    "that do not report as a joystick, which is common for them.",
-                                    wrap);
+                                    "that do not report as a joystick, which is common for them. " +
+                                    "'Try DirectInput' under advanced may help.", wrap);
             }
             catch (Exception ex)
             {
