@@ -13,3 +13,5 @@ EXPORTS
     FreeDirectInput
     SetPreferredDevice
     SetPreferredDeviceIndex
+    EnumerateDevices
+    GetDeviceName

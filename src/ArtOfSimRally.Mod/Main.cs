@@ -100,6 +100,9 @@ namespace ArtOfSimRally.Mod
             Settings.Draw(modEntry);
 
             GUILayout.Space(12);
+            DrawDevicePicker();
+
+            GUILayout.Space(12);
             GUILayout.Label("<b>Having trouble?</b>");
 
             // Long explanations live here rather than in [Draw] tooltips. UMM
@@ -113,8 +116,9 @@ namespace ArtOfSimRally.Mod
                 "'Log peak torque', drive a minute, and the log reports the number to use.",
                 wrap);
             GUILayout.Label(
-                "If several wheels share a name, the log lists each with an index - put that " +
-                "number in 'Wheel index'.", wrap);
+                "If your shifter or handbrake will not bind, check it is not hidden by " +
+                "HidHide or a similar tool - the game cannot bind a device it never sees.",
+                wrap);
 
             GUILayout.Space(6);
             if (GUILayout.Button("Create support file on Desktop", GUILayout.Width(260)))
@@ -126,6 +130,57 @@ namespace ArtOfSimRally.Mod
                 GUILayout.Label(
                     "Collects your settings, the force feedback log and the game's log into one " +
                     "file to attach to a bug report.", wrap);
+        }
+
+        // Device names are not unique - a Fanatec rig reports two identical
+        // "FANATEC Wheel" entries - so the picker stores the index as well and
+        // shows the position, letting a user tell two same-named devices apart by
+        // trying each. Cached because enumerating on every OnGUI frame would hit
+        // DirectInput sixty times a second.
+        private static string[] _devices;
+        private static bool _devicesListed;
+
+        private static void DrawDevicePicker()
+        {
+            var wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
+            GUILayout.Label("<b>Force feedback device</b>");
+
+            if (!_devicesListed)
+            {
+                _devices = FfbNative.ListDevices();
+                _devicesListed = true;
+            }
+
+            if (_devices == null || _devices.Length == 0)
+            {
+                GUILayout.Label("No force-feedback device found. Check the wheel is on and " +
+                                "not in use by another program.", wrap);
+                if (GUILayout.Button("Look again", GUILayout.Width(140))) _devicesListed = false;
+                return;
+            }
+
+            if (_devices.Length == 1)
+            {
+                GUILayout.Label("Using: " + _devices[0], wrap);
+                Settings.PreferredDevice = _devices[0];
+                Settings.PreferredDeviceIndex = -1;
+                return;
+            }
+
+            GUILayout.Label("You have more than one. Pick your wheel:", wrap);
+            for (int i = 0; i < _devices.Length; i++)
+            {
+                bool chosen = Settings.PreferredDeviceIndex == i;
+                bool now = GUILayout.Toggle(chosen, "  " + _devices[i] + "   (device " + i + ")");
+                if (now && !chosen)
+                {
+                    Settings.PreferredDeviceIndex = i;
+                    Settings.PreferredDevice = _devices[i];
+                    SaveSettings();
+                    ModLog.Info("Force feedback device set to [" + i + "] " + _devices[i]);
+                }
+            }
+            GUILayout.Label("Takes effect next time you start the game.", wrap);
         }
 
         private static void OnSaveGUI(UnityModManager.ModEntry modEntry)

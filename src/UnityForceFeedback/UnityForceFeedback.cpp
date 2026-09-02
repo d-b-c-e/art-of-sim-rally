@@ -360,6 +360,40 @@ __declspec(dllexport) int InitDirectInput(int hwnd)
     return 1;
 }
 
+// Enumerates force-feedback devices without opening or acquiring anything, so
+// the settings UI can show the user a list of real device names to pick from
+// instead of asking for an index. Safe to call at any time.
+__declspec(dllexport) int EnumerateDevices(void)
+{
+    if (!g_lockInit) { InitializeCriticalSection(&g_lock); g_lockInit = true; }
+
+    bool temporary = (g_di == nullptr);
+    if (temporary) {
+        HRESULT hr = DirectInput8Create(GetModuleHandle(nullptr), DIRECTINPUT_VERSION,
+                                        IID_IDirectInput8, (VOID**)&g_di, nullptr);
+        if (FAILED(hr)) { Log("EnumerateDevices: DirectInput8Create failed 0x%08lX", hr); return 0; }
+    }
+
+    g_candidateCount = 0;
+    g_di->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumDeviceCallback, nullptr, DIEDFL_ATTACHEDONLY);
+
+    // Only release what we created here; never tear down a live session.
+    if (temporary && !g_device) { g_di->Release(); g_di = nullptr; }
+
+    return g_candidateCount;
+}
+
+// Copies the name of an enumerated device. Returns 0 if the index is out of
+// range, so the caller can stop without knowing the count in advance.
+__declspec(dllexport) int GetDeviceName(int index, char* buffer, int size)
+{
+    if (!buffer || size <= 0) return 0;
+    buffer[0] = 0;
+    if (index < 0 || index >= g_candidateCount) return 0;
+    strncpy_s(buffer, (size_t)size, g_candidates[index].name, _TRUNCATE);
+    return 1;
+}
+
 // Not part of the game's original contract - an eighth export the mod calls
 // before InitDirectInput. Harmless to the game, which never calls it.
 __declspec(dllexport) void SetPreferredDevice(const char* name)

@@ -62,12 +62,11 @@ namespace ArtOfSimRally.Mod
         [Draw("Log peak torque (for tuning)")]
         public bool DiagnosticLogging = false;
 
-        [Draw("Preferred wheel (optional)", Tooltip =
-            "Part of your wheel's name. Only needed if you have several.")]
+        // Set by the device picker in the settings panel, not drawn directly.
+        // The name is what persists; the index is only a tiebreaker for rigs
+        // where two devices report the same name (Fanatec does this).
         public string PreferredDevice = "";
 
-        [Draw("Wheel index (-1 = auto)", Min = -1, Max = 7, Tooltip =
-            "Index from the log. Use when wheels share a name.")]
         public int PreferredDeviceIndex = -1;
 
         // ---- Camera ---------------------------------------------------------

@@ -43,6 +43,12 @@ namespace ArtOfSimRally.Mod
         [DllImport(Dll)]
         private static extern void SetPreferredDeviceIndex(int index);
 
+        [DllImport(Dll)]
+        private static extern int EnumerateDevices();
+
+        [DllImport(Dll, CharSet = CharSet.Ansi)]
+        private static extern int GetDeviceName(int index, System.Text.StringBuilder buffer, int size);
+
         /// <summary>DirectInput's nominal full-scale force.</summary>
         public const int ForceMax = 10000;
 
@@ -135,6 +141,40 @@ namespace ArtOfSimRally.Mod
             {
                 ModLog.Error($"SetDeviceForcesXY failed, disabling FFB: {ex.Message}");
                 _failed = true;
+            }
+        }
+
+        /// <summary>
+        /// Names of the force-feedback devices attached, for the settings UI.
+        /// </summary>
+        /// <remarks>
+        /// Lets the panel offer a list of real device names instead of asking for
+        /// an index, which is only meaningful to whoever wrote the enumeration.
+        /// Enumerating does not open or acquire anything, so it is safe to call
+        /// while driving.
+        /// </remarks>
+        public static string[] ListDevices()
+        {
+            try
+            {
+                int count = EnumerateDevices();
+                if (count <= 0) return new string[0];
+
+                var names = new string[count];
+                var buf = new System.Text.StringBuilder(260);
+                for (int i = 0; i < count; i++)
+                {
+                    buf.Length = 0;
+                    names[i] = GetDeviceName(i, buf, buf.Capacity) != 0
+                        ? buf.ToString()
+                        : "(device " + i + ")";
+                }
+                return names;
+            }
+            catch (Exception ex)
+            {
+                ModLog.Warning("Could not list force feedback devices: " + ex.Message);
+                return new string[0];
             }
         }
 
