@@ -5,15 +5,14 @@
 .DESCRIPTION
     Produces dist/ArtOfSimRally-<version>.zip.
 
-    There are two install locations and only one of them is automatic. The mod
-    itself goes under Mods/ for Unity Mod Manager, which can install it straight
-    from this zip. UnityForceFeedback.dll is a native plugin and must land in
-    artofrally_Data/Plugins/x86_64 beside the game's own; UMM will not place it,
-    and anywhere else means force feedback silently does nothing with no error.
+    Layout is deliberately dual-purpose: ArtOfSimRally/ sits at the zip root so
+    dragging the zip onto Unity Mod Manager installs it correctly, while
+    Install.bat next to it gives a double-click install for everyone else. An
+    earlier layout nested the mod under Mods/, which made UMM produce
+    Mods/Mods/ArtOfSimRally and silently fail to load - reported by a user.
 
-    The zip therefore mirrors the game's folder layout, so the manual half of the
-    copy is unambiguous.
-
+    The native plugin ships inside the mod folder; the installer copies it on to
+    artofrally_Data/Plugins/x86_64 as well.
 .EXAMPLE
     .\tools\package\package.ps1 -Version 0.1.0
 #>
@@ -36,16 +35,18 @@ Write-Host "Building native plugin..." -ForegroundColor Cyan
 if ($LASTEXITCODE -ne 0) { throw "Native build failed" }
 
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
-$modDir    = Join-Path $stage 'Mods\ArtOfSimRally'
-$nativeDir = Join-Path $stage 'artofrally_Data\Plugins\x86_64'
-New-Item -ItemType Directory -Force -Path $modDir, $nativeDir | Out-Null
+$modDir    = Join-Path $stage 'ArtOfSimRally'
+New-Item -ItemType Directory -Force -Path $modDir | Out-Null
 
 $bin = Join-Path $root 'src\ArtOfSimRally.Mod\bin\Release'
 Copy-Item (Join-Path $bin 'ArtOfSimRally.Mod.dll')       $modDir
 Copy-Item (Join-Path $bin 'ArtOfSimRally.Telemetry.dll') $modDir
 Copy-Item (Join-Path $root 'src\ArtOfSimRally.Mod\Info.json') $modDir
-Copy-Item (Join-Path $root 'src\UnityForceFeedback\build\UnityForceFeedback.dll') $nativeDir
+Copy-Item (Join-Path $root 'src\UnityForceFeedback\build\UnityForceFeedback.dll') $modDir
 Copy-Item (Join-Path $root 'LICENSE') $stage
+Copy-Item (Join-Path $root 'tools\installer\Install.bat')   $stage
+Copy-Item (Join-Path $root 'tools\installer\Uninstall.bat') $stage
+Copy-Item (Join-Path $root 'tools\installer\install.ps1')   $stage
 
 $readme = @'
 art of sim rally
@@ -57,31 +58,28 @@ game only applies to wheels it recognises.
 
 INSTALL
 -------
-1. Install Unity Mod Manager and point it at art of rally. The game is already in
-   UMM's supported list.  https://www.nexusmods.com/site/mods/21
+1. Install Unity Mod Manager and point it at art of rally. The game is already
+   in its supported list.   https://www.nexusmods.com/site/mods/21
 
-2. Install the mod, either way:
-     - drag this zip onto Unity Mod Manager's Mods tab, or
-     - copy the "Mods" folder from this zip into your art of rally folder.
+2. Double-click Install.bat.
 
-3. IMPORTANT, and not automatic - copy this by hand into your game folder:
+That is it. It finds your game (including on a non-default Steam library),
+checks Unity Mod Manager is present, and puts everything where it belongs.
 
-       artofrally_Data\Plugins\x86_64\UnityForceFeedback.dll
+If you would rather do it by hand, or you use Vortex: drag this zip onto Unity
+Mod Manager's Mods tab, which installs the ArtOfSimRally folder correctly.
 
-   It is a native plugin and has to sit beside the game's own. Unity Mod Manager
-   will not place it for you, and anywhere else means force feedback silently
-   does nothing, with no error anywhere.
-
-4. Launch the game. Press Ctrl+F10 for the settings panel.
+To remove it later, double-click Uninstall.bat. Your settings are kept.
 
 FIRST THINGS TO CHECK
 ---------------------
+Launch the game and press Ctrl+F10 for the settings panel.
+
 * Steering should feel direct straight away.
 
 * Force feedback strength is "Reference torque", and LOWER IS STRONGER. The
-  default of 150 is a starting guess that will need tuning for your wheel. Turn
-  on "Log peak torque", drive for a minute, and the log reports the number to
-  put there.
+  default is a starting guess that will need tuning for your wheel. Turn on
+  "Log peak torque", drive for a minute, and the log reports the number to use.
 
 * The bonnet camera is added to the game's normal view rotation - press your
   change-view button to cycle onto it. Adjust it live on the numpad while you
@@ -90,6 +88,12 @@ FIRST THINGS TO CHECK
 
 * Telemetry is off by default. Switch it on and point SimHub at a Forza
   Horizon 5 profile on UDP port 8000.
+
+SOMETHING NOT WORKING?
+----------------------
+In the settings panel press "Create support file on Desktop". That collects
+your settings, your controllers, what is actually bound, and the logs into one
+file. Attach it to a bug report - it usually contains the answer.
 
 KNOWN LIMITS
 ------------

@@ -93,14 +93,31 @@ Ok "Game found: $GameDir"
 
 # --- check Unity Mod Manager ----------------------------------------------
 
+# Installing over a running game leaves half-copied DLLs and a confusing error.
+if (Get-Process artofrally -ErrorAction SilentlyContinue) {
+    Fail "art of rally is running."
+    Say ""
+    Say "  Close the game and run this again."
+    Say ""
+    exit 1
+}
+
+# Checked per-game, not globally: Unity Mod Manager is installed into each game
+# separately, so having it for another title does not help here.
 $ummInstalled = (Test-Path (Join-Path $GameDir 'artofrally_Data\Managed\UnityModManager\UnityModManager.dll'))
 if (-not $ummInstalled) {
-    Fail "Unity Mod Manager is not installed for this game."
+    Fail "Unity Mod Manager is not installed for art of rally."
     Say ""
-    Say "  Install it first, then run this again:"
-    Say "    https://www.nexusmods.com/site/mods/21" DarkGray
+    Say "  This mod runs on top of Unity Mod Manager, so that has to go on first." Yellow
+    Say "  It is a one-time setup and takes about a minute:"
     Say ""
-    Say "  In its installer, pick 'Art of Rally' and click Install."
+    Say "    1. Download Unity Mod Manager:"
+    Say "         https://www.nexusmods.com/site/mods/21" DarkGray
+    Say "    2. Run UnityModManager.exe"
+    Say "    3. In the Game dropdown pick 'Art of Rally'"
+    Say "       (it should find your install automatically)"
+    Say "    4. Click Install, then close it"
+    Say "    5. Double-click Install.bat again - this installer"
     Say ""
     exit 1
 }
