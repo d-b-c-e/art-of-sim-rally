@@ -150,6 +150,12 @@ namespace ArtOfSimRally.Mod
 
         private static void UpdateHPattern(Settings cfg, Drivetrain drivetrain, int n)
         {
+            // With nothing bound, every frame looks like "no gate held", which
+            // below means neutral - so an enabled but unconfigured H-pattern would
+            // hold the car in neutral forever and look exactly like the shifter
+            // having broken the game. Do nothing until at least one gate is bound.
+            if (!AnyGearBound(cfg)) return;
+
             int gear = -1;
 
             // Reverse first: on many shifters reverse shares a gate with a forward
@@ -192,6 +198,13 @@ namespace ArtOfSimRally.Mod
 
             if (!GearExists(drivetrain, target)) return;
             drivetrain.Shift(target, true);
+        }
+
+        private static bool AnyGearBound(Settings cfg)
+        {
+            if (cfg.GearReverseButton >= 0) return true;
+            for (int g = 1; g <= 6; g++) if (cfg.GearButton(g) >= 0) return true;
+            return false;
         }
 
         private static bool GearExists(Drivetrain drivetrain, int gear)
