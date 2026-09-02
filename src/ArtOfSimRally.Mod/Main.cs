@@ -54,7 +54,8 @@ namespace ArtOfSimRally.Mod
             modEntry.OnUnload    = OnUnload;
 
             if (Settings.ForceFeedbackEnabled)
-                FfbNative.Initialise(Path.GetDirectoryName(modEntry.Path),
+                // modEntry.Path IS the mod folder; do not take its parent.
+                FfbNative.Initialise(modEntry.Path,
                                      Settings.PreferredDevice, Settings.PreferredDeviceIndex);
 
             try

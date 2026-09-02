@@ -87,10 +87,12 @@ namespace ArtOfSimRally.Mod
                 // the later DllImport bind to an already-resident module, and
                 // turns "wrong folder" into a clear log line instead of a
                 // DllNotFoundException from inside a physics callback.
-                if (LoadLibraryW(ResolveDllPath(pluginDir)) == IntPtr.Zero)
+                string dllPath = ResolveDllPath(pluginDir);
+                if (LoadLibraryW(dllPath) == IntPtr.Zero)
                     ModLog.Warning(
-                        "Could not preload UnityForceFeedback.dll by path; " +
-                        "relying on the default search order.");
+                        "Could not preload " + dllPath + "; relying on the default search order.");
+                else
+                    ModLog.Info("Native plugin loaded from " + dllPath);
 
                 // Must precede InitDirectInput - that is where selection happens.
                 // Index wins over name, being the unambiguous one.
@@ -187,15 +189,36 @@ namespace ArtOfSimRally.Mod
             _failed = true;
         }
 
-        // The DLL belongs beside the game's other native plugins. Fall back to the
-        // plugin folder so a development copy can be dropped next to the mod.
-        private static string ResolveDllPath(string pluginDir)
+        // Prefer the copy shipped with the mod, falling back to the game's native
+        // plugin folder.
+        //
+        // The caller passes UMM's ModEntry.Path, which may or may not carry a
+        // trailing separator. Path.GetDirectoryName on a path WITHOUT one returns
+        // the parent, so an earlier version searched Mods\ instead of
+        // Mods\ArtOfSimRally\, found nothing, silently fell through to the plugin
+        // folder, and loaded a stale copy left there by an older install - which
+        // then failed on an export that copy predated. Normalise the path instead
+        // of trusting its shape, and try the parent too.
+        private static string ResolveDllPath(string modDir)
         {
-            string beside = Path.Combine(pluginDir, "UnityForceFeedback.dll");
-            if (File.Exists(beside)) return beside;
+            if (!string.IsNullOrEmpty(modDir))
+            {
+                string dir = modDir.TrimEnd(
+                    Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+                string beside = Path.Combine(dir, Dll + ".dll");
+                if (File.Exists(beside)) return beside;
+
+                string parent = Path.GetDirectoryName(dir);
+                if (!string.IsNullOrEmpty(parent))
+                {
+                    beside = Path.Combine(parent, Dll + ".dll");
+                    if (File.Exists(beside)) return beside;
+                }
+            }
 
             string dataDir = UnityEngine.Application.dataPath; // <game>/artofrally_Data
-            return Path.Combine(dataDir, "Plugins", "x86_64", "UnityForceFeedback.dll");
+            return Path.Combine(dataDir, "Plugins", "x86_64", Dll + ".dll");
         }
     }
 }
