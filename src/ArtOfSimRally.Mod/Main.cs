@@ -146,6 +146,9 @@ namespace ArtOfSimRally.Mod
             Settings.Draw(modEntry);
 
             GUILayout.Space(12);
+            DrawInputStatus();
+
+            GUILayout.Space(12);
             DrawDevicePicker();
 
             GUILayout.Space(12);
@@ -176,6 +179,58 @@ namespace ArtOfSimRally.Mod
                 GUILayout.Label(
                     "Collects your settings, the force feedback log and the game's log into one " +
                     "file to attach to a bug report.", wrap);
+        }
+
+        /// <summary>
+        /// Shows what the game's input layer can actually see.
+        /// </summary>
+        /// <remarks>
+        /// Added because "I ticked the DirectInput box and the shifter still is
+        /// not there" had two possible causes that looked identical from the
+        /// panel: the setting only applies at startup, and the backend may not
+        /// enumerate the device at all. Showing the live backend and joystick
+        /// count separates them without reading a log.
+        /// </remarks>
+        private static void DrawInputStatus()
+        {
+            var wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
+            GUILayout.Label("<b>Game controller input</b>");
+
+            try
+            {
+                if (!ReInput.isReady) { GUILayout.Label("Input system not started yet.", wrap); return; }
+
+                var joysticks = ReInput.controllers.Joysticks;
+                var backend = ReInput.configuration.windowsStandalonePrimaryInputSource;
+
+                GUILayout.Label("Backend: " + backend + "    Devices seen: " +
+                                (joysticks == null ? 0 : joysticks.Count), wrap);
+
+                if (joysticks != null)
+                    foreach (var j in joysticks)
+                        GUILayout.Label("    " + j.name +
+                                        (j.hardwareTypeGuid == Guid.Empty ? "   (not recognised)" : ""),
+                                        wrap);
+
+                // The setting is applied during Load, so ticking it now changes
+                // nothing until the game is restarted. Say so, rather than letting
+                // it look broken.
+                bool wantsDirectInput = Settings != null && Settings.UseDirectInput;
+                bool onDirectInput =
+                    backend == Rewired.Platforms.WindowsStandalonePrimaryInputSource.DirectInput;
+
+                if (wantsDirectInput && !onDirectInput)
+                    GUILayout.Label("DirectInput is selected but NOT active yet - restart the game. " +
+                                    "You will need to rebind afterwards.", wrap);
+                else if (joysticks != null && joysticks.Count < 2)
+                    GUILayout.Label("Only one device here. If a shifter or handbrake is missing, " +
+                                    "try 'Use DirectInput for controllers' under advanced, then " +
+                                    "restart and rebind.", wrap);
+            }
+            catch (Exception ex)
+            {
+                GUILayout.Label("Could not read input state: " + ex.Message, wrap);
+            }
         }
 
         // Device names are not unique - a Fanatec rig reports two identical

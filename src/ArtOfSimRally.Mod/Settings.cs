@@ -31,7 +31,7 @@ namespace ArtOfSimRally.Mod
         public bool ZeroAxisDeadzone = true;
 
         [Draw("Use DirectInput for controllers", VisibleOn = "ShowAdvanced|true", Tooltip =
-            "See shifters/handbrakes Raw Input skips. YOU MUST REBIND AFTERWARDS.")]
+            "Sees shifters Raw Input skips. NEEDS RESTART, THEN REBIND.")]
         public bool UseDirectInput = false;
 
         [Draw("Bind any device", Tooltip =
