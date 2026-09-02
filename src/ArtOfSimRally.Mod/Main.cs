@@ -100,227 +100,7 @@ namespace ArtOfSimRally.Mod
             return true;
         }
 
-        private static void OnGUI(UnityModManager.ModEntry modEntry)
-        {
-            Settings.Draw(modEntry);
-
-            GUILayout.Space(12);
-            DrawInputStatus();
-
-            GUILayout.Space(12);
-            DrawDevicePicker();
-
-            GUILayout.Space(12);
-            DrawShifter();
-
-            GUILayout.Space(12);
-            GUILayout.Label("<b>Having trouble?</b>");
-
-            // Long explanations live here rather than in [Draw] tooltips. UMM
-            // renders a tooltip to the left of its "?" marker with no option to
-            // change side, so anything more than a few words runs off the panel
-            // and is unreadable. Visible wrapped text has no such limit and does
-            // not need hovering to find.
-            var wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
-            GUILayout.Label(
-                "Wheel too light or too strong? Move the strength slider. Everything else " +
-                "is under 'Show advanced options'.", wrap);
-            GUILayout.Label(
-                "Shifter or handbrake missing from the controls screen? The game's input " +
-                "layer skips devices that do not report as a joystick, which is common for " +
-                "shifters. Turn on 'Use DirectInput for controllers' under advanced, restart, " +
-                "and rebind - it sees more devices, but it does mean rebinding.", wrap);
-
-            GUILayout.Space(6);
-            if (GUILayout.Button("Create support file on Desktop", GUILayout.Width(260)))
-                SupportBundle.Create();
-
-            if (!string.IsNullOrEmpty(SupportBundle.LastResult))
-                GUILayout.Label(SupportBundle.LastResult, wrap);
-            else
-                GUILayout.Label(
-                    "Collects your settings, the force feedback log and the game's log into one " +
-                    "file to attach to a bug report.", wrap);
-        }
-
-        /// <summary>
-        /// Shows what the game's input layer can actually see.
-        /// </summary>
-        /// <remarks>
-        /// Added because "I ticked the DirectInput box and the shifter still is
-        /// not there" had two possible causes that looked identical from the
-        /// panel: the setting only applies at startup, and the backend may not
-        /// enumerate the device at all. Showing the live backend and joystick
-        /// count separates them without reading a log.
-        /// </remarks>
-        private static void DrawInputStatus()
-        {
-            var wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
-            GUILayout.Label("<b>Game controller input</b>");
-
-            try
-            {
-                if (!ReInput.isReady) { GUILayout.Label("Input system not started yet.", wrap); return; }
-
-                var joysticks = ReInput.controllers.Joysticks;
-                var backend = ReInput.configuration.windowsStandalonePrimaryInputSource;
-
-                GUILayout.Label("Backend: " + backend + "    Devices seen: " +
-                                (joysticks == null ? 0 : joysticks.Count), wrap);
-
-                if (joysticks != null)
-                    foreach (var j in joysticks)
-                        GUILayout.Label("    " + j.name +
-                                        (j.hardwareTypeGuid == Guid.Empty ? "   (not recognised)" : ""),
-                                        wrap);
-
-                // The setting is applied during Load, so ticking it now changes
-                // nothing until the game is restarted. Say so, rather than letting
-                // it look broken.
-                if (joysticks != null && joysticks.Count < 2)
-                    GUILayout.Label("Only one device here. The game's input layer skips devices " +
-                                    "that do not report as a joystick, which is common for " +
-                                    "shifters - so it cannot bind them. Use 'Separate shifter' " +
-                                    "below, which reads the device directly instead.", wrap);
-            }
-            catch (Exception ex)
-            {
-                GUILayout.Label("Could not read input state: " + ex.Message, wrap);
-            }
-        }
-
-        private static string[] _allDevices;
-        private static bool _allDevicesListed;
-        private static int _bindingGear = int.MinValue;   // MinValue = not binding
-
-        /// <summary>
-        /// Device picker and gear binding for a separate shifter.
-        /// </summary>
-        /// <remarks>
-        /// Binding lives here rather than in the game's controls screen because the
-        /// game cannot see these devices at all - there is nothing to bind in. The
-        /// flow is the one people expect from a controls menu: click a gear, press
-        /// the gate, done.
-        /// </remarks>
-        private static void DrawShifter()
-        {
-            var cfg = Settings;
-            if (cfg == null || !cfg.ShifterEnabled) return;
-
-            var wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
-            if (!_allDevicesListed) { _allDevices = Shifter.ListDevices(); _allDevicesListed = true; }
-
-            int picked = DeviceDropdown.Draw(
-                "shifter", "Shifter device", _allDevices, cfg.ShifterDeviceIndex,
-                "No controllers found.");
-            if (picked >= 0)
-            {
-                cfg.ShifterDeviceIndex = picked;
-                cfg.ShifterDeviceName = _allDevices[picked];
-                Shifter.Open(picked);
-                SaveSettings();
-            }
-
-            if (cfg.ShifterDeviceIndex < 0) return;
-
-            if (!Shifter.IsOpen && GUILayout.Button("Connect", GUILayout.Width(140)))
-                Shifter.Open(cfg.ShifterDeviceIndex);
-
-            if (!Shifter.IsOpen) { GUILayout.Label("Not connected.", wrap); return; }
-
-            GUILayout.Space(6);
-            GUILayout.Label(cfg.ShifterIsHPattern
-                ? "Click a gear, then move the lever into that gate."
-                : "Click a gear, then press the button you want for it.", wrap);
-
-            // Poll here too so the button shows live while the panel is open,
-            // even when the car is not running.
-            Shifter.Poll();
-
-            if (_bindingGear != int.MinValue)
-            {
-                int pressed = Shifter.PressedButton;
-                GUILayout.Label(pressed >= 0
-                    ? "Detected button " + pressed + " - release to confirm."
-                    : "Waiting for " + GearLabel(_bindingGear) + "...  (click again to cancel)", wrap);
-
-                if (pressed >= 0)
-                {
-                    cfg.SetGearButton(_bindingGear, pressed);
-                    ModLog.Info("Bound " + GearLabel(_bindingGear) + " to button " + pressed);
-                    _bindingGear = int.MinValue;
-                    SaveSettings();
-                }
-            }
-
-            DrawGearRow(cfg, -1);
-            for (int g = 1; g <= 6; g++) DrawGearRow(cfg, g);
-
-            GUILayout.Label("Currently pressed: " +
-                (Shifter.PressedButton >= 0 ? "button " + Shifter.PressedButton : "none"), wrap);
-        }
-
-        private static void DrawGearRow(Settings cfg, int gear)
-        {
-            int button = gear == -1 ? cfg.GearReverseButton : cfg.GearButton(gear);
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(GearLabel(gear), GUILayout.Width(70));
-            GUILayout.Label(button >= 0 ? "button " + button : "not set", GUILayout.Width(90));
-            if (GUILayout.Button(_bindingGear == gear ? "cancel" : "set", GUILayout.Width(70)))
-                _bindingGear = _bindingGear == gear ? int.MinValue : gear;
-            if (button >= 0 && GUILayout.Button("clear", GUILayout.Width(70)))
-            {
-                cfg.SetGearButton(gear, -1);
-                SaveSettings();
-            }
-            GUILayout.EndHorizontal();
-        }
-
-        private static string GearLabel(int gear) => gear == -1 ? "Reverse" : "Gear " + gear;
-
-        // Device names are not unique - a Fanatec rig reports two identical
-        // "FANATEC Wheel" entries - so the picker stores the index as well and
-        // shows the position, letting a user tell two same-named devices apart by
-        // trying each. Cached because enumerating on every OnGUI frame would hit
-        // DirectInput sixty times a second.
-        private static string[] _devices;
-        private static bool _devicesListed;
-
-        private static void DrawDevicePicker()
-        {
-            if (!_devicesListed) { _devices = FfbNative.ListDevices(); _devicesListed = true; }
-
-            int chosen = DeviceDropdown.Draw(
-                "wheel", "Force feedback wheel", _devices, Settings.PreferredDeviceIndex,
-                "No force-feedback device found. Check the wheel is on and not in use by " +
-                "another program.");
-
-            if (chosen >= 0)
-            {
-                Settings.PreferredDeviceIndex = chosen;
-                Settings.PreferredDevice = _devices[chosen];
-                SaveSettings();
-                ModLog.Info("Force feedback device set to [" + chosen + "] " + _devices[chosen]);
-            }
-
-            var wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
-            if (_devices != null && _devices.Length > 0)
-            {
-                // With one device the choice is made for us, but showing the
-                // dropdown anyway keeps the panel consistent with the shifter.
-                if (Settings.PreferredDeviceIndex < 0)
-                    GUILayout.Label("Using " + _devices[0] + " by default.", wrap);
-                else
-                    GUILayout.Label("Takes effect next time you start the game.", wrap);
-            }
-
-            if (GUILayout.Button("Rescan devices", GUILayout.Width(160)))
-            {
-                _devicesListed = false;
-                _allDevicesListed = false;
-                DeviceDropdown.CloseAll();
-            }
-        }
+        private static void OnGUI(UnityModManager.ModEntry modEntry) => SettingsPanel.Draw();
 
         private static void OnSaveGUI(UnityModManager.ModEntry modEntry)
             => Settings.Save(modEntry);
@@ -332,8 +112,18 @@ namespace ArtOfSimRally.Mod
             return true;
         }
 
+        /// <summary>
+        /// Reopens the force feedback device, e.g. after choosing a different wheel.
+        /// </summary>
+        public static bool ReopenForceFeedback()
+        {
+            if (_modEntry == null || Settings == null || !Settings.ForceFeedbackEnabled) return false;
+            return FfbNative.Reinitialise(_modEntry.Path,
+                                          Settings.PreferredDevice, Settings.PreferredDeviceIndex);
+        }
+
         /// <summary>Persists settings changed outside the panel, e.g. by the camera hotkeys.</summary>
-        internal static void SaveSettings()
+        public static void SaveSettings()
         {
             try { Settings.Save(_modEntry); }
             catch (Exception ex) { ModLog.Warning($"Could not save settings: {ex.Message}"); }

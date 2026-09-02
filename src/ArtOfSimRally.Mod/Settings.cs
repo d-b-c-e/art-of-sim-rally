@@ -18,38 +18,24 @@ namespace ArtOfSimRally.Mod
     /// alternative is quitting to edit a text file for every adjustment.
     /// </para>
     /// </remarks>
-    public class Settings : UnityModManager.ModSettings, IDrawable
+    public class Settings : UnityModManager.ModSettings
     {
         // ---- Steering -------------------------------------------------------
 
-        [Draw("Direct steering", Tooltip =
-            "Removes gamepad steering smoothing applied to unrecognised wheels.")]
         public bool DirectSteering = true;
 
-        [Draw("Clear hidden axis deadzone", Tooltip =
-            "Clears Rewired's hidden 10% deadzone. Not the one in game options.", VisibleOn = "ShowAdvanced|true")]
         public bool ZeroAxisDeadzone = true;
 
-        [Draw("Show button names when no icon exists", VisibleOn = "ShowAdvanced|true", Tooltip =
-            "Replaces blank glyph boxes with the button name, e.g. B12.")]
         public bool GlyphTextFallback = true;
 
-        [Draw("Bind any device", Tooltip =
-            "Rebind the device you touch, not just the first joystick.", VisibleOn = "ShowAdvanced|true")]
         public bool BindAnyDevice = true;
 
-        [Draw("Disable steering assist", Tooltip =
-            "CHANGES THE CAR. Off by default. Affects leaderboards.", VisibleOn = "ShowAdvanced|true")]
         public bool DisableSteerAssist = false;
 
         // ---- Force feedback -------------------------------------------------
 
-        [Draw("Force feedback", Tooltip =
-            "Needs UnityForceFeedback.dll in artofrally_Data/Plugins/x86_64.")]
         public bool ForceFeedbackEnabled = true;
 
-        [Draw("Force feedback strength", Min = 0, Max = 100, Tooltip =
-            "Overall strength, like any other game. 50 is the baseline.")]
         public int Strength = 50;
 
         /// <summary>
@@ -63,22 +49,24 @@ namespace ArtOfSimRally.Mod
         /// </remarks>
         public float GainFromStrength => Strength / 50f;
 
-        [Draw("Reference torque (lower = stronger)", Min = 10f, Max = 1000f, Precision = 0, Tooltip =
-            "Lower is stronger. See help at the bottom of this panel.", VisibleOn = "ShowAdvanced|true")]
+        /// <summary>
+        /// Aligning torque treated as full force, before Strength is applied.
+        /// </summary>
+        /// <remarks>
+        /// Not shown in the panel. It sets where the output starts clipping, which
+        /// is a different thing from how strong the wheel feels, and having two
+        /// dials for one sensation - one of them inverted, where lower means
+        /// stronger - confused everyone who met it. Strength is the only dial now;
+        /// this stays as the reference it scales against, tuned from measured peak
+        /// torque across a real stage.
+        /// </remarks>
         public float MzReference = 150f;
 
-        [Draw("Smoothing", Min = 0f, Max = 0.95f, Precision = 2, Tooltip =
-            "0 is raw and detailed, higher is damped.", VisibleOn = "ShowAdvanced|true")]
         public float Smoothing = 0.2f;
 
-        [Draw("Invert force", Tooltip =
-            "Flip if the wheel pulls the wrong way.", VisibleOn = "ShowAdvanced|true")]
         public bool Invert = false;
 
-        [Draw("Show advanced options")]
-        public bool ShowAdvanced = false;
 
-        [Draw("Log peak torque (for tuning)", VisibleOn = "ShowAdvanced|true")]
         public bool DiagnosticLogging = false;
 
         // Set by the device picker in the settings panel, not drawn directly.
@@ -90,31 +78,20 @@ namespace ArtOfSimRally.Mod
 
         // ---- Camera ---------------------------------------------------------
 
-        [Draw("Bonnet camera", Tooltip =
-            "Adds a bonnet view to the normal view rotation.")]
         public bool BonnetCameraEnabled = true;
 
-        [Draw("Height (m)", Min = -1f, Max = 3f, Precision = 2, VisibleOn = "ShowAdvanced|true")]
         public float BonnetHeight = 0.95f;
 
-        [Draw("Forward (m)", Min = -3f, Max = 4f, Precision = 2, VisibleOn = "ShowAdvanced|true")]
         public float BonnetForward = 1.0f;
 
-        [Draw("Side (m)", Min = -1.5f, Max = 1.5f, Precision = 2, VisibleOn = "ShowAdvanced|true")]
         public float BonnetSide = 0f;
 
-        [Draw("Pitch (deg)", Min = -30f, Max = 30f, Precision = 1, VisibleOn = "ShowAdvanced|true")]
         public float BonnetPitch = 3f;
 
-        [Draw("Field of view", Min = 40f, Max = 120f, Precision = 0, VisibleOn = "ShowAdvanced|true")]
         public float BonnetFOV = 75f;
 
-        [Draw("Cornering lean", Min = 0f, Max = 1f, Precision = 2, Tooltip =
-            "Lateral shift under cornering load. 0 disables.", VisibleOn = "ShowAdvanced|true")]
         public float BonnetLean = 0.1f;
 
-        [Draw("Numpad camera hotkeys", Tooltip =
-            "Numpad adjusts the camera while looking through it.")]
         public bool CameraTuningKeys = true;
 
         // Rates for the hotkeys. Not drawn: tuning the tuner is a rabbit hole, and
@@ -136,12 +113,8 @@ namespace ArtOfSimRally.Mod
 
         // ---- Shifter --------------------------------------------------------
 
-        [Draw("Separate shifter", Tooltip =
-            "Read a shifter directly, bypassing the game's input system.")]
         public bool ShifterEnabled = false;
 
-        [Draw("H-pattern (off = sequential)", VisibleOn = "ShifterEnabled|true", Tooltip =
-            "H-pattern returns to neutral between gates. Sequential does not.")]
         public bool ShifterIsHPattern = false;
 
         // Chosen in the panel's device list rather than typed.
@@ -191,24 +164,12 @@ namespace ArtOfSimRally.Mod
 
         // ---- Telemetry ------------------------------------------------------
 
-        [Draw("Telemetry (Forza-compatible UDP)", Tooltip =
-            "Forza-compatible UDP. Use a Forza Horizon 5 profile.")]
         public bool TelemetryEnabled = false;
 
-        [Draw("Host", VisibleOn = "ShowAdvanced|true")]
         public string TelemetryHost = "127.0.0.1";
 
-        [Draw("Port", Min = 1, Max = 65535, VisibleOn = "ShowAdvanced|true")]
         public int TelemetryPort = 8000;
 
         public override void Save(UnityModManager.ModEntry modEntry) => Save(this, modEntry);
-
-        /// <summary>Called by UMM whenever a drawn value changes.</summary>
-        public void OnChange()
-        {
-            // Force feedback holds an exclusive device handle, so it cannot simply
-            // be flipped by writing a bool - release the wheel when switched off.
-            if (!ForceFeedbackEnabled) FfbNative.SetForce(0);
-        }
     }
 }

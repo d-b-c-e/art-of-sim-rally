@@ -180,6 +180,25 @@ namespace ArtOfSimRally.Mod
             }
         }
 
+        /// <summary>
+        /// Closes the current device and opens another, without restarting the game.
+        /// </summary>
+        /// <remarks>
+        /// Initialise deliberately runs once, so changing the wheel used to need a
+        /// relaunch. That is a poor trade for a setting sitting in a dropdown: the
+        /// obvious way to find out which of two identically named devices is the
+        /// right one is to pick one and feel whether the wheel moves.
+        /// </remarks>
+        public static bool Reinitialise(string modDir, string preferredDevice, int preferredIndex)
+        {
+            try { SetForce(0); } catch { }
+            Shutdown();
+
+            _initialised = false;
+            _failed = false;
+            return Initialise(modDir, preferredDevice, preferredIndex);
+        }
+
         /// <summary>Stops the effect and releases the device.</summary>
         public static void Shutdown()
         {
@@ -187,6 +206,7 @@ namespace ArtOfSimRally.Mod
             try { StopEffect(); FreeDirectInput(); }
             catch (Exception ex) { ModLog.Warning($"FFB shutdown: {ex.Message}"); }
             _failed = true;
+            _initialised = false;
         }
 
         // Prefer the copy shipped with the mod, falling back to the game's native
