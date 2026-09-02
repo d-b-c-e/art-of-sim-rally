@@ -8,7 +8,7 @@ properly on a racing wheel.
 - **Fixes vague steering.** Two separate problems make wheels feel dead near
   centre. Both are fixed.
 - **Shifter support**, H-pattern and sequential, on a separate device.
-- **Bonnet camera**, added to the game's normal view rotation.
+- **Bonnet and bumper cameras**, added to the game's normal view rotation.
 - **Telemetry** for SimHub, dashboards, bass shakers and motion rigs.
 
 ## Install
@@ -49,8 +49,8 @@ effect immediately. If the wheel pulls the wrong way, tick *Invert direction*.
 gear: click **set**, then move the lever into that gate. H-pattern and sequential
 are both supported, and the bindings shown match the mode you picked.
 
-**Camera** — press your change-view button to cycle onto the bonnet view, then
-adjust it with the numpad while looking through it:
+**Camera** — press your change-view button to cycle onto the bonnet view, and
+once more for the bumper view. Adjust whichever is on screen with the numpad:
 
 | Key | |
 |---|---|

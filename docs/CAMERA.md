@@ -133,3 +133,14 @@ run, rather than guessing at fixes.
 
 Note that the failure is only reachable by driving a stage to completion, so
 this cannot be checked from the menu.
+
+## Bumper view
+
+Added 2026-09-02 as a second entry in the same rotation, after the bonnet
+view. It is the same mechanism — a `CameraAngle` appended in `CarCameras.Start`,
+taken over in the `LateUpdate` postfix — with its own offsets (`BumperHeight`,
+`BumperForward`, `BumperSide`, `BumperPitch`, `BumperFOV`), defaulting to just
+above the front bumper looking down the road. `BonnetLean` is shared. The
+numpad tuner adjusts whichever mounted view is on screen and the reset key
+resets that view alone. Either view can be disabled independently; changes to
+the rotation take effect on the next stage, when `CarCameras.Start` runs again.

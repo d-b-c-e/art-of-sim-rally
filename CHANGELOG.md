@@ -5,6 +5,16 @@ Notable changes to art of sim rally.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Bumper camera.** A second mounted view after the bonnet view in the
+  rotation — lower and further forward, just above the front bumper. Its own
+  height, forward, side, pitch and field of view; the numpad adjusts whichever
+  of the two views is on screen and resets that one alone. Can be switched off
+  separately from the bonnet view.
+
 ## [0.2.0] - 2026-09-01
 
 The shifter release. Also the point at which the settings panel stopped being
