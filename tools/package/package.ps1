@@ -18,7 +18,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Version = "0.1.0"
+    [string]$Version = "0.2.0"
 )
 
 $ErrorActionPreference = 'Stop'
@@ -77,9 +77,17 @@ Launch the game and press Ctrl+F10 for the settings panel.
 
 * Steering should feel direct straight away.
 
-* Force feedback strength is "Reference torque", and LOWER IS STRONGER. The
-  default is a starting guess that will need tuning for your wheel. Turn on
-  "Log peak torque", drive for a minute, and the log reports the number to use.
+* Force feedback strength is a 0-100 slider. Start around 70 and adjust to
+  taste. If the wheel pulls the wrong way, tick "Invert direction".
+
+* Pick your wheel from the Wheel dropdown under Force feedback. If two devices
+  share a name, choose one and turn the wheel - if nothing happens, choose the
+  other. Switching takes effect immediately.
+
+* Got a separate shifter? Open the Shifter section, tick "Use a separate
+  shifter", choose the device, and bind each gear by clicking "set" and moving
+  the lever. Both H-pattern and sequential work. The game's own input system
+  cannot see most shifters - this reads yours directly, so it works anyway.
 
 * The bonnet camera is added to the game's normal view rotation - press your
   change-view button to cycle onto it. Adjust it live on the numpad while you
@@ -87,7 +95,8 @@ Launch the game and press Ctrl+F10 for the settings panel.
   1/3 tilt, +/- field of view, 0 resets. Changes save on their own.
 
 * Telemetry is off by default. Switch it on and point SimHub at a Forza
-  Horizon 5 profile on UDP port 8000.
+  Horizon 5 profile on UDP port 8000. Host and port can be changed while the
+  game runs - handy if something else already owns the port.
 
 SOMETHING NOT WORKING?
 ----------------------
@@ -100,6 +109,9 @@ KNOWN LIMITS
 * Developed and tested on a MOZA R12 Base only. The steering and deadzone fixes
   should apply to any wheel Rewired does not recognise, which is likely most
   modern direct-drive bases, but that is reasoning rather than testing.
+
+* The camera can swing about for a moment when the game takes control at the
+  end of a stage. Cosmetic, and only during the results cinematic.
 
 * This is a bonnet camera, not a cockpit camera. art of rally's cars have no
   modelled interiors, so there is nothing to sit inside of.
