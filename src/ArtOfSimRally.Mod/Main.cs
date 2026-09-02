@@ -46,8 +46,6 @@ namespace ArtOfSimRally.Mod
                 Settings = new Settings();
             }
 
-            ApplyInputBackend();
-
             modEntry.OnGUI       = OnGUI;
             modEntry.OnSaveGUI   = OnSaveGUI;
             modEntry.OnToggle    = OnToggle;
@@ -82,48 +80,6 @@ namespace ArtOfSimRally.Mod
                 $"Loaded - directSteering={Settings.DirectSteering}, " +
                 $"ffb={Settings.ForceFeedbackEnabled}, telemetry={Settings.TelemetryEnabled}");
             return true;
-        }
-
-        /// <summary>
-        /// Optionally switches Rewired from Raw Input to DirectInput.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Rewired's Raw Input backend enumerates by HID usage and skips devices
-        /// that do not present as a joystick or gamepad. A DS-8X sequential
-        /// shifter and a MOZA Multi-function Stalk both report as supplemental
-        /// devices: DirectInput lists them, Raw Input does not, and the game shows
-        /// "found 1 joysticks attached" while joy.cpl shows three. A device the
-        /// input layer never sees cannot be bound by any means.
-        /// </para>
-        /// <para>
-        /// Off by default because it is not free: Rewired keys saved bindings by a
-        /// hardware identifier that begins with the backend name, so switching
-        /// invalidates every existing binding and the player has to redo them.
-        /// That is a bad surprise to inflict on someone whose wheel already works.
-        /// </para>
-        /// </remarks>
-        private static void ApplyInputBackend()
-        {
-            if (Settings == null || !Settings.UseDirectInput) return;
-
-            try
-            {
-                if (ReInput.isReady)
-                {
-                    // Already enumerated; the setting cannot take effect until the
-                    // next launch. Say so rather than appearing to do nothing.
-                    ModLog.Warning("Rewired already started - DirectInput takes effect next launch.");
-                }
-
-                ReInput.configuration.windowsStandalonePrimaryInputSource =
-                    Rewired.Platforms.WindowsStandalonePrimaryInputSource.DirectInput;
-                ModLog.Info("Controller backend set to DirectInput. Rebinding will be required.");
-            }
-            catch (Exception ex)
-            {
-                ModLog.Error("Could not switch to DirectInput: " + ex.Message);
-            }
         }
 
         private static bool OnToggle(UnityModManager.ModEntry modEntry, bool value)
@@ -215,17 +171,11 @@ namespace ArtOfSimRally.Mod
                 // The setting is applied during Load, so ticking it now changes
                 // nothing until the game is restarted. Say so, rather than letting
                 // it look broken.
-                bool wantsDirectInput = Settings != null && Settings.UseDirectInput;
-                bool onDirectInput =
-                    backend == Rewired.Platforms.WindowsStandalonePrimaryInputSource.DirectInput;
-
-                if (wantsDirectInput && !onDirectInput)
-                    GUILayout.Label("DirectInput is selected but NOT active yet - restart the game. " +
-                                    "You will need to rebind afterwards.", wrap);
-                else if (joysticks != null && joysticks.Count < 2)
-                    GUILayout.Label("Only one device here. If a shifter or handbrake is missing, " +
-                                    "try 'Use DirectInput for controllers' under advanced, then " +
-                                    "restart and rebind.", wrap);
+                if (joysticks != null && joysticks.Count < 2)
+                    GUILayout.Label("Only one device here. A shifter or handbrake missing from this " +
+                                    "list cannot be bound - the game's input layer skips devices " +
+                                    "that do not report as a joystick, which is common for them.",
+                                    wrap);
             }
             catch (Exception ex)
             {

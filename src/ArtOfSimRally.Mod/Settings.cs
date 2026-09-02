@@ -30,10 +30,6 @@ namespace ArtOfSimRally.Mod
             "Clears Rewired's hidden 10% deadzone. Not the one in game options.", VisibleOn = "ShowAdvanced|true")]
         public bool ZeroAxisDeadzone = true;
 
-        [Draw("Use DirectInput for controllers", VisibleOn = "ShowAdvanced|true", Tooltip =
-            "Sees shifters Raw Input skips. NEEDS RESTART, THEN REBIND.")]
-        public bool UseDirectInput = false;
-
         [Draw("Bind any device", Tooltip =
             "Rebind the device you touch, not just the first joystick.", VisibleOn = "ShowAdvanced|true")]
         public bool BindAnyDevice = true;
