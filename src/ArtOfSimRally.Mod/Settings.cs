@@ -92,6 +92,17 @@ namespace ArtOfSimRally.Mod
 
         public float BonnetLean = 0.1f;
 
+        /// <summary>Adds a bumper view after the bonnet view in the rotation.</summary>
+        public bool BumperCameraEnabled = true;
+
+        // Lower and further forward than the bonnet: just above the front
+        // bumper, looking down the road. Shares BonnetLean.
+        public float BumperHeight = 0.45f;
+        public float BumperForward = 1.9f;
+        public float BumperSide = 0f;
+        public float BumperPitch = 2f;
+        public float BumperFOV = 80f;
+
         public bool CameraTuningKeys = true;
 
         // Rates for the hotkeys. Not drawn: tuning the tuner is a rabbit hole, and

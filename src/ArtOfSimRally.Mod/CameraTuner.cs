@@ -7,10 +7,12 @@ namespace ArtOfSimRally.Mod
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The right bonnet mount differs per car - a Group B monster and a 60s Mini do
-    /// not want the same offsets - and the only way to judge it is to look through
-    /// it while moving. Editing a config file and restarting for every 2 cm makes
-    /// that unusable, so the offsets are nudgeable in place.
+    /// The right mount differs per car - a Group B monster and a 60s Mini do not
+    /// want the same offsets - and the only way to judge it is to look through it
+    /// while moving. Editing a config file and restarting for every 2 cm makes
+    /// that unusable, so the offsets are nudgeable in place. The keys adjust
+    /// whichever mounted view is on screen, bonnet or bumper, each with its own
+    /// stored offsets.
     /// </para>
     /// <para>
     /// Saving is debounced rather than immediate: writing the config on every frame
@@ -29,13 +31,14 @@ namespace ArtOfSimRally.Mod
         private static bool  _dirty;
 
         /// <summary>
-        /// Polls adjustment keys. Called from the bonnet camera's LateUpdate patch,
-        /// so it only runs while that view is actually active.
+        /// Polls adjustment keys for the given view. Called from the camera's
+        /// LateUpdate patch, so it only runs while that view is actually active.
         /// </summary>
-        public static void Update()
+        public static void Update(BonnetCamera.View view)
         {
             var cfg = Main.Settings;
             if (!Main.Enabled || cfg == null || !cfg.CameraTuningKeys) return;
+            if (view == BonnetCamera.View.None) return;
 
             // Per-second rates, scaled by real time so behaviour does not change
             // with frame rate or when the game is paused.
@@ -44,12 +47,24 @@ namespace ArtOfSimRally.Mod
             float ang  = cfg.TuneAngleSpeed * dt;
 
             bool changed = false;
+            bool bumper = view == BonnetCamera.View.Bumper;
 
-            changed |= Nudge(ref cfg.BonnetHeight,  cfg.KeyUp,        cfg.KeyDown,     move);
-            changed |= Nudge(ref cfg.BonnetForward, cfg.KeyForward,   cfg.KeyBack,     move);
-            changed |= Nudge(ref cfg.BonnetSide,    cfg.KeyRight,     cfg.KeyLeft,     move);
-            changed |= Nudge(ref cfg.BonnetPitch,   cfg.KeyPitchDown, cfg.KeyPitchUp,  ang);
-            changed |= Nudge(ref cfg.BonnetFOV,     cfg.KeyFovUp,     cfg.KeyFovDown,  ang);
+            if (bumper)
+            {
+                changed |= Nudge(ref cfg.BumperHeight,  cfg.KeyUp,        cfg.KeyDown,     move);
+                changed |= Nudge(ref cfg.BumperForward, cfg.KeyForward,   cfg.KeyBack,     move);
+                changed |= Nudge(ref cfg.BumperSide,    cfg.KeyRight,     cfg.KeyLeft,     move);
+                changed |= Nudge(ref cfg.BumperPitch,   cfg.KeyPitchDown, cfg.KeyPitchUp,  ang);
+                changed |= Nudge(ref cfg.BumperFOV,     cfg.KeyFovUp,     cfg.KeyFovDown,  ang);
+            }
+            else
+            {
+                changed |= Nudge(ref cfg.BonnetHeight,  cfg.KeyUp,        cfg.KeyDown,     move);
+                changed |= Nudge(ref cfg.BonnetForward, cfg.KeyForward,   cfg.KeyBack,     move);
+                changed |= Nudge(ref cfg.BonnetSide,    cfg.KeyRight,     cfg.KeyLeft,     move);
+                changed |= Nudge(ref cfg.BonnetPitch,   cfg.KeyPitchDown, cfg.KeyPitchUp,  ang);
+                changed |= Nudge(ref cfg.BonnetFOV,     cfg.KeyFovUp,     cfg.KeyFovDown,  ang);
+            }
 
             if (Input.GetKeyDown(cfg.KeyReset))
             {
@@ -57,23 +72,38 @@ namespace ArtOfSimRally.Mod
                 // single source of truth for defaults now that there is no config
                 // framework holding them separately.
                 var defaults = new Settings();
-                cfg.BonnetHeight  = defaults.BonnetHeight;
-                cfg.BonnetForward = defaults.BonnetForward;
-                cfg.BonnetSide    = defaults.BonnetSide;
-                cfg.BonnetPitch   = defaults.BonnetPitch;
-                cfg.BonnetFOV     = defaults.BonnetFOV;
+                if (bumper)
+                {
+                    cfg.BumperHeight  = defaults.BumperHeight;
+                    cfg.BumperForward = defaults.BumperForward;
+                    cfg.BumperSide    = defaults.BumperSide;
+                    cfg.BumperPitch   = defaults.BumperPitch;
+                    cfg.BumperFOV     = defaults.BumperFOV;
+                }
+                else
+                {
+                    cfg.BonnetHeight  = defaults.BonnetHeight;
+                    cfg.BonnetForward = defaults.BonnetForward;
+                    cfg.BonnetSide    = defaults.BonnetSide;
+                    cfg.BonnetPitch   = defaults.BonnetPitch;
+                    cfg.BonnetFOV     = defaults.BonnetFOV;
+                }
                 changed = true;
-                ModLog.Info("Bonnet camera reset to defaults.");
+                ModLog.Info((bumper ? "Bumper" : "Bonnet") + " camera reset to defaults.");
             }
 
             if (changed)
             {
                 _dirty = true;
                 _saveDueAt = Time.unscaledTime + 1f;
-                ModLog.Info(
-                    $"Camera  height={cfg.BonnetHeight:F2}  forward={cfg.BonnetForward:F2}  " +
-                    $"side={cfg.BonnetSide:F2}  pitch={cfg.BonnetPitch:F1}  " +
-                    $"fov={cfg.BonnetFOV:F0}");
+                if (bumper)
+                    ModLog.Info(
+                        $"Bumper camera  height={cfg.BumperHeight:F2}  forward={cfg.BumperForward:F2}  " +
+                        $"side={cfg.BumperSide:F2}  pitch={cfg.BumperPitch:F1}  fov={cfg.BumperFOV:F0}");
+                else
+                    ModLog.Info(
+                        $"Bonnet camera  height={cfg.BonnetHeight:F2}  forward={cfg.BonnetForward:F2}  " +
+                        $"side={cfg.BonnetSide:F2}  pitch={cfg.BonnetPitch:F1}  fov={cfg.BonnetFOV:F0}");
             }
 
             if (_dirty && Time.unscaledTime >= _saveDueAt)

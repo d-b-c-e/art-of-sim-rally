@@ -136,13 +136,21 @@ namespace ArtOfSimRally.Mod
                     "While looking through it: 8/2 up-down, 7/9 back-forward, 4/6 left-right, " +
                     "1/3 tilt, +/- field of view, 0 resets. Saves automatically.");
 
-                cfg.BonnetFOV    = Slider(cfg.BonnetFOV, 40f, 120f, "Field of view", null, "F0");
+                cfg.BonnetFOV    = Slider(cfg.BonnetFOV, 40f, 120f, "Bonnet field of view", null, "F0");
                 cfg.BonnetLean   = Slider(cfg.BonnetLean, 0f, 1f, "Lean in corners",
                     "Sells the mounted feel, but is also the first thing to cause motion " +
-                    "sickness. 0 turns it off.", "F2");
+                    "sickness. 0 turns it off. Shared by both mounted views.", "F2");
 
                 GUILayout.Label("Position is easiest to set with the numpad while driving.", Wrap);
             }
+
+            cfg.BumperCameraEnabled = Toggle(cfg.BumperCameraEnabled, "Bumper camera",
+                "A second mounted view, lower and further forward, after the bonnet view in " +
+                "the rotation. The numpad adjusts whichever of the two is on screen. " +
+                "Takes effect on the next stage.");
+
+            if (cfg.BumperCameraEnabled)
+                cfg.BumperFOV = Slider(cfg.BumperFOV, 40f, 120f, "Bumper field of view", null, "F0");
 
             End();
         }

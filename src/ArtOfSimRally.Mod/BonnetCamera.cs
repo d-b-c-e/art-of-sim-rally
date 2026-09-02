@@ -5,23 +5,23 @@ using UnityEngine;
 namespace ArtOfSimRally.Mod
 {
     /// <summary>
-    /// Adds a bonnet camera to the game's existing view rotation.
+    /// Adds mounted views - bonnet, then bumper - to the game's existing view rotation.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// It behaves like any other view: press the change-view button and it appears
-    /// in the cycle after the eight stock angles, and the choice persists. That
-    /// works because <c>CarCameras.SetCameraFromSave</c> wraps on
-    /// <c>CameraAnglesList.Count</c> rather than on a hard-coded 8, so appending an
-    /// entry in a <c>Start</c> postfix is enough to join the rotation - no patching
-    /// of the cycling logic at all.
+    /// They behave like any other view: press the change-view button and they
+    /// appear in the cycle after the eight stock angles, and the choice persists.
+    /// That works because <c>CarCameras.SetCameraFromSave</c> wraps on
+    /// <c>CameraAnglesList.Count</c> rather than on a hard-coded 8, so appending
+    /// entries in a <c>Start</c> postfix is enough to join the rotation - no
+    /// patching of the cycling logic at all.
     /// </para>
     /// <para>
-    /// The stock rig cannot produce this view by parameters alone. It always places
-    /// the camera at a distance and calls <c>LookAt</c> on the car, so a zero
-    /// distance would have the camera looking at itself. Instead, when our entry is
-    /// the active one, a <c>LateUpdate</c> postfix takes the camera over completely
-    /// and mounts it to the car.
+    /// The stock rig cannot produce these views by parameters alone. It always
+    /// places the camera at a distance and calls <c>LookAt</c> on the car, so a zero
+    /// distance would have the camera looking at itself. Instead, when one of our
+    /// entries is the active one, a <c>LateUpdate</c> postfix takes the camera over
+    /// completely and mounts it to the car.
     /// </para>
     /// <para>
     /// Deliberately rigid: no position or rotation damping. The stock damping exists
@@ -31,16 +31,20 @@ namespace ArtOfSimRally.Mod
     /// legible from inside the car.
     /// </para>
     /// <para>
-    /// This is a bonnet camera, not a cockpit camera. art of rally's cars have no
-    /// modelled interiors, so there is nothing to sit inside of. See docs/CAMERA.md.
+    /// Bonnet and bumper, not cockpit. art of rally's cars have no modelled
+    /// interiors, so there is nothing to sit inside of. See docs/CAMERA.md.
     /// </para>
     /// </remarks>
     internal static class BonnetCamera
     {
+        /// <summary>Which mounted view, if any, the player has cycled to.</summary>
+        internal enum View { None, Bonnet, Bumper }
+
         // Identified by reference rather than by CameraAngle.CameraAngles, whose
-        // enum only defines CAMERA1..CAMERA8. Inventing a ninth value would mean
-        // casting an out-of-range int and hoping nothing switches on it.
+        // enum only defines CAMERA1..CAMERA8. Inventing new values would mean
+        // casting out-of-range ints and hoping nothing switches on them.
         private static CameraAngle _bonnetAngle;
+        private static CameraAngle _bumperAngle;
 
         private static float _lateralOffset;
 
@@ -55,9 +59,13 @@ namespace ArtOfSimRally.Mod
         private static readonly AccessTools.FieldRef<CarCameras, CarDynamics> Dynamics =
             AccessTools.FieldRefAccess<CarCameras, CarDynamics>("cardynamics");
 
-        /// <summary>True when the player has cycled to the bonnet view.</summary>
-        private static bool IsActive(CarCameras cameras)
-            => _bonnetAngle != null && ReferenceEquals(cameras.CurrentCameraAngle, _bonnetAngle);
+        internal static View ActiveView(CarCameras cameras)
+        {
+            var current = cameras.CurrentCameraAngle;
+            if (_bonnetAngle != null && ReferenceEquals(current, _bonnetAngle)) return View.Bonnet;
+            if (_bumperAngle != null && ReferenceEquals(current, _bumperAngle)) return View.Bumper;
+            return View.None;
+        }
 
         [HarmonyPatch(typeof(CarCameras), "Start")]
         internal static class AddToRotation
@@ -66,23 +74,27 @@ namespace ArtOfSimRally.Mod
             private static void Append(CarCameras __instance)
             {
                 var cfg = Main.Settings;
-                if (cfg == null || !cfg.BonnetCameraEnabled) return;
+                if (cfg == null) return;
                 var list = AnglesList(__instance);
                 if (list == null) return;
 
-                // Start runs per car; only ever contribute one entry.
-                if (_bonnetAngle != null && list.Contains(_bonnetAngle))
-                    return;
-
+                // Start runs per car; only ever contribute one entry per view.
                 // distance 0 keeps the stock rig from doing anything useful or
                 // harmful before our LateUpdate takes over. The CameraAngles tag
-                // is cosmetic here; CAMERA1 is reused simply because the value is
-                // never compared against ours.
-                _bonnetAngle = new CameraAngle(0f, 0f, 0f, CameraAngle.CameraAngles.CAMERA1);
-                list.Add(_bonnetAngle);
-
-                ModLog.Info(
-                    $"Bonnet camera added as view {list.Count} of {list.Count} in the rotation.");
+                // is cosmetic here; CAMERA1 is reused because the value is never
+                // compared against ours.
+                if (cfg.BonnetCameraEnabled && (_bonnetAngle == null || !list.Contains(_bonnetAngle)))
+                {
+                    _bonnetAngle = new CameraAngle(0f, 0f, 0f, CameraAngle.CameraAngles.CAMERA1);
+                    list.Add(_bonnetAngle);
+                    ModLog.Info($"Bonnet camera added as view {list.Count} in the rotation.");
+                }
+                if (cfg.BumperCameraEnabled && (_bumperAngle == null || !list.Contains(_bumperAngle)))
+                {
+                    _bumperAngle = new CameraAngle(0f, 0f, 0f, CameraAngle.CameraAngles.CAMERA1);
+                    list.Add(_bumperAngle);
+                    ModLog.Info($"Bumper camera added as view {list.Count} in the rotation.");
+                }
             }
         }
 
@@ -95,8 +107,9 @@ namespace ArtOfSimRally.Mod
             private static void Mount(CarCameras __instance)
             {
                 var cfg = Main.Settings;
-                if (cfg == null || !cfg.BonnetCameraEnabled) return;
-                bool shouldDrive = IsActive(__instance) && GameState.IsPlayerView;
+                if (cfg == null) return;
+                var view = ActiveView(__instance);
+                bool shouldDrive = view != View.None && GameState.IsPlayerView;
 
                 // Hand the camera back cleanly for the end-of-stage cinematic,
                 // replays and the intro.
@@ -141,21 +154,22 @@ namespace ArtOfSimRally.Mod
                     lean = _lateralOffset * cfg.BonnetLean;
                 }
 
+                bool bumper = view == View.Bumper;
                 var offset = new Vector3(
-                    cfg.BonnetSide + lean,
-                    cfg.BonnetHeight,
-                    cfg.BonnetForward);
+                    (bumper ? cfg.BumperSide : cfg.BonnetSide) + lean,
+                    bumper ? cfg.BumperHeight : cfg.BonnetHeight,
+                    bumper ? cfg.BumperForward : cfg.BonnetForward);
 
                 cam.transform.position = target.position + rot * offset;
-                cam.transform.rotation = rot * Quaternion.Euler(cfg.BonnetPitch, 0f, 0f);
+                cam.transform.rotation = rot * Quaternion.Euler(bumper ? cfg.BumperPitch : cfg.BonnetPitch, 0f, 0f);
 
                 // The stock UpdateFOVAndPitch rewrites fieldOfView every frame for
                 // the chase camera, so set ours after it rather than once.
-                cam.fieldOfView = cfg.BonnetFOV;
+                cam.fieldOfView = bumper ? cfg.BumperFOV : cfg.BonnetFOV;
 
                 // Polled here so the hotkeys are live only while looking through
-                // this camera, and never while driving a stock view or in a menu.
-                CameraTuner.Update();
+                // one of our views, and never while driving a stock view or in a menu.
+                CameraTuner.Update(view);
             }
 
             // Average lateral slip across the wheels, which the game already
