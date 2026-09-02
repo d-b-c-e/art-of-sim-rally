@@ -27,15 +27,19 @@ namespace ArtOfSimRally.Mod
         public bool DirectSteering = true;
 
         [Draw("Clear hidden axis deadzone", Tooltip =
-            "Clears Rewired's hidden 10% deadzone. Not the one in game options.")]
+            "Clears Rewired's hidden 10% deadzone. Not the one in game options.", VisibleOn = "ShowAdvanced|true")]
         public bool ZeroAxisDeadzone = true;
 
+        [Draw("Use DirectInput for controllers", VisibleOn = "ShowAdvanced|true", Tooltip =
+            "See shifters/handbrakes Raw Input skips. YOU MUST REBIND AFTERWARDS.")]
+        public bool UseDirectInput = false;
+
         [Draw("Bind any device", Tooltip =
-            "Rebind the device you touch, not just the first joystick.")]
+            "Rebind the device you touch, not just the first joystick.", VisibleOn = "ShowAdvanced|true")]
         public bool BindAnyDevice = true;
 
         [Draw("Disable steering assist", Tooltip =
-            "CHANGES THE CAR. Off by default. Affects leaderboards.")]
+            "CHANGES THE CAR. Off by default. Affects leaderboards.", VisibleOn = "ShowAdvanced|true")]
         public bool DisableSteerAssist = false;
 
         // ---- Force feedback -------------------------------------------------
@@ -44,22 +48,37 @@ namespace ArtOfSimRally.Mod
             "Needs UnityForceFeedback.dll in artofrally_Data/Plugins/x86_64.")]
         public bool ForceFeedbackEnabled = true;
 
-        [Draw("Strength", Min = 0f, Max = 5f, Precision = 2)]
-        public float Gain = 1.0f;
+        [Draw("Force feedback strength", Min = 0, Max = 100, Tooltip =
+            "Overall strength, like any other game. 50 is the baseline.")]
+        public int Strength = 50;
+
+        /// <summary>
+        /// Strength as the multiplier the force model actually uses.
+        /// </summary>
+        /// <remarks>
+        /// 50 maps to 1.0 so the slider's midpoint is the tuning this shipped
+        /// with, and the ends are meaningfully different rather than a 0-5 range
+        /// where most of the travel is unusable. Nobody thinks in gain
+        /// multipliers; everybody understands a percentage.
+        /// </remarks>
+        public float GainFromStrength => Strength / 50f;
 
         [Draw("Reference torque (lower = stronger)", Min = 10f, Max = 1000f, Precision = 0, Tooltip =
-            "Lower is stronger. See help at the bottom of this panel.")]
+            "Lower is stronger. See help at the bottom of this panel.", VisibleOn = "ShowAdvanced|true")]
         public float MzReference = 150f;
 
         [Draw("Smoothing", Min = 0f, Max = 0.95f, Precision = 2, Tooltip =
-            "0 is raw and detailed, higher is damped.")]
+            "0 is raw and detailed, higher is damped.", VisibleOn = "ShowAdvanced|true")]
         public float Smoothing = 0.2f;
 
         [Draw("Invert force", Tooltip =
-            "Flip if the wheel pulls the wrong way.")]
+            "Flip if the wheel pulls the wrong way.", VisibleOn = "ShowAdvanced|true")]
         public bool Invert = false;
 
-        [Draw("Log peak torque (for tuning)")]
+        [Draw("Show advanced options")]
+        public bool ShowAdvanced = false;
+
+        [Draw("Log peak torque (for tuning)", VisibleOn = "ShowAdvanced|true")]
         public bool DiagnosticLogging = false;
 
         // Set by the device picker in the settings panel, not drawn directly.
@@ -75,23 +94,23 @@ namespace ArtOfSimRally.Mod
             "Adds a bonnet view to the normal view rotation.")]
         public bool BonnetCameraEnabled = true;
 
-        [Draw("Height (m)", Min = -1f, Max = 3f, Precision = 2)]
+        [Draw("Height (m)", Min = -1f, Max = 3f, Precision = 2, VisibleOn = "ShowAdvanced|true")]
         public float BonnetHeight = 0.95f;
 
-        [Draw("Forward (m)", Min = -3f, Max = 4f, Precision = 2)]
+        [Draw("Forward (m)", Min = -3f, Max = 4f, Precision = 2, VisibleOn = "ShowAdvanced|true")]
         public float BonnetForward = 1.0f;
 
-        [Draw("Side (m)", Min = -1.5f, Max = 1.5f, Precision = 2)]
+        [Draw("Side (m)", Min = -1.5f, Max = 1.5f, Precision = 2, VisibleOn = "ShowAdvanced|true")]
         public float BonnetSide = 0f;
 
-        [Draw("Pitch (deg)", Min = -30f, Max = 30f, Precision = 1)]
+        [Draw("Pitch (deg)", Min = -30f, Max = 30f, Precision = 1, VisibleOn = "ShowAdvanced|true")]
         public float BonnetPitch = 3f;
 
-        [Draw("Field of view", Min = 40f, Max = 120f, Precision = 0)]
+        [Draw("Field of view", Min = 40f, Max = 120f, Precision = 0, VisibleOn = "ShowAdvanced|true")]
         public float BonnetFOV = 75f;
 
         [Draw("Cornering lean", Min = 0f, Max = 1f, Precision = 2, Tooltip =
-            "Lateral shift under cornering load. 0 disables.")]
+            "Lateral shift under cornering load. 0 disables.", VisibleOn = "ShowAdvanced|true")]
         public float BonnetLean = 0.1f;
 
         [Draw("Numpad camera hotkeys", Tooltip =
@@ -121,10 +140,10 @@ namespace ArtOfSimRally.Mod
             "Forza-compatible UDP. Use a Forza Horizon 5 profile.")]
         public bool TelemetryEnabled = false;
 
-        [Draw("Host")]
+        [Draw("Host", VisibleOn = "ShowAdvanced|true")]
         public string TelemetryHost = "127.0.0.1";
 
-        [Draw("Port", Min = 1, Max = 65535)]
+        [Draw("Port", Min = 1, Max = 65535, VisibleOn = "ShowAdvanced|true")]
         public int TelemetryPort = 8000;
 
         public override void Save(UnityModManager.ModEntry modEntry) => Save(this, modEntry);

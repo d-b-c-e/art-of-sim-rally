@@ -91,7 +91,7 @@ namespace ArtOfSimRally.Mod
             // DiagnosticLogging prints the observed peak so it can be tuned
             // against real driving rather than guessed.
             float normalised = mz / Mathf.Max(1f, cfg.MzReference);
-            normalised *= cfg.Gain;
+            normalised *= cfg.GainFromStrength;
             if (cfg.Invert) normalised = -normalised;
             normalised = Mathf.Clamp(normalised, -1f, 1f);
 

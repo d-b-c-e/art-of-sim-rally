@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
+using Rewired;
 using UnityModManagerNet;
 
 namespace ArtOfSimRally.Mod
@@ -45,6 +46,8 @@ namespace ArtOfSimRally.Mod
                 Settings = new Settings();
             }
 
+            ApplyInputBackend();
+
             modEntry.OnGUI       = OnGUI;
             modEntry.OnSaveGUI   = OnSaveGUI;
             modEntry.OnToggle    = OnToggle;
@@ -80,6 +83,48 @@ namespace ArtOfSimRally.Mod
             return true;
         }
 
+        /// <summary>
+        /// Optionally switches Rewired from Raw Input to DirectInput.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Rewired's Raw Input backend enumerates by HID usage and skips devices
+        /// that do not present as a joystick or gamepad. A DS-8X sequential
+        /// shifter and a MOZA Multi-function Stalk both report as supplemental
+        /// devices: DirectInput lists them, Raw Input does not, and the game shows
+        /// "found 1 joysticks attached" while joy.cpl shows three. A device the
+        /// input layer never sees cannot be bound by any means.
+        /// </para>
+        /// <para>
+        /// Off by default because it is not free: Rewired keys saved bindings by a
+        /// hardware identifier that begins with the backend name, so switching
+        /// invalidates every existing binding and the player has to redo them.
+        /// That is a bad surprise to inflict on someone whose wheel already works.
+        /// </para>
+        /// </remarks>
+        private static void ApplyInputBackend()
+        {
+            if (Settings == null || !Settings.UseDirectInput) return;
+
+            try
+            {
+                if (ReInput.isReady)
+                {
+                    // Already enumerated; the setting cannot take effect until the
+                    // next launch. Say so rather than appearing to do nothing.
+                    ModLog.Warning("Rewired already started - DirectInput takes effect next launch.");
+                }
+
+                ReInput.configuration.windowsStandalonePrimaryInputSource =
+                    Rewired.Platforms.WindowsStandalonePrimaryInputSource.DirectInput;
+                ModLog.Info("Controller backend set to DirectInput. Rebinding will be required.");
+            }
+            catch (Exception ex)
+            {
+                ModLog.Error("Could not switch to DirectInput: " + ex.Message);
+            }
+        }
+
         private static bool OnToggle(UnityModManager.ModEntry modEntry, bool value)
         {
             Enabled = value;
@@ -112,13 +157,13 @@ namespace ArtOfSimRally.Mod
             // not need hovering to find.
             var wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
             GUILayout.Label(
-                "Force feedback strength is 'Reference torque' - LOWER IS STRONGER. Turn on " +
-                "'Log peak torque', drive a minute, and the log reports the number to use.",
-                wrap);
+                "Wheel too light or too strong? Move the strength slider. Everything else " +
+                "is under 'Show advanced options'.", wrap);
             GUILayout.Label(
-                "If your shifter or handbrake will not bind, check it is not hidden by " +
-                "HidHide or a similar tool - the game cannot bind a device it never sees.",
-                wrap);
+                "Shifter or handbrake missing from the controls screen? The game's input " +
+                "layer skips devices that do not report as a joystick, which is common for " +
+                "shifters. Turn on 'Use DirectInput for controllers' under advanced, restart, " +
+                "and rebind - it sees more devices, but it does mean rebinding.", wrap);
 
             GUILayout.Space(6);
             if (GUILayout.Button("Create support file on Desktop", GUILayout.Width(260)))
