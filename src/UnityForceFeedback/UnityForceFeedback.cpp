@@ -61,6 +61,16 @@ static int       g_preferredIndex = -1;
 // SetParameters call must agree with it.
 static DWORD     g_effectAxes = 2;
 
+// A second device we read directly - typically a sequential or H-pattern
+// shifter. Kept entirely separate from the force feedback device: it is opened
+// non-exclusively so it never competes with the game's own input, and it exists
+// precisely because Rewired's Raw Input backend does not enumerate these at all.
+static const int kMaxAuxDevices = 16;
+struct AuxDevice { GUID guid; char name[MAX_PATH]; };
+static AuxDevice g_aux[kMaxAuxDevices];
+static int       g_auxCount = 0;
+static LPDIRECTINPUTDEVICE8 g_auxDevice = nullptr;
+
 static LPDIRECTINPUT8       g_di      = nullptr;
 static LPDIRECTINPUTDEVICE8 g_device  = nullptr;
 static LPDIRECTINPUTEFFECT  g_effect  = nullptr;
@@ -187,6 +197,21 @@ static BOOL CALLBACK EnumDeviceCallback(const DIDEVICEINSTANCE* inst, VOID* ctx)
         g_candidateCount - 1, c.name, caps.dwAxes, caps.dwButtons);
 
     candidate->Release();
+    return DIENUM_CONTINUE;
+}
+
+// Collects every attached game controller, force feedback or not. The FFB
+// enumeration deliberately skips devices without actuators; this one must not,
+// because a shifter is exactly such a device.
+static BOOL CALLBACK EnumAuxCallback(const DIDEVICEINSTANCE* inst, VOID* ctx)
+{
+    (void)ctx;
+    if (g_auxCount >= kMaxAuxDevices) return DIENUM_STOP;
+
+    AuxDevice& d = g_aux[g_auxCount++];
+    d.guid = inst->guidInstance;
+    strncpy_s(d.name, sizeof(d.name), inst->tszProductName, _TRUNCATE);
+    Log("  device [%d]: %s", g_auxCount - 1, d.name);
     return DIENUM_CONTINUE;
 }
 
@@ -410,6 +435,93 @@ __declspec(dllexport) void SetPreferredDeviceIndex(int index)
 {
     g_preferredIndex = index;
     Log("SetPreferredDeviceIndex(%d)", index);
+}
+
+// ---- auxiliary (button-only) device: shifters, handbrakes -----------------
+
+__declspec(dllexport) int EnumerateAllDevices(void)
+{
+    if (!g_lockInit) { InitializeCriticalSection(&g_lock); g_lockInit = true; }
+
+    bool temporary = (g_di == nullptr);
+    if (temporary) {
+        HRESULT hr = DirectInput8Create(GetModuleHandle(nullptr), DIRECTINPUT_VERSION,
+                                        IID_IDirectInput8, (VOID**)&g_di, nullptr);
+        if (FAILED(hr)) { Log("EnumerateAllDevices failed 0x%08lX", hr); return 0; }
+    }
+
+    Log("EnumerateAllDevices()");
+    g_auxCount = 0;
+    g_di->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumAuxCallback, nullptr, DIEDFL_ATTACHEDONLY);
+
+    if (temporary && !g_device && !g_auxDevice) { g_di->Release(); g_di = nullptr; }
+    return g_auxCount;
+}
+
+__declspec(dllexport) int GetAnyDeviceName(int index, char* buffer, int size)
+{
+    if (!buffer || size <= 0) return 0;
+    buffer[0] = 0;
+    if (index < 0 || index >= g_auxCount) return 0;
+    strncpy_s(buffer, (size_t)size, g_aux[index].name, _TRUNCATE);
+    return 1;
+}
+
+// Opened NON-exclusively and in the background: we only read buttons, and taking
+// it exclusively would stop anything else - including the game - from seeing it.
+__declspec(dllexport) int OpenAuxDevice(int index)
+{
+    if (index < 0 || index >= g_auxCount) { Log("OpenAuxDevice(%d): out of range", index); return 0; }
+    if (!g_di) { if (EnumerateAllDevices() <= 0) return 0; }
+
+    if (g_auxDevice) { g_auxDevice->Unacquire(); g_auxDevice->Release(); g_auxDevice = nullptr; }
+
+    HRESULT hr = g_di->CreateDevice(g_aux[index].guid, &g_auxDevice, nullptr);
+    if (FAILED(hr) || !g_auxDevice) { Log("OpenAuxDevice: CreateDevice failed 0x%08lX", hr); return 0; }
+
+    if (FAILED(hr = g_auxDevice->SetDataFormat(&c_dfDIJoystick2))) {
+        Log("OpenAuxDevice: SetDataFormat failed 0x%08lX", hr);
+        g_auxDevice->Release(); g_auxDevice = nullptr; return 0;
+    }
+
+    HWND hwnd = g_hwnd ? g_hwnd : GetForegroundWindow();
+    if (FAILED(hr = g_auxDevice->SetCooperativeLevel(hwnd, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND))) {
+        Log("OpenAuxDevice: SetCooperativeLevel failed 0x%08lX", hr);
+        g_auxDevice->Release(); g_auxDevice = nullptr; return 0;
+    }
+
+    g_auxDevice->Acquire();
+    Log("OpenAuxDevice(%d): %s opened", index, g_aux[index].name);
+    return 1;
+}
+
+// Fills one byte per button, 1 = pressed. Returns how many were written.
+__declspec(dllexport) int ReadAuxButtons(unsigned char* buffer, int length)
+{
+    if (!g_auxDevice || !buffer || length <= 0) return 0;
+
+    DIJOYSTATE2 state = {};
+    HRESULT hr = g_auxDevice->Poll();
+    if (FAILED(hr)) { g_auxDevice->Acquire(); g_auxDevice->Poll(); }
+
+    hr = g_auxDevice->GetDeviceState(sizeof(state), &state);
+    if (FAILED(hr)) {
+        if (hr == DIERR_INPUTLOST || hr == DIERR_NOTACQUIRED) g_auxDevice->Acquire();
+        return 0;
+    }
+
+    int n = length < 128 ? length : 128;
+    for (int i = 0; i < n; ++i) buffer[i] = (state.rgbButtons[i] & 0x80) ? 1 : 0;
+    return n;
+}
+
+__declspec(dllexport) void CloseAuxDevice(void)
+{
+    if (!g_auxDevice) return;
+    g_auxDevice->Unacquire();
+    g_auxDevice->Release();
+    g_auxDevice = nullptr;
+    Log("CloseAuxDevice()");
 }
 
 __declspec(dllexport) void Aquire(void)

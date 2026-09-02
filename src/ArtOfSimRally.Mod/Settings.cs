@@ -134,6 +134,61 @@ namespace ArtOfSimRally.Mod
         public KeyCode KeyFovDown   = KeyCode.KeypadMinus;
         public KeyCode KeyReset     = KeyCode.Keypad0;
 
+        // ---- Shifter --------------------------------------------------------
+
+        [Draw("Separate shifter", Tooltip =
+            "Read a shifter directly, bypassing the game's input system.")]
+        public bool ShifterEnabled = false;
+
+        [Draw("H-pattern (off = sequential)", VisibleOn = "ShifterEnabled|true", Tooltip =
+            "H-pattern returns to neutral between gates. Sequential does not.")]
+        public bool ShifterIsHPattern = false;
+
+        // Chosen in the panel's device list rather than typed.
+        public int ShifterDeviceIndex = -1;
+        public string ShifterDeviceName = "";
+
+        // Button index per gate; -1 means unbound. Stored flat rather than as an
+        // array because UnityModManager's XML settings round-trip simple fields
+        // far more reliably than collections.
+        public int GearReverseButton = -1;
+        public int Gear1Button = -1;
+        public int Gear2Button = -1;
+        public int Gear3Button = -1;
+        public int Gear4Button = -1;
+        public int Gear5Button = -1;
+        public int Gear6Button = -1;
+
+        /// <summary>Button bound to a gear, 1-6. Returns -1 when unbound.</summary>
+        public int GearButton(int gear)
+        {
+            switch (gear)
+            {
+                case 1: return Gear1Button;
+                case 2: return Gear2Button;
+                case 3: return Gear3Button;
+                case 4: return Gear4Button;
+                case 5: return Gear5Button;
+                case 6: return Gear6Button;
+                default: return -1;
+            }
+        }
+
+        /// <summary>Binds a button to a gear, 1-6, or -1 for reverse.</summary>
+        public void SetGearButton(int gear, int button)
+        {
+            switch (gear)
+            {
+                case -1: GearReverseButton = button; break;
+                case 1:  Gear1Button = button; break;
+                case 2:  Gear2Button = button; break;
+                case 3:  Gear3Button = button; break;
+                case 4:  Gear4Button = button; break;
+                case 5:  Gear5Button = button; break;
+                case 6:  Gear6Button = button; break;
+            }
+        }
+
         // ---- Telemetry ------------------------------------------------------
 
         [Draw("Telemetry (Forza-compatible UDP)", Tooltip =

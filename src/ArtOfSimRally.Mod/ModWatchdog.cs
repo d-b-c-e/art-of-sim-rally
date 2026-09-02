@@ -93,6 +93,8 @@ namespace ArtOfSimRally.Mod
 
             FfbNative.SetForce(0);
             FfbNative.Shutdown();
+
+            Shifter.Close();
         }
     }
 }

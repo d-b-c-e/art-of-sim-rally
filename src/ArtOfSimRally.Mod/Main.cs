@@ -73,6 +73,9 @@ namespace ArtOfSimRally.Mod
 
             Enabled = true;
 
+            if (Settings.ShifterEnabled && Settings.ShifterDeviceIndex >= 0)
+                Shifter.Open(Settings.ShifterDeviceIndex);
+
             // Releases the wheel and parks telemetry when the game stops driving
             // or exits, independently of whether any patched object is still
             // ticking. See ModWatchdog.
@@ -108,6 +111,9 @@ namespace ArtOfSimRally.Mod
 
             GUILayout.Space(12);
             DrawDevicePicker();
+
+            GUILayout.Space(12);
+            DrawShifter();
 
             GUILayout.Space(12);
             GUILayout.Label("<b>Having trouble?</b>");
@@ -192,6 +198,106 @@ namespace ArtOfSimRally.Mod
                 GUILayout.Label("Could not read input state: " + ex.Message, wrap);
             }
         }
+
+        private static string[] _allDevices;
+        private static bool _allDevicesListed;
+        private static int _bindingGear = int.MinValue;   // MinValue = not binding
+
+        /// <summary>
+        /// Device picker and gear binding for a separate shifter.
+        /// </summary>
+        /// <remarks>
+        /// Binding lives here rather than in the game's controls screen because the
+        /// game cannot see these devices at all - there is nothing to bind in. The
+        /// flow is the one people expect from a controls menu: click a gear, press
+        /// the gate, done.
+        /// </remarks>
+        private static void DrawShifter()
+        {
+            var cfg = Settings;
+            if (cfg == null || !cfg.ShifterEnabled) return;
+
+            var wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
+            GUILayout.Label("<b>Shifter</b>");
+
+            if (!_allDevicesListed) { _allDevices = Shifter.ListDevices(); _allDevicesListed = true; }
+
+            if (_allDevices == null || _allDevices.Length == 0)
+            {
+                GUILayout.Label("No controllers found.", wrap);
+                if (GUILayout.Button("Look again", GUILayout.Width(140))) _allDevicesListed = false;
+                return;
+            }
+
+            GUILayout.Label("Which device is your shifter?", wrap);
+            for (int i = 0; i < _allDevices.Length; i++)
+            {
+                bool chosen = cfg.ShifterDeviceIndex == i;
+                if (GUILayout.Toggle(chosen, "  " + _allDevices[i]) && !chosen)
+                {
+                    cfg.ShifterDeviceIndex = i;
+                    cfg.ShifterDeviceName = _allDevices[i];
+                    Shifter.Open(i);
+                    SaveSettings();
+                }
+            }
+
+            if (cfg.ShifterDeviceIndex < 0) return;
+
+            if (!Shifter.IsOpen && GUILayout.Button("Connect", GUILayout.Width(140)))
+                Shifter.Open(cfg.ShifterDeviceIndex);
+
+            if (!Shifter.IsOpen) { GUILayout.Label("Not connected.", wrap); return; }
+
+            GUILayout.Space(6);
+            GUILayout.Label(cfg.ShifterIsHPattern
+                ? "Click a gear, then move the lever into that gate."
+                : "Click a gear, then press the button you want for it.", wrap);
+
+            // Poll here too so the button shows live while the panel is open,
+            // even when the car is not running.
+            Shifter.Poll();
+
+            if (_bindingGear != int.MinValue)
+            {
+                int pressed = Shifter.PressedButton;
+                GUILayout.Label(pressed >= 0
+                    ? "Detected button " + pressed + " - release to confirm."
+                    : "Waiting for " + GearLabel(_bindingGear) + "...  (click again to cancel)", wrap);
+
+                if (pressed >= 0)
+                {
+                    cfg.SetGearButton(_bindingGear, pressed);
+                    ModLog.Info("Bound " + GearLabel(_bindingGear) + " to button " + pressed);
+                    _bindingGear = int.MinValue;
+                    SaveSettings();
+                }
+            }
+
+            DrawGearRow(cfg, -1);
+            for (int g = 1; g <= 6; g++) DrawGearRow(cfg, g);
+
+            GUILayout.Label("Currently pressed: " +
+                (Shifter.PressedButton >= 0 ? "button " + Shifter.PressedButton : "none"), wrap);
+        }
+
+        private static void DrawGearRow(Settings cfg, int gear)
+        {
+            int button = gear == -1 ? cfg.GearReverseButton : cfg.GearButton(gear);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(GearLabel(gear), GUILayout.Width(70));
+            GUILayout.Label(button >= 0 ? "button " + button : "not set", GUILayout.Width(90));
+            if (GUILayout.Button(_bindingGear == gear ? "cancel" : "set", GUILayout.Width(70)))
+                _bindingGear = _bindingGear == gear ? int.MinValue : gear;
+            if (button >= 0 && GUILayout.Button("clear", GUILayout.Width(70)))
+            {
+                cfg.SetGearButton(gear, -1);
+                SaveSettings();
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        private static string GearLabel(int gear) => gear == -1 ? "Reverse" : "Gear " + gear;
 
         // Device names are not unique - a Fanatec rig reports two identical
         // "FANATEC Wheel" entries - so the picker stores the index as well and

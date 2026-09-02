@@ -15,3 +15,8 @@ EXPORTS
     SetPreferredDeviceIndex
     EnumerateDevices
     GetDeviceName
+    EnumerateAllDevices
+    GetAnyDeviceName
+    OpenAuxDevice
+    ReadAuxButtons
+    CloseAuxDevice
