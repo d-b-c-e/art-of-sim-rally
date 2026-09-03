@@ -271,7 +271,7 @@ actually run it. The things most likely to differ elsewhere:
 
 | Risk | Detail |
 |---|---|
-| **Multiple FFB devices** | Addressed: the plugin now logs every FFB device it finds and takes the first unless a preferred name is set in the mod settings. Previously it silently grabbed whichever DirectInput listed first. |
+| **Multiple FFB devices** | Every FFB device is logged with its axis and button counts; the preferred one (by index, then name) is opened first and, if it cannot create a constant-force effect, the others are tried before giving up. A Fanatec direct-drive base presents **two** `FANATEC Wheel` devices with the same name and only one has the actuator (the other fails with `0x80040154`); the dropdowns show axes/buttons so the twins can be told apart. One DirectInput instance lives for the whole session: releasing it after a "temporary" enumeration while the device table stayed populated crashed the game when a shifter was chosen (2026-09-03). |
 | **Exclusive acquisition** | FFB needs `DISCL_EXCLUSIVE` while Rewired already holds the wheel. Fine on this stack; other driver stacks may refuse. The log says so explicitly if it happens. |
 | **Force scaling** | `FyReference` is per-wheel. A strong direct-drive base and a gear-driven Logitech want very different numbers. This is tuning, not compatibility. |
 | **Axis assignment** | Force is applied on X, which is steering on every wheel that follows the convention. A device that reports steering elsewhere would need the effect axis changed. |

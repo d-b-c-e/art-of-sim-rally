@@ -32,6 +32,19 @@ namespace ArtOfSimRally.Mod
     /// works in-process.
     /// </para>
     /// <para>
+    /// OUTCOME (2026-09-03): abandoned. Applied from the panel, and again at the
+    /// title screen with the switch pre-armed, the switch left the menus dead
+    /// while every probe said input was flowing - keyboard controller, player
+    /// actions (UISubmit/UICancel/UIHorizontal firing), keyboard maps enabled,
+    /// Rewired's UI input module alive. The game's log showed 48,216 stale-object
+    /// errors from game code caching Rewired objects (ControllerButtonDisplay,
+    /// Arcader); refreshing all of them brought the count to zero and did not
+    /// bring the menus back. Whatever else ResetAll() breaks in this game's menu
+    /// code was not found. This class stays as an experiment reachable only via
+    /// UseDirectInputBackend in Settings.xml; it is not in the panel. The
+    /// shipped answer is WheelInput, which bypasses Rewired for the wheel.
+    /// </para>
+    /// <para>
     /// The verification is not trusted blindly. Every keyboard press is checked
     /// through <c>UnityEngine.Input</c> and through Rewired separately; three
     /// presses Rewired misses put the backend back to Raw Input and turn the

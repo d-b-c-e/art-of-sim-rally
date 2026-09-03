@@ -18,11 +18,14 @@ deliberate rather than lazy packaging:
 The config is grouped by feature so this reads clearly to a user:
 
 ```
-[Steering]  DirectSteering, ZeroAxisDeadzone, DisableSteerAssist
-[ForceFeedback]  Enabled, Gain, FyReference, Smoothing, Invert
-[Camera]  BonnetCamera, Height, Forward, Side, Pitch, FieldOfView, Lean
-[CameraTuning]  hotkeys
+[Steering]  DirectSteering, ZeroAxisDeadzone, BindAnyDevice, GlyphTextFallback, DisableSteerAssist
+[ForceFeedback]  Enabled, Strength, FyReference, Smoothing, Invert, PreferredDevice(+Index), DiagnosticLogging
+[Shifter]  Enabled, IsHPattern, DeviceIndex/Name, SkipNeutral, gear and shift buttons
+[WheelInput]  Enabled, Steer/Throttle/Brake/Clutch/Handbrake bindings ("device|index|axis:N|rest|far")
+[Camera]  Bonnet* and Bumper*: Enabled, Height, Forward, Side, Pitch, FOV; BonnetLean
+[CameraTuning]  numpad hotkeys
 [Telemetry]  Enabled, Host, Port
+[Experiment]  UseDirectInputBackend (Settings.xml only; see CONTROLS.md)
 ```
 
 ## Loader: Unity Mod Manager (done)

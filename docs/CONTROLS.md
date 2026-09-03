@@ -127,7 +127,7 @@ equally - not just this one wheel.
 A binding utility is still the wrong answer - see the xoutput section below.
 Teaching Rewired the device beats flattening it to a gamepad.
 
-### Raw Input vs DirectInput — confirmed, and now a setting (2026-09-02)
+### Raw Input vs DirectInput — tried at runtime, abandoned (2026-09-02/03)
 
 Rewired supports several Windows backends (`Rewired.InputSource` in
 `Rewired_Core.dll`): `DirectInput = 1`, `XInput = 2`, `RawInput = 5`, and

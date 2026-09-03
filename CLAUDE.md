@@ -30,28 +30,29 @@ third-party binaries, nothing that would force the repo private.
 | `tests/ArtOfSimRally.Telemetry.Tests` | xUnit, 24 tests pinning the wire format |
 | `tools/ArtOfSimRally.Synth` | Synthetic emitter for testing consumers without the game |
 | `harness/forza_probe.py` | Listens and prints what is actually on the wire |
-| `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP |
+| `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP, RELEASING |
 
-## Status — do not overstate this
+## Status (2026-09-03) — do not overstate this
+
+Released: **0.2.1** (2026-09-02). "Verified" means confirmed on the owner's MOZA
+R12 rig unless stated otherwise.
 
 | Component | State |
 |---|---|
-| `UnityForceFeedback.dll` | Built; verified sound (LoadLibrary OK, 7 exports resolve, no VC-runtime dep). **Tested in game 2026-08-31: the game never calls it.** |
-| Telemetry encoder | Done. 24 tests pass. Round-tripped C# → UDP → Python 2026-08-31. |
-| Synth + probe | Done, verified together. |
-| UMM mod | Not started. Blocked on UMM being installed. |
-| Bonnet camera | Not started. |
+| Force feedback | Verified. Front-axle lateral force × pneumatic trail, faded out below 12 km/h, re-acquires the wheel after alt-tab. Sign confirmed on a MOZA R12; the MOZA R5 one-sided inversion fixed by user report. |
+| Steering fixes, bind-any-device, glyph text fallback | Verified. |
+| Shifter (sequential + H-pattern), read directly from the device | Verified by users. |
+| Bonnet + bumper cameras | Verified. End-of-stage cinematic wobble is a known cosmetic issue (docs/CAMERA.md). |
+| Telemetry (Forza format) | Verified with SimHub + ButtKicker, live from the start line. |
+| **Direct wheel input** (`WheelInput`) | Built 2026-09-03; all devices open and read on this rig; **not yet driven**. Unreleased. |
+| Crash fix (shifter choice after FFB failure), FFB candidate fallback, capability labels | Built 2026-09-03, init verified here. Unreleased. |
+| Rewired DirectInput backend switch (`InputBackend`) | **Abandoned** after four attempts. Settings.xml-only experiment. Do not retry — see below. |
 
-Phase 0 is **answered and closed**. The game never calls the DLL, and
-decompilation shows why: the FFB feature is half-built. `ForceFeedback.Start()`
-has no gate at all (so the earlier "gated on wheel recognition" theory is
-disproven) — the component is simply never attached. `Wheel` computes `Mz` only
-`if (cardynamics.enableForceFeedback)`, which nothing sets, so `Mz` is always 0.
-And `CarDynamics.forceFeedback` is never assigned anywhere. Route A cannot work
-because the force would be a constant zero even if everything were wired.
-
-The mod supplies the missing middle: set `enableForceFeedback`, compute force
-from steered-wheel `Mz`, output via the DLL. See `docs/FORCE-FEEDBACK.md`.
+The game's force feedback was half-built: `ForceFeedback` is never attached,
+`Wheel.Mz` is computed only `if (cardynamics.enableForceFeedback)`, which
+nothing sets, and `CarDynamics.forceFeedback` is never assigned. The mod sets
+the flag, computes a force from the steered axle and drives the DLL. The force
+is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
 
 ## Conventions
 
@@ -82,6 +83,17 @@ from steered-wheel `Mz`, output via the DLL. See `docs/FORCE-FEEDBACK.md`.
    `Speed`@256 and `Gear`@319, both validated against SimHub via the sibling
    cruisn-collection harness. A wrong offset does not throw, it renders a
    plausible and completely wrong dashboard. There are tests; keep them.
+5. **Never switch Rewired's input source at runtime in shipped code.** The
+   setter calls `ResetAll()`; applied at load it killed the keyboard, applied
+   after the title screen it killed the menus while every probe said input was
+   flowing. Four attempts over two days (docs/CONTROLS.md). Devices Rewired
+   cannot read are handled by `WheelInput`, which bypasses it.
+6. **One DirectInput instance per session in the native plugin.** Releasing a
+   "temporary" instance while the device table stayed populated crashed the
+   game for a Fanatec user. `EnsureDirectInput()` at every entry point;
+   `FreeDirectInput` releases the instance only when nothing else holds a device.
+7. **Deploy only when the game is closed.** The DLLs are locked while it runs;
+   a copy that "succeeds" over a running game is the stale build you tested last.
 
 ## Environment facts
 
@@ -89,12 +101,21 @@ from steered-wheel `Mz`, output via the DLL. See `docs/FORCE-FEEDBACK.md`.
   `D:\Program Files (x86)\Steam\steamapps\common\artofrally`. Steam root on this
   machine is on `D:`, not a default path.
 - Engine: **Unity 2019.4.38f1, Mono** — ideal for modding. Not IL2CPP.
-- Input: **Rewired**, all four backends. Wheel input already works; only force
-  feedback is missing. The game has its own press-to-bind UI (`ControlsRemapper`)
-  with split-axis support, and Rewired recognises most wheels — **no binding
-  utility is needed, and xoutput/XInput must NOT be used** because it would
-  hide the wheel from the DirectInput API the FFB route needs. See
-  `docs/CONTROLS.md`.
+- Input: **Rewired 1.1.55 on the Raw Input backend.** The game has its own
+  press-to-bind screen (`ControlsRemapper`) which only ever binds `Joysticks[0]`
+  (the mod retargets it to the device you touch). Unrecognised wheels bind but
+  get a hidden 10% deadzone (mod removes it). Some devices Raw Input cannot
+  read at all — a Fanatec direct-drive base appears twice as `FANATEC Wheel`,
+  32 axes / 144 buttons, no element ever moves; DirectInput reads the same two
+  as 8/108 and 12/63 and only one has the actuator. For those: direct wheel
+  input. **xoutput/XInput must NOT be used** — it hides the wheel from the
+  DirectInput API force feedback needs. See docs/CONTROLS.md.
+- Logs: UMM `artofrally_Data\Managed\UnityModManager\Log.txt`; native
+  `%LOCALAPPDATA%\ArtOfSimRally\ffb.log`; Unity
+  `%USERPROFILE%\AppData\LocalLow\Funselektor Labs\art of rally\Player.log`
+  — Rewired's own errors appear only there, without stack traces.
+- The game runs on the **second monitor**; a primary-screen screenshot will not
+  show it.
 - Bindings persist in PlayerPrefs at `HKCU\Software\Funselektor Labs\art of rally`.
   That key not existing means the game has never been launched on this machine.
 - MSVC 14.44 x64 build tools and Windows SDK 10.0.26100 with `dinput8.lib` are
@@ -103,6 +124,48 @@ from steered-wheel `Mz`, output via the DLL. See `docs/FORCE-FEEDBACK.md`.
 - `vcvars64.bat` prints `'vswhere.exe' is not recognized` on this machine. That
   comes from inside Microsoft's script and is harmless; only a non-zero exit
   code means a real failure.
+
+## Findings that must not be re-derived
+
+- **`Mz` is unusable as a steering force.** `CalcAligningForce` is a 1989
+  Pacejka curve that reverses sign at ~8° slip; this game's front tyres run
+  12–29° in ordinary corners, so the wheel flipped from centring to pushing
+  outward mid-corner ("there is no centre"). Force = `(FyL + FyR) × trail /
+  FyReference`, trail 1.0 → 0.6 at twice the ideal slip angle, faded 3→12 km/h.
+  `+Fy` centres on a MOZA R12. Measured 2026-09-02 with the `FFB trace` lines
+  (DiagnosticLogging).
+- **`0x80040205` is `DIERR_NOTEXCLUSIVEACQUIRED`**, not INCOMPLETEEFFECT or
+  EFFECTPLAYING (both were tried). It means focus was lost and the wheel came
+  back non-exclusive; the DLL re-acquires and retries. Look up HRESULTs in the
+  SDK's `dinput.h` before theorising.
+- **Telemetry `IsRaceOn` is true from `WAITING_TO_BEGIN`**, so a shaker follows
+  the engine while revving on the line. Forces still wait for `UNDERWAY`.
+- **The Fanatec crash chain** (support bundle 2026-09-03): preferred FFB device
+  had no actuator → `CreateEffect` 0x80040154 → instance released → device list
+  refilled by a temporary instance → shifter chosen → `CreateDevice` on null.
+  Fixed by rule 6 above and by trying every FFB candidate.
+- **Rewired reset diagnostics**, for the record: after `ResetAll()` the keyboard
+  controller, player actions and UI module all reported input; the game logged
+  48,216 "object from a previous session" errors from cached Rewired objects in
+  `ControllerButtonDisplay` and `Arcader`; refreshing all 84 references brought
+  that to zero and the menus stayed dead. Cause not found. Not worth a fifth try.
+
+## Working on this machine
+
+- **`Stop-Process` from a Bash-spawned PowerShell does not stop the game**; the
+  native PowerShell tool does. Same for anything that needs the interactive
+  desktop.
+- art of rally **accepts `SendInput` keyboard events** (unlike iRacing Arcade),
+  so unattended tests can drive the title screen. The x64 `INPUT` struct must be
+  40 bytes (`FieldOffset(32) long pad`) or `SendInput` fails with error 87.
+  `FindWindow` by title fails; use the process's `MainWindowHandle`.
+- `ilspycmd` (dotnet tool) is installed: `ilspycmd -t <Type> Assembly-CSharp.dll`
+  for one type, `-p -o <dir>` for the whole assembly. `Rewired_Core.dll` is
+  obfuscated internally but its public API decompiles fine.
+- Long heredocs in the Bash tool get mangled (quotes, backslashes, truncation).
+  Write scripts to the scratchpad with the Write tool and run them by path.
+- Support bundles from users are the fastest diagnosis: the controllers section
+  shows Rewired's view, the ffb.log section shows DirectInput's. Compare them.
 
 ## Testing
 
@@ -131,4 +194,4 @@ names plus the whole P/Invoke table are readable from metadata with
 `System.Reflection.Metadata`, which ships in the .NET SDK. `PEReader` →
 `GetMetadataReader()` → enumerate `TypeDefinitions`; `MethodDefinition.GetImport()`
 gives the `DllImport` module and entry point. That is how the missing DLL was
-found. Method *bodies* would need a real decompiler, which has not been needed yet.
+found. Method *bodies* need a decompiler: `ilspycmd` is installed and used for that (see above).
