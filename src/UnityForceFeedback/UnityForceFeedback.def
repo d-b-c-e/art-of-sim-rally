@@ -23,3 +23,5 @@ EXPORTS
     OpenReadDevice
     ReadDeviceState
     CloseReadDevices
+    GetDeviceInfo
+    GetAnyDeviceInfo

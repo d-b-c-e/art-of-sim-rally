@@ -49,6 +49,9 @@ namespace ArtOfSimRally.Mod
         [DllImport(Dll, CharSet = CharSet.Ansi)]
         private static extern int GetDeviceName(int index, System.Text.StringBuilder buffer, int size);
 
+        [DllImport(Dll)]
+        private static extern int GetDeviceInfo(int index, out int axes, out int buttons);
+
         /// <summary>DirectInput's nominal full-scale force.</summary>
         public const int ForceMax = 10000;
 
@@ -178,6 +181,27 @@ namespace ArtOfSimRally.Mod
                 ModLog.Warning("Could not list force feedback devices: " + ex.Message);
                 return new string[0];
             }
+        }
+
+        /// <summary>
+        /// Display labels for <see cref="ListDevices"/>: the name plus axis and
+        /// button counts, so two devices with the same name (a Fanatec base shows
+        /// two "FANATEC Wheel" entries) can be told apart. Not for storing.
+        /// </summary>
+        public static string[] ListDeviceLabels(string[] names)
+        {
+            var labels = new string[names.Length];
+            for (int i = 0; i < names.Length; i++)
+            {
+                labels[i] = names[i];
+                try
+                {
+                    if (GetDeviceInfo(i, out int axes, out int buttons) != 0 && (axes > 0 || buttons > 0))
+                        labels[i] = names[i] + "  (" + axes + " axes, " + buttons + " buttons)";
+                }
+                catch { }
+            }
+            return labels;
         }
 
         /// <summary>

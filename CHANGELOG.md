@@ -21,6 +21,20 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and left the menus dead both times; it remains only as a Settings.xml
   experiment, not in the panel.
 - Support bundle now records which input backend was active.
+- Device dropdowns show axis and button counts, so two devices with the same
+  name (a Fanatec base's two `FANATEC Wheel` entries) can be told apart.
+
+### Fixed
+
+- **Crash when choosing a shifter** whenever force feedback had failed to
+  initialise (reported with a Fanatec bundle). Listing controllers created a
+  temporary DirectInput instance and released it, leaving the device table
+  filled; opening the chosen device then used the released instance. One
+  instance now lives for the whole session.
+- **Force feedback gave up when the preferred device had no actuator.** A
+  Fanatec base presents two `FANATEC Wheel` devices and only one does force
+  feedback; picking the other failed with `0x80040154` and left the wheel
+  dead. The other candidates are now tried before giving up.
 
 ## [0.2.1] - 2026-09-02
 

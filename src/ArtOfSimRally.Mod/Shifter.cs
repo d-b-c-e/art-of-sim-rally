@@ -36,6 +36,7 @@ namespace ArtOfSimRally.Mod
         [DllImport(Dll)] private static extern int  EnumerateAllDevices();
         [DllImport(Dll, CharSet = CharSet.Ansi)]
         private static extern int  GetAnyDeviceName(int index, StringBuilder buffer, int size);
+        [DllImport(Dll)] private static extern int  GetAnyDeviceInfo(int index, out int axes, out int buttons, out int ffb);
         [DllImport(Dll)] private static extern int  OpenAuxDevice(int index);
         [DllImport(Dll)] private static extern int  ReadAuxButtons(byte[] buffer, int length);
         [DllImport(Dll)] private static extern void CloseAuxDevice();
@@ -84,6 +85,23 @@ namespace ArtOfSimRally.Mod
                 ModLog.Warning("Could not list controllers: " + ex.Message);
                 return new string[0];
             }
+        }
+
+        /// <summary>Display labels for <see cref="ListDevices"/> - name plus capabilities. Not for storing.</summary>
+        public static string[] ListDeviceLabels(string[] names)
+        {
+            var labels = new string[names.Length];
+            for (int i = 0; i < names.Length; i++)
+            {
+                labels[i] = names[i];
+                try
+                {
+                    if (GetAnyDeviceInfo(i, out int axes, out int buttons, out int ffb) != 0 && (axes > 0 || buttons > 0))
+                        labels[i] = names[i] + "  (" + axes + " axes, " + buttons + " buttons" + (ffb != 0 ? ", force feedback" : "") + ")";
+                }
+                catch { }
+            }
+            return labels;
         }
 
         /// <summary>Opens the chosen device for reading. Safe to call repeatedly.</summary>

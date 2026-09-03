@@ -21,8 +21,11 @@ namespace ArtOfSimRally.Mod
         private static GUIStyle Wrap => _wrap ?? (_wrap = new GUIStyle(GUI.skin.label) { wordWrap = true });
 
         private static string[] _ffbDevices;
+
+        private static string[] _ffbLabels = new string[0];
         private static bool _ffbListed;
         private static string[] _allDevices;
+        private static string[] _allLabels = new string[0];
         private static bool _allListed;
         private static int _bindingGear = int.MinValue;
 
@@ -37,10 +40,10 @@ namespace ArtOfSimRally.Mod
         public static void DrawWheelPicker()
         {
             var cfg = Main.Settings;
-            if (!_ffbListed) { _ffbDevices = FfbNative.ListDevices(); _ffbListed = true; }
+            if (!_ffbListed) { _ffbDevices = FfbNative.ListDevices(); _ffbLabels = FfbNative.ListDeviceLabels(_ffbDevices); _ffbListed = true; }
 
             int chosen = DeviceDropdown.Draw(
-                "wheel", "Wheel", _ffbDevices, cfg.PreferredDeviceIndex,
+                "wheel", "Wheel", _ffbLabels, cfg.PreferredDeviceIndex,
                 "No force-feedback device found. Check the wheel is powered on and not held " +
                 "by another program.");
 
@@ -67,13 +70,13 @@ namespace ArtOfSimRally.Mod
 
         public static void DrawShifterBinding(Settings cfg)
         {
-            if (!_allListed) { _allDevices = Shifter.ListDevices(); _allListed = true; }
+            if (!_allListed) { _allDevices = Shifter.ListDevices(); _allLabels = Shifter.ListDeviceLabels(_allDevices); _allListed = true; }
 
             cfg.ShifterIsHPattern = GUILayout.Toggle(cfg.ShifterIsHPattern,
                 "  H-pattern (off = sequential)");
 
             int picked = DeviceDropdown.Draw(
-                "shifter", "Shifter", _allDevices, cfg.ShifterDeviceIndex, "No controllers found.");
+                "shifter", "Shifter", _allLabels, cfg.ShifterDeviceIndex, "No controllers found.");
             if (picked >= 0)
             {
                 cfg.ShifterDeviceIndex = picked;

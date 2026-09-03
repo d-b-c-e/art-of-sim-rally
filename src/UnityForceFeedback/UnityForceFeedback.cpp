@@ -51,7 +51,7 @@ static const char kLogEnv[] = "AOSR_FFB_LOG";
 // bigger problems than picking one.
 static const int kMaxCandidates = 8;
 
-struct Candidate { GUID guid; char name[MAX_PATH]; };
+struct Candidate { GUID guid; char name[MAX_PATH]; DWORD axes; DWORD buttons; };
 static Candidate g_candidates[kMaxCandidates];
 static int       g_candidateCount = 0;
 static char      g_preferred[MAX_PATH] = {};
@@ -68,7 +68,8 @@ static char      g_activeName[260] = {};
 // non-exclusively so it never competes with the game's own input, and it exists
 // precisely because Rewired's Raw Input backend does not enumerate these at all.
 static const int kMaxAuxDevices = 16;
-struct AuxDevice { GUID guid; char name[MAX_PATH]; };
+struct AuxDevice { GUID guid; char name[MAX_PATH]; DWORD axes; DWORD buttons; int ffb; };
+static DWORD g_activeAxes = 0, g_activeButtons = 0;   // caps of the wheel we hold
 static AuxDevice g_aux[kMaxAuxDevices];
 static int       g_auxCount = 0;
 static LPDIRECTINPUTDEVICE8 g_auxDevice = nullptr;
@@ -175,6 +176,20 @@ static bool ContainsNoCase(const char* haystack, const char* needle)
 //
 // Devices without FFB are skipped outright - acquiring one exclusively would take
 // input away from Rewired for no benefit.
+// One DirectInput instance for the life of the process. Releasing it after a
+// "temporary" enumeration left the device table populated and g_di null, and
+// the next OpenAuxDevice dereferenced it - a hard crash for anyone whose force
+// feedback had failed to initialise (Fanatec support bundle, 2026-09-03).
+static bool EnsureDirectInput()
+{
+    if (!g_lockInit) { InitializeCriticalSection(&g_lock); g_lockInit = true; }
+    if (g_di) return true;
+    HRESULT hr = DirectInput8Create(GetModuleHandle(nullptr), DIRECTINPUT_VERSION,
+                                    IID_IDirectInput8, (VOID**)&g_di, nullptr);
+    if (FAILED(hr)) { Log("DirectInput8Create failed 0x%08lX", hr); g_di = nullptr; return false; }
+    return true;
+}
+
 static BOOL CALLBACK EnumDeviceCallback(const DIDEVICEINSTANCE* inst, VOID* ctx)
 {
     (void)ctx;
@@ -189,6 +204,7 @@ static BOOL CALLBACK EnumDeviceCallback(const DIDEVICEINSTANCE* inst, VOID* ctx)
         Candidate& held = g_candidates[g_candidateCount++];
         held.guid = inst->guidInstance;
         strncpy_s(held.name, sizeof(held.name), inst->tszProductName, _TRUNCATE);
+        held.axes = g_activeAxes; held.buttons = g_activeButtons;
         Log("  found FFB device [%d]: %s (in use)", g_candidateCount - 1, held.name);
         return DIENUM_CONTINUE;
     }
@@ -208,6 +224,7 @@ static BOOL CALLBACK EnumDeviceCallback(const DIDEVICEINSTANCE* inst, VOID* ctx)
     Candidate& c = g_candidates[g_candidateCount++];
     c.guid = inst->guidInstance;
     strncpy_s(c.name, sizeof(c.name), inst->tszProductName, _TRUNCATE);
+    c.axes = caps.dwAxes; c.buttons = caps.dwButtons;
     Log("  found FFB device [%d]: %s (%u axes, %u buttons)",
         g_candidateCount - 1, c.name, caps.dwAxes, caps.dwButtons);
 
@@ -226,7 +243,21 @@ static BOOL CALLBACK EnumAuxCallback(const DIDEVICEINSTANCE* inst, VOID* ctx)
     AuxDevice& d = g_aux[g_auxCount++];
     d.guid = inst->guidInstance;
     strncpy_s(d.name, sizeof(d.name), inst->tszProductName, _TRUNCATE);
-    Log("  device [%d]: %s", g_auxCount - 1, d.name);
+    d.axes = 0; d.buttons = 0; d.ffb = 0;
+    if (g_device && IsEqualGUID(inst->guidInstance, g_activeGuid)) {
+        // Never re-open the wheel we hold; its answer is already known.
+        d.axes = g_activeAxes; d.buttons = g_activeButtons; d.ffb = 1;
+    } else if (g_di) {
+        LPDIRECTINPUTDEVICE8 probe = nullptr;
+        if (SUCCEEDED(g_di->CreateDevice(inst->guidInstance, &probe, nullptr)) && probe) {
+            DIDEVCAPS caps = {}; caps.dwSize = sizeof(caps);
+            if (SUCCEEDED(probe->GetCapabilities(&caps))) {
+                d.axes = caps.dwAxes; d.buttons = caps.dwButtons; d.ffb = (caps.dwFlags & DIDC_FORCEFEEDBACK) ? 1 : 0;
+            }
+            probe->Release();
+        }
+    }
+    Log("  device [%d]: %s (%lu axes, %lu buttons%s)", g_auxCount - 1, d.name, d.axes, d.buttons, d.ffb ? ", force feedback" : "");
     return DIENUM_CONTINUE;
 }
 
@@ -332,6 +363,77 @@ static HRESULT CreateForceEffect()
     return hr;
 }
 
+// Releases a device that turned out not to do force feedback, keeping the
+// DirectInput instance for the next attempt (and for the shifter and reader).
+static void CloseCandidate()
+{
+    ReleaseEffect();
+    if (g_device) { g_device->Unacquire(); g_device->Release(); g_device = nullptr; }
+    g_activeGuid = GUID{}; g_activeName[0] = 0; g_activeAxes = g_activeButtons = 0;
+}
+
+// Opens one FFB candidate and creates the constant-force effect on it.
+// Returns 1 on success; on failure everything but the instance is released.
+static int OpenCandidate(int idx)
+{
+    HRESULT hr = S_OK;
+
+    if (FAILED(g_di->CreateDevice(g_candidates[idx].guid, &g_device, nullptr)) || !g_device) {
+        Log("  could not open the device");
+        return 0;
+    }
+    g_activeGuid = g_candidates[idx].guid;
+    g_activeAxes = g_candidates[idx].axes; g_activeButtons = g_candidates[idx].buttons;
+    strncpy_s(g_activeName, sizeof(g_activeName), g_candidates[idx].name, _TRUNCATE);
+
+    if (FAILED(hr = g_device->SetDataFormat(&c_dfDIJoystick2))) {
+        Log("  SetDataFormat failed 0x%08lX", hr);
+        CloseCandidate();
+        return 0;
+    }
+
+    // Force feedback requires exclusive access. Background keeps effects alive
+    // when the game loses focus, which matters on a multi-monitor sim rig.
+    if (FAILED(hr = g_device->SetCooperativeLevel(g_hwnd, DISCL_EXCLUSIVE | DISCL_BACKGROUND))) {
+        Log("  SetCooperativeLevel(EXCLUSIVE|BACKGROUND) failed 0x%08lX - "
+            "another process may hold the wheel", hr);
+        CloseCandidate();
+        return 0;
+    }
+
+    // Autocentre fights every effect we apply; off by default, the game can
+    // turn it back on through SetAutoCenter.
+    DIPROPDWORD prop = {};
+    prop.diph.dwSize       = sizeof(DIPROPDWORD);
+    prop.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+    prop.diph.dwObj        = 0;
+    prop.diph.dwHow        = DIPH_DEVICE;
+    prop.dwData            = DIPROPAUTOCENTER_OFF;
+    g_device->SetProperty(DIPROP_AUTOCENTER, &prop.diph);
+    // Axes in a known range, so the direct-input reader can calibrate against
+    // 0..65535 on every device. Harmless for force feedback.
+    {
+        DIPROPRANGE range = {};
+        range.diph.dwSize       = sizeof(DIPROPRANGE);
+        range.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+        range.diph.dwObj        = 0;
+        range.diph.dwHow        = DIPH_DEVICE;
+        range.lMin = 0; range.lMax = 65535;
+        g_device->SetProperty(DIPROP_RANGE, &range.diph);
+    }
+
+    g_device->Acquire();
+
+    hr = CreateForceEffect();
+    if (FAILED(hr)) {
+        Log("  CreateEffect(GUID_ConstantForce) failed 0x%08lX", hr);
+        CloseCandidate();
+        return 0;
+    }
+    Log("  initialised OK (constant force on %lu axis/axes)", g_effectAxes);
+    return 1;
+}
+
 __declspec(dllexport) int InitDirectInput(int hwnd)
 {
     Log("InitDirectInput(hwnd=%d)", hwnd);
@@ -348,16 +450,14 @@ __declspec(dllexport) int InitDirectInput(int hwnd)
     g_hwnd = ResolveHwnd(hwnd);
     if (!g_hwnd) return 0;
 
-    HRESULT hr = DirectInput8Create(GetModuleHandle(nullptr), DIRECTINPUT_VERSION,
-                                    IID_IDirectInput8, (VOID**)&g_di, nullptr);
-    if (FAILED(hr)) { Log("  DirectInput8Create failed 0x%08lX", hr); return 0; }
+    if (!EnsureDirectInput()) return 0;
+    HRESULT hr = S_OK; (void)hr;
 
     g_candidateCount = 0;
     g_di->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumDeviceCallback, nullptr, DIEDFL_ATTACHEDONLY);
 
     if (g_candidateCount == 0) {
         Log("  no force-feedback device found");
-        g_di->Release(); g_di = nullptr;
         return 0;
     }
 
@@ -390,62 +490,18 @@ __declspec(dllexport) int InitDirectInput(int hwnd)
             g_candidateCount, g_candidates[0].name);
     }
 
-    Log("  using: %s", g_candidates[chosen].name);
-
-    if (FAILED(g_di->CreateDevice(g_candidates[chosen].guid, &g_device, nullptr)) || !g_device) {
-        Log("  could not open the chosen device");
-        g_di->Release(); g_di = nullptr;
-        return 0;
+    // Open the chosen device; if it cannot do constant force - a Fanatec base
+    // presents two "FANATEC Wheel" devices and only one has the actuator - try
+    // the others rather than give up. Which twin is which is not something to
+    // make a user guess from a dropdown.
+    for (int attempt = 0; attempt < g_candidateCount; ++attempt) {
+        int idx = (chosen + attempt) % g_candidateCount;
+        Log("  using: [%d] %s", idx, g_candidates[idx].name);
+        if (OpenCandidate(idx)) return 1;
+        Log("  [%d] %s cannot be used for force feedback - trying the next", idx, g_candidates[idx].name);
     }
-    g_activeGuid = g_candidates[chosen].guid;
-    strncpy_s(g_activeName, sizeof(g_activeName), g_candidates[chosen].name, _TRUNCATE);
-
-    if (FAILED(hr = g_device->SetDataFormat(&c_dfDIJoystick2))) {
-        Log("  SetDataFormat failed 0x%08lX", hr);
-        FreeDirectInput();
-        return 0;
-    }
-
-    // Force feedback requires exclusive access. Background keeps effects alive
-    // when the game loses focus, which matters on a multi-monitor sim rig.
-    if (FAILED(hr = g_device->SetCooperativeLevel(g_hwnd, DISCL_EXCLUSIVE | DISCL_BACKGROUND))) {
-        Log("  SetCooperativeLevel(EXCLUSIVE|BACKGROUND) failed 0x%08lX - "
-            "another process may hold the wheel", hr);
-        FreeDirectInput();
-        return 0;
-    }
-
-    // Autocentre fights every effect we apply; off by default, the game can
-    // turn it back on through SetAutoCenter.
-    DIPROPDWORD prop = {};
-    prop.diph.dwSize       = sizeof(DIPROPDWORD);
-    prop.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-    prop.diph.dwObj        = 0;
-    prop.diph.dwHow        = DIPH_DEVICE;
-    prop.dwData            = DIPROPAUTOCENTER_OFF;
-    g_device->SetProperty(DIPROP_AUTOCENTER, &prop.diph);
-    // Axes in a known range, so the direct-input reader can calibrate against
-    // 0..65535 on every device. Harmless for force feedback.
-    {
-        DIPROPRANGE range = {};
-        range.diph.dwSize       = sizeof(DIPROPRANGE);
-        range.diph.dwHeaderSize = sizeof(DIPROPHEADER);
-        range.diph.dwObj        = 0;
-        range.diph.dwHow        = DIPH_DEVICE;
-        range.lMin = 0; range.lMax = 65535;
-        g_device->SetProperty(DIPROP_RANGE, &range.diph);
-    }
-
-    g_device->Acquire();
-
-    hr = CreateForceEffect();
-    if (FAILED(hr)) {
-        Log("  CreateEffect(GUID_ConstantForce) failed 0x%08lX", hr);
-        FreeDirectInput();
-        return 0;
-    }
-    Log("  initialised OK (constant force on %lu axis/axes)", g_effectAxes);
-    return 1;
+    Log("  no usable force-feedback device");
+    return 0;
 }
 
 // Enumerates force-feedback devices without opening or acquiring anything, so
@@ -453,20 +509,10 @@ __declspec(dllexport) int InitDirectInput(int hwnd)
 // instead of asking for an index. Safe to call at any time.
 __declspec(dllexport) int EnumerateDevices(void)
 {
-    if (!g_lockInit) { InitializeCriticalSection(&g_lock); g_lockInit = true; }
-
-    bool temporary = (g_di == nullptr);
-    if (temporary) {
-        HRESULT hr = DirectInput8Create(GetModuleHandle(nullptr), DIRECTINPUT_VERSION,
-                                        IID_IDirectInput8, (VOID**)&g_di, nullptr);
-        if (FAILED(hr)) { Log("EnumerateDevices: DirectInput8Create failed 0x%08lX", hr); return 0; }
-    }
+    if (!EnsureDirectInput()) return 0;
 
     g_candidateCount = 0;
     g_di->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumDeviceCallback, nullptr, DIEDFL_ATTACHEDONLY);
-
-    // Only release what we created here; never tear down a live session.
-    if (temporary && !g_device) { g_di->Release(); g_di = nullptr; }
 
     return g_candidateCount;
 }
@@ -502,22 +548,28 @@ __declspec(dllexport) void SetPreferredDeviceIndex(int index)
 
 // ---- auxiliary (button-only) device: shifters, handbrakes -----------------
 
+// Capabilities of an FFB candidate, for telling two same-named devices apart.
+__declspec(dllexport) int GetDeviceInfo(int index, int* axes, int* buttons)
+{
+    if (index < 0 || index >= g_candidateCount || !axes || !buttons) return 0;
+    *axes = (int)g_candidates[index].axes; *buttons = (int)g_candidates[index].buttons;
+    return 1;
+}
+
+// Capabilities of any enumerated controller.
+__declspec(dllexport) int GetAnyDeviceInfo(int index, int* axes, int* buttons, int* ffb)
+{
+    if (index < 0 || index >= g_auxCount || !axes || !buttons || !ffb) return 0;
+    *axes = (int)g_aux[index].axes; *buttons = (int)g_aux[index].buttons; *ffb = g_aux[index].ffb;
+    return 1;
+}
+
 __declspec(dllexport) int EnumerateAllDevices(void)
 {
-    if (!g_lockInit) { InitializeCriticalSection(&g_lock); g_lockInit = true; }
-
-    bool temporary = (g_di == nullptr);
-    if (temporary) {
-        HRESULT hr = DirectInput8Create(GetModuleHandle(nullptr), DIRECTINPUT_VERSION,
-                                        IID_IDirectInput8, (VOID**)&g_di, nullptr);
-        if (FAILED(hr)) { Log("EnumerateAllDevices failed 0x%08lX", hr); return 0; }
-    }
-
+    if (!EnsureDirectInput()) return 0;
     Log("EnumerateAllDevices()");
     g_auxCount = 0;
     g_di->EnumDevices(DI8DEVCLASS_GAMECTRL, EnumAuxCallback, nullptr, DIEDFL_ATTACHEDONLY);
-
-    if (temporary && !g_device && !g_auxDevice) { g_di->Release(); g_di = nullptr; }
     return g_auxCount;
 }
 
@@ -544,6 +596,7 @@ __declspec(dllexport) int OpenAuxDevice(int index)
         return 0;
     }
 
+    if (!EnsureDirectInput()) return 0;
     if (g_auxDevice) { g_auxDevice->Unacquire(); g_auxDevice->Release(); g_auxDevice = nullptr; }
 
     HRESULT hr = g_di->CreateDevice(g_aux[index].guid, &g_auxDevice, nullptr);
@@ -630,6 +683,7 @@ __declspec(dllexport) int OpenReadDevice(int index)
         Log("OpenReadDevice(%d): %s is the force feedback wheel - read through that handle (slot %d)", index, s.name, g_readCount);
         return g_readCount++;
     }
+    if (!EnsureDirectInput()) return -1;
     HRESULT hr = g_di->CreateDevice(g_aux[index].guid, &s.dev, nullptr);
     if (FAILED(hr) || !s.dev) { Log("OpenReadDevice(%d): CreateDevice failed 0x%08lX", index, hr); s.dev = nullptr; return -1; }
     if (FAILED(hr = s.dev->SetDataFormat(&c_dfDIJoystick2))) {
@@ -859,7 +913,9 @@ __declspec(dllexport) void FreeDirectInput(void)
     Log("FreeDirectInput()");
     ReleaseEffect();
     if (g_device) { g_device->Unacquire(); g_device->Release(); g_device = nullptr; }
-    if (g_di)     { g_di->Release();  g_di = nullptr; }
+    g_activeGuid = GUID{}; g_activeName[0] = 0; g_activeAxes = g_activeButtons = 0;
+    // The instance stays while the shifter or the direct reader still use it.
+    if (g_di && !g_auxDevice && g_readCount == 0) { g_di->Release(); g_di = nullptr; }
 }
 
 } // extern "C"
