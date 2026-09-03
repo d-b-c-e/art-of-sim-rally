@@ -138,7 +138,7 @@ Needs the .NET SDK and Visual Studio Build Tools with the C++ workload.
 
 ```
 dotnet build ArtOfSimRally.sln -c Release
-tools\package\package.ps1 -Version 0.2.0
+tools\package\package.ps1 -Version 0.2.1
 ```
 
 Referencing the game's assemblies requires art of rally installed; override

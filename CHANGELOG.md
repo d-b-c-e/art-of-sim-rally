@@ -5,7 +5,7 @@ Notable changes to art of sim rally.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.1] - 2026-09-02
 
 ### Added
 
@@ -15,17 +15,34 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   of the two views is on screen and resets that one alone. Can be switched off
   separately from the bonnet view.
 
+### Changed
+
+- **Force feedback is now lateral force through a pneumatic trail, not the
+  game's aligning torque.** `Mz` is a Pacejka curve that reverses sign at
+  about 8° of slip, and this game's front tyres sit at 12–29° in ordinary
+  corners — so the wheel flipped from centring to pulling toward lock in the
+  middle of every corner ("there is no centre"). The new force is the front
+  axle's `Fy` scaled by a trail that shrinks toward the limit: it centres in
+  proportion to load, lightens as the front starts to slide, never reverses.
+  Fades out below 12 km/h, where slip angles mean nothing. Sign confirmed on
+  a MOZA R12; `Invert` remains for wheels that read the axis the other way.
+  `MzReference` is replaced by `FyReference` (8,000 N).
+
 ### Fixed
 
+- **Telemetry parked until the lights went green.** `IsRaceOn` used the strict
+  "driving" state, which is false during the countdown, so SimHub treated the
+  start line as race-off and a bass shaker ignored the engine while revving.
+  It is now true from the start-line hold onward; forces still wait for green.
 - **Force feedback inverted on one side only** (MOZA R5, reported with a
   log). The native plugin passed the sign in both the direction vector and the
   magnitude; a negative magnitude reverses the direction again, so on a wheel
   that honours both the force always pointed the same way — right turns
   correct, left inverted, and *Invert* could not help because it negates both.
-  The direction is now fixed at +X and the **signed magnitude alone** carries
-  which way to pull: right for a wheel that honours direction (R5), for one
-  that ignores it and reads the magnitude sign (R12), and for single-axis
-  wheels (Fanatec), which already worked that way.
+  The **signed magnitude alone** now carries which way to pull, with the
+  direction vector's length matching it: right for a wheel that honours
+  direction (R5), for one that ignores it and reads the magnitude sign (R12),
+  and for single-axis wheels (Fanatec), which already worked that way.
 - **Force feedback stopping mid-session and never returning.** Alt-tabbing
   away from the game left the wheel acquired non-exclusively
   (`DIERR_NOTEXCLUSIVEACQUIRED`), which force feedback cannot use, and nothing

@@ -113,7 +113,7 @@ namespace ArtOfSimRally.Mod
             {
                 // False in menus, cutscenes, pauses and replays, so dashboards
                 // park and motion rigs stop instead of reacting to an AI-driven car.
-                IsRaceOn    = GameState.IsDriving,
+                IsRaceOn    = GameState.IsEngineLive,   // on the line too - see GameState
                 TimestampMs = _timestampMs,
 
                 EngineMaxRpm     = _drivetrain != null ? _drivetrain.maxRPM : 0f,

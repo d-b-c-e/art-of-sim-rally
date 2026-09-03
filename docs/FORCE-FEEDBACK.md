@@ -186,7 +186,8 @@ is small and well-defined. The mod must supply the missing middle:
 
 1. Set `cardynamics.enableForceFeedback = true` - this alone turns on the
    game's own `CalcAligningForce` and gives real per-wheel `Mz`.
-2. Each physics step, compute a force from the steered wheels' `Mz` and write
+2. Each physics step, compute a force from the steered wheels and write
+   (*originally from `Mz`; replaced by lateral force × trail — see the last section*)
    it to `cardynamics.forceFeedback` - the link the developers never wrote.
 3. Output it, either by attaching the game's `ForceFeedback` component (which
    then drives our DLL unmodified) or by calling `SetDeviceForcesXY` directly.
@@ -272,7 +273,7 @@ actually run it. The things most likely to differ elsewhere:
 |---|---|
 | **Multiple FFB devices** | Addressed: the plugin now logs every FFB device it finds and takes the first unless a preferred name is set in the mod settings. Previously it silently grabbed whichever DirectInput listed first. |
 | **Exclusive acquisition** | FFB needs `DISCL_EXCLUSIVE` while Rewired already holds the wheel. Fine on this stack; other driver stacks may refuse. The log says so explicitly if it happens. |
-| **Force scaling** | `MzReference` is per-wheel. A strong direct-drive base and a gear-driven Logitech want very different numbers. This is tuning, not compatibility. |
+| **Force scaling** | `FyReference` is per-wheel. A strong direct-drive base and a gear-driven Logitech want very different numbers. This is tuning, not compatibility. |
 | **Axis assignment** | Force is applied on X, which is steering on every wheel that follows the convention. A device that reports steering elsewhere would need the effect axis changed. |
 | **Driver compatibility modes** | Some bases can present in a mode that hides or limits DirectInput FFB. If the log shows the wheel with no FFB capability, that is where to look. |
 
@@ -331,3 +332,38 @@ The exclusive cooperative level is also bound to this process's own main
 window rather than whatever `GetForegroundWindow()` returned at init. A
 standalone probe confirmed every parameter encoding is accepted by the R12,
 so nothing about the encoding was involved.
+
+## The force model: lateral force × trail, not `Mz` (2026-09-02)
+
+The first shipped model was `Mz` from the steered axle, on the reasoning that
+the game already computes a real self-aligning torque. On the wheel it felt
+like there was no centre: the wheel pulled *toward* lock, on both sides, and
+snapped across the middle. A 5 Hz trace of the quantities the force is built
+from (`FFB trace` lines, with `DiagnosticLogging` on) showed why:
+
+| | |
+|---|---|
+| Ideal (peak-grip) slip angle | 8.5° |
+| Front slip angles in ordinary corners | 12° at 86 km/h, 17° at 47 km/h, 29° at 39 km/h |
+| `Mz` vs `Fy` sign, small slip | opposite (centring) |
+| `Mz` vs `Fy` sign, above ~8° | same (pushes outward) |
+| Share of samples above 60 km/h where `Mz` centred | 42% |
+
+`CalcAligningForce` is a 1989 Pacejka aligning-torque curve. Like the real
+thing it peaks at a few degrees of slip, then falls through zero and reverses,
+and this game's tyres spend most of every corner past that point. So the
+force flipped from centring to shoving outward mid-corner, every corner. It
+was also tiny (|Mz| ≤ 15 against a reference of 150).
+
+The force is now what most sims use: the **front axle's lateral force through
+a pneumatic trail** — `(FyL + FyR) × trail / FyReference`, where the trail
+falls linearly from 1.0 at zero slip to 0.6 at twice the ideal slip angle.
+`Fy` is large (up to 4,400 N per wheel), follows the steering 98–100% of the
+time above 30 km/h, and saturates without reversing; the shrinking trail
+keeps the "lightening" cue as the front starts to slide. A **low-speed fade**
+(0 at 3 km/h, full at 12 km/h) removes the parking-lot chaos where slip angles
+are meaningless. The sign was set at the wheel: on a MOZA R12 `+Fy` centres;
+`Invert` remains for devices that read the axis the other way.
+
+`FyReference` defaults to 8,000 N — a hard corner at ~100 km/h measured
+6,000–7,000 N, and 6,000 felt a little strong at Strength 50.

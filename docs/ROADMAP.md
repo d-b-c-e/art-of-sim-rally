@@ -73,7 +73,7 @@ The encoder is done and round-trip tested; this is about the mapping.
 
 Only meaningful once phase 0 says which route we are on.
 
-Compute force from `Wheel.Mz` (self-aligning torque, per wheel) rather than
+~~Compute force from `Wheel.Mz`~~ (done, then replaced 2026-09-02 by lateral force × trail — `Mz` reverses past 8° slip; see FORCE-FEEDBACK.md) rather than
 faking it from lateral G, and layer on:
 
 - load sensitivity from suspension force

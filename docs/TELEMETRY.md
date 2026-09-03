@@ -84,7 +84,7 @@ metres) and `ForzaPacket` encodes it. Sources, from
 
 | Forza field | art of rally source | Notes |
 |---|---|---|
-| `IsRaceOn` | stage active | must go false in menus, or dashboards never park |
+| `IsRaceOn` | driving **or held on the start line** | true from `WAITING_TO_BEGIN` so a shaker follows the engine while revving before the lights; must go false in menus and cutscenes, or dashboards never park |
 | `CurrentEngineRpm` | `Drivetrain` RPM | |
 | `EngineMaxRpm` / `EngineIdleRpm` | `Drivetrain.maxRPM` / `.minRPM` | |
 | `Speed` | `CarController.veloKmh / 3.6` | m/s |

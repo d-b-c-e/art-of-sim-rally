@@ -50,17 +50,19 @@ namespace ArtOfSimRally.Mod
         public float GainFromStrength => Strength / 50f;
 
         /// <summary>
-        /// Aligning torque treated as full force, before Strength is applied.
+        /// Front-axle lateral force (N, both wheels, after the trail) treated as
+        /// full force, before Strength is applied.
         /// </summary>
         /// <remarks>
         /// Not shown in the panel. It sets where the output starts clipping, which
         /// is a different thing from how strong the wheel feels, and having two
         /// dials for one sensation - one of them inverted, where lower means
         /// stronger - confused everyone who met it. Strength is the only dial now;
-        /// this stays as the reference it scales against, tuned from measured peak
-        /// torque across a real stage.
+        /// this stays as the reference it scales against. 8,000 N: a hard
+        /// corner at 100 km/h measured 6,000-7,000 N on 2026-09-02 and the owner
+        /// found that a little strong at Strength 50, so it clips a bit later.
         /// </remarks>
-        public float MzReference = 150f;
+        public float FyReference = 8000f;
 
         public float Smoothing = 0.2f;
 

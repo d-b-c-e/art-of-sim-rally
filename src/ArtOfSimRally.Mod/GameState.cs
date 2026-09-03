@@ -56,6 +56,32 @@ namespace ArtOfSimRally.Mod
         }
 
         /// <summary>
+        /// True while the engine is the player's to rev: driving, or held on the
+        /// start line waiting for the lights.
+        /// </summary>
+        /// <remarks>
+        /// Telemetry uses this for <c>IsRaceOn</c> rather than <see cref="IsDriving"/>.
+        /// The engine model runs during <c>WAITING_TO_BEGIN</c> and responds to the
+        /// throttle, so a rig should shake to it; with the narrower flag SimHub
+        /// parked the bass shaker until the lights went green. Forces stay on
+        /// <see cref="IsDriving"/> - the wheel must not fight the start-line hold.
+        /// </remarks>
+        public static bool IsEngineLive
+        {
+            get
+            {
+                try
+                {
+                    var manager = GameEntryPoint.EventManager;
+                    if (manager == null) return false;
+                    return manager.status == EventStatusEnums.EventStatus.UNDERWAY
+                        || manager.status == EventStatusEnums.EventStatus.WAITING_TO_BEGIN;
+                }
+                catch { return false; }
+            }
+        }
+
+        /// <summary>
         /// True while the player's own camera should be in control of the view.
         /// </summary>
         /// <remarks>

@@ -19,7 +19,7 @@ The config is grouped by feature so this reads clearly to a user:
 
 ```
 [Steering]  DirectSteering, ZeroAxisDeadzone, DisableSteerAssist
-[ForceFeedback]  Enabled, Gain, MzReference, Smoothing, Invert
+[ForceFeedback]  Enabled, Gain, FyReference, Smoothing, Invert
 [Camera]  BonnetCamera, Height, Forward, Side, Pitch, FieldOfView, Lean
 [CameraTuning]  hotkeys
 [Telemetry]  Enabled, Host, Port
@@ -139,7 +139,7 @@ Two things to state plainly, because both will otherwise generate complaints:
 1. **Tested on one wheel.** Everything was developed against a MOZA R12 Base. The
    deadzone and steering findings should apply to any wheel Rewired does not
    recognise, which is likely every modern direct-drive base, but that is
-   reasoning rather than testing. `MzReference` will need tuning per wheel.
+   reasoning rather than testing. `FyReference` will need tuning per wheel.
 2. **Leaderboards.** `DirectSteering` and `ZeroAxisDeadzone` restore what a
    recognised wheel already gets and are fair-play neutral. `DisableSteerAssist`
    genuinely changes driving aids and is off by default. Say so, so nobody enables
