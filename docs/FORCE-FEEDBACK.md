@@ -293,3 +293,19 @@ If `SetCooperativeLevel` fails in the log, the fallbacks in order are:
    DirectInput at all (Logitech wheels only).
 3. Reuse Rewired's own device handle from inside the process via Harmony,
    rather than opening a second one.
+
+
+## Sign handling, per axis count (fixed 2026-09-02)
+
+`SetDeviceForcesXY(x, 0)` must put the sign in exactly one place:
+
+| Effect | Direction | Magnitude |
+|---|---|---|
+| Two axes (MOZA R5, R12, most bases) | `rglDirection = {x, 0}` carries the sign | `sqrt(x² + y²)`, never negative |
+| One axis (Fanatec fallback) | ignored by DirectInput | signed `x` carries the sign |
+
+Before the fix the two-axis path passed a signed magnitude as well, applying the
+sign twice. A MOZA R5 honoured that literally and pulled the same way on both
+sides — the report was "right works, left inverted, Invert does nothing", which
+is exactly the signature: `Invert` negates `x`, which flips both terms and
+changes nothing. A MOZA R12 ignores the magnitude sign and never showed it.

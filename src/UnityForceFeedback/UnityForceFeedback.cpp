@@ -32,6 +32,7 @@
 #include <dinput.h>
 #include <shlobj.h>
 #include <cstdio>
+#include <cmath>
 #include <cstdarg>
 #include <cstring>
 #include <cctype>
@@ -560,10 +561,22 @@ __declspec(dllexport) int SetDeviceForcesXY(int x, int y)
 
     LONG direction[2] = { (LONG)x, (LONG)y };
     DICONSTANTFORCE constant = {};
-    // Cartesian direction carries the sign; magnitude is the vector length the
-    // device should pull with. Using |x| keeps a pure-X setup behaving exactly
-    // as the game intends: negative x pulls one way, positive the other.
-    constant.lMagnitude = (LONG)x;
+    // The sign must live in exactly one place.
+    //
+    // Two axes: the Cartesian direction vector carries it and the magnitude is
+    // the vector's length. Passing a SIGNED magnitude here as well applied the
+    // sign twice - a negative magnitude reverses the direction - so on drivers
+    // that honour it literally the force always pointed the same way: right
+    // turns correct, left turns inverted, and Invert (which negates x) could
+    // not help. Reported on a MOZA R5; a MOZA R12 ignores the sign and hid it.
+    //
+    // One axis: DirectInput ignores the direction, so the sign has to be in the
+    // magnitude, which is what the single-axis wheels were already getting.
+    if (g_effectAxes == 1) {
+        constant.lMagnitude = (LONG)x;
+    } else {
+        constant.lMagnitude = (LONG)sqrt((double)x * x + (double)y * y);
+    }
 
     DIEFFECT update      = {};
     update.dwSize        = sizeof(DIEFFECT);

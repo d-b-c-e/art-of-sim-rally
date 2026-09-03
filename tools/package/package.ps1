@@ -89,8 +89,8 @@ Launch the game and press Ctrl+F10 for the settings panel.
   the lever. Both H-pattern and sequential work. The game's own input system
   cannot see most shifters - this reads yours directly, so it works anyway.
 
-* The bonnet camera is added to the game's normal view rotation - press your
-  change-view button to cycle onto it. Adjust it live on the numpad while you
+* Bonnet and bumper cameras are added to the game's normal view rotation - press
+  your change-view button to cycle onto them. Adjust it live on the numpad while you
   are looking through it: 8/2 up-down, 7/9 back-forward, 4/6 left-right,
   1/3 tilt, +/- field of view, 0 resets. Changes save on their own.
 

@@ -81,6 +81,11 @@ deadzone* only restore what the game already gives wheels it recognises, so they
 change nothing about the car. *Disable steering assist* does change how the car
 behaves, and is off by default. The game has online leaderboards.
 
+**A shifter gate that also accelerates or brakes** means the game auto-bound that
+button to one of its own actions when it saw the shifter as a controller. Reset or
+clear the binding in the game's controls screen; the mod reads the shifter directly
+and does not need the game to know about it.
+
 **Bonnet, not cockpit.** The cars have no modelled interiors, so a cockpit view
 isn't possible.
 

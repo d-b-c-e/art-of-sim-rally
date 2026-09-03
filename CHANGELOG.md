@@ -15,6 +15,18 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   of the two views is on screen and resets that one alone. Can be switched off
   separately from the bonnet view.
 
+### Fixed
+
+- **Force feedback inverted on one side only** (MOZA R5, reported with a
+  log). On wheels that take the two-axis effect, the native plugin passed the
+  sign in both the direction vector and the magnitude; a negative magnitude
+  reverses the direction again, so on drivers that honour it literally the
+  force always pointed the same way — right turns correct, left inverted, and
+  *Invert* could not help because it negates both. The magnitude is now the
+  vector length and the direction alone carries the sign. Single-axis wheels
+  (Fanatec) were already correct and are unchanged. A MOZA R12 ignores the
+  magnitude sign, which is why the owner never saw it.
+
 ## [0.2.0] - 2026-09-01
 
 The shifter release. Also the point at which the settings panel stopped being
