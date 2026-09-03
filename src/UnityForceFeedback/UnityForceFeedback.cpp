@@ -32,7 +32,6 @@
 #include <dinput.h>
 #include <shlobj.h>
 #include <cstdio>
-#include <cmath>
 #include <cstdarg>
 #include <cstring>
 #include <cctype>
@@ -347,7 +346,7 @@ __declspec(dllexport) int InitDirectInput(int hwnd)
     // A single constant force on X (+Y where the device has it). This mirrors
     // what the game asks for: SetDeviceForcesXY is the only force call it makes.
     DWORD axes[2]      = { DIJOFS_X, DIJOFS_Y };
-    LONG  direction[2] = { 0, 0 };
+    LONG  direction[2] = { 1, 0 };   // fixed +X; the sign lives in the magnitude
 
     DICONSTANTFORCE constant = {};
     constant.lMagnitude = 0;
@@ -559,24 +558,20 @@ __declspec(dllexport) int SetDeviceForcesXY(int x, int y)
 
     EnterCriticalSection(&g_lock);
 
-    LONG direction[2] = { (LONG)x, (LONG)y };
     DICONSTANTFORCE constant = {};
-    // The sign must live in exactly one place.
-    //
-    // Two axes: the Cartesian direction vector carries it and the magnitude is
-    // the vector's length. Passing a SIGNED magnitude here as well applied the
-    // sign twice - a negative magnitude reverses the direction - so on drivers
-    // that honour it literally the force always pointed the same way: right
-    // turns correct, left turns inverted, and Invert (which negates x) could
-    // not help. Reported on a MOZA R5; a MOZA R12 ignores the sign and hid it.
-    //
-    // One axis: DirectInput ignores the direction, so the sign has to be in the
-    // magnitude, which is what the single-axis wheels were already getting.
-    if (g_effectAxes == 1) {
-        constant.lMagnitude = (LONG)x;
-    } else {
-        constant.lMagnitude = (LONG)sqrt((double)x * x + (double)y * y);
-    }
+    // The direction is fixed at +X (set at creation) and the SIGNED magnitude
+    // carries which way to pull. This is the one encoding every wheel seen so
+    // far agrees on:
+    //   - a MOZA R12 ignores the direction vector and reads the sign from the
+    //     magnitude, so putting the sign only in the direction left it with no
+    //     sign at all (anti-centring: it pushed away from centre both ways);
+    //   - a MOZA R5 honours the direction AND the magnitude sign, so putting the
+    //     sign in both applied it twice and it pulled the same way both sides;
+    //   - single-axis wheels (Fanatec) ignore direction and were already using
+    //     the signed magnitude.
+    // A constant positive direction with a signed magnitude is right for all
+    // three. Do not put the sign in the direction vector again.
+    constant.lMagnitude = (LONG)x;
 
     DIEFFECT update      = {};
     update.dwSize        = sizeof(DIEFFECT);
@@ -585,12 +580,13 @@ __declspec(dllexport) int SetDeviceForcesXY(int x, int y)
     // while the effect fell back to 1 axis makes every update fail with
     // E_INVALIDARG, and the wheel simply never moves.
     update.cAxes         = g_effectAxes;
-    update.rglDirection  = direction;
     update.cbTypeSpecificParams  = sizeof(DICONSTANTFORCE);
     update.lpvTypeSpecificParams = &constant;
 
+    // Direction is never re-sent: it was fixed at creation, and some drivers
+    // restart the effect on a direction change.
     HRESULT hr = g_effect->SetParameters(
-        &update, DIEP_DIRECTION | DIEP_TYPESPECIFICPARAMS | DIEP_START);
+        &update, DIEP_TYPESPECIFICPARAMS | DIEP_START);
 
     LeaveCriticalSection(&g_lock);
 

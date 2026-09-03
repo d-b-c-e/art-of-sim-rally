@@ -295,17 +295,20 @@ If `SetCooperativeLevel` fails in the log, the fallbacks in order are:
    rather than opening a second one.
 
 
-## Sign handling, per axis count (fixed 2026-09-02)
+## Sign handling (settled 2026-09-02, after two contradictory reports)
 
-`SetDeviceForcesXY(x, 0)` must put the sign in exactly one place:
+`SetDeviceForcesXY(x, 0)` must put the sign in exactly one place, and that
+place has to be one every wheel reads. Three wheels, three behaviours:
 
-| Effect | Direction | Magnitude |
+| Wheel | Honours direction vector | Honours magnitude sign |
 |---|---|---|
-| Two axes (MOZA R5, R12, most bases) | `rglDirection = {x, 0}` carries the sign | `sqrt(x² + y²)`, never negative |
-| One axis (Fanatec fallback) | ignored by DirectInput | signed `x` carries the sign |
+| MOZA R5 | yes | yes |
+| MOZA R12 | **no** | yes |
+| Fanatec (single-axis effect) | n/a — DirectInput ignores it | yes |
 
-Before the fix the two-axis path passed a signed magnitude as well, applying the
-sign twice. A MOZA R5 honoured that literally and pulled the same way on both
-sides — the report was "right works, left inverted, Invert does nothing", which
-is exactly the signature: `Invert` negates `x`, which flips both terms and
-changes nothing. A MOZA R12 ignores the magnitude sign and never showed it.
+The original code signed both (correct on the R12, double-negated on the R5 —
+"right works, left inverted, Invert does nothing"). Putting the sign only in
+the direction fixed the R5 and broke the R12 ("no centre, pushes away both
+ways"). The encoding that satisfies all three: **direction fixed at +X, set
+once at creation; signed `lMagnitude` carries the sign; direction never
+re-sent.** Do not put the sign back in the direction vector.
