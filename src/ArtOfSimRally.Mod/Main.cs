@@ -46,6 +46,10 @@ namespace ArtOfSimRally.Mod
                 Settings = new Settings();
             }
 
+            // Before anything is applied: a marker from a launch where the
+            // DirectInput switch left the keyboard dead turns that setting off.
+            InputBackend.OnLoad();
+
             modEntry.OnGUI       = OnGUI;
             modEntry.OnSaveGUI   = OnSaveGUI;
             modEntry.OnToggle    = OnToggle;

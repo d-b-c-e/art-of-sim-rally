@@ -122,6 +122,7 @@ namespace ArtOfSimRally.Mod
                 var joysticks = ReInput.controllers.Joysticks;
                 sb.AppendLine("joysticks attached : " + (joysticks?.Count ?? 0));
                 sb.AppendLine("assigned to player : " + (player?.controllers.joystickCount ?? 0));
+                sb.AppendLine("input backend      : " + InputBackend.Describe());
                 sb.AppendLine();
 
                 if (joysticks == null) { sb.AppendLine(); return; }

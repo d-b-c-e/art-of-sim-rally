@@ -5,6 +5,21 @@ Notable changes to art of sim rally.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **"Use DirectInput for controllers"** (Steering section). For wheels the
+  controls screen never responds to — a Fanatec base shows up as two identical
+  `FANATEC Wheel` entries the game's input library cannot read — and for
+  shifters and stalks it cannot see at all. Switches Rewired to its DirectInput
+  backend at runtime, after the title screen, with two safety nets: three
+  keypresses Rewired misses revert it and turn it off, and a marker from a
+  launch where nothing reached the game turns it off next time. The wheel
+  must be bound again once. An earlier version of this switch (0.1.x, removed)
+  applied it during load and killed the keyboard; the cause was the timing.
+- Support bundle now records which input backend was active.
+
 ## [0.2.1] - 2026-09-02
 
 ### Added

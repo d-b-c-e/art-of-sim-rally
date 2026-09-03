@@ -32,6 +32,12 @@ namespace ArtOfSimRally.Mod
 
         public bool DisableSteerAssist = false;
 
+        /// <summary>
+        /// Switch the game's input library (Rewired) to its DirectInput backend at
+        /// runtime, for devices Raw Input cannot see or read. See InputBackend.cs.
+        /// </summary>
+        public bool UseDirectInputBackend = false;
+
         // ---- Force feedback -------------------------------------------------
 
         public bool ForceFeedbackEnabled = true;

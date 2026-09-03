@@ -127,32 +127,49 @@ equally - not just this one wheel.
 A binding utility is still the wrong answer - see the xoutput section below.
 Teaching Rewired the device beats flattening it to a gamepad.
 
-### Leading hypothesis: Raw Input vs DirectInput
+### Raw Input vs DirectInput — confirmed, and now a setting (2026-09-02)
 
 Rewired supports several Windows backends (`Rewired.InputSource` in
-`Rewired_Core.dll`):
+`Rewired_Core.dll`): `DirectInput = 1`, `XInput = 2`, `RawInput = 5`, and
+others. art of rally runs **Raw Input** — saved binding keys are prefixed
+`WindowsRawInput...`. Raw Input parses HID reports itself and has two failure
+modes seen in the wild:
 
-```
-None = 0   DirectInput = 1   XInput = 2   Fallback = 4   RawInput = 5
-WindowsGamingInput = 30   SDL2 = 19   Steam = 18   ...
-```
+- **Devices it never lists.** Shifters and stalks report as supplemental HID
+  devices, not joysticks; the game logs "found 1 joysticks attached" while
+  joy.cpl shows three.
+- **Devices it lists but cannot read.** A Fanatec direct-drive base (support
+  bundle, 2026-09-02) appears twice as `FANATEC Wheel` with *identical*
+  hardware ids and 32 axes / 144 buttons — Rewired's ceiling for a descriptor
+  it failed to parse. Both entries are assigned to the player, nothing is
+  bound, and the controls screen never sees an element move, so no binding
+  fix can help. DirectInput on the same machine reads them as 8 axes / 108
+  buttons and 12 / 63, distinct.
 
-art of rally is running **Raw Input** - the saved binding keys are prefixed
-`WindowsRawInput...`. That matters because the two backends handle an
-unrecognised device very differently:
+`ReInput.configuration.windowsStandalonePrimaryInputSource` has a runtime
+setter, and it calls Rewired's `ResetAll()` — a full teardown and rebuild of
+controllers, assignments and maps. A first attempt (2026-09-01) applied it
+during mod load and killed the keyboard with no in-game way back; it was
+removed twice without the cause being established. The instrumented re-test
+on 2026-09-02 (every keypress probed through `UnityEngine.Input` and through
+Rewired independently) established what matters:
 
-- **Raw Input** reads the raw HID report and needs a hardware definition to
-  know which bytes are which axis. With no matching map (our all-zero
-  `hardwareGuid`) it has little to go on.
-- **DirectInput** exposes the device through its own axis/button abstraction,
-  which works for unknown devices. `tools/dinput-enum` proves this reads the
-  R12 correctly - 8 axes, 128 buttons, FFB actuators identified.
+| Applied after the title screen is up | Result |
+|---|---|
+| Keyboard, 15 presses under DirectInput | seen by Unity and by Rewired, every one |
+| Saved keyboard maps | intact (3 before, 3 after) |
+| Joysticks enumerated | 1 on Raw Input (base) → 3 on DirectInput (base, stalk, DS-8X) |
+| Switching back in-process | works; Raw Input bindings return |
 
-So the likely fix is to make Rewired use DirectInput for this device, or to
-give Raw Input the hardware map it is missing. Both are things a mod can do;
-the backend is selected in the Rewired configuration, so a patch would have to
-land **before** `ReInput` initialises. This is a hypothesis with a clear test,
-not yet a confirmed diagnosis.
+So the failure was the *timing* — a Rewired reset in the middle of the game's
+own initialisation — not the backend. **"Use DirectInput for controllers"** in
+the Steering section applies the switch only once Rewired has been ready for
+eight seconds, never at load, and keeps two safety nets: three keypresses
+Unity sees and Rewired misses put it back to Raw Input and turn the setting
+off; a marker file written on switching and cleared by the first keypress
+Rewired sees turns it off on the next launch if nothing ever reached the game.
+Joystick bindings are keyed by a hardware id that begins with the backend
+name, so the wheel must be bound once more after switching.
 
 ### Why the device presents unusually
 
