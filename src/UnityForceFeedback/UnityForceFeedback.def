@@ -20,3 +20,6 @@ EXPORTS
     OpenAuxDevice
     ReadAuxButtons
     CloseAuxDevice
+    OpenReadDevice
+    ReadDeviceState
+    CloseReadDevices

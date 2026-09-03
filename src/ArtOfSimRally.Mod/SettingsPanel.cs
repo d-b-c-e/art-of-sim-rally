@@ -28,6 +28,7 @@ namespace ArtOfSimRally.Mod
         private static bool _openFfb = true;
         private static bool _openCamera;
         private static bool _openShifter;
+        private static bool _openWheelInput;
         private static bool _openTelemetry;
         private static bool _openTrouble;
 
@@ -42,6 +43,7 @@ namespace ArtOfSimRally.Mod
             DrawSteering(cfg);
             DrawForceFeedback(cfg);
             DrawShifter(cfg);
+            DrawWheelInput(cfg);
             DrawCamera(cfg);
             DrawTelemetry(cfg);
             DrawTrouble(cfg);
@@ -126,6 +128,41 @@ namespace ArtOfSimRally.Mod
                     cfg.SkipNeutral = Toggle(cfg.SkipNeutral, "Skip neutral",
                         "Reverse to first in one press instead of stopping on neutral.");
             }
+
+            End();
+        }
+
+        private static void DrawWheelInput(Settings cfg)
+        {
+            if (!Section("Wheel input (direct)", ref _openWheelInput)) return;
+
+            bool was = cfg.WheelInputEnabled;
+            cfg.WheelInputEnabled = Toggle(cfg.WheelInputEnabled, "Read the wheel directly",
+                "For wheels the game's controls screen never responds to - Fanatec bases show up as " +
+                "two identical 'FANATEC Wheel' entries the game's input library cannot read. Steering " +
+                "and pedals are read straight from the device and fed to the car, bypassing that " +
+                "library. Menus still use the keyboard or a pad. Press Assign, then move the control.");
+            if (was && !cfg.WheelInputEnabled) WheelInput.CancelAssign();
+            if (!cfg.WheelInputEnabled) { End(); return; }
+
+            GUILayout.Label("      Reading: " + WheelInput.DeviceSummary, Wrap);
+            GUILayout.Space(4);
+
+            foreach (var ch in WheelInput.Channels)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("  " + ch, GUILayout.Width(110));
+                GUILayout.Label(WheelInput.Describe(ch), GUILayout.Width(260));
+                bool assigning = WheelInput.Assigning == ch;
+                if (GUILayout.Button(assigning ? "Move it now... (cancel)" : "Assign", GUILayout.Width(170)))
+                {
+                    if (assigning) WheelInput.CancelAssign(); else WheelInput.BeginAssign(ch);
+                }
+                if (WheelInput.IsBound(ch) && GUILayout.Button("Clear", GUILayout.Width(60)))
+                    WheelInput.Clear(ch);
+                GUILayout.EndHorizontal();
+            }
+            if (!string.IsNullOrEmpty(WheelInput.Status)) Help(WheelInput.Status);
 
             End();
         }

@@ -424,6 +424,17 @@ __declspec(dllexport) int InitDirectInput(int hwnd)
     prop.diph.dwHow        = DIPH_DEVICE;
     prop.dwData            = DIPROPAUTOCENTER_OFF;
     g_device->SetProperty(DIPROP_AUTOCENTER, &prop.diph);
+    // Axes in a known range, so the direct-input reader can calibrate against
+    // 0..65535 on every device. Harmless for force feedback.
+    {
+        DIPROPRANGE range = {};
+        range.diph.dwSize       = sizeof(DIPROPRANGE);
+        range.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+        range.diph.dwObj        = 0;
+        range.diph.dwHow        = DIPH_DEVICE;
+        range.lMin = 0; range.lMax = 65535;
+        g_device->SetProperty(DIPROP_RANGE, &range.diph);
+    }
 
     g_device->Acquire();
 
@@ -581,6 +592,95 @@ __declspec(dllexport) void CloseAuxDevice(void)
     g_auxDevice->Release();
     g_auxDevice = nullptr;
     Log("CloseAuxDevice()");
+}
+
+// --- direct reading of any controller's axes and buttons ----------------------
+// Used for wheels the game's input library cannot read (Fanatec bases under
+// Rewired's Raw Input). Every controller is opened non-exclusively for reading,
+// except the force-feedback wheel, which is read through the exclusive handle we
+// already hold - a second instance of the same device is not needed.
+static const int kMaxReadSlots = 8;
+struct ReadSlot { LPDIRECTINPUTDEVICE8 dev; bool isWheel; char name[MAX_PATH]; };
+static ReadSlot g_read[kMaxReadSlots];
+static int      g_readCount = 0;
+
+static void SetFullRange(LPDIRECTINPUTDEVICE8 dev)
+{
+    DIPROPRANGE range = {};
+    range.diph.dwSize       = sizeof(DIPROPRANGE);
+    range.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+    range.diph.dwObj        = 0;
+    range.diph.dwHow        = DIPH_DEVICE;
+    range.lMin = 0; range.lMax = 65535;
+    HRESULT hr = dev->SetProperty(DIPROP_RANGE, &range.diph);
+    if (FAILED(hr)) Log("  DIPROP_RANGE 0..65535 refused 0x%08lX (device keeps its native range)", hr);
+}
+
+// Returns the slot to read from, or -1.
+__declspec(dllexport) int OpenReadDevice(int index)
+{
+    if (g_auxCount == 0) { if (EnumerateAllDevices() <= 0) return -1; }
+    if (index < 0 || index >= g_auxCount) { Log("OpenReadDevice(%d): out of range (%d devices)", index, g_auxCount); return -1; }
+    if (g_readCount >= kMaxReadSlots) { Log("OpenReadDevice(%d): no free slot", index); return -1; }
+    ReadSlot& s = g_read[g_readCount];
+    s.dev = nullptr; s.isWheel = false;
+    strncpy_s(s.name, sizeof(s.name), g_aux[index].name, _TRUNCATE);
+    if (g_device && IsEqualGUID(g_aux[index].guid, g_activeGuid)) {
+        s.isWheel = true;
+        Log("OpenReadDevice(%d): %s is the force feedback wheel - read through that handle (slot %d)", index, s.name, g_readCount);
+        return g_readCount++;
+    }
+    HRESULT hr = g_di->CreateDevice(g_aux[index].guid, &s.dev, nullptr);
+    if (FAILED(hr) || !s.dev) { Log("OpenReadDevice(%d): CreateDevice failed 0x%08lX", index, hr); s.dev = nullptr; return -1; }
+    if (FAILED(hr = s.dev->SetDataFormat(&c_dfDIJoystick2))) {
+        Log("OpenReadDevice(%d): SetDataFormat failed 0x%08lX", index, hr);
+        s.dev->Release(); s.dev = nullptr; return -1;
+    }
+    HWND hwnd = g_hwnd ? g_hwnd : GetForegroundWindow();
+    if (FAILED(hr = s.dev->SetCooperativeLevel(hwnd, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND))) {
+        Log("OpenReadDevice(%d): SetCooperativeLevel failed 0x%08lX", index, hr);
+        s.dev->Release(); s.dev = nullptr; return -1;
+    }
+    SetFullRange(s.dev);
+    s.dev->Acquire();
+    Log("OpenReadDevice(%d): %s opened for reading (slot %d)", index, s.name, g_readCount);
+    return g_readCount++;
+}
+
+// axes: 8 ints (X Y Z Rx Ry Rz Slider1 Slider2); buttons: one byte each, 1 = pressed.
+// Returns 1 when a state was read.
+__declspec(dllexport) int ReadDeviceState(int slot, int* axes, unsigned char* buttons, int buttonCount)
+{
+    if (slot < 0 || slot >= g_readCount || !axes) return 0;
+    ReadSlot& s = g_read[slot];
+    LPDIRECTINPUTDEVICE8 dev = s.isWheel ? g_device : s.dev;
+    if (!dev) return 0;
+    DIJOYSTATE2 st = {};
+    HRESULT hr = dev->Poll();
+    if (FAILED(hr) && !s.isWheel) { dev->Acquire(); dev->Poll(); }
+    hr = dev->GetDeviceState(sizeof(st), &st);
+    if (FAILED(hr)) {
+        // The wheel's acquisition is the force-feedback path's business.
+        if (!s.isWheel && (hr == DIERR_INPUTLOST || hr == DIERR_NOTACQUIRED)) dev->Acquire();
+        return 0;
+    }
+    axes[0] = st.lX;  axes[1] = st.lY;  axes[2] = st.lZ;
+    axes[3] = st.lRx; axes[4] = st.lRy; axes[5] = st.lRz;
+    axes[6] = st.rglSlider[0]; axes[7] = st.rglSlider[1];
+    if (buttons && buttonCount > 0) {
+        int n = buttonCount < 128 ? buttonCount : 128;
+        for (int i = 0; i < n; ++i) buttons[i] = (st.rgbButtons[i] & 0x80) ? 1 : 0;
+    }
+    return 1;
+}
+
+__declspec(dllexport) void CloseReadDevices(void)
+{
+    for (int i = 0; i < g_readCount; ++i) {
+        if (g_read[i].dev) { g_read[i].dev->Unacquire(); g_read[i].dev->Release(); g_read[i].dev = nullptr; }
+    }
+    if (g_readCount) Log("CloseReadDevices(): %d slot(s) released", g_readCount);
+    g_readCount = 0;
 }
 
 __declspec(dllexport) void Aquire(void)

@@ -49,6 +49,7 @@ namespace ArtOfSimRally.Mod
             // Before anything is applied: a marker from a launch where the
             // DirectInput switch left the keyboard dead turns that setting off.
             InputBackend.OnLoad();
+            WheelInput.LoadBindings();
 
             modEntry.OnGUI       = OnGUI;
             modEntry.OnSaveGUI   = OnSaveGUI;
@@ -112,6 +113,7 @@ namespace ArtOfSimRally.Mod
         private static bool OnUnload(UnityModManager.ModEntry modEntry)
         {
             ModWatchdog.Shutdown();
+            WheelInput.Close();
             _harmony?.UnpatchAll(modEntry.Info.Id);
             return true;
         }

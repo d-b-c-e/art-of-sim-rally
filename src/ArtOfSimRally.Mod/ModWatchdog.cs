@@ -52,6 +52,7 @@ namespace ArtOfSimRally.Mod
         {
             if (!Main.Enabled) return;
             InputBackend.Tick();
+            WheelInput.Update();
 
             // Independent of whether any game object is still ticking. The
             // FixedUpdate postfix normally gets here first; this exists for when

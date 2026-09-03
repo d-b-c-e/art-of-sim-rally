@@ -59,6 +59,7 @@ namespace ArtOfSimRally.Mod
         private static bool _switchedByUs;
         private static bool _keySeenSinceSwitch;
         private static int _blindPresses;
+        private static float _stateAgainAt = -1f;
 
         private static string MarkerPath => Path.Combine(
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ArtOfSimRally"),
@@ -91,6 +92,11 @@ namespace ArtOfSimRally.Mod
             if (_readyAt < 0f) _readyAt = Time.realtimeSinceStartup;
 
             ProbeKeyboard(cfg);
+            if (_stateAgainAt > 0f && Time.realtimeSinceStartup >= _stateAgainAt)
+            {
+                _stateAgainAt = -1f;
+                LogState("1 s later");
+            }
 
             bool wantDirect = cfg.UseDirectInputBackend;
             bool isDirect = Current() == Rewired.Platforms.WindowsStandalonePrimaryInputSource.DirectInput;
@@ -123,6 +129,11 @@ namespace ArtOfSimRally.Mod
                 _blindPresses = 0;
                 if (!direct) DeleteMarker();
                 LogState("after switch to " + target + " (" + reason + ")");
+                _stateAgainAt = Time.realtimeSinceStartup + 1f;
+                ModLog.Info("UI state after switch:" + UiProbe());
+                ReinitUiModule();
+                RefreshStaleReferences();
+                HookStaleObjectErrors();
                 Status = "Backend now " + Describe() + " - " + reason + ".";
                 if (direct) Status += " Bind your wheel in the game's controls screen.";
             }
@@ -143,13 +154,19 @@ namespace ArtOfSimRally.Mod
             if (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2)) return;
             if (!_switchedByUs) return;
 
-            bool rewiredSaw = false;
+            bool controllerSaw = false, playerSaw = false;
             try
             {
                 var kb = ReInput.controllers.Keyboard;
-                rewiredSaw = kb != null && kb.GetAnyButtonDown();
+                controllerSaw = kb != null && kb.GetAnyButtonDown();
+                playerSaw = ReInput.players.GetPlayer(0).GetAnyButtonDown();
             }
             catch { }
+            ModLog.Info("Input backend probe: key seen by Unity; keyboard controller=" + controllerSaw +
+                        " player actions=" + playerSaw + " (" + Describe() + ")" + UiProbe());
+            // The game reads actions through the player, so that is the level
+            // that decides whether input "works".
+            bool rewiredSaw = playerSaw;
 
             if (rewiredSaw)
             {
@@ -190,6 +207,109 @@ namespace ArtOfSimRally.Mod
             catch { return "unknown"; }
         }
 
+        // What the menus actually consume: the Unity EventSystem driven by Rewired's
+        // input module (Submit/Cancel/Move actions resolved by name), and the
+        // game's PanelManager polling action ids 17/28 (back) and 14 (tabs).
+        private static string UiProbe()
+        {
+            var sb = new System.Text.StringBuilder();
+            try
+            {
+                var p = ReInput.players.GetPlayer(0);
+                sb.Append(" | last active=").Append(ReInput.controllers.GetLastActiveControllerType());
+                sb.Append(" back17=").Append(p.GetButtonDown(17)).Append(" back28=").Append(p.GetButtonDown(28))
+                  .Append(" tab14=").Append(p.GetButtonDown(14) || p.GetNegativeButtonDown(14));
+                var es = UnityEngine.EventSystems.EventSystem.current;
+                sb.Append(" | eventSystem=").Append(es != null ? (es.enabled ? "on" : "off") : "none");
+                if (es != null)
+                    sb.Append(" module=").Append(es.currentInputModule != null ? es.currentInputModule.GetType().Name : "none")
+                      .Append(" focused=").Append(es.isFocused)
+                      .Append(" selected=").Append(es.currentSelectedGameObject != null ? es.currentSelectedGameObject.name : "none");
+                var mod = UnityEngine.Object.FindObjectOfType<Rewired.Integration.UnityUI.RewiredStandaloneInputModule>();
+                sb.Append(" | rewiredModule=").Append(mod != null ? (mod.enabled ? "on" : "off") : "none");
+                if (mod != null)
+                {
+                    var t = mod.GetType();
+                    var bf = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+                    var ids = t.GetField("playerIds", bf)?.GetValue(mod) as int[];
+                    sb.Append(" playerIds=").Append(ids == null ? "null" : string.Join(",", ids.Select(i => i.ToString()).ToArray()));
+                    foreach (var f in new[] { "m_SubmitButton", "m_CancelButton", "m_HorizontalAxis", "m_VerticalAxis" })
+                    {
+                        var name = t.GetField(f, bf)?.GetValue(mod) as string;
+                        int id = string.IsNullOrEmpty(name) ? -1 : ReInput.mapping.GetActionId(name);
+                        bool down = id >= 0 && (p.GetButtonDown(id) || p.GetNegativeButtonDown(id));
+                        sb.Append(' ').Append(f.Substring(2)).Append('=').Append(name ?? "?").Append('#').Append(id).Append(down ? "*" : "");
+                    }
+                }
+            }
+            catch (Exception ex) { sb.Append(" | ui probe failed: ").Append(ex.Message); }
+            return sb.ToString();
+        }
+
+        // Rewired's UI input module clears its player list on ShutDownEvent and
+        // refills it on InitializedEvent; ResetAll() raises both. Belt and braces:
+        // run its own initialisation again after a switch, and say what it did.
+        private static void ReinitUiModule()
+        {
+            try
+            {
+                var mod = UnityEngine.Object.FindObjectOfType<Rewired.Integration.UnityUI.RewiredStandaloneInputModule>();
+                if (mod == null) { ModLog.Info("UI module: none found"); return; }
+                var m = mod.GetType().GetMethod("InitializeRewired",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (m == null) { ModLog.Info("UI module: no InitializeRewired"); return; }
+                m.Invoke(mod, null);
+                ModLog.Info("UI module re-initialised:" + UiProbe());
+            }
+            catch (Exception ex) { ModLog.Warning("UI module re-init failed: " + ex.Message); }
+        }
+
+        // The game caches Rewired objects in a few places (ControllerButtonDisplay
+        // keeps a Player and re-fetches it only when null; Arcader keeps one from
+        // Awake). After ResetAll every such object is dead and Rewired logs
+        // "created by a previous session ... no longer valid" on each access.
+        private static void RefreshStaleReferences()
+        {
+            int nulled = 0;
+            try
+            {
+                var bf = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+                foreach (var d in Resources.FindObjectsOfTypeAll<ControllerButtonDisplay>())
+                {
+                    var t = typeof(ControllerButtonDisplay);
+                    foreach (var name in new[] { "player", "activeController", "lastController", "currentControllerGlyphType" })
+                    {
+                        var f = t.GetField(name, bf);
+                        if (f != null && f.GetValue(d) != null) { f.SetValue(d, null); nulled++; }
+                    }
+                }
+                foreach (var a in Resources.FindObjectsOfTypeAll<Arcader>())
+                {
+                    var f = typeof(Arcader).GetField("player", bf);
+                    if (f != null) { f.SetValue(a, ReInput.players.GetPlayer(0)); nulled++; }
+                }
+                ModLog.Info("Stale Rewired references refreshed: " + nulled);
+            }
+            catch (Exception ex) { ModLog.Warning("Refreshing stale references failed: " + ex.Message); }
+        }
+
+        // Rewired's stale-object error carries no stack trace in the player log.
+        // Capture the managed stack for the first few so the holder can be named.
+        private static int _staleTraces;
+        private static bool _hooked;
+        private static void HookStaleObjectErrors()
+        {
+            if (_hooked) return;
+            _hooked = true;
+            Application.logMessageReceived += (msg, stack, type) =>
+            {
+                if (_staleTraces >= 4 || msg == null || !msg.StartsWith("Rewired: [ERROR] You are attemping")) return;
+                _staleTraces++;
+                string trace = new System.Diagnostics.StackTrace(1, false).ToString();
+                ModLog.Warning("Stale Rewired object access #" + _staleTraces + ": " + trace);
+            };
+        }
+
         private static void DeleteMarker()
         {
             try { if (File.Exists(MarkerPath)) File.Delete(MarkerPath); }
@@ -208,7 +328,12 @@ namespace ArtOfSimRally.Mod
                   .Append(" joysticks=").Append(ReInput.controllers.joystickCount)
                   .Append(" assigned=").Append(p.controllers.joystickCount)
                   .Append(" kbMaps=").Append(p.controllers.maps.GetAllMaps(ControllerType.Keyboard).Count())
-                  .Append(" joyMaps=").Append(p.controllers.maps.GetAllMaps(ControllerType.Joystick).Count());
+                  .Append(" joyMaps=").Append(p.controllers.maps.GetAllMaps(ControllerType.Joystick).Count())
+                  .Append(" hasKeyboard=").Append(p.controllers.hasKeyboard)
+                  .Append(" mapEnabler=").Append(p.controllers.maps.mapEnabler != null && p.controllers.maps.mapEnabler.enabled);
+                foreach (var m in p.controllers.maps.GetAllMaps(ControllerType.Keyboard))
+                    sb.Append(" | kb map cat=").Append(m.categoryId).Append(" layout=").Append(m.layoutId)
+                      .Append(" enabled=").Append(m.enabled).Append(" buttons=").Append(m.buttonMapCount);
                 foreach (var j in ReInput.controllers.Joysticks)
                     sb.Append(" | ").Append(j.name).Append(" [").Append(j.hardwareIdentifier).Append("]");
                 ModLog.Info(sb.ToString());
