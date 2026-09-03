@@ -145,7 +145,9 @@ Release history is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Building
 
-Needs the .NET SDK and Visual Studio Build Tools with the C++ workload.
+Needs the .NET SDK. The native force-feedback DLL and the telemetry encoder are
+vendored from [dbce-wheel-mod-toolkit](https://github.com/d-b-c-e/dbce-wheel-mod-toolkit)
+under `lib/toolkit` (`tools\Sync-Toolkit.ps1` refreshes the pin).
 
 ```
 dotnet build ArtOfSimRally.sln -c Release

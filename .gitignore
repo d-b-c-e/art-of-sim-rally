@@ -430,8 +430,7 @@ FodyWeavers.xsd
 
 
 # --- art-of-sim-rally ---
-# Native build output (rebuild with src/UnityForceFeedback/build.ps1)
-src/UnityForceFeedback/build/
+# Native plugin is vendored from dbce-wheel-mod-toolkit (lib/toolkit); no local native build.
 
 # Never commit game assemblies. They are copyrighted, they are large, and the
 # reference paths in the mod csproj point at the local Steam install instead.
@@ -446,3 +445,7 @@ dist/
 
 # UMM assemblies extracted locally for compilation - never commit these
 lib/
+
+# Vendored dbce-wheel-mod-toolkit artifacts, pinned by lib/toolkit/VERSION
+!lib/toolkit/
+!lib/toolkit/**

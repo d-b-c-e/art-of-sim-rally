@@ -99,7 +99,7 @@ A release zip needs:
 
 ```
 ArtOfSimRally.Mod.dll          the mod
-ArtOfSimRally.Telemetry.dll    the Forza encoder
+Dbce.Wheel.Telemetry.dll       the Forza encoder (from dbce-wheel-mod-toolkit)
 UnityForceFeedback.dll         the native plugin the GAME is missing
 README / install instructions
 ```

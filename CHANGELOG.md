@@ -7,6 +7,18 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Native plugin and telemetry encoder now come from dbce-wheel-mod-toolkit
+  0.1.0**, vendored under `lib/toolkit` and pinned by `lib/toolkit/VERSION`.
+  `UnityForceFeedback.dll` is the toolkit's `WheelFfb.dll` under the name the
+  mod P/Invokes (same exports plus the toolkit's lifecycle additions);
+  `ArtOfSimRally.Telemetry.dll` is replaced by `Dbce.Wheel.Telemetry.dll`, a
+  byte-identical encoder whose test suite moved with it. The local copies of
+  both, the telemetry tests, the probe and the synth tool are removed from this
+  repo (`tools/forza` in the toolkit replaces the last two). No behaviour change
+  intended.
+
 ### Added
 
 - **Direct wheel input** (new "Wheel input (direct)" section). For wheels the

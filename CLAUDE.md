@@ -25,11 +25,7 @@ third-party binaries, nothing that would force the repo private.
 
 | Path | Contents |
 |---|---|
-| `src/UnityForceFeedback` | C++ x64 DirectInput plugin. The DLL the game is missing. |
-| `src/ArtOfSimRally.Telemetry` | Forza Data Out encoder + UDP sender. **No Unity, no UMM.** |
-| `tests/ArtOfSimRally.Telemetry.Tests` | xUnit, 24 tests pinning the wire format |
-| `tools/ArtOfSimRally.Synth` | Synthetic emitter for testing consumers without the game |
-| `harness/forza_probe.py` | Listens and prints what is actually on the wire |
+| `lib/toolkit/` | **Vendored** from dbce-wheel-mod-toolkit (pinned by `VERSION`; refresh with `tools/Sync-Toolkit.ps1`): `native/WheelFfb.dll` (shipped as `UnityForceFeedback.dll`, the name the mod P/Invokes) and `dotnet/Dbce.Wheel.Telemetry.dll`. The native source and the encoder live in that repo now. |
 | `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP, RELEASING |
 
 ## Status (2026-09-03) — do not overstate this
@@ -56,11 +52,12 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
 
 ## Conventions
 
-- **`ArtOfSimRally.Telemetry` targets `netstandard2.0`** and must never
-  reference Unity or Unity Mod Manager. It is loaded into Unity 2019.4's Mono
-  runtime; targeting net8.0 builds fine and then fails to load in game. That
-  isolation is also what lets the encoder be unit-tested on modern .NET with no
-  game present — which is why it could be finished before UMM was installed.
+- **The telemetry encoder and native FFB layer are not in this repo.** They are
+  vendored built artifacts from dbce-wheel-mod-toolkit under `lib/toolkit`. Fix
+  FFB lifecycle or packet-layout bugs *there*, release, then bump the pin here
+  with `tools/Sync-Toolkit.ps1 -Version vX.Y.Z`. Game-specific code (hooks,
+  force signal, cameras, panel) stays here.
+
 - **Solution stays classic `.sln`**, not `.slnx`. The .NET 10 SDK emits `.slnx`
   by default and older SDKs cannot open it. Regenerate with
   `dotnet new sln --format sln`.
@@ -171,17 +168,16 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
 
 ```powershell
 dotnet test ArtOfSimRally.sln
-.\src\UnityForceFeedback\build.ps1          # also verifies all 7 exports
 ```
 
 End-to-end telemetry check, no game required — run the probe in one shell and
 the synth in another:
 
 ```bash
-python harness/forza_probe.py 8123
+python E:\Source\dbce-wheel-mod-toolkit\tools\forza\forza_probe.py 8123
 ```
 ```powershell
-dotnet run --project tools/ArtOfSimRally.Synth -- 8123 10
+python E:\Source\dbce-wheel-mod-toolkit\tools\forza\forza_synth.py 8123
 ```
 
 The probe's `src` column reads `mod` when byte 323 carries our `'R'` sentinel,

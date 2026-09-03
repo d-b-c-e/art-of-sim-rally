@@ -26,8 +26,17 @@
     <UmmDir>$(MSBuildThisFileDirectory)..\..\lib\umm</UmmDir>
   </PropertyGroup>
 
+  <!--
+    The Forza encoder and the native FFB layer come from dbce-wheel-mod-toolkit,
+    vendored as built artifacts under lib\toolkit (pinned by lib\toolkit\VERSION,
+    refreshed with tools\Sync-Toolkit.ps1). Private=true: the assembly ships
+    beside the mod.
+  -->
   <ItemGroup>
-    <ProjectReference Include="..\ArtOfSimRally.Telemetry\ArtOfSimRally.Telemetry.csproj" />
+    <Reference Include="Dbce.Wheel.Telemetry">
+      <HintPath>..\..\lib\toolkit\dotnet\Dbce.Wheel.Telemetry.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
   </ItemGroup>
 
   <!--

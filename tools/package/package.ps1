@@ -31,7 +31,9 @@ Write-Host "Building managed mod..." -ForegroundColor Cyan
 if ($LASTEXITCODE -ne 0) { throw "Managed build failed" }
 
 Write-Host "Building native plugin..." -ForegroundColor Cyan
-& cmd.exe /c (Join-Path $root 'src\UnityForceFeedback\build.bat')
+# Native FFB layer and telemetry encoder are vendored from dbce-wheel-mod-toolkit (lib\toolkit).
+$toolkit = Join-Path $root 'lib\toolkit'
+if (-not (Test-Path (Join-Path $toolkit 'native\WheelFfb.dll'))) { throw 'lib\toolkit is missing - run tools\Sync-Toolkit.ps1' }
 if ($LASTEXITCODE -ne 0) { throw "Native build failed" }
 
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
@@ -40,9 +42,9 @@ New-Item -ItemType Directory -Force -Path $modDir | Out-Null
 
 $bin = Join-Path $root 'src\ArtOfSimRally.Mod\bin\Release'
 Copy-Item (Join-Path $bin 'ArtOfSimRally.Mod.dll')       $modDir
-Copy-Item (Join-Path $bin 'ArtOfSimRally.Telemetry.dll') $modDir
+Copy-Item (Join-Path $bin 'Dbce.Wheel.Telemetry.dll') $modDir
 Copy-Item (Join-Path $root 'src\ArtOfSimRally.Mod\Info.json') $modDir
-Copy-Item (Join-Path $root 'src\UnityForceFeedback\build\UnityForceFeedback.dll') $modDir
+Copy-Item (Join-Path $toolkit 'native\WheelFfb.dll') (Join-Path $modDir 'UnityForceFeedback.dll')   # the file name the mod P/Invokes
 Copy-Item (Join-Path $root 'LICENSE') $stage
 Copy-Item (Join-Path $root 'tools\installer\Install.bat')   $stage
 Copy-Item (Join-Path $root 'tools\installer\Uninstall.bat') $stage

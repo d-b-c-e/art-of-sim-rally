@@ -202,7 +202,7 @@ catch [System.UnauthorizedAccessException] {
 
 Say ""
 Say "Verifying..."
-$expected = 'ArtOfSimRally.Mod.dll', 'ArtOfSimRally.Telemetry.dll', 'Info.json'
+$expected = 'ArtOfSimRally.Mod.dll', 'Dbce.Wheel.Telemetry.dll', 'Info.json'
 $missing = $expected | Where-Object { -not (Test-Path (Join-Path $modDir $_)) }
 if ($missing) {
     Fail "Missing after install: $($missing -join ', ')"

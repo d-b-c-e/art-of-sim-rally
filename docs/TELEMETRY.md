@@ -73,7 +73,7 @@ which were validated live against SimHub's Forza Horizon profile. Everything
 else follows from field order and sizes, and the arithmetic closes exactly:
 sled ends at 232, dash starts at 244, packet ends at 324.
 
-`tests/ArtOfSimRally.Telemetry.Tests` locks all of this down. If a change breaks
+The toolkit's `Dbce.Wheel.Telemetry.Tests` locks all of this down. If a change breaks
 `SpeedIsAtOffset256_TheAnchorForTheHorizonLayout`, the change is wrong.
 
 ## Mapping art of rally onto it
@@ -119,8 +119,8 @@ Two independent halves, so a failure can always be localised.
 **Prove the consumer** — emit a known-good synthetic drive with no game running:
 
 ```powershell
-dotnet run --project tools/ArtOfSimRally.Synth          # port 8000
-dotnet run --project tools/ArtOfSimRally.Synth -- 5300 30
+python <toolkit>/tools/forza/forza_synth.py           # port 8000
+python <toolkit>/tools/forza/forza_synth.py 5300
 ```
 
 Speed ramps 0→130→0 mph on a 20 s triangle, gears step 1–5, RPM sawtooths per
@@ -131,7 +131,7 @@ from what the mod actually sends.
 **Prove the emitter** — listen and print, with SimHub closed:
 
 ```bash
-python harness/forza_probe.py            # port 8000
+python <toolkit>/tools/forza/forza_probe.py    # port 8000
 ```
 
 The `src` column reads `mod` when byte 323 carries our sentinel, so packets from

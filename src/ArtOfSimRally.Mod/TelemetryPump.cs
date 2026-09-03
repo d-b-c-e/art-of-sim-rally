@@ -1,5 +1,5 @@
 using System;
-using ArtOfSimRally.Telemetry;
+using Dbce.Wheel.Telemetry;
 using HarmonyLib;
 using UnityEngine;
 
@@ -16,7 +16,7 @@ namespace ArtOfSimRally.Mod
     /// </para>
     /// <para>
     /// Field sources and unit conversions are documented in docs/TELEMETRY.md.
-    /// The encoder itself lives in ArtOfSimRally.Telemetry, which has no Unity
+    /// The encoder itself lives in Dbce.Wheel.Telemetry (dbce-wheel-mod-toolkit), which has no Unity
     /// dependency and is unit-tested without the game.
     /// </para>
     /// </remarks>

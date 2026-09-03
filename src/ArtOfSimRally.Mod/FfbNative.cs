@@ -40,6 +40,9 @@ namespace ArtOfSimRally.Mod
         [DllImport(Dll, CharSet = CharSet.Ansi)]
         private static extern void SetPreferredDevice(string name);
 
+        [DllImport(Dll, CharSet = CharSet.Ansi)]
+        private static extern void SetLogPath(string path);
+
         [DllImport(Dll)]
         private static extern void SetPreferredDeviceIndex(int index);
 
@@ -96,6 +99,16 @@ namespace ArtOfSimRally.Mod
                         "Could not preload " + dllPath + "; relying on the default search order.");
                 else
                     ModLog.Info("Native plugin loaded from " + dllPath);
+
+                // The toolkit DLL logs to %LOCALAPPDATA%' + BS + 'DbceWheel by default; keep this
+                // mod's historical location so support bundles and docs stay right.
+                try
+                {
+                    SetLogPath(System.IO.Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        "ArtOfSimRally", "ffb.log"));
+                }
+                catch (Exception ex) { ModLog.Warning("Could not set the native log path: " + ex.Message); }
 
                 // Must precede InitDirectInput - that is where selection happens.
                 // Index wins over name, being the unambiguous one.
