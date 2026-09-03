@@ -252,6 +252,46 @@ __declspec(dllexport) void FreeDirectInput(void);
 
 // Returns 1 on success, 0 on failure. The game ignores the value, but a
 // non-zero result is the honest signal and makes the log readable.
+// Creates the constant-force effect on g_device. Separate from init so a
+// dead effect can be rebuilt mid-session - see SetDeviceForcesXY.
+static HRESULT CreateForceEffect()
+{
+    HRESULT hr;
+    // A single constant force on X (+Y where the device has it). This mirrors
+    // what the game asks for: SetDeviceForcesXY is the only force call it makes.
+    DWORD axes[2]      = { DIJOFS_X, DIJOFS_Y };
+    LONG  direction[2] = { 1, 0 };   // fixed +X; the sign lives in the magnitude
+
+    DICONSTANTFORCE constant = {};
+    constant.lMagnitude = 0;
+
+    DIEFFECT effect      = {};
+    effect.dwSize        = sizeof(DIEFFECT);
+    effect.dwFlags       = DIEFF_CARTESIAN | DIEFF_OBJECTOFFSETS;
+    effect.dwDuration    = INFINITE;
+    effect.dwGain        = DI_FFNOMINALMAX;
+    effect.dwTriggerButton = DIEB_NOTRIGGER;
+    effect.cAxes         = 2;
+    effect.rgdwAxes      = axes;
+    effect.rglDirection  = direction;
+    effect.cbTypeSpecificParams = sizeof(DICONSTANTFORCE);
+    effect.lpvTypeSpecificParams = &constant;
+
+    g_effectAxes = 2;
+    hr = g_device->CreateEffect(GUID_ConstantForce, &effect, &g_effect, nullptr);
+    if (FAILED(hr)) {
+        // Plenty of wheels expose a single FFB axis. Retry with X alone, and
+        // remember that we did - SetParameters must describe the same number of
+        // axes the effect was created with, or every update is rejected with
+        // E_INVALIDARG and the wheel goes silently dead.
+        Log("  2-axis CreateEffect failed 0x%08lX, retrying single axis", hr);
+        effect.cAxes = 1;
+        hr = g_device->CreateEffect(GUID_ConstantForce, &effect, &g_effect, nullptr);
+        if (SUCCEEDED(hr)) g_effectAxes = 1;
+    }
+    return hr;
+}
+
 __declspec(dllexport) int InitDirectInput(int hwnd)
 {
     Log("InitDirectInput(hwnd=%d)", hwnd);
@@ -343,44 +383,12 @@ __declspec(dllexport) int InitDirectInput(int hwnd)
 
     g_device->Acquire();
 
-    // A single constant force on X (+Y where the device has it). This mirrors
-    // what the game asks for: SetDeviceForcesXY is the only force call it makes.
-    DWORD axes[2]      = { DIJOFS_X, DIJOFS_Y };
-    LONG  direction[2] = { 1, 0 };   // fixed +X; the sign lives in the magnitude
-
-    DICONSTANTFORCE constant = {};
-    constant.lMagnitude = 0;
-
-    DIEFFECT effect      = {};
-    effect.dwSize        = sizeof(DIEFFECT);
-    effect.dwFlags       = DIEFF_CARTESIAN | DIEFF_OBJECTOFFSETS;
-    effect.dwDuration    = INFINITE;
-    effect.dwGain        = DI_FFNOMINALMAX;
-    effect.dwTriggerButton = DIEB_NOTRIGGER;
-    effect.cAxes         = 2;
-    effect.rgdwAxes      = axes;
-    effect.rglDirection  = direction;
-    effect.cbTypeSpecificParams = sizeof(DICONSTANTFORCE);
-    effect.lpvTypeSpecificParams = &constant;
-
-    g_effectAxes = 2;
-    hr = g_device->CreateEffect(GUID_ConstantForce, &effect, &g_effect, nullptr);
-    if (FAILED(hr)) {
-        // Plenty of wheels expose a single FFB axis. Retry with X alone, and
-        // remember that we did - SetParameters must describe the same number of
-        // axes the effect was created with, or every update is rejected with
-        // E_INVALIDARG and the wheel goes silently dead.
-        Log("  2-axis CreateEffect failed 0x%08lX, retrying single axis", hr);
-        effect.cAxes = 1;
-        hr = g_device->CreateEffect(GUID_ConstantForce, &effect, &g_effect, nullptr);
-        if (SUCCEEDED(hr)) g_effectAxes = 1;
-    }
+    hr = CreateForceEffect();
     if (FAILED(hr)) {
         Log("  CreateEffect(GUID_ConstantForce) failed 0x%08lX", hr);
         FreeDirectInput();
         return 0;
     }
-
     Log("  initialised OK (constant force on %lu axis/axes)", g_effectAxes);
     return 1;
 }
@@ -592,6 +600,30 @@ __declspec(dllexport) int SetDeviceForcesXY(int x, int y)
 
     HRESULT hr = g_effect->SetParameters(
         &update, DIEP_DIRECTION | DIEP_TYPESPECIFICPARAMS | DIEP_START);
+
+    // Self-heal. A MOZA R12 started answering every update with
+    // DIERR_INCOMPLETEEFFECT a few minutes into a session and never recovered
+    // - 3,230 rejected updates in a minute, a dead wheel. The effect object
+    // is unrecoverable at that point; a fresh one accepts parameters again.
+    // Rate-limited so a genuinely broken device cannot spin this.
+    if (hr == DIERR_INCOMPLETEEFFECT) {
+        static DWORD lastHeal = 0;
+        DWORD now = GetTickCount();
+        if (lastHeal == 0 || now - lastHeal > 1000) {
+            lastHeal = now;
+            Log("SetParameters returned DIERR_INCOMPLETEEFFECT - recreating the effect");
+            g_device->Acquire();
+            if (g_effect) { g_effect->Stop(); g_effect->Release(); g_effect = nullptr; }
+            HRESULT ch = CreateForceEffect();
+            if (SUCCEEDED(ch) && g_effect) {
+                hr = g_effect->SetParameters(
+                    &update, DIEP_DIRECTION | DIEP_TYPESPECIFICPARAMS | DIEP_START);
+                Log("  recreated effect: update now 0x%08lX", hr);
+            } else {
+                Log("  recreate failed 0x%08lX", ch);
+            }
+        }
+    }
 
     LeaveCriticalSection(&g_lock);
 
