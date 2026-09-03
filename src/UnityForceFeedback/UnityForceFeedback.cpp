@@ -60,6 +60,8 @@ static int       g_preferredIndex = -1;
 // Axis count the constant-force effect was actually created with. Every
 // SetParameters call must agree with it.
 static DWORD     g_effectAxes = 2;
+static GUID      g_activeGuid = {};      // instance GUID of the wheel we hold
+static char      g_activeName[260] = {};
 
 // A second device we read directly - typically a sequential or H-pattern
 // shifter. Kept entirely separate from the force feedback device: it is opened
@@ -177,6 +179,19 @@ static BOOL CALLBACK EnumDeviceCallback(const DIDEVICEINSTANCE* inst, VOID* ctx)
 {
     (void)ctx;
     if (g_candidateCount >= kMaxCandidates) return DIENUM_STOP;
+
+    // The wheel we already hold exclusively is not re-opened to be inspected:
+    // a second device object on a live FFB device is the one interaction in
+    // the log immediately before every update started failing on a MOZA
+    // R12. Its answer is known - it is an FFB device - so it is listed
+    // without touching it.
+    if (g_device && IsEqualGUID(inst->guidInstance, g_activeGuid)) {
+        Candidate& held = g_candidates[g_candidateCount++];
+        held.guid = inst->guidInstance;
+        strncpy_s(held.name, sizeof(held.name), inst->tszProductName, _TRUNCATE);
+        Log("  found FFB device [%d]: %s (in use)", g_candidateCount - 1, held.name);
+        return DIENUM_CONTINUE;
+    }
 
     LPDIRECTINPUTDEVICE8 candidate = nullptr;
     if (FAILED(g_di->CreateDevice(inst->guidInstance, &candidate, nullptr)))
@@ -355,6 +370,8 @@ __declspec(dllexport) int InitDirectInput(int hwnd)
         g_di->Release(); g_di = nullptr;
         return 0;
     }
+    g_activeGuid = g_candidates[chosen].guid;
+    strncpy_s(g_activeName, sizeof(g_activeName), g_candidates[chosen].name, _TRUNCATE);
 
     if (FAILED(hr = g_device->SetDataFormat(&c_dfDIJoystick2))) {
         Log("  SetDataFormat failed 0x%08lX", hr);
