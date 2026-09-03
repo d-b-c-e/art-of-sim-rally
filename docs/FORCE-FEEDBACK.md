@@ -311,8 +311,23 @@ The original code signed both (correct on the R12, double-negated on the R5 —
 the direction fixed the R5 and broke the R12 ("no centre, pushes away both
 ways"). The encoding that satisfies all three: **direction fixed at +X; signed `lMagnitude` carries the sign.** Do not put the sign back in the direction vector.
 
-The constant direction is still sent with **every** update. Leaving it out
-worked until the device was re-acquired mid-session, after which every
-`SetParameters` returned `DIERR_INCOMPLETEEFFECT` (0x80040205) and the wheel
-went dead - 3,230 rejected updates in a minute on a MOZA R12. `ffb.log`
-records that line, which is how it was found.
+
+## The wheel going dead: `0x80040205` is NOTEXCLUSIVEACQUIRED (2026-09-02)
+
+After the sign fix, an R12 session would run for ~45 s (or fail from the first
+update if the first update came late) and then reject every `SetParameters`
+with `0x80040205` — 4,401 refusals in one session, no force at all. That code
+was misread twice (as `INCOMPLETEEFFECT` 0x…206 and `EFFECTPLAYING` 0x…208);
+the SDK header says it is **`DIERR_NOTEXCLUSIVEACQUIRED`**: the device is
+acquired, but not exclusively, and force feedback needs exclusive access. It
+happens when the game loses the foreground — alt-tabbing to a chat window —
+and the device comes back non-exclusive; nothing re-acquired it, so it stayed
+dead.
+
+Fix, in `SetDeviceForcesXY`: on `NOTEXCLUSIVEACQUIRED` / `INPUTLOST` /
+`NOTACQUIRED`, unacquire, acquire again (exclusive once the game is in front)
+and retry the update, rate-limited and logged as *"access lost … re-acquire"*.
+The exclusive cooperative level is also bound to this process's own main
+window rather than whatever `GetForegroundWindow()` returned at init. A
+standalone probe confirmed every parameter encoding is accepted by the R12,
+so nothing about the encoding was involved.

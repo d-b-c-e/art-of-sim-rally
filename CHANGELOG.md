@@ -26,6 +26,12 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   which way to pull: right for a wheel that honours direction (R5), for one
   that ignores it and reads the magnitude sign (R12), and for single-axis
   wheels (Fanatec), which already worked that way.
+- **Force feedback stopping mid-session and never returning.** Alt-tabbing
+  away from the game left the wheel acquired non-exclusively
+  (`DIERR_NOTEXCLUSIVEACQUIRED`), which force feedback cannot use, and nothing
+  re-acquired it. Now re-acquired and retried automatically; the exclusive
+  mode is also bound to the game's own window rather than whatever was in
+  front at startup.
 
 ## [0.2.0] - 2026-09-01
 

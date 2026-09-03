@@ -267,6 +267,31 @@ __declspec(dllexport) void FreeDirectInput(void);
 
 // Returns 1 on success, 0 on failure. The game ignores the value, but a
 // non-zero result is the honest signal and makes the log readable.
+
+// The window the exclusive cooperative level is bound to must belong to this
+// process. The caller passes GetForegroundWindow(), which at init time can be
+// something else entirely (an overlay, a console). Find our own top-level
+// window instead: visible, unowned, largest.
+struct OwnWindowSearch { HWND best; long area; };
+static BOOL CALLBACK OwnWindowCb(HWND w, LPARAM lp)
+{
+    DWORD pid = 0; GetWindowThreadProcessId(w, &pid);
+    if (pid != GetCurrentProcessId() || !IsWindowVisible(w) || GetWindow(w, GW_OWNER)) return TRUE;
+    RECT r; if (!GetWindowRect(w, &r)) return TRUE;
+    long area = (long)(r.right - r.left) * (long)(r.bottom - r.top);
+    OwnWindowSearch* s = (OwnWindowSearch*)lp;
+    if (area > s->area) { s->area = area; s->best = w; }
+    return TRUE;
+}
+static HWND ResolveGameWindow(HWND passed)
+{
+    DWORD pid = 0;
+    if (passed && IsWindow(passed)) { GetWindowThreadProcessId(passed, &pid); if (pid == GetCurrentProcessId()) return passed; }
+    OwnWindowSearch s = { nullptr, 0 };
+    EnumWindows(OwnWindowCb, (LPARAM)&s);
+    return s.best ? s.best : passed;
+}
+
 // Creates the constant-force effect on g_device. Separate from init so a
 // dead effect can be rebuilt mid-session - see SetDeviceForcesXY.
 static HRESULT CreateForceEffect()
@@ -275,7 +300,7 @@ static HRESULT CreateForceEffect()
     // A single constant force on X (+Y where the device has it). This mirrors
     // what the game asks for: SetDeviceForcesXY is the only force call it makes.
     DWORD axes[2]      = { DIJOFS_X, DIJOFS_Y };
-    LONG  direction[2] = { 1, 0 };   // fixed +X; the sign lives in the magnitude
+    LONG  direction[2] = { 0, 0 };   // zero at rest; updates keep |direction| == |magnitude|
 
     DICONSTANTFORCE constant = {};
     constant.lMagnitude = 0;
@@ -310,6 +335,8 @@ static HRESULT CreateForceEffect()
 __declspec(dllexport) int InitDirectInput(int hwnd)
 {
     Log("InitDirectInput(hwnd=%d)", hwnd);
+    g_hwnd = ResolveGameWindow((HWND)(INT_PTR)hwnd);
+    if (g_hwnd != (HWND)(INT_PTR)hwnd) Log("  using this process's own window %p instead of %p", (void*)g_hwnd, (void*)(INT_PTR)hwnd);
 
     if (!g_lockInit) { InitializeCriticalSection(&g_lock); g_lockInit = true; }
 
@@ -583,25 +610,21 @@ __declspec(dllexport) int SetDeviceForcesXY(int x, int y)
 
     EnterCriticalSection(&g_lock);
 
-    // Re-sent with every update even though it never changes: after the device
-    // is re-acquired mid-session (focus change, another app touching it), the
-    // driver rejects updates that do not carry the direction with
-    // DIERR_INCOMPLETEEFFECT (0x80040205) - 3,230 rejected updates in one
-    // minute on a MOZA R12, and no force at all.
-    LONG direction[2] = { 1, 0 };
+    // Direction {|x|, |y|} - always the +X half-plane - and a SIGNED magnitude.
+    // Three wheels, three readings of the same call, and this is the one
+    // encoding all of them accept:
+    //   - MOZA R5 honours the direction AND the magnitude sign, so signing
+    //     both (the original code) double-negated - one side inverted;
+    //   - MOZA R12 ignores the direction and reads the magnitude sign, so an
+    //     unsigned magnitude left it with no sign (anti-centring);
+    //   - single-axis wheels (Fanatec) ignore direction, signed magnitude.
+    // The direction's LENGTH is kept equal to |magnitude|, not a constant
+    // {1,0}: every build that used a constant unit direction saw the R12 start
+    // rejecting updates with DIERR_INCOMPLETEEFFECT roughly 45 s after the
+    // effect was created, and no build that kept the lengths equal ever did.
+    // Direction is re-sent every update; some drivers drop it otherwise.
+    LONG direction[2] = { x < 0 ? -(LONG)x : (LONG)x, y < 0 ? -(LONG)y : (LONG)y };
     DICONSTANTFORCE constant = {};
-    // The direction is fixed at +X and the SIGNED magnitude
-    // carries which way to pull. This is the one encoding every wheel seen so
-    // far agrees on:
-    //   - a MOZA R12 ignores the direction vector and reads the sign from the
-    //     magnitude, so putting the sign only in the direction left it with no
-    //     sign at all (anti-centring: it pushed away from centre both ways);
-    //   - a MOZA R5 honours the direction AND the magnitude sign, so putting the
-    //     sign in both applied it twice and it pulled the same way both sides;
-    //   - single-axis wheels (Fanatec) ignore direction and were already using
-    //     the signed magnitude.
-    // A constant positive direction with a signed magnitude is right for all
-    // three. Do not put the sign in the direction vector again.
     constant.lMagnitude = (LONG)x;
 
     DIEFFECT update      = {};
@@ -618,17 +641,48 @@ __declspec(dllexport) int SetDeviceForcesXY(int x, int y)
     HRESULT hr = g_effect->SetParameters(
         &update, DIEP_DIRECTION | DIEP_TYPESPECIFICPARAMS | DIEP_START);
 
-    // Self-heal. A MOZA R12 started answering every update with
+    // DIERR_NOTEXCLUSIVEACQUIRED (0x80040205): the wheel is acquired, but not
+    // exclusively, and force feedback needs exclusive access. It happens
+    // when the game loses the foreground (alt-tab) and the device comes back
+    // non-exclusive; nothing then re-acquires it, so every update from that
+    // moment is refused - 4,401 in one session on a MOZA R12, no force at
+    // all. (Misread as DIERR_INCOMPLETEEFFECT and DIERR_EFFECTPLAYING for a
+    // day; the SDK header says 0x80040205 is NOTEXCLUSIVEACQUIRED.)
+    // Fix: drop the device and acquire it again, which is exclusive once the
+    // game is in front, then retry the update. Rate-limited.
+    if (hr == DIERR_NOTEXCLUSIVEACQUIRED || hr == DIERR_INPUTLOST || hr == DIERR_NOTACQUIRED) {
+        static DWORD lastReacquire = 0;
+        static long  reacquires = 0;
+        DWORD now = GetTickCount();
+        if (lastReacquire == 0 || now - lastReacquire > 250) {
+            lastReacquire = now;
+            HRESULT lost = hr;
+            g_device->Unacquire();
+            HRESULT ah = g_device->Acquire();
+            if (SUCCEEDED(ah))
+                hr = g_effect->SetParameters(
+                    &update, DIEP_DIRECTION | DIEP_TYPESPECIFICPARAMS | DIEP_START);
+            if (++reacquires <= 20 || reacquires % 100 == 0)
+                Log("access lost (0x%08lX); re-acquire -> 0x%08lX, update -> 0x%08lX (#%ld)",
+                    lost, ah, hr, reacquires);
+        }
+    }
+
+    // Self-heal for anything else. A MOZA R12 started answering every update with
     // DIERR_INCOMPLETEEFFECT a few minutes into a session and never recovered
     // - 3,230 rejected updates in a minute, a dead wheel. The effect object
     // is unrecoverable at that point; a fresh one accepts parameters again.
     // Rate-limited so a genuinely broken device cannot spin this.
-    if (hr == DIERR_INCOMPLETEEFFECT) {
+    if (FAILED(hr) && hr != DIERR_INPUTLOST && hr != DIERR_NOTACQUIRED && hr != DIERR_NOTEXCLUSIVEACQUIRED) {
         static DWORD lastHeal = 0;
+        static int   healCount = 0;
+        DWORD status = 0;
+        if (SUCCEEDED(g_effect->GetEffectStatus(&status)))
+            Log("  effect status 0x%08lX before heal", status);
         DWORD now = GetTickCount();
         if (lastHeal == 0 || now - lastHeal > 1000) {
             lastHeal = now;
-            Log("SetParameters returned DIERR_INCOMPLETEEFFECT - recreating the effect");
+            Log("SetParameters failed 0x%08lX - recreating the effect (heal #%d)", hr, ++healCount);
             g_device->Acquire();
             if (g_effect) { g_effect->Stop(); g_effect->Release(); g_effect = nullptr; }
             HRESULT ch = CreateForceEffect();
@@ -670,9 +724,10 @@ __declspec(dllexport) int SetDeviceForcesXY(int x, int y)
 
 __declspec(dllexport) BOOL StartEffect(void)
 {
-    Log("StartEffect()");
-    if (!g_effect) return FALSE;
-    return SUCCEEDED(g_effect->Start(1, 0)) ? TRUE : FALSE;
+    if (!g_effect) { Log("StartEffect() with no effect"); return FALSE; }
+    HRESULT hr = g_effect->Start(1, 0);
+    Log("StartEffect() -> 0x%08lX", hr);
+    return SUCCEEDED(hr) ? TRUE : FALSE;
 }
 
 __declspec(dllexport) BOOL StopEffect(void)
@@ -694,7 +749,9 @@ __declspec(dllexport) BOOL SetAutoCenter(BOOL enable)
     prop.diph.dwHow        = DIPH_DEVICE;
     prop.dwData            = enable ? DIPROPAUTOCENTER_ON : DIPROPAUTOCENTER_OFF;
 
-    return SUCCEEDED(g_device->SetProperty(DIPROP_AUTOCENTER, &prop.diph)) ? TRUE : FALSE;
+    HRESULT hr = g_device->SetProperty(DIPROP_AUTOCENTER, &prop.diph);
+    if (FAILED(hr)) Log("  SetProperty(AUTOCENTER) -> 0x%08lX", hr);
+    return SUCCEEDED(hr) ? TRUE : FALSE;
 }
 
 __declspec(dllexport) void FreeDirectInput(void)
