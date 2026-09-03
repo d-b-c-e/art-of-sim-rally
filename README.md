@@ -116,7 +116,11 @@ physics are there, the output code is there, and nothing connects them — the v
 linking the two is never assigned, and the native plugin it calls into isn't in
 the shipped build.
 
-This mod supplies the missing piece and the missing plugin.
+This mod supplies the missing piece and the missing plugin. The force is the
+front axle's lateral force through a pneumatic trail — centring in proportion
+to load, lightening as the front starts to slide — faded out below 12 km/h.
+Strength is the only dial; *Invert* is there for wheels that read the axis the
+other way. Confirmed on a MOZA R12 and, via a user's log, a MOZA R5.
 
 ## Shifters
 

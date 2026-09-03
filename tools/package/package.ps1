@@ -53,7 +53,7 @@ art of sim rally
 ================
 
 Turns art of rally into something you can drive on a wheel: real force feedback,
-a bonnet camera, Forza-compatible telemetry, and two fixes for steering that the
+bonnet and bumper cameras, Forza-compatible telemetry, and two fixes for steering that the
 game only applies to wheels it recognises.
 
 INSTALL
@@ -77,8 +77,9 @@ Launch the game and press Ctrl+F10 for the settings panel.
 
 * Steering should feel direct straight away.
 
-* Force feedback strength is a 0-100 slider. Start around 70 and adjust to
-  taste. If the wheel pulls the wrong way, tick "Invert direction".
+* Force feedback strength is a 0-100 slider; 50 is the tuned default. If the
+  wheel pulls toward lock instead of back to centre, tick "Invert direction".
+  There is no force below about 12 km/h - that is deliberate.
 
 * Pick your wheel from the Wheel dropdown under Force feedback. If two devices
   share a name, choose one and turn the wheel - if nothing happens, choose the
