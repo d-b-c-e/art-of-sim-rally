@@ -558,8 +558,14 @@ __declspec(dllexport) int SetDeviceForcesXY(int x, int y)
 
     EnterCriticalSection(&g_lock);
 
+    // Re-sent with every update even though it never changes: after the device
+    // is re-acquired mid-session (focus change, another app touching it), the
+    // driver rejects updates that do not carry the direction with
+    // DIERR_INCOMPLETEEFFECT (0x80040205) - 3,230 rejected updates in one
+    // minute on a MOZA R12, and no force at all.
+    LONG direction[2] = { 1, 0 };
     DICONSTANTFORCE constant = {};
-    // The direction is fixed at +X (set at creation) and the SIGNED magnitude
+    // The direction is fixed at +X and the SIGNED magnitude
     // carries which way to pull. This is the one encoding every wheel seen so
     // far agrees on:
     //   - a MOZA R12 ignores the direction vector and reads the sign from the
@@ -580,13 +586,12 @@ __declspec(dllexport) int SetDeviceForcesXY(int x, int y)
     // while the effect fell back to 1 axis makes every update fail with
     // E_INVALIDARG, and the wheel simply never moves.
     update.cAxes         = g_effectAxes;
+    update.rglDirection  = direction;
     update.cbTypeSpecificParams  = sizeof(DICONSTANTFORCE);
     update.lpvTypeSpecificParams = &constant;
 
-    // Direction is never re-sent: it was fixed at creation, and some drivers
-    // restart the effect on a direction change.
     HRESULT hr = g_effect->SetParameters(
-        &update, DIEP_TYPESPECIFICPARAMS | DIEP_START);
+        &update, DIEP_DIRECTION | DIEP_TYPESPECIFICPARAMS | DIEP_START);
 
     LeaveCriticalSection(&g_lock);
 

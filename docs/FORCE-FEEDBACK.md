@@ -309,6 +309,10 @@ place has to be one every wheel reads. Three wheels, three behaviours:
 The original code signed both (correct on the R12, double-negated on the R5 —
 "right works, left inverted, Invert does nothing"). Putting the sign only in
 the direction fixed the R5 and broke the R12 ("no centre, pushes away both
-ways"). The encoding that satisfies all three: **direction fixed at +X, set
-once at creation; signed `lMagnitude` carries the sign; direction never
-re-sent.** Do not put the sign back in the direction vector.
+ways"). The encoding that satisfies all three: **direction fixed at +X; signed `lMagnitude` carries the sign.** Do not put the sign back in the direction vector.
+
+The constant direction is still sent with **every** update. Leaving it out
+worked until the device was re-acquired mid-session, after which every
+`SetParameters` returned `DIERR_INCOMPLETEEFFECT` (0x80040205) and the wheel
+went dead - 3,230 rejected updates in a minute on a MOZA R12. `ffb.log`
+records that line, which is how it was found.
