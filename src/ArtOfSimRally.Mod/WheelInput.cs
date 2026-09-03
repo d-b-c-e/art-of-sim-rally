@@ -109,6 +109,7 @@ namespace ArtOfSimRally.Mod
         private static float _assignDeadline;
         private static float _nextSave = -1f;
         private static float _nextOpenRetry;
+        private static bool _firstReadLogged;
 
         public static string Status { get; private set; } = "";
         public static Channel? Assigning => _assigning;
@@ -183,7 +184,10 @@ namespace ArtOfSimRally.Mod
                     _devices.Add(new Device { Slot = slot, Index = i, Name = name });
                 }
                 _open = _devices.Count > 0;
-                ModLog.Info("Wheel input: reading " + _devices.Count + " controller(s): " + DeviceSummary);
+                _firstReadLogged = false;
+                var names = new StringBuilder();
+                foreach (var d in _devices) { if (names.Length > 0) names.Append(", "); names.Append(d.Name); }
+                ModLog.Info("Wheel input: opened " + _devices.Count + " controller(s): " + names);
                 if (!_open) Status = "No controllers found to read.";
             }
             catch (Exception ex)
@@ -224,6 +228,19 @@ namespace ArtOfSimRally.Mod
             {
                 try { d.Ok = ReadDeviceState(d.Slot, d.Axes, d.Buttons, ButtonCount) != 0; }
                 catch { d.Ok = false; }
+            }
+            if (!_firstReadLogged)
+            {
+                // Once, with raw values: proves the reads work on every handle,
+                // and shows the resting position of each axis for support.
+                _firstReadLogged = true;
+                var sb = new StringBuilder("Wheel input: first read -");
+                foreach (var d in _devices)
+                {
+                    sb.Append(" | ").Append(d.Name).Append(d.Ok ? " axes " : " NOT RESPONDING");
+                    if (d.Ok) for (int i = 0; i < AxisCount; i++) sb.Append(d.Axes[i]).Append(i < AxisCount - 1 ? "," : "");
+                }
+                ModLog.Info(sb.ToString());
             }
 
             if (_assigning.HasValue) StepAssign(cfg);

@@ -66,12 +66,6 @@ namespace ArtOfSimRally.Mod
             cfg.BindAnyDevice = Toggle(cfg.BindAnyDevice, "Bind whichever device you touch",
                 "The controls screen normally only binds the first controller.");
 
-            cfg.UseDirectInputBackend = Toggle(cfg.UseDirectInputBackend, "Use DirectInput for controllers",
-                "For a wheel the controls screen never responds to - a Fanatec base shows up as two " +
-                "identical 'FANATEC Wheel' entries the game cannot read - and for shifters and stalks " +
-                "it cannot see at all. Switches the game's input library to its DirectInput backend, " +
-                "immediately. You will need to bind your wheel again, once. Turns itself off if the " +
-                "keyboard stops reaching the game.");
             if (!string.IsNullOrEmpty(InputBackend.Status)) Help(InputBackend.Status);
 
             cfg.GlyphTextFallback = Toggle(cfg.GlyphTextFallback, "Show button names when no icon exists",

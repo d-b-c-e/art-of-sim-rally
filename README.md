@@ -132,6 +132,13 @@ usually there is nothing to bind in the first place.
 The mod reads the shifter directly instead, and selects the gear you actually
 chose.
 
+The same direct path is available for the wheel itself. Some bases — Fanatec's
+direct-drive units in particular — appear to the game's input library as two
+identical devices it cannot read, so the controls screen never responds to
+them. *Wheel input (direct)* in the mod panel reads steering and pedals from
+the device and feeds them to the car, bypassing that library; assign each
+control by moving it. Menus still use the keyboard or a pad.
+
 Full technical detail, including how to read any of this out of the game
 yourself, is in [docs/](docs/) — start with [FINDINGS.md](docs/FINDINGS.md).
 Release history is in [CHANGELOG.md](CHANGELOG.md).

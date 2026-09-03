@@ -9,15 +9,17 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- **"Use DirectInput for controllers"** (Steering section). For wheels the
-  controls screen never responds to — a Fanatec base shows up as two identical
-  `FANATEC Wheel` entries the game's input library cannot read — and for
-  shifters and stalks it cannot see at all. Switches Rewired to its DirectInput
-  backend at runtime, after the title screen, with two safety nets: three
-  keypresses Rewired misses revert it and turn it off, and a marker from a
-  launch where nothing reached the game turns it off next time. The wheel
-  must be bound again once. An earlier version of this switch (0.1.x, removed)
-  applied it during load and killed the keyboard; the cause was the timing.
+- **Direct wheel input** (new "Wheel input (direct)" section). For wheels the
+  game's controls screen never responds to — a Fanatec base shows up as two
+  identical `FANATEC Wheel` entries the game's input library cannot read.
+  Steering, throttle, brake, clutch and handbrake are read straight from the
+  device and fed to the car, bypassing that library; assign each by "Assign,
+  then move it", and the range calibrates itself the first time the control
+  is used fully. Any DirectInput controller can supply any channel, so
+  separate pedals work too. Menus still use the keyboard or a pad.
+  Switching the game's input library to DirectInput instead was tried twice
+  and left the menus dead both times; it remains only as a Settings.xml
+  experiment, not in the panel.
 - Support bundle now records which input backend was active.
 
 ## [0.2.1] - 2026-09-02

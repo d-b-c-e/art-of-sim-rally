@@ -161,15 +161,42 @@ Rewired independently) established what matters:
 | Joysticks enumerated | 1 on Raw Input (base) → 3 on DirectInput (base, stalk, DS-8X) |
 | Switching back in-process | works; Raw Input bindings return |
 
-So the failure was the *timing* — a Rewired reset in the middle of the game's
-own initialisation — not the backend. **"Use DirectInput for controllers"** in
-the Steering section applies the switch only once Rewired has been ready for
-eight seconds, never at load, and keeps two safety nets: three keypresses
-Unity sees and Rewired misses put it back to Raw Input and turn the setting
-off; a marker file written on switching and cleared by the first keypress
-Rewired sees turns it off on the next launch if nothing ever reached the game.
-Joystick bindings are keyed by a hardware id that begins with the backend
-name, so the wheel must be bound once more after switching.
+That looked like the whole story, and was not. Applied later in the same
+session from the settings panel — and then again at the title screen with the
+switch pre-armed — the switch left the **menus** dead while every probe said
+input was flowing: 30 and then 67 keypresses seen by Unity, by Rewired's
+keyboard controller *and* by the player's actions (`UISubmit`, `UICancel`,
+`UIHorizontal` all firing), keyboard maps enabled and identical, Rewired's UI
+input module alive with player 0. The game's own log showed 48,216 "object
+created by a previous session ... no longer valid" errors — stale Rewired
+objects cached by game code (`ControllerButtonDisplay`, `Arcader`) — and
+refreshing all 84 of them brought the count to zero without bringing the
+menus back. Whatever else `ResetAll()` breaks in this game's menu code was
+not found, and after four attempts across two days it was abandoned.
+**The switch stays in the code as an experiment reachable only through
+`UseDirectInputBackend` in Settings.xml; it is not in the panel.**
+
+### The fix that shipped: read the wheel directly (2026-09-03)
+
+Instead of making Rewired see the device, the mod stops needing Rewired for
+the wheel. The native plugin already enumerates every DirectInput controller
+for the shifter; `OpenReadDevice` / `ReadDeviceState` open each one
+non-exclusively for reading (the force-feedback wheel is read through the
+exclusive handle already held) with axes requested in 0..65535.
+`WheelInput` binds Steer, Throttle, Brake, Clutch and Handbrake to an axis or
+button by "Assign, then move it": the value at rest and the value it moved
+to are recorded, the far end keeps extending as the control is used, steering
+maps the recorded direction to +1 and the other lock to −1, pedals map rest
+to 0 and the moved direction to 1 (so pedals that idle at the top of their
+range work too). A postfix on `AxisCarController.GetInput` writes bound
+channels over the game's values after its own deadzone processing and keeps
+the steering-alignment effect, so direct steering, steer assist and telemetry
+all see what they would from a wheel Rewired understood. Unbound channels
+are untouched; menus still use keyboard or pad.
+
+Verified 2026-09-03 on the MOZA rig: all three controllers open, the base
+reads through the FFB handle (steering centred at 32669), pedals on the base
+at rest. Driving with bound channels: see the release notes.
 
 ### Why the device presents unusually
 
