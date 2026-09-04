@@ -40,17 +40,26 @@ new surface yet. Two pieces are worth taking, in this order:
 
 ### `SetPreferredDeviceGuid` — pick the wheel by instance GUID
 
-Today the wheel is chosen by index, then by name, then by trying every
-force-feedback candidate in turn. All three are guesses when a Fanatec base
-presents two devices called `FANATEC Wheel`, and the index is only stable until
-something is unplugged. A DirectInput instance GUID is unambiguous and
-persistent.
+**Blocked on a toolkit change. Do not start here.**
 
-Small and self-contained: store the GUID alongside the existing name/index in
-`Settings`, pass it before `InitDirectInput`, keep the current path as the
-fallback for settings written by an older version. It would turn
-[KI-3](KNOWN-ISSUES.md#ki-3--fanatec-fixes-are-unverified-on-fanatec-hardware)
-from "try the candidates and hope" into a deterministic selection.
+The idea is sound: the wheel is chosen today by index, then by name, then by
+trying every force-feedback candidate in turn, and all three are guesses when a
+Fanatec base presents two devices called `FANATEC Wheel`. An instance GUID is
+unambiguous and survives a replug, which the index does not.
+
+The problem is that **nothing hands the GUID out.** `SetPreferredDeviceGuid`
+takes one — the toolkit's own example passes "a GUID from my input layer",
+which suits a native proxy that enumerates DirectInput itself. This mod has no
+such layer: it sees devices only through `EnumerateDevices`, `GetDeviceName`
+and `GetDeviceInfo`, none of which return a GUID, and the full 32-export list
+has no `GetDeviceGuid`.
+
+So the first move is in **dbce-wheel-mod-toolkit**: add a
+`GetDeviceGuid(int index, void* out16)` (and probably `GetAnyDeviceGuid` for the
+read-only device list), release, re-pin here. Only then is the consumer side —
+a settings field, the panel writing it at selection time, the old name/index
+path kept as a fallback for settings written by an older version — worth
+writing.
 
 ### Hardware periodic effects — road texture and tyre slip
 
@@ -65,17 +74,25 @@ This is the surviving substance of the old phase 3 — surface texture per
 `TCSTriggered` as discrete effects. The game already computes every input
 needed; see the `Wheel` field list in [FINDINGS.md](FINDINGS.md).
 
-**Take a damper first, before any of the texture work.** The output today is a
-pure centring force with nothing opposing the wheel's rate of movement, so it
-overshoots when a slide gathers up and oscillates on a direct-drive base
+**Take a damper first, before any of the texture work** — and note it is
+*also* blocked on the toolkit. The output today is a pure centring force with
+nothing opposing the wheel's rate of movement, so it overshoots when a slide
+gathers up and oscillates on a direct-drive base
 ([KI-6](KNOWN-ISSUES.md#ki-6--the-wheel-snaps-back-as-the-car-straightens-out-of-a-slide)).
 `Smoothing` is the only thing resisting that now and it is the wrong tool — a
 low-pass on the force delays every cue, not just the unwanted one. A damper is
 smaller than the texture work, fixes a thing a user has actually complained
-about, and proves the effect plumbing before anything subtle rides on it.
+about, and proves the effect plumbing before anything subtle rides on it. But a
+damper is a DirectInput **condition** effect (`GUID_Damper`), and the toolkit
+exports only a periodic one, so it needs an export too.
 
-Do it after the GUID work: it is the larger change, it needs tuning at a
-powered base, and it wants a settled device-selection story underneath it.
+### So the toolkit is the critical path
+
+Both items above need the same thing: one small toolkit release adding
+`GetDeviceGuid` and a condition (damper) effect, then a re-pin here. That is the
+work to do while waiting for a test window, and it is where the next hour is
+best spent — not on the consumer side, which cannot be written until the API
+exists.
 
 ## After that
 
