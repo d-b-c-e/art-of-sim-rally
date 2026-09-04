@@ -370,6 +370,40 @@ Detail on R-6 through R-11 is in [FORCE-FEEDBACK.md](FORCE-FEEDBACK.md) and
 
 ---
 
+## Upstream, recorded here
+
+### U-1 — `simlite@1` was not art of rally's tuning; `simlite@2` is
+
+dbce-wheel-mod-toolkit's `simlite@1` profile was described as this mod's 0.2.2
+tuning. Feeding it `docs/force-curve-vector.csv` (2026-09-04) showed that only
+its **model** half was: its **shaper** half was the toolkit's own `ForceShaper`
+defaults, which this game does not use. Our curve has no deadzone, no output
+deadband, no soft saturation, no slew limit and no ramp — 500 N at 5 km/h
+produces 0.005487 undiminished and sends 54 to the wheel, not 0.
+
+Fixed upstream as `simlite@2`. `simlite@1` was annotated rather than edited, so a
+published version stays immutable.
+
+**Consequence for us:** if the toolkit's `ForceModel` is ever adopted here
+([ROADMAP.md](ROADMAP.md) step 3), take **`simlite@2`'s shaper values**, not
+`ForceModelSettings.SimLite()` — that helper still returns the old `ForceShaper`
+defaults, so adopting it in code would silently import a deadzone and a soft
+knee this game has never had. This corrects the guidance written here before the
+vector existed.
+
+### U-2 — Clamp order differs from the toolkit, deliberately
+
+We fade then clamp; `ForceModel.Compute` clamps then fades. Four of 640 vector
+rows differ, all at 5–7.5 km/h, worst 1,086/10,000 at the wheel. Reaching it
+needs a force past full scale *and* a partial fade at once — a low-speed slide or
+an impact. Detail and the table are in
+[FORCE-FEEDBACK.md](FORCE-FEEDBACK.md#clamp-order-fade-first-clamp-last-measured-2026-09-04).
+
+Ours is the better order — a device limit should not be applied before a model
+term — but changing the toolkit moves every profile's output and a cross-language
+golden file, so it is the toolkit owner's decision, held open pending a call. It
+changes nothing here today: this mod does not consume `ForceModel`.
+
 ## Will not fix
 
 ### WNF-1 — Switching Rewired's input backend at runtime
