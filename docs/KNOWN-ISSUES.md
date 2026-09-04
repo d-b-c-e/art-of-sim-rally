@@ -225,7 +225,7 @@ Data points so far:
 
 | Rig | Base gain | Strength | Smoothing | Notes |
 |---|---|---|---|---|
-| MOZA R12 (owner) | — | 20 → 50 | 0.2 | `FyReference` retuned 6,000 → 8,000 → 11,500 N to move the usable setting toward the slider midpoint |
+| MOZA R12 (owner) | — | **26** | 0.2 | `FyReference` retuned 6,000 → 8,000 → 11,500 N to move the usable setting toward the slider midpoint; it was 20 at 8,000 N, and the live setting is still 26, not the 50 default |
 | Unstated wheel + motion platform (Reddit, 2026-09-04) | 100% | **15** | **0.50** | "works perfect"; raised smoothing specifically to kill notchiness over low-poly inclines |
 
 Both users ended up well below Strength 50 — the second at 15 with the base at
