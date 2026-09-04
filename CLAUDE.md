@@ -38,7 +38,7 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-04) — do not overstate this
 
-Released: **0.2.2** (2026-09-04). Toolkit pin: **v0.2.0**, bumped 2026-09-04, no
+Released: **0.2.2** (2026-09-04). Toolkit pin: **v0.4.0**, bumped 2026-09-04, no
 mod code using its new surface yet. "Verified" means confirmed on the owner's
 MOZA R12 rig unless stated otherwise.
 
@@ -52,7 +52,7 @@ MOZA R12 rig unless stated otherwise.
 | **Direct wheel input** (`WheelInput`) | Verified driving on the owner's rig 2026-09-03 after the steering-sign fix (assignment is direction-independent; Flip per channel). Released in 0.2.2. Fanatec user pending. |
 | Crash fix (shifter choice after FFB failure), FFB candidate fallback, capability labels | Released in 0.2.2; init verified here, Fanatec user pending. |
 | Rewired DirectInput backend switch (`InputBackend`) | **Abandoned** after four attempts. Settings.xml-only experiment. Do not retry — see below. |
-| Toolkit `SetPreferredDeviceGuid`, periodic effects | Available since the v0.2.0 pin, **unused**. The next two pieces of work (docs/ROADMAP.md). |
+| Toolkit GUID device selection, condition (damper) and periodic effects | Available since the v0.4.0 pin, **unused**. The next two pieces of work (docs/ROADMAP.md). `GetDeviceGuid`/`GetAnyDeviceGuid` were added at this repo's request - without them `SetPreferredDeviceGuid` was unusable here. |
 
 The game's force feedback was half-built: `ForceFeedback` is never attached,
 `Wheel.Mz` is computed only `if (cardynamics.enableForceFeedback)`, which

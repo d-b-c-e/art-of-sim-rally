@@ -331,8 +331,18 @@ helping with a different symptom — notchiness over low-poly inclines — which
 consistent with it being a blunt instrument.
 
 The right fix is a **damper effect**, which DirectInput supports natively and
-the wheelbase renders itself. Toolkit 0.2.0's periodic-effect surface is the
-route in; see [ROADMAP.md](ROADMAP.md).
+the wheelbase renders itself. Toolkit 0.4.0 exports one
+(`CreateConditionEffect(1)` for a damper, then `UpdateConditionEffect`), so the
+API exists as of the current pin.
+
+It will not be the whole answer on its own. A hardware damper is computed by the
+base from axis velocity, continuously and between our updates — which is why it
+is smoother than anything synthesised at 60 Hz — but it knows nothing about road
+speed or grip, so it cannot be scaled with the car's state. Expect to want a
+small constant hardware damper for stability *plus* a speed-scaled term in our
+own force model for feel. And expect `CreateConditionEffect` to return −1 on
+devices whose drivers expose no condition effects, which is a normal answer to
+fall back from, not a failure. Plan in [ROADMAP.md](ROADMAP.md).
 
 ---
 

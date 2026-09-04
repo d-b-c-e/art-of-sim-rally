@@ -34,32 +34,33 @@ they are worth keeping. Detail and the mechanism are in
 
 ## Next — adopt toolkit 0.2.0
 
-The pin moved to `v0.2.0` on 2026-09-04 and the DLL is a drop-in (32 exports,
+The pin moved to `v0.4.0` on 2026-09-04 and the DLL is a drop-in (37 exports,
 strict superset of the 28 that shipped in 0.2.2). Nothing in the mod uses the
-new surface yet. Two pieces are worth taking, in this order:
+new surface yet. Two pieces are worth taking, in this order — and **both are now
+unblocked**: the missing exports this file previously recorded as the critical
+path were added in toolkit 0.4.0 at this repo's request.
 
 ### `SetPreferredDeviceGuid` — pick the wheel by instance GUID
 
-**Blocked on a toolkit change. Do not start here.**
+The wheel is chosen today by index, then by name, then by trying every
+force-feedback candidate in turn, and all three are guesses when a Fanatec base
+presents two devices called `FANATEC Wheel`. An instance GUID is unambiguous and
+survives a replug, which the index does not.
 
-The idea is sound: the wheel is chosen today by index, then by name, then by
-trying every force-feedback candidate in turn, and all three are guesses when a
-Fanatec base presents two devices called `FANATEC Wheel`. An instance GUID is
-unambiguous and survives a replug, which the index does not.
+This was blocked until 0.4.0, because `SetPreferredDeviceGuid` took a GUID that
+nothing handed out — fine for a native proxy that enumerates DirectInput itself,
+useless to a mod that sees devices only through the toolkit.
+**`GetDeviceGuid(index, out16)` and `GetAnyDeviceGuid(index, out16)` close the
+round trip**, returning the 16 raw bytes for an entry in the
+`EnumerateDevices` / `EnumerateAllDevices` list — the same list the panel's
+dropdowns are built from.
 
-The problem is that **nothing hands the GUID out.** `SetPreferredDeviceGuid`
-takes one — the toolkit's own example passes "a GUID from my input layer",
-which suits a native proxy that enumerates DirectInput itself. This mod has no
-such layer: it sees devices only through `EnumerateDevices`, `GetDeviceName`
-and `GetDeviceInfo`, none of which return a GUID, and the full 32-export list
-has no `GetDeviceGuid`.
-
-So the first move is in **dbce-wheel-mod-toolkit**: add a
-`GetDeviceGuid(int index, void* out16)` (and probably `GetAnyDeviceGuid` for the
-read-only device list), release, re-pin here. Only then is the consumer side —
-a settings field, the panel writing it at selection time, the old name/index
-path kept as a fallback for settings written by an older version — worth
-writing.
+The consumer side is then straightforward: P/Invoke the two getters, add a GUID
+field to `Settings` written when a device is picked in the panel, pass it before
+`InitDirectInput`, and keep the name/index path as the fallback for settings
+written by an older version. A GUID that no longer matches anything attached
+must fall back rather than fail — the native side already logs and falls back in
+that case.
 
 ### Hardware periodic effects — road texture and tyre slip
 
@@ -74,25 +75,43 @@ This is the surviving substance of the old phase 3 — surface texture per
 `TCSTriggered` as discrete effects. The game already computes every input
 needed; see the `Wheel` field list in [FINDINGS.md](FINDINGS.md).
 
-**Take a damper first, before any of the texture work** — and note it is
-*also* blocked on the toolkit. The output today is a pure centring force with
-nothing opposing the wheel's rate of movement, so it overshoots when a slide
-gathers up and oscillates on a direct-drive base
+**Take a damper first, before any of the texture work.** The output today is a
+pure centring force with nothing opposing the wheel's rate of movement, so it
+overshoots when a slide gathers up and oscillates on a direct-drive base
 ([KI-6](KNOWN-ISSUES.md#ki-6--the-wheel-snaps-back-as-the-car-straightens-out-of-a-slide)).
 `Smoothing` is the only thing resisting that now and it is the wrong tool — a
 low-pass on the force delays every cue, not just the unwanted one. A damper is
 smaller than the texture work, fixes a thing a user has actually complained
-about, and proves the effect plumbing before anything subtle rides on it. But a
-damper is a DirectInput **condition** effect (`GUID_Damper`), and the toolkit
-exports only a periodic one, so it needs an export too.
+about, and proves the effect plumbing before anything subtle rides on it.
 
-### So the toolkit is the critical path
+Toolkit 0.4.0 adds the condition effects it needs:
+`CreateConditionEffect(type)` — 0 spring, 1 damper, 2 inertia, 3 friction —
+returning a slot, then `UpdateConditionEffect(slot, coefficient, saturation,
+deadband, offset)` with everything in −10000..10000, and
+`ReleaseConditionEffects()`. Two things to design around, both from the
+toolkit's own guidance:
 
-Both items above need the same thing: one small toolkit release adding
-`GetDeviceGuid` and a condition (damper) effect, then a re-pin here. That is the
-work to do while waiting for a test window, and it is where the next hour is
-best spent — not on the consumer side, which cannot be written until the API
-exists.
+- **`-1` from `CreateConditionEffect` is a legitimate answer, not an error.**
+  Plenty of drivers expose no condition effects at all. Treat it as "damp in the
+  force model instead", not as a failure path — the same discipline as the FFB
+  candidate fallback.
+- **A hardware damper is not a drop-in for a model damper term.** The base
+  computes it from axis velocity continuously, between our updates, which is
+  exactly why it feels smoother than anything we can synthesise at 60 Hz. But it
+  knows nothing about road speed, grip or the car, so it cannot be scaled the
+  way a term inside our own force model could. The likely answer is **both**: a
+  small constant hardware damper for stability, plus a speed-scaled term in the
+  force model for feel. Note this mod computes its own force and does not use
+  the toolkit's `ForceModelSettings`, so the model-side term is ours to write.
+
+### Neither is blocked any more
+
+This section previously recorded both items as blocked on missing toolkit
+exports. Toolkit 0.4.0 added them — verified here rather than taken on trust:
+37 exports, a strict superset of the 28 the mod ships today, nothing removed,
+`GetDeviceGuid`, `GetAnyDeviceGuid`, `CreateConditionEffect`,
+`UpdateConditionEffect` and `ReleaseConditionEffects` all present, x64. The
+remaining constraint is a rig to tune against, not an API.
 
 ## After that
 

@@ -1,0 +1,10 @@
+# Written by Sync-Toolkit.ps1. SHA-256 of every vendored file as it was
+# placed here. The next sync compares against this to tell a routine
+# update apart from something edited locally, and refuses to overwrite
+# the second kind. Do not edit by hand.
+# toolkit v0.4.0  2026-09-04T13:55:34
+351E5FD4119FD3F6A4100869F28F64189827AD03E197A1269602CFD89A644458  dotnet\Dbce.Wheel.Ffb.dll
+80070460CBEF3131D41017CD37C11E07A7EEC3939EA9C67BA25DA11D12550FD7  dotnet\Dbce.Wheel.Ffb.xml
+4A7AA8E4AC58CBF9ED2B2347980EE62D42B3D0E460CBB6B5B6A9C83FC205823B  dotnet\Dbce.Wheel.Telemetry.dll
+063EC5D0FC00E0EBFD48924C262CB616DCD51A80C32C6894D47D1C1EDFEEE448  dotnet\Dbce.Wheel.Telemetry.xml
+A2B95A56AA2A9B9DF5A35ED7F311F0A7E02527D832E40DE54308285D83B18B9C  native\WheelFfb.dll

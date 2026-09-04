@@ -44,12 +44,29 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- **Toolkit pin v0.1.0 -> v0.2.0.** The native DLL is a drop-in: 32 undecorated
-  exports against the 28 that shipped in 0.2.2, nothing removed, still x64.
-  Verified with `dumpbin /exports` against the previous release's binary. No
-  behaviour change - the mod does not yet call the four new entry points
-  (`SetPreferredDeviceGuid`, `CreatePeriodicEffect`, `UpdatePeriodicEffect`,
-  `ReleasePeriodicEffects`), which is the next work in docs/ROADMAP.md.
+- **Toolkit pin v0.1.0 -> v0.4.0.** The native DLL is a drop-in: 37 undecorated
+  exports against the 28 that shipped in 0.2.2, nothing removed, still x64,
+  every entry point the mod P/Invokes present. Verified with `dumpbin /exports`
+  against the previous release's binary. The telemetry encoder's public surface
+  is byte-for-byte identical and the toolkit's 39 encoder tests pass at the
+  release commit, including the `Speed`@256 anchor.
+
+  No behaviour change - the mod calls none of the new surface yet. What it
+  unlocks: `GetDeviceGuid` / `GetAnyDeviceGuid` (added at this repo's request,
+  and the thing that makes `SetPreferredDeviceGuid` usable from a mod with no
+  DirectInput layer of its own), `CreateConditionEffect` /
+  `UpdateConditionEffect` / `ReleaseConditionEffects` for the damper KI-6 wants,
+  and the periodic effects for surface texture. See docs/ROADMAP.md.
+
+  `Dbce.Wheel.Ffb` gained `ForceModelSettings` parameters and a `ForceProfile`
+  type in toolkit 0.3.0. This mod does not reference that assembly, so nothing
+  moves; the vendored copy is unused and only ships because the sync script
+  copies `Dbce.Wheel.*`.
+
+- `tools/Sync-Toolkit.ps1` refreshed from the toolkit (it changed in 0.3.1). It
+  now hashes everything it writes into `lib/toolkit/MANIFEST.txt` and refuses to
+  overwrite a vendored file that was edited locally, exiting non-zero rather
+  than clobbering it.
 
 ### Documentation
 

@@ -140,12 +140,38 @@
         <member name="F:Dbce.Wheel.Ffb.ForceModelSettings.ShiftPulseStrength">
             <summary>Amplitude of the symmetric gear-shift double pulse.</summary>
         </member>
+        <member name="F:Dbce.Wheel.Ffb.ForceModelSettings.DamperStaticFraction">
+            <summary>Damper authority at a standstill, as a fraction of its authority at speed. 1 = speed-independent.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Ffb.ForceModelSettings.TrailSlipSpan">
+            <summary>Multiple of the ideal slip angle at which the trail reaches <see cref="F:Dbce.Wheel.Ffb.ForceModelSettings.TrailFloor"/>.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Ffb.ForceModelSettings.WeightTransferMin">
+            <summary>Bounds on the weight-transfer multiplier: how much braking may add and throttle may shed.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Ffb.ForceModelSettings.WeightTransferMax">
+            <summary>Bounds on the weight-transfer multiplier: how much braking may add and throttle may shed.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Ffb.ForceModelSettings.TextureHz">
+            <summary>Texture oscillator frequency in Hz. Above ~15 the zero-order hold at 60 Hz eats it.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Ffb.ForceModelSettings.ImpactSeconds">
+            <summary>Duration of the decaying impact impulse, seconds.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Ffb.ForceModelSettings.ShiftPulseSeconds">
+            <summary>Duration of the positive half of the gear-shift pulse, seconds.</summary>
+        </member>
         <member name="M:Dbce.Wheel.Ffb.ForceModelSettings.SimLite">
             <summary>
             The sim-like preset: lateral tyre force through a pneumatic trail that
             shrinks toward the limit; no virtual spring. art-of-sim-rally's shipped
             model (2026-09-02), where the game exposes per-wheel lateral force.
             </summary>
+            <remarks>
+            Equivalent to the profile <c>simlite@1</c>. Prefer loading a named,
+            versioned profile (<see cref="T:Dbce.Wheel.Ffb.ForceProfile"/>): a profile can be swapped
+            or A/B tested without rebuilding the game, and it pins what was tuned.
+            </remarks>
         </member>
         <member name="M:Dbce.Wheel.Ffb.ForceModelSettings.Arcade">
             <summary>
@@ -153,6 +179,11 @@
             damper + lateral load lightening in a drift, weight transfer, events.
             Starting values, not truth; every game retunes.
             </summary>
+            <remarks>
+            This is <b>not</b> OutRun's shipped tuning; several constants differ.
+            <c>arcade-outrun@1</c> in <c>profiles/force-profiles.ini</c> is the one
+            that matches the game, and is what OutRun2006Tweaks-FFB loads.
+            </remarks>
         </member>
         <member name="T:Dbce.Wheel.Ffb.ForceModel">
             <summary>
@@ -201,6 +232,91 @@
         </member>
         <member name="M:Dbce.Wheel.Ffb.InputValidator.Report">
             <summary>One paragraph for logs and support bundles.</summary>
+        </member>
+        <member name="T:Dbce.Wheel.Ffb.ForceProfile">
+            <summary>
+            A named, versioned set of every parameter that decides how a game feels:
+            the <see cref="T:Dbce.Wheel.Ffb.ForceModelSettings"/> and the <see cref="T:Dbce.Wheel.Ffb.ForceShaper"/>
+            conditioning chain together, as data.
+            </summary>
+            <remarks>
+            <para>
+            The point of versioning is that a tune can be swapped without rebuilding
+            a game and without losing the one it replaced. A consumer names a profile
+            (<c>arcade-outrun@1</c>); to try a different feel you add a new version,
+            point the game's config at it, and drive both. Comparing two builds is
+            how tuning stops being reproducible.
+            </para>
+            <para>
+            <b>A published version is immutable.</b> Editing <c>arcade-outrun@1</c>
+            makes every earlier report about it a lie, including the one in the case
+            file. Add <c>@2</c> instead; <c>inherits</c> keeps that to the lines that
+            actually changed.
+            </para>
+            <para>
+            The same files are parsed by <c>native/forcemodel/force_profile.h</c>, and
+            a conformance test pins the two readers to identical results. Add a key in
+            one and you must add it in the other.
+            </para>
+            </remarks>
+        </member>
+        <member name="F:Dbce.Wheel.Ffb.ForceProfile.Name">
+            <summary>Family name, e.g. <c>arcade-outrun</c>. Lower case, no spaces.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Ffb.ForceProfile.Version">
+            <summary>Version within the family. Immutable once published.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Ffb.ForceProfile.Description">
+            <summary>What this tune is and where it came from. Shown in panels and traces.</summary>
+        </member>
+        <member name="P:Dbce.Wheel.Ffb.ForceProfile.Id">
+            <summary><c>name@version</c>, the id a game names in its config.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Ffb.ForceProfile.UnknownKeys">
+            <summary>Keys the file carried that this build does not understand. Never silently dropped.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.ForceProfile.Get(System.String)">
+            <summary>Current value of a key, for round-tripping and for the conformance test.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.ForceProfile.ListIds(System.String)">
+            <summary>Every profile id defined in the text, in file order.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.ForceProfile.Parse(System.String,System.String)">
+            <summary>
+            Reads one profile out of the text. Resolves <c>inherits</c> first, so a
+            version can state only what it changes. Throws if the id is absent or
+            the inheritance chain loops.
+            </summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.ForceProfile.Strip(System.String)">
+            <summary>Strips a trailing comment (# or ;) and surrounding whitespace.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.ForceProfile.Load(System.String,System.String)">
+            <summary>Reads a profile from a file. <paramref name="id"/> is <c>name@version</c>.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Ffb.ForceProfile.ShippedFileName">
+            <summary>The file a game ships; overwritten when the toolkit is updated.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Ffb.ForceProfile.UserFileName">
+            <summary>The player's own tunes; never overwritten, and its sections win.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.ForceProfile.LoadFrom(System.String,System.String,System.String@)">
+            <summary>
+            Reads <paramref name="id"/> from <c>force-profiles.ini</c> in
+            <paramref name="directory"/>, with <c>force-profiles.user.ini</c>
+            layered on top when it exists, so a player's edits survive an update
+            and a profile of the same id in the user file wins outright.
+            </summary>
+            <returns>The profile, or null when neither file defines the id.</returns>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.ForceProfile.AvailableIn(System.String)">
+            <summary>Every profile id available in a directory, shipped and user.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.ForceProfile.ToIni">
+            <summary>Renders this profile as a section, every key explicit. Useful for a support bundle.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.ForceProfile.ToString">
+            <summary>A one-line summary for a trace or a log header.</summary>
         </member>
         <member name="T:Dbce.Wheel.Ffb.ForceShaper">
             <summary>
@@ -338,6 +454,37 @@
         </member>
         <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.UpdatePeriodic(System.Int32,System.Single,System.Single)">
             <summary>Envelope update; safe to call every frame (unchanged envelopes never reach the driver).</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.DeviceGuid(System.Int32)">
+            <summary>
+            Instance GUID of an enumerated force-feedback device, to hand back to
+            <see cref="M:Dbce.Wheel.Ffb.WheelFfbNative.PreferGuid(System.Nullable{System.Guid})"/>. Without this a mod with no DirectInput layer
+            of its own could not pin a device by identity, and matching by name
+            picks the wrong one of a Fanatec base's two entries. Toolkit 0.4.0+.
+            </summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.AnyDeviceGuid(System.Int32)">
+            <summary>The same for the full controller list (shifters, pedal sets).</summary>
+        </member>
+        <member name="T:Dbce.Wheel.Ffb.WheelFfbNative.ConditionKind">
+            <summary>Condition effect kind for <see cref="M:Dbce.Wheel.Ffb.WheelFfbNative.CreateCondition(Dbce.Wheel.Ffb.WheelFfbNative.ConditionKind)"/>.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.CreateCondition(Dbce.Wheel.Ffb.WheelFfbNative.ConditionKind)">
+            <summary>
+            Creates a hardware condition effect - the base computes force from axis
+            position or velocity continuously, rather than following our updates.
+            A hardware damper is smoother and more stable than damping synthesised
+            at 60 Hz, and is usually the right answer to a base that oscillates.
+            Returns the slot, or -1 when the driver has no such effect (normal;
+            fall back to damping in the model). Toolkit 0.4.0+.
+            </summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.UpdateCondition(System.Int32,System.Single,System.Single,System.Single,System.Single)">
+            <summary>
+            Updates a condition slot. All four are -1..1 (saturation and deadband
+            0..1); safe to call every frame, since an unchanged condition never
+            reaches the driver.
+            </summary>
         </member>
         <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.Shutdown">
             <summary>Releases the device. Safe to call repeatedly.</summary>
