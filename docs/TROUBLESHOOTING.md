@@ -61,7 +61,7 @@ it. If you still see it, the support file's force-feedback section will show
 
 - **Check the support file's header first.** `native ffb:` is the version of
   `UnityForceFeedback.dll` actually loaded, and `loaded from:` is the file it
-  came from. If that path is inside `artofrally_Data\Plugins_64`, an old
+  came from. If that path is inside `artofrally_Data\Plugins\x86_64`, an old
   manual install left a copy there and it is being used instead of the one in
   the mod folder - delete it. A version older than the release you installed
   means the same thing.
