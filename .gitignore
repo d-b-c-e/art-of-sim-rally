@@ -443,8 +443,11 @@ results/
 # Release packaging output
 dist/
 
-# UMM assemblies extracted locally for compilation - never commit these
-lib/
+# UMM assemblies extracted locally for compilation - never commit these.
+# lib/* rather than lib/: git never descends into an excluded DIRECTORY, so the
+# !lib/toolkit rules below could never match and the vendored, pinned toolkit
+# silently stayed untracked through the whole of 0.2.2.
+lib/*
 
 # Vendored dbce-wheel-mod-toolkit artifacts, pinned by lib/toolkit/VERSION
 !lib/toolkit/

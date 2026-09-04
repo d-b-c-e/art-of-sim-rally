@@ -1,0 +1,352 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Dbce.Wheel.Telemetry</name>
+    </assembly>
+    <members>
+        <member name="T:Dbce.Wheel.Telemetry.ForzaLayout">
+            <summary>
+            The three "Data Out" packet layouts Forza titles emit, all understood by
+            SimHub and most dashboards. Receivers validate by <b>exact length</b>.
+            </summary>
+            <remarks>
+            <para>
+            <see cref="F:Dbce.Wheel.Telemetry.ForzaLayout.Sled232"/> is the Motorsport 7 "sled" (physics only).
+            <see cref="F:Dbce.Wheel.Telemetry.ForzaLayout.Fm7Dash311"/> appends the 79-byte dash block directly at 232.
+            <see cref="F:Dbce.Wheel.Telemetry.ForzaLayout.Horizon324"/> inserts 12 unknown bytes at 232, then the dash
+            at 244, then one trailing byte — 324 in total. The intuitive 323 is
+            rejected silently: SimHub logs "started receiving unprocessed data" at
+            packet rate and never connects (measured, milestone-wheel-tools, 2026-08-30).
+            </para>
+            <para>
+            OutRun2006Tweaks-FFB emits <see cref="F:Dbce.Wheel.Telemetry.ForzaLayout.Fm7Dash311"/>; art-of-sim-rally,
+            iracing-arcade-wheel and cruisn-collection emit <see cref="F:Dbce.Wheel.Telemetry.ForzaLayout.Horizon324"/>.
+            The two are not interchangeable: a dash profile expects one or the other.
+            </para>
+            </remarks>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.ForzaLayout.Sled232">
+            <summary>232 bytes: physics sled only.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.ForzaLayout.Fm7Dash311">
+            <summary>311 bytes: sled + dash at offset 232 (Forza Motorsport 7 "Dash").</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.ForzaLayout.Horizon324">
+            <summary>324 bytes: sled + 12-byte insert + dash at 244 + 1 trailing byte (Forza Horizon 4/5).</summary>
+        </member>
+        <member name="T:Dbce.Wheel.Telemetry.ForzaPacket">
+            <summary>
+            Writes the 324-byte Forza Horizon 4/5 "Data Out" UDP packet.
+            </summary>
+            <remarks>
+            <para>
+            Emitting a format consumers already understand is the whole point: SimHub,
+            dashboards, motion rigs and bass shakers all speak Forza Data Out, so art of
+            rally gains that entire ecosystem without anyone writing a plugin for it.
+            </para>
+            <para>
+            The layout is the Forza Motorsport 7 "sled" (232 bytes) followed by a 12-byte
+            block the Horizon titles insert, then the "dash" fields. That 12-byte insert
+            is the whole reason FM7 dash offsets do not work here and why the packet is
+            324 rather than 311 bytes.
+            </para>
+            <para>
+            Offsets are not guesses. <c>Speed</c> at 256 and <c>Gear</c> at 319 are the
+            two that pin the layout, and both are copied from a harness in the sibling
+            cruisn-collection project that was validated live against SimHub's Forza
+            Horizon profile. Everything else follows from field order and sizes.
+            See docs/TELEMETRY.md.
+            </para>
+            <para>
+            All fields are little-endian, matching x86/x64 hosts. Unwritten bytes stay
+            zero, which consumers read as "not supported" rather than as bad data.
+            </para>
+            </remarks>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.ForzaPacket.Size">
+            <summary>Total FH4/FH5 Data Out packet length, in bytes.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.ForzaPacket.SizeOf(Dbce.Wheel.Telemetry.ForzaLayout)">
+            <summary>Exact packet length for a layout. Receivers validate by length.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.ForzaPacket.OffHorizonPadding">
+            <summary>
+            Start of the 12 bytes the Horizon titles insert between the sled and the
+            dash section. Left zeroed; consumers skip it.
+            </summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.ForzaPacket.OffSourceSentinel">
+            <summary>
+            Byte 323 is unused by every Forza title. The cruisn-collection harness
+            stamps a sentinel here so a listener can tell a synthetic packet from a
+            real one; we do the same so a probe can prove packets came from this mod
+            and not from another emitter on the same port.
+            </summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.ForzaPacket.SourceSentinel">
+            <summary>Sentinel value written to <see cref="F:Dbce.Wheel.Telemetry.ForzaPacket.OffSourceSentinel"/>: ASCII 'R' for rally.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.ForzaPacket.Write(Dbce.Wheel.Telemetry.TelemetryFrame@,System.Byte[])">
+            <summary>
+            Serialises <paramref name="frame"/> into <paramref name="buffer"/>.
+            </summary>
+            <param name="frame">Physics snapshot to encode.</param>
+            <param name="buffer">
+            Destination, at least <see cref="F:Dbce.Wheel.Telemetry.ForzaPacket.Size"/> bytes. Fully overwritten, so the
+            same buffer can be reused every frame without clearing it.
+            </param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="buffer"/> is null.</exception>
+            <exception cref="T:System.ArgumentException"><paramref name="buffer"/> is too small.</exception>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.ForzaPacket.Write(Dbce.Wheel.Telemetry.TelemetryFrame@,System.Byte[],Dbce.Wheel.Telemetry.ForzaLayout)">
+            <summary>
+            Serialises <paramref name="frame"/> in the given <paramref name="layout"/>.
+            The sled (first 232 bytes) is identical in all three; the dash block sits
+            at 232 in <see cref="F:Dbce.Wheel.Telemetry.ForzaLayout.Fm7Dash311"/> and at 244 in
+            <see cref="F:Dbce.Wheel.Telemetry.ForzaLayout.Horizon324"/>; the source sentinel exists only in
+            the Horizon layout's trailing byte.
+            </summary>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.ForzaPacket.CreateBuffer">
+            <summary>Allocates a correctly sized packet buffer.</summary>
+        </member>
+        <member name="T:Dbce.Wheel.Telemetry.IdleKeeper">
+            <summary>
+            Keeps a dashboard alive while no game is driving: emits zeroed frames at a
+            low rate so gauges rest at zero instead of freezing on the last value.
+            </summary>
+            <remarks>
+            <para>
+            SimHub and most dash software hold the last received values when a stream
+            stops, so a game that exits (or crashes) leaves the dash stuck. Lifted from
+            cruisn-collection's <c>ForzaKeeper</c> (2026-08), which learned two things
+            the hard way, both encoded here:
+            </para>
+            <list type="bullet">
+            <item>The keeper frame must carry the <b>same engine constants</b> as the
+            game's frames. A fully zero packet (<c>EngineMaxRpm = 0</c>) is degenerate
+            and can wedge SimHub's normalisation state so it ignores the real stream
+            afterwards.</item>
+            <item><c>Gear</c> is 1, because 0 renders as reverse and Forza has no code
+            for neutral.</item>
+            </list>
+            <para>
+            <see cref="F:Dbce.Wheel.Telemetry.IdleKeeper.SourceSentinel"/> (<c>'K'</c>) is stamped into the unused trailing
+            byte of the Horizon layout so a probe can tell keeper frames from game frames.
+            The keeper is inert while <see cref="F:Dbce.Wheel.Telemetry.IdleKeeper.GameActive"/> is set.
+            </para>
+            </remarks>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.IdleKeeper.SourceSentinel">
+            <summary>Marker written to byte 323 of Horizon frames sent by the keeper.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.IdleKeeper.GameActive">
+            <summary>Set while a game is emitting its own frames; the keeper stays quiet.</summary>
+        </member>
+        <member name="P:Dbce.Wheel.Telemetry.IdleKeeper.FramesSent">
+            <summary>Frames sent so far.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.IdleKeeper.#ctor(System.Collections.Generic.IEnumerable{System.String},System.Single,System.Single,Dbce.Wheel.Telemetry.ForzaLayout,System.Int32)">
+            <param name="targets">"host:port" entries. Empty host means 127.0.0.1.</param>
+            <param name="engineMaxRpm">Must match what the game's frames carry.</param>
+            <param name="engineIdleRpm">Must match what the game's frames carry.</param>
+            <param name="layout">Packet layout the dash expects.</param>
+            <param name="rateHz">Emission rate while idle; 10 Hz is plenty.</param>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.IdleKeeper.BuildFrame(System.UInt32)">
+            <summary>Builds the exact bytes one keeper frame carries, for tests and probes.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.IdleKeeper.Start">
+            <summary>Starts the background emitter. No-op without targets.</summary>
+        </member>
+        <member name="T:Dbce.Wheel.Telemetry.RpmSynthesizer">
+            <summary>
+            A plausible engine speed for games that have none, from road speed and a
+            gear-ratio table. Three projects had each written their own version of
+            this (OutRun 2006, Cruis'n, Gravel); this is the one to keep.
+            </summary>
+            <remarks>
+            <para>
+            The output exists to drive rev counters, shift lights and bass shakers,
+            not to be true. It rises through each gear's speed band from idle to just
+            under the redline, drops on the up-shift, and never exceeds
+            <see cref="P:Dbce.Wheel.Telemetry.RpmSynthesizer.MaxRpm"/>. When the game reports no gear either, the gear is
+            inferred from speed against the same table.
+            </para>
+            <para>
+            Pass the frame's <c>EngineMaxRpm</c>/<c>EngineIdleRpm</c> the same values
+            every frame — dashboards normalise against them, and the idle keeper must
+            use the same constants (see <see cref="T:Dbce.Wheel.Telemetry.IdleKeeper"/>).
+            </para>
+            </remarks>
+        </member>
+        <member name="P:Dbce.Wheel.Telemetry.RpmSynthesizer.GearTopSpeedsMps">
+            <summary>Speed (m/s) at which each gear reaches the redline; ascending.</summary>
+        </member>
+        <member name="P:Dbce.Wheel.Telemetry.RpmSynthesizer.RedlineFraction">
+            <summary>Fraction of the redline reached at the top of each gear (leaves headroom for the limiter cue).</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.RpmSynthesizer.#ctor(System.Single[],System.Single,System.Single,System.Single)">
+            <param name="gearTopSpeedsMps">Speed at which each gear tops out, metres per second, ascending. At least one entry.</param>
+            <param name="maxRpm">Redline reported to the dash as <c>EngineMaxRpm</c>.</param>
+            <param name="idleRpm">Idle reported to the dash as <c>EngineIdleRpm</c>.</param>
+            <param name="redlineFraction">Fraction of <paramref name="maxRpm"/> reached at the top of each gear.</param>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.RpmSynthesizer.FromTopSpeed(System.Single,System.Int32,System.Single,System.Single)">
+            <summary>A table from a top speed and a gear count, with ratios spaced like a road car's.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.RpmSynthesizer.InferGear(System.Single)">
+            <summary>Gear (1-based) inferred from speed against the table.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.RpmSynthesizer.Rpm(System.Single,System.Int32)">
+            <summary>
+            Engine speed for <paramref name="speedMps"/> in <paramref name="gear"/>
+            (1-based; 0 or out of range infers the gear from speed).
+            </summary>
+        </member>
+        <member name="T:Dbce.Wheel.Telemetry.WheelValues">
+            <summary>Per-wheel values, always front-left, front-right, rear-left, rear-right.</summary>
+            <remarks>
+            A struct with named corners rather than a <c>float[4]</c>: the array form makes
+            it far too easy to fill the corners in the wrong order, which produces a
+            dashboard that looks plausible and is silently wrong.
+            </remarks>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.WheelValues.Uniform(System.Single)">
+            <summary>All four corners set to the same value.</summary>
+        </member>
+        <member name="T:Dbce.Wheel.Telemetry.TelemetryFrame">
+            <summary>
+            One physics-frame snapshot, in neutral units, ready to be encoded.
+            </summary>
+            <remarks>
+            <para>
+            Deliberately independent of both art of rally and Forza. The mod fills this
+            from the game's <c>CarController</c>/<c>Drivetrain</c>/<c>Wheel</c> objects,
+            and <see cref="T:Dbce.Wheel.Telemetry.ForzaPacket"/> encodes it. Keeping the middle layer neutral is
+            what lets the encoder be unit-tested without Unity present, and what would let
+            a second output format be added without touching the game-reading code.
+            </para>
+            <para>
+            Units follow Forza's conventions so the encoder stays a pure memcpy with no
+            hidden arithmetic: metres, metres/second, radians, watts, newton-metres.
+            The conversions from art of rally's units live in the mod, documented in
+            docs/TELEMETRY.md.
+            </para>
+            </remarks>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.IsRaceOn">
+            <summary>
+            False when not driving. Consumers use this to park the dashboard, so it
+            must go false in menus and between stages, not just stay true forever.
+            </summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.TimestampMs">
+            <summary>Milliseconds since an arbitrary origin; only deltas are meaningful.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.Yaw">
+            <summary>Orientation in radians.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.Pitch">
+            <summary>Orientation in radians.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.Roll">
+            <summary>Orientation in radians.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.NormalizedSuspensionTravel">
+            <summary>Suspension compression, 0 = full droop, 1 = fully compressed.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.WheelOnRumbleStrip">
+            <summary>Non-zero where the wheel is on a rumble strip. Encoded as s32.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.SurfaceRumble">
+            <summary>
+            Surface roughness, 0..1. This is the field bass shakers and rumble motors
+            key off, so on a rally stage it carries most of the surface texture.
+            </summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.DrivetrainType">
+            <summary>0 = FWD, 1 = RWD, 2 = AWD.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.Speed">
+            <summary>Metres per second. The single field most consumers actually read.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.Power">
+            <summary>Watts.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.Torque">
+            <summary>Newton-metres.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.Accel">
+            <summary>Throttle, 0..255.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.Brake">
+            <summary>Brake, 0..255.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.Clutch">
+            <summary>Clutch, 0..255.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.HandBrake">
+            <summary>Handbrake, 0..255.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.Gear">
+            <summary>0 = reverse, 1..n = forward gears. Neutral is reported as 0 by Forza too.</summary>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetryFrame.Steer">
+            <summary>Steering, -127 (full left) to 127 (full right).</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.TelemetryFrame.ToPedal(System.Single)">
+            <summary>
+            Scales a 0..1 pedal input to the 0..255 byte Forza expects, clamping first.
+            Art of rally's inputs are nominally 0..1 but smoothing can overshoot, and an
+            unchecked cast would wrap 1.01 round to a near-zero throttle.
+            </summary>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.TelemetryFrame.ToSteer(System.Single)">
+            <summary>
+            Scales a -1..1 steering input to the -127..127 range Forza expects, clamping first.
+            </summary>
+        </member>
+        <member name="T:Dbce.Wheel.Telemetry.TelemetrySender">
+            <summary>
+            Fire-and-forget UDP sender for <see cref="T:Dbce.Wheel.Telemetry.ForzaPacket"/> frames.
+            </summary>
+            <remarks>
+            <para>
+            Called from the game's physics loop, so the two rules are: never allocate per
+            frame, and never let a network error reach the caller. A telemetry problem
+            must not stall or crash the game — dropping a packet is always the right
+            answer, and UDP callers expect loss anyway.
+            </para>
+            <para>
+            Not thread-safe: the shared scratch buffer assumes a single caller. That
+            matches how it is used (one Unity FixedUpdate), and a lock on the hot path
+            would cost more than it protects.
+            </para>
+            </remarks>
+        </member>
+        <member name="F:Dbce.Wheel.Telemetry.TelemetrySender.DefaultPort">
+            <summary>Port SimHub and most Forza consumers listen on by default.</summary>
+        </member>
+        <member name="P:Dbce.Wheel.Telemetry.TelemetrySender.PacketsSent">
+            <summary>Number of packets successfully handed to the socket.</summary>
+        </member>
+        <member name="P:Dbce.Wheel.Telemetry.TelemetrySender.SendFailures">
+            <summary>Number of sends that failed. Non-zero is not necessarily a problem.</summary>
+        </member>
+        <member name="P:Dbce.Wheel.Telemetry.TelemetrySender.LastError">
+            <summary>Most recent send error, for surfacing in the mod's settings UI.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.TelemetrySender.#ctor(System.String,System.Int32)">
+            <param name="host">Destination host. Loopback for a consumer on this PC.</param>
+            <param name="port">Destination UDP port.</param>
+            <exception cref="T:System.ArgumentException"><paramref name="host"/> cannot be resolved.</exception>
+        </member>
+        <member name="M:Dbce.Wheel.Telemetry.TelemetrySender.Send(Dbce.Wheel.Telemetry.TelemetryFrame@)">
+            <summary>
+            Encodes and sends one frame. Never throws; failures are counted instead.
+            </summary>
+            <returns><c>true</c> if the packet reached the socket.</returns>
+        </member>
+    </members>
+</doc>

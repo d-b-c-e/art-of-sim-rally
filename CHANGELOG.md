@@ -5,6 +5,27 @@ Notable changes to art of sim rally.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **The vendored toolkit was never actually committed.** `.gitignore` excluded
+  the `lib/` *directory*, and git does not descend into an excluded directory,
+  so the `!lib/toolkit/**` re-include below it could never match. A fresh clone
+  had no `lib/toolkit`, so `tools/package/package.ps1` failed at its own guard
+  and the "pinned by VERSION, diffable bump" convention was untrue in practice
+  for the whole of 0.2.2. The rule is now `lib/*`, and the pinned binaries are
+  committed.
+
+### Changed
+
+- **Toolkit pin v0.1.0 -> v0.2.0.** The native DLL is a drop-in: 32 undecorated
+  exports against the 28 that shipped in 0.2.2, nothing removed, still x64.
+  Verified with `dumpbin /exports` against the previous release's binary. No
+  behaviour change - the mod does not yet call the four new entry points
+  (`SetPreferredDeviceGuid`, `CreatePeriodicEffect`, `UpdatePeriodicEffect`,
+  `ReleasePeriodicEffects`), which is the next work in docs/ROADMAP.md.
+
 ## [0.2.2] - 2026-09-03
 
 ### Changed
