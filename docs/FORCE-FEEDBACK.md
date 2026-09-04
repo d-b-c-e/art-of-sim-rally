@@ -61,15 +61,20 @@ invertForceFeedback (bool)  sign (int)  m_force (float)  cardynamics (CarDynamic
   reads garbage. Our implementation returns `BOOL`.
 - **x64 only.** art of rally is a 64-bit Unity player. A 32-bit DLL fails to
   load with no diagnostic beyond force feedback quietly not working.
-- **Exports must be undecorated** and named exactly as above. `build.ps1`
-  verifies all seven with `dumpbin /exports` and fails the build otherwise,
-  because the failure mode is otherwise an `EntryPointNotFoundException` thrown
-  deep inside a MonoBehaviour that the game swallows.
+- **Exports must be undecorated** and named exactly as above. The toolkit's
+  `build.ps1` verifies every export with `dumpbin /exports` and fails the build
+  otherwise, because the failure mode is otherwise an
+  `EntryPointNotFoundException` thrown deep inside a MonoBehaviour that the
+  game swallows.
 - `InitDirectInput` takes an `int`, so the game truncates its `HWND`. Our
   implementation sign-extends it back, validates with `IsWindow`, and falls
   back to `GetForegroundWindow()` if that fails.
 
-## Two routes
+## Two routes (historical — route B is what shipped)
+
+This section is the analysis done before anything ran, kept because it explains
+why the mod is shaped the way it is. **Route A turned out to be impossible** —
+see "Phase 0 result" below — and route B is what ships today.
 
 ### Route A — supply the missing DLL
 
@@ -77,17 +82,18 @@ Build `UnityForceFeedback.dll` and drop it in
 `artofrally_Data\Plugins\x86_64\`. The game's own force feedback comes alive
 with **zero** patching of game code, no mod loader, and no Harmony.
 
-This is implemented in [`src/UnityForceFeedback/`](../src/UnityForceFeedback/)
-and builds today:
+**Outcome: dead.** The DLL was built and installed, and the game never called
+it — not because the DLL was wrong, but because the `ForceFeedback` behaviour it
+would serve is never attached to anything. Settled 2026-08-31; the evidence is
+under "Phase 0 result" below.
 
-```powershell
-.\src\UnityForceFeedback\build.ps1 -Install
-```
+The DLL itself lives on, driven by the mod instead of by the game. Its source is
+no longer in this repo: it is `WheelFfb.dll` from
+[dbce-wheel-mod-toolkit](https://github.com/d-b-c-e/dbce-wheel-mod-toolkit),
+vendored under `lib/toolkit/native` and shipped as `UnityForceFeedback.dll` —
+the name the mod P/Invokes. Refresh the pin with `tools\Sync-Toolkit.ps1`.
 
-Status: **built and export-verified, not yet runtime-verified** — nobody has
-confirmed the game actually calls it. That is phase 0 of the roadmap.
-
-Limits of route A: we get whatever force curve the developers wrote and never
+Limits route A would have had: we get whatever force curve the developers wrote and never
 shipped. It may be excellent, it may be unusable. We control only `multiplier`,
 `smoothingFactor`, `clampValue` and `invertForceFeedback`, and only by patching
 those fields — and it is a single constant force with no separate road texture,
@@ -114,11 +120,12 @@ Output options for route B:
   wheel this is a zero-native-code path to rich, purpose-built rally effects.
   Logitech only, so it can only ever be a bonus path alongside DirectInput.
 
-### Recommendation
+### How it actually went
 
-Do A first — it is a day's work and it settles every open question about
-whether the game's FFB path is live. Then do B, reusing everything A taught us.
-They compose: A's logging mode is the instrumentation B needs.
+A was done first, on the reasoning that it was a day's work and would settle
+every open question about whether the game's FFB path was live. It did settle
+them — by answering no. The work was not wasted: A's DLL is B's output stage,
+and A's logging mode is the instrumentation B was debugged with.
 
 ## Phase 0 result (2026-08-31): ANSWERED - the feature is half-built
 
@@ -202,58 +209,72 @@ casts to int *before* multiplying by 1000, quantising the output to 21 discrete
 steps. That would feel notchy. Prefer calling `SetDeviceForcesXY` at full
 resolution, or Harmony-patch `Update()`.
 
-## Phase 0: the decisive experiment
+## The native log
 
-The shipped DLL doubles as a probe. Set `AOSR_FFB_LOG=1` and every call is
-traced to `%LOCALAPPDATA%\ArtOfSimRally\ffb.log`.
+The DLL traces itself to `%LOCALAPPDATA%\ArtOfSimRally\ffb.log`. It is the first
+thing to read for any force-feedback report, and the support file embeds it.
 
-**The variable must reach the game process, not just your shell.** A game
-launched from Steam inherits Steam's environment, so setting it in a terminal
-and then pressing Play in Steam produces an empty log - which reads exactly
-like "the game never calls our DLL" and would send you down route B for no
-reason. Set it at user scope and restart Steam:
+**Logging is on by default** — since the native layer moved to
+dbce-wheel-mod-toolkit, no environment variable is needed to switch it on. The
+mod calls `SetLogPath` at init to keep the historical `ArtOfSimRally\ffb.log`
+location rather than the toolkit's default `%LOCALAPPDATA%\DbceWheel\ffb.log`.
 
-```powershell
-.\src\UnityForceFeedback\build.ps1 -Install
-[Environment]::SetEnvironmentVariable('AOSR_FFB_LOG', '1', 'User')
-# fully exit Steam, start it again, then launch art of rally and drive a stage
-Get-Content "$env:LOCALAPPDATA\ArtOfSimRally\ffb.log"
-```
+| Variable | Effect |
+|---|---|
+| `DBCE_FFB_LOG=0` | turns logging **off** |
+| `DBCE_FFB_LOG_PATH=<file>` | redirects it, overriding the default |
 
-Or bypass the persistent setting by starting **Steam itself** with the variable
-- it passes down to the game it launches:
+> Earlier revisions of this document told you to set `AOSR_FFB_LOG=1`. **That
+> variable no longer exists** and setting it does nothing — harmless now that
+> logging defaults to on, but it was worth an hour of confusion when the
+> renaming landed. If a set of instructions anywhere still mentions it, they
+> predate toolkit 0.1.0.
+
+An environment variable does still have to reach the game *process*, not just
+your shell, if you ever need one. A game launched from Steam inherits Steam's
+environment, so setting a variable in a terminal and then pressing Play in Steam
+has no effect on it. Set it at user scope and fully restart Steam, or start
+Steam itself with the variable set:
 
 ```powershell
 & "D:\Program Files (x86)\Steam\steam.exe" -shutdown
 # wait for Steam to fully exit, then:
-$env:AOSR_FFB_LOG = "1"
+$env:DBCE_FFB_LOG = "0"
 & "D:\Program Files (x86)\Steam\steam.exe"
 ```
 
 **Do not try to launch `artofrally.exe` directly.** The game ships without a
-`steam_appid.txt`, so Steamworks restarts it through Steam - and the relaunched
+`steam_appid.txt`, so Steamworks restarts it through Steam — and the relaunched
 process is spawned by Steam, so it does not inherit a variable set in your
 shell. It looks like the game simply failed to start.
 
-An empty log is only meaningful once you have confirmed the variable actually
-reached the game.
-
-Read the log:
+### Reading it
 
 | What you see | What it means |
 |---|---|
-| `InitDirectInput` then a stream of `SetDeviceForcesXY` | Everything works. The premise is proven and route A is done. |
-| `InitDirectInput` but no `SetDeviceForcesXY` | The behaviour is attached but gated. Look at `CarDynamics.enableForceFeedback` and `ForceFeedback.forceFeedbackEnabled`; force them with Harmony. |
-| Nothing at all | The `ForceFeedback` MonoBehaviour is not attached to a live object. Route A is dead; go to route B. |
-| `no force-feedback device found` | No FFB-capable DirectInput device is attached, or another process holds it. |
-| `SetCooperativeLevel ... failed` | Exclusive acquisition was refused — most likely Rewired already owns the wheel. See below. |
+| `InitDirectInput` then a stream of `SetDeviceForcesXY` | Working normally. |
+| `no force-feedback device found` | No FFB-capable DirectInput device attached, or another process holds it exclusively. |
+| `SetCooperativeLevel ... failed` | Exclusive acquisition refused. See "fighting Rewired for the device" below. |
+| `CreateEffect ... 0x80040154` | The chosen device has no actuator — the wrong twin of a Fanatec base. The mod now tries the others. |
+| `access lost ... re-acquire` | `0x80040205`, focus was lost and the device came back non-exclusive. Recovering as designed; a flood of them is a problem. |
+| `SetParameters FAILED` | The device refused the force outright. Report it with the support file. |
 
-The `SetDeviceForcesXY` values are also a free gift: they are the game's own
-computed force curve, which tells us immediately whether route A's output is
-worth keeping and gives route B a reference to beat.
+The log only records `SetDeviceForcesXY` when the value *changes*, to keep a
+60 Hz stream readable.
 
-Note the log only records `SetDeviceForcesXY` when the value *changes*, to keep
-a 60 Hz stream readable.
+### What it said in 2026-08-31's decisive experiment
+
+The same log settled phase 0. With the DLL installed and a full stage driven,
+it was **empty** and `Player.log` held no exception — the game did not try and
+fail, it did not try. That is what killed route A, and the table used to read:
+
+| What you saw | What it meant then |
+|---|---|
+| `InitDirectInput` then `SetDeviceForcesXY` | The premise is proven, route A is done. |
+| `InitDirectInput` but no `SetDeviceForcesXY` | Attached but gated; force `enableForceFeedback` with Harmony. |
+| Nothing at all | The `ForceFeedback` MonoBehaviour is not attached. Route A is dead. |
+
+It was the third row.
 
 ## Wheel compatibility
 

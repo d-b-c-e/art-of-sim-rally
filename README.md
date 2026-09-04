@@ -41,7 +41,7 @@ Everything is in the Ctrl+F10 panel, in collapsible sections, and adjustable
 while driving.
 
 **Force feedback** — pick your wheel from the **Wheel** dropdown, then set
-**Strength** (0–100; start around 70). If two devices share a name, choose one
+**Strength** (0–100; 50 is the tuned default, and the right starting point). If two devices share a name, choose one
 and turn the wheel — if nothing happens, choose the other. Switching wheels takes
 effect immediately. If the wheel pulls the wrong way, tick *Invert direction*.
 
@@ -97,14 +97,18 @@ and does not need the game to know about it.
 **Bonnet, not cockpit.** The cars have no modelled interiors, so a cockpit view
 isn't possible.
 
-**Tested on a MOZA R12 Base** (the developer's rig), and by users on a MOZA R5
-and Fanatec CSL DD. The force feedback is plain DirectInput constant force with
+**Tested on a MOZA R12 Base** (the developer's rig), and by users on a MOZA R5,
+a Fanatec CSL DD and a Thrustmaster T300 RS GT. The force feedback is plain DirectInput constant force with
 nothing vendor-specific in it, so it should work on anything that does force
 feedback; per-wheel differences that turned up are handled (see
 [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)).
 
-**Known issue:** the camera can move about for a second when the game takes over
-at the end of a stage. Cosmetic, and confined to the results cinematic.
+**Known issues** are listed in [docs/KNOWN-ISSUES.md](docs/KNOWN-ISSUES.md).
+On 0.2.2, the game's own camera angles render reversed once you have cycled
+through the bonnet or bumper view ([#1](../../issues/1)); until the next release,
+untick both mounted cameras in Ctrl+F10 → Camera, or just restart the stage. The
+camera also moves about for a second when the game takes over at the end of a
+stage — cosmetic, results cinematic only.
 
 ## Why the steering felt wrong
 
@@ -161,8 +165,12 @@ under `lib/toolkit` (`tools\Sync-Toolkit.ps1` refreshes the pin).
 
 ```
 dotnet build ArtOfSimRally.sln -c Release
-tools\package\package.ps1 -Version 0.2.2
+tools\package\package.ps1 -Version 0.2.3
 ```
+
+The vendored toolkit binaries are committed, so a clone builds and packages
+without needing the toolkit repo. Release steps are in
+[docs/RELEASING.md](docs/RELEASING.md).
 
 Referencing the game's assemblies requires art of rally installed; override
 `GameDir` if it isn't in the default Steam location. Unity Mod Manager's

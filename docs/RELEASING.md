@@ -109,21 +109,41 @@ documented DirectInput API and a P/Invoke signature read from the game's own
 metadata. It ships with the mod. **No game files are redistributed**, and none
 should ever be added to this repo.
 
-Note its install path differs from the rest: it belongs in
-`artofrally_Data/Plugins/x86_64/`, beside the game's other native plugins, not in
-the plugin folder. Any installer or instructions must be explicit about that,
-because a wrong location fails silently with no force feedback and no error.
+**It ships inside the mod folder**, beside `ArtOfSimRally.Mod.dll`, and is
+loaded from there by absolute path — `FfbNative.ResolveDllPath` looks in the mod
+folder first, then its parent, and only then falls back to
+`artofrally_Data/Plugins/x86_64/`. An earlier revision of this document said the
+plugin folder was the required location; it is not, and a stale copy left there
+by an old manual install is a real failure mode, because it can be loaded in
+preference to the current one and then fail on an export it predates.
 
-## Before the repo goes public
+The binary itself is vendored, not built here: it is `WheelFfb.dll` from
+dbce-wheel-mod-toolkit (`lib/toolkit/native`, pinned by `lib/toolkit/VERSION`),
+copied to `UnityForceFeedback.dll` by `tools/package/package.ps1`.
 
-- [ ] Flip the repo to public.
-- [ ] LICENSE is MIT; check the copyright name is the one you want.
-- [ ] Rewrite README's opening for users rather than for us — right now it leads
-      with the engineering discovery, which is the right hook for other modders
-      but not for someone who just wants their wheel to work.
-- [ ] Confirm no game assemblies or `.CT` files were ever committed:
-      `git log --stat --all | grep -iE "Assembly-CSharp|\.CT$"`
-- [ ] Tag `v0.1.0` and attach the zip to a GitHub release.
+## Cutting a release
+
+Done once per version, in this order. The repo went public at 0.1.0 and the
+pre-publication checklist that used to live here is complete: MIT licence, a
+user-facing README, no game assemblies ever committed
+(`git log --stat --all | grep -iE "Assembly-CSharp|\.CT$"` stays empty), and
+tagged releases with the zip attached.
+
+1. **Refresh the toolkit pin if it moved.** `tools\Sync-Toolkit.ps1 -Version
+   vX.Y.Z`, then confirm the native exports are still a superset of what the mod
+   P/Invokes — `dumpbin /exports` on the new `lib\toolkit\native\WheelFfb.dll`
+   against the previous release's `UnityForceFeedback.dll`. The vendored
+   binaries are committed, so the bump shows up as a diff.
+2. **Close the game.** The DLLs are locked while it runs, and a deploy that
+   "succeeds" over a running game leaves you testing the previous build.
+3. `dotnet build ArtOfSimRally.sln -c Release`
+4. `tools\package\package.ps1 -Version X.Y.Z`
+5. Install the packaged zip, not the working tree, and drive a stage.
+6. Update `CHANGELOG.md`, tag, and attach the zip to a GitHub release.
+
+There are no unit tests in this repo — the telemetry encoder's suite moved to
+dbce-wheel-mod-toolkit with the encoder. `dotnet test` here succeeds while
+running nothing, so it proves nothing; step 5 is the real gate.
 
 ## Channels
 

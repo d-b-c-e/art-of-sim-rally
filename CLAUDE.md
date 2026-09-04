@@ -3,6 +3,8 @@
 > **Resuming a session? Read `docs/FINDINGS.md` first.** It records everything
 > verified on disk about the game. Do not re-derive it, and do not describe a
 > component as working if the status table below says it has never run.
+> Open defects live in `docs/KNOWN-ISSUES.md` — check there before treating a
+> symptom as new.
 
 ## Repository Purpose
 
@@ -14,8 +16,9 @@ viewpoint.
 The founding discovery: **art of rally ships a complete force feedback
 implementation that never runs, because `UnityForceFeedback.dll` was left out of
 the build.** The managed `ForceFeedback` class P/Invokes seven entry points from
-a module that does not exist in the install. `src/UnityForceFeedback/` is a
-clean-room implementation of it.
+a module that does not exist in the install. The clean-room implementation of
+it now lives in dbce-wheel-mod-toolkit as `WheelFfb.dll`, vendored here and
+shipped under the name the game's dead code P/Invokes.
 
 Unlike the sibling `dbce-mod-toolkit` (private by design), this is intended to
 be **public and shareable**. Keep it that way: no game assemblies committed, no
@@ -25,25 +28,31 @@ third-party binaries, nothing that would force the repo private.
 
 | Path | Contents |
 |---|---|
+| `src/ArtOfSimRally.Mod/` | The whole mod. One project, one assembly. `Main.cs` is the only loader-aware file. |
+| `lib/toolkit/` | **Vendored** from dbce-wheel-mod-toolkit (pinned by `VERSION`; refresh with `tools/Sync-Toolkit.ps1`): `native/WheelFfb.dll` (shipped as `UnityForceFeedback.dll`, the name the mod P/Invokes) and `dotnet/Dbce.Wheel.Telemetry.dll`. The native source and the encoder live in that repo now. **These binaries are committed** — see the gitignore note under Findings. |
+| `lib/umm/` | UnityModManager.dll + 0Harmony.dll, extracted locally, **never committed**. |
+| `tools/` | `Sync-Toolkit.ps1` (toolkit pin), `package/` (release zip), `installer/` (the double-click installer), `dinput-enum/` (lists DirectInput devices without launching the game). |
+| `docs/KNOWN-ISSUES.md` | **The defect register.** Open, resolved and will-not-fix, with severities. Read before diagnosing anything. |
 | `docs/TROUBLESHOOTING.md` | User-facing fixes by symptom; the Fanatec section is the most-needed page. |
-| `lib/toolkit/` | **Vendored** from dbce-wheel-mod-toolkit (pinned by `VERSION`; refresh with `tools/Sync-Toolkit.ps1`): `native/WheelFfb.dll` (shipped as `UnityForceFeedback.dll`, the name the mod P/Invokes) and `dotnet/Dbce.Wheel.Telemetry.dll`. The native source and the encoder live in that repo now. |
 | `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP, RELEASING |
 
-## Status (2026-09-03) — do not overstate this
+## Status (2026-09-04) — do not overstate this
 
-Released: **0.2.2** (2026-09-03). "Verified" means confirmed on the owner's MOZA
-R12 rig unless stated otherwise.
+Released: **0.2.2** (2026-09-04). Toolkit pin: **v0.2.0**, bumped 2026-09-04, no
+mod code using its new surface yet. "Verified" means confirmed on the owner's
+MOZA R12 rig unless stated otherwise.
 
 | Component | State |
 |---|---|
 | Force feedback | Verified. Front-axle lateral force × pneumatic trail (reference 11,500 N after two retunes), faded out below 12 km/h, re-acquires the wheel after alt-tab. Sign confirmed on a MOZA R12; the MOZA R5 one-sided inversion fixed by user report. |
 | Steering fixes, bind-any-device, glyph text fallback | Verified. |
 | Shifter (sequential + H-pattern), read directly from the device | Verified by users. |
-| Bonnet + bumper cameras | Verified. End-of-stage cinematic wobble is a known cosmetic issue (docs/CAMERA.md). |
+| Bonnet + bumper cameras | Verified. The game's own angles 3-8 rendered reversed once a mounted view had been used (issue #1); **root-caused and fixed in the working tree, unreleased, not yet confirmed on screen** (KI-1). The same fix should close the end-of-stage wobble (KI-2). |
 | Telemetry (Forza format) | Verified with SimHub + ButtKicker, live from the start line. |
 | **Direct wheel input** (`WheelInput`) | Verified driving on the owner's rig 2026-09-03 after the steering-sign fix (assignment is direction-independent; Flip per channel). Released in 0.2.2. Fanatec user pending. |
 | Crash fix (shifter choice after FFB failure), FFB candidate fallback, capability labels | Released in 0.2.2; init verified here, Fanatec user pending. |
 | Rewired DirectInput backend switch (`InputBackend`) | **Abandoned** after four attempts. Settings.xml-only experiment. Do not retry — see below. |
+| Toolkit `SetPreferredDeviceGuid`, periodic effects | Available since the v0.2.0 pin, **unused**. The next two pieces of work (docs/ROADMAP.md). |
 
 The game's force feedback was half-built: `ForceFeedback` is never attached,
 `Wheel.Mz` is computed only `if (cardynamics.enableForceFeedback)`, which
@@ -80,7 +89,8 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
 4. **Do not guess wire-format offsets.** The Forza layout is anchored on
    `Speed`@256 and `Gear`@319, both validated against SimHub via the sibling
    cruisn-collection harness. A wrong offset does not throw, it renders a
-   plausible and completely wrong dashboard. There are tests; keep them.
+   plausible and completely wrong dashboard. The tests that lock this down now
+   live in dbce-wheel-mod-toolkit with the encoder; keep them there.
 5. **Never switch Rewired's input source at runtime in shipped code.** The
    setter calls `ResetAll()`; applied at load it killed the keyboard, applied
    after the title screen it killed the menus while every probe said input was
@@ -92,6 +102,10 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
    `FreeDirectInput` releases the instance only when nothing else holds a device.
 7. **Deploy only when the game is closed.** The DLLs are locked while it runs;
    a copy that "succeeds" over a running game is the stale build you tested last.
+8. **The vendored toolkit binaries are committed, and must stay committed.**
+   They are our own MIT artifacts, not third-party ones, so they do not
+   compromise rule 2. Without them a clone cannot package. Verify with
+   `git check-ignore -v lib/toolkit/native/WheelFfb.dll` returning nothing.
 
 ## Environment facts
 
@@ -116,9 +130,15 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
   show it.
 - Bindings persist in PlayerPrefs at `HKCU\Software\Funselektor Labs\art of rally`.
   That key not existing means the game has never been launched on this machine.
-- MSVC 14.44 x64 build tools and Windows SDK 10.0.26100 with `dinput8.lib` are
-  installed. `cl.exe` is not on PATH — `src/UnityForceFeedback/build.bat` sets
-  up the environment itself.
+- **There is no native build in this repo any more.** The native source moved to
+  dbce-wheel-mod-toolkit; build it there and re-pin here. MSVC 14.44 x64 build
+  tools and Windows SDK 10.0.26100 with `dinput8.lib` are installed for that
+  repo's sake, and `dumpbin.exe` (useful for checking a new pin's exports) is at
+  `C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\`.
+  `cl.exe` is not on PATH.
+- The native DLL logs to `%LOCALAPPDATA%\ArtOfSimRally\ffb.log` **by default** —
+  logging is on unless `DBCE_FFB_LOG=0`. The old `AOSR_FFB_LOG=1` variable no
+  longer exists; anything still telling you to set it is stale.
 - `vcvars64.bat` prints `'vswhere.exe' is not recognized` on this machine. That
   comes from inside Microsoft's script and is harmless; only a non-zero exit
   code means a real failure.
@@ -138,6 +158,11 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
   SDK's `dinput.h` before theorising.
 - **Telemetry `IsRaceOn` is true from `WAITING_TO_BEGIN`**, so a shaker follows
   the engine while revving on the line. Forces still wait for `UNDERWAY`.
+- **A `.gitignore` rule excluding a directory cannot be undone below it.**
+  `lib/` plus `!lib/toolkit/**` silently kept the vendored toolkit untracked
+  through all of 0.2.2 — git never descends into an excluded directory, so the
+  re-include never matched. `lib/*` is the fix. Check with `git check-ignore -v`,
+  not by reading the file.
 - **The Fanatec crash chain** (support bundle 2026-09-03): preferred FFB device
   had no actuator → `CreateEffect` 0x80040154 → instance released → device list
   refilled by a temporary instance → shifter chosen → `CreateDevice` on null.
@@ -153,10 +178,25 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
 - **`Stop-Process` from a Bash-spawned PowerShell does not stop the game**; the
   native PowerShell tool does. Same for anything that needs the interactive
   desktop.
-- art of rally **accepts `SendInput` keyboard events** (unlike iRacing Arcade),
-  so unattended tests can drive the title screen. The x64 `INPUT` struct must be
-  40 bytes (`FieldOffset(32) long pad`) or `SendInput` fails with error 87.
-  `FindWindow` by title fails; use the process's `MainWindowHandle`.
+- **art of rally no longer accepts injected keyboard input** (retested
+  2026-09-04, build 17584229 with UMM). Virtual-key `SendInput`, scan-code
+  `SendInput` (`KEYEVENTF_SCANCODE`) and `PostMessage(WM_KEYDOWN)` all leave the
+  title screen sitting on "press any button to start", with the game confirmed
+  foreground. An earlier note here said the opposite; it no longer holds, so
+  **anything needing a stage driven has to be driven by a person.** Plan for
+  that: ship a diagnostic behind `DiagnosticLogging` and read the log, rather
+  than trying to automate the UI. If retrying anyway: the x64 `INPUT` struct
+  must be 40 bytes (`FieldOffset(32) long pad`) or `SendInput` fails with error
+  87, `FindWindow` by title fails so use `MainWindowHandle`, and UMM's panel
+  opens over the game at startup (`ShowOnStart` in
+  `artofrally_Data\Managed\UnityModManager\Params.xml`).
+- **The stage camera is a two-object rig.** `CarCameras` is on the GameObject
+  "Stage Camera"; the camera that renders is "Camera Main", **its child**, which
+  the game pins at local identity (`CameraManager`'s constructor zeroes
+  `localPosition`/`localRotation`). Writing a world-space transform to
+  `Camera.main` therefore leaves a local offset on the child that the stock rig
+  never clears — the cause of KI-1. Anything touching the camera must restore
+  that invariant when it lets go.
 - `ilspycmd` (dotnet tool) is installed: `ilspycmd -t <Type> Assembly-CSharp.dll`
   for one type, `-p -o <dir>` for the whole assembly. `Rewired_Core.dll` is
   obfuscated internally but its public API decompiles fine.
@@ -167,8 +207,17 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
 
 ## Testing
 
+**There are no unit tests in this repo.** `tests/` is empty and the solution
+holds one project, so `dotnet test ArtOfSimRally.sln` succeeds while running
+nothing — do not quote it as evidence of anything. The telemetry encoder's suite
+moved to dbce-wheel-mod-toolkit along with the encoder; run it there when
+touching packet layout.
+
+What actually gates a change here is installing the packaged zip and driving a
+stage (docs/RELEASING.md), plus:
+
 ```powershell
-dotnet test ArtOfSimRally.sln
+dotnet build ArtOfSimRally.sln -c Release   # must be warning-free
 ```
 
 End-to-end telemetry check, no game required — run the probe in one shell and

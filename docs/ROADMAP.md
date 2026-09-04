@@ -3,113 +3,117 @@
 Ordered by what settles the most uncertainty per unit of effort, not by what is
 most exciting.
 
-## Phase 0 — prove the force feedback path  ← next
+> **The original phases 0–5 are all shipped.** Force feedback was proved,
+> re-derived from lateral force, and released; the UMM mod, telemetry, the
+> mounted cameras and public distribution all followed. That history is kept
+> at the bottom under [Shipped](#shipped) because the reasoning still explains
+> why things are the way they are. What follows is what is actually left.
 
-The one experiment that decides the shape of the whole project.
+Open defects are tracked in [KNOWN-ISSUES.md](KNOWN-ISSUES.md); this file is
+about work, not symptoms.
 
-`UnityForceFeedback.dll` is built and export-verified but has never run inside
-the game. Install it with logging on, drive a stage, read the log.
+## Now — drive one stage, then release 0.2.3  ← next
 
-```powershell
-.\src\UnityForceFeedback\build.ps1 -Install
-[Environment]::SetEnvironmentVariable('AOSR_FFB_LOG', '1', 'User')
-# fully exit and restart Steam so the game inherits it, then drive a stage
-Get-Content "$env:LOCALAPPDATA\ArtOfSimRally\ffb.log"
-```
+[Issue #1](https://github.com/d-b-c-e/art-of-sim-rally/issues/1) (stock cameras
+3–8 rendering reversed) is **root-caused and fixed in the working tree**, and the
+same fix should close the end-of-stage wobble that has been open since
+2026-09-01. Neither is confirmed on screen, because injected input no longer
+drives this game's UI — that takes a person at the rig.
 
-Restarting Steam is not optional. The game inherits Steam's environment, so a
-variable set only in your shell produces an empty log that looks identical to
-the game never calling the DLL - a false negative that would send you down
-route B for no reason.
+One stage settles both:
 
-Interpretation table is in [FORCE-FEEDBACK.md](FORCE-FEEDBACK.md#phase-0-the-decisive-experiment).
+1. Cycle bonnet → bumper → a stock angle. The stock angle should look forward
+   down the road, not back at the car.
+2. Drive to the finish and watch the results cinematic for the residual swing
+   ([KI-2](KNOWN-ISSUES.md#ki-2--the-camera-moves-oddly-at-the-end-of-a-stage)).
 
-Outcomes:
+Then release, and reply to the reporter — they are on 0.2.1, they hit this on a
+Thrustmaster T300 RS GT, and they came to the mod from an x360ce workaround, so
+they are worth keeping. Detail and the mechanism are in
+[KI-1](KNOWN-ISSUES.md#ki-1--stock-cameras-38-render-reversed).
 
-- **Calls arrive** — route A works. Force feedback exists in art of rally for
-  the first time, with no game code patched. Move to phase 1.
-- **Init but no forces** — the behaviour is gated. Small Harmony patch to force
-  `enableForceFeedback`; still route A.
-- **Silence** — the behaviour is not attached. Route A is dead, go to phase 3
-  and build force feedback ourselves.
+## Next — adopt toolkit 0.2.0
 
-Also record the `SetDeviceForcesXY` values. That is the game's own force curve,
-and it tells us whether route A's output is worth keeping.
+The pin moved to `v0.2.0` on 2026-09-04 and the DLL is a drop-in (32 exports,
+strict superset of the 28 that shipped in 0.2.2). Nothing in the mod uses the
+new surface yet. Two pieces are worth taking, in this order:
 
-**Blocked on:** a wheel being plugged into this machine. Everything up to this
-point was doable without one; nothing past it is.
+### `SetPreferredDeviceGuid` — pick the wheel by instance GUID
 
-First bind the wheel in game — no utility needed, see
-[CONTROLS.md](CONTROLS.md) — and confirm throttle and brake are on separate
-axes before trusting anything the FFB log says.
+Today the wheel is chosen by index, then by name, then by trying every
+force-feedback candidate in turn. All three are guesses when a Fanatec base
+presents two devices called `FANATEC Wheel`, and the index is only stable until
+something is unplugged. A DirectInput instance GUID is unambiguous and
+persistent.
 
-## Phase 1 — the Unity Mod Manager mod
+Small and self-contained: store the GUID alongside the existing name/index in
+`Settings`, pass it before `InitDirectInput`, keep the current path as the
+fallback for settings written by an older version. It would turn
+[KI-3](KNOWN-ISSUES.md#ki-3--fanatec-fixes-are-unverified-on-fanatec-hardware)
+from "try the candidates and hope" into a deterministic selection.
 
-Stand up the UMM + Harmony mod proper, following
-[`MMike17/ArtOfRally_ModBase`](https://github.com/MMike17/ArtOfRally_ModBase).
+### Hardware periodic effects — road texture and tyre slip
 
-- `Info.json`, entry point, Ctrl+F10 settings UI.
-- Harmony hook on `CarDynamics.FixedUpdate` (or `CarController.FixedUpdate`) to
-  read the physics state.
-- Wire `ArtOfSimRally.Telemetry` in and emit for real.
-- Settings: telemetry on/off, host, port; FFB multiplier, smoothing, invert.
+`CreatePeriodicEffect` / `UpdatePeriodicEffect` / `ReleasePeriodicEffects` let
+the wheelbase render an effect itself instead of the mod synthesising it through
+the constant force. That matters more than it sounds: a texture ridden on the
+constant force loses roughly 26% to zero-order-hold roll-off at 60 Hz, and
+another 30–60% to soft saturation when it sits on top of steering load.
 
-**Blocked on:** Unity Mod Manager being installed, to reference
-`UnityModManager.dll` and `0Harmony.dll`. The telemetry assembly is deliberately
-free of both so it could be built and tested first — which it has been.
+This is the surviving substance of the old phase 3 — surface texture per
+`surfaceType` / `physicMaterial`, kerb and impact effects, `ABSTriggered` /
+`TCSTriggered` as discrete effects. The game already computes every input
+needed; see the `Wheel` field list in [FINDINGS.md](FINDINGS.md).
 
-## Phase 2 — telemetry against the real game
+Do it after the GUID work: it is the larger change, it needs tuning at a
+powered base, and it wants a settled device-selection story underneath it.
 
-The encoder is done and round-trip tested; this is about the mapping.
+## After that
 
-- Fill `TelemetryFrame` from the real `Wheel` / `Drivetrain` / `CarController`
-  fields per the table in [TELEMETRY.md](TELEMETRY.md#mapping-art-of-rally-onto-it).
-- Verify with `harness/forza_probe.py`, then with SimHub.
-- Check units: `veloKmh` ÷ 3.6, degrees → radians, suspension travel normalised.
-- Confirm `IsRaceOn` actually goes false in menus.
-- Derive acceleration by differentiating velocity — the game does not store it.
+**Per-wheel force defaults.** `FyReference` has been retuned twice on one rig
+and is Settings.xml only ([KI-4](KNOWN-ISSUES.md#ki-4--force-scaling-is-tuned-for-one-wheel)).
+Either expose it, or ship a small table of starting points by wheel class once
+enough reports exist to build one. Reports are the blocker, not the code.
 
-## Phase 3 — force feedback worth having
+**Close the loop with Fanatec and Thrustmaster owners.** Three fixes shipped in
+0.2.2 on the strength of one support bundle and have never run on the hardware
+they target. The T300 RS GT in issue #1 is the first Thrustmaster report of any
+kind; whatever comes out of KI-1, ask what else that rig does or does not do.
 
-Only meaningful once phase 0 says which route we are on.
+**The Logitech SDK path.** `LogitechSteeringWheelEnginesWrapper.dll` ships with
+the game and `Assembly-CSharp.dll` already binds `LogiPlayDirtRoadEffect`,
+`LogiPlayBumpyRoadEffect`, `LogiPlaySlipperyRoadEffect` and
+`LogiPlaySurfaceEffect`. For a Logitech wheel those are purpose-built rally
+effects available for nothing. Logitech only, so it can only ever be a bonus
+path alongside DirectInput — and hardware periodic effects may make it
+redundant. Evaluate after that lands, not before.
 
-~~Compute force from `Wheel.Mz`~~ (done, then replaced 2026-09-02 by lateral force × trail — `Mz` reverses past 8° slip; see FORCE-FEEDBACK.md) rather than
-faking it from lateral G, and layer on:
-
-- load sensitivity from suspension force
-- surface texture per `surfaceType` / `physicMaterial`
-- kerb and impact effects
-- `ABSTriggered` / `TCSTriggered` as discrete effects
-- a tuning UI, because no two wheels agree on anything
-
-Consider the Logitech SDK path in parallel: the game already binds
-`LogiPlayDirtRoadEffect`, `LogiPlayBumpyRoadEffect`, `LogiPlaySlipperyRoadEffect`
-and `LogiPlaySurfaceEffect`, and that native DLL **is** shipped. For a Logitech
-wheel those are purpose-built rally effects available for free.
-
-## Phase 4 — bonnet camera
-
-Design and constraints in [CAMERA.md](CAMERA.md). Deliberately last: a working
-camera mod already exists on Nexus, so this is the feature with the least unmet
-need, and it is the one most improved by having telemetry to tune against.
-
-## Phase 5 — make it shareable
-
-The stated goal is a robust, reusable, shareable mod.
-
-- Flip the repo public.
-- Release workflow producing a UMM-installable zip, versioned by tag.
-- README aimed at users rather than at us.
-- Publish to Nexus.
-- Decide what to do about `UnityForceFeedback.dll`: it is our own clean-room
-  implementation of a documented DirectInput API against a P/Invoke signature,
-  so it ships with the mod. No game files are redistributed.
+**Nexus Mods.** GitHub releases are the source of truth and the audience is
+already there; Nexus is where art of rally modders actually look. See the
+channels table in [RELEASING.md](RELEASING.md).
 
 ## Explicitly out of scope
 
-- **Cockpit view.** No modelled interiors. See [CAMERA.md](CAMERA.md).
-- **Physics or assist changes.** art of rally has online leaderboards. Force
-  feedback, camera and telemetry are all fair-play neutral; changing grip,
-  assists or car behaviour is not. Keeping that line bright is what lets this
-  be shared without argument.
-- **Redistributing game assemblies.** Reference them from the local install.
+Cockpit view, physics or assist changes, redistributing game assemblies, and
+switching Rewired's input backend at runtime. Each is recorded with its
+reasoning under [Will not fix](KNOWN-ISSUES.md#will-not-fix).
+
+---
+
+## Shipped
+
+Kept for the reasoning, not the status. Dates are when the work landed.
+
+| Phase | What | Landed |
+|---|---|---|
+| 0 | **Prove the force feedback path.** Answered 2026-08-31: the DLL never loaded because the `ForceFeedback` behaviour is never attached — the feature was built from both ends and never joined in the middle. Route A (supply the missing DLL and let the game drive it) was dead on arrival; route B (compute the force ourselves) is what shipped. | 0.1.0 |
+| 1 | **The Unity Mod Manager mod.** `Info.json`, entry point, Ctrl+F10 settings, Harmony hooks on the car's physics update. | 0.1.0 |
+| 2 | **Telemetry against the real game.** Forza Horizon 324-byte packet, anchored on `Speed`@256 and `Gear`@319, verified with SimHub and a ButtKicker. | 0.1.0 |
+| 3 | **Force feedback worth having.** `Mz` first, then replaced by front-axle lateral force × pneumatic trail after `Mz` proved to reverse sign mid-corner. Low-speed fade, sign settled across three wheels, re-acquire after focus loss. | 0.2.1 |
+| 4 | **Bonnet camera**, and a bumper view beside it, appended to the game's own rotation with a numpad tuner. | 0.2.0 |
+| 5 | **Make it shareable.** Public repo, MIT, tagged releases with a double-click installer, user-facing README and troubleshooting. | 0.1.0 → 0.2.2 |
+
+Phase 3's remaining ambitions — surface texture, kerb and impact effects,
+discrete ABS/TCS effects — were parked for want of a way to render them
+properly. Toolkit 0.2.0's periodic effects are that way, which is why they
+appear under [Next](#next--adopt-toolkit-020) rather than here.

@@ -208,15 +208,30 @@ $md = [System.Reflection.Metadata.PEReaderExtensions]::GetMetadataReader($pe)
 # MethodDefinition.GetImport() yields the DllImport module and entry point.
 ```
 
-## Open questions
+## Open questions — all four answered
 
-These are **not** established, and the roadmap's phase 0 exists to settle them:
+Posed 2026-08-31, settled by the end of 0.2.1. Kept with their answers because
+the questions are the ones anyone re-deriving this would ask.
 
-1. Is the `ForceFeedback` MonoBehaviour actually attached to a live GameObject
-   and enabled at runtime? The class name appears in `sharedassets0.assets` and
-   `globalgamemanagers.assets`, which is suggestive but is *not* proof.
-2. Is `CarDynamics.enableForceFeedback` true by default?
-3. Is the game's own force curve any good? It was never shipped, so it was
-   almost certainly never QA'd.
-4. Does exclusive DirectInput acquisition for FFB fight Rewired, which already
-   holds the wheel for input?
+1. **Is the `ForceFeedback` MonoBehaviour attached to a live GameObject and
+   enabled at runtime?** **No.** Nothing ever calls `AddComponent<ForceFeedback>()`
+   or `GetComponent<ForceFeedback>()` anywhere in the assembly. The class name
+   in `sharedassets0.assets` was suggestive and misleading. This is why the
+   installed DLL was never called, and why route A was dead.
+2. **Is `CarDynamics.enableForceFeedback` true by default?** **No — it is never
+   set at all**, anywhere. Since `Wheel` guards its aligning-torque calculation
+   on it, `Mz` is permanently zero in the shipped game. The mod sets the flag.
+3. **Is the game's own force curve any good?** **Unanswerable, and moot.**
+   `CarDynamics.forceFeedback` is never assigned either, so there is no curve to
+   judge — the feature was built from both ends and never joined in the middle.
+   The mod computes its own force, and `Mz` turned out to be the wrong basis
+   for it anyway (it reverses sign past ~8° slip; see FORCE-FEEDBACK.md).
+4. **Does exclusive DirectInput acquisition fight Rewired?** **No.** The
+   exclusive acquire coexists with Rewired's non-exclusive one on every stack
+   reported so far. Losing the window focus *does* return the device
+   non-exclusively — `0x80040205` — which is a separate problem with its own
+   fix.
+
+Full evidence for 1–3 is in [FORCE-FEEDBACK.md](FORCE-FEEDBACK.md) under
+"Phase 0 result"; current open defects are in
+[KNOWN-ISSUES.md](KNOWN-ISSUES.md).

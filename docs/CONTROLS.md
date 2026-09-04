@@ -67,16 +67,20 @@ The all-zero `hardwareGuid` is the signature of an Unknown Controller: no
 hardware map matched, so no Racing Wheel Template, no element names, no glyphs.
 Note the backend is **Raw Input**, not DirectInput.
 
-### Symptom and first thing to check
+### Symptom, and what it turned out to be — RESOLVED
 
 Observed 2026-08-31: the controls screen offered only "keyboard" and
 "joystick", and rebinding produced no response from the wheel.
 
-Three joystick devices are connected here - DS-8X Shifter, MOZA R12 Base, MOZA
-Multi-function Stalk - and `ControlsRemapper` exposes `joystick` (singular),
-`activeController` and `joystickCount`, i.e. it targets **one device at a
-time**. If it defaults to the shifter or the stalk, the wheel produces nothing.
-**Check for a device selector on that screen before concluding anything else.**
+`ControlsRemapper` exposes `joystick` (singular), `activeController` and
+`joystickCount` — it targets **one device at a time**, and it only ever binds
+`Joysticks[0]`. With three joysticks connected here (DS-8X Shifter, MOZA R12
+Base, MOZA Multi-function Stalk) whichever one sorted first won, and the wheel
+produced nothing.
+
+Fixed by `BindAnyDevice`, which retargets the remapper at whichever device you
+actually touch. Shipped in 0.1.0 and verified. The deadzone finding below is a
+*second*, independent cause of "the wheel feels wrong" and was fixed separately.
 
 ### CONFIRMED root cause: Rewired's hidden 10% axis deadzone
 
@@ -114,18 +118,21 @@ Because Rewired's shipped database predates every modern direct-drive base,
 this very likely affects Moza, Simagic, Simucube, Fanatec DD and Asetek users
 equally - not just this one wheel.
 
-### Options, cheapest first
+### Options considered, and what shipped
 
-1. Cycle the remapper to the MOZA R12 Base.
-2. Moza Pit House compatibility settings. A `1STPERSON` device type with 128
-   buttons is unusual HID presentation; Pit House can change how it enumerates.
-3. **A mod that registers a Rewired hardware map for the R12** (`346E:0006`)
-   with a Racing Wheel Template mapping. Rewired supports custom controller
-   definitions, so this is well-scoped and gives real axis names and sane
-   defaults instead of Unknown Controller.
+1. ~~Cycle the remapper to the MOZA R12 Base.~~ Superseded: `BindAnyDevice`
+   retargets it automatically.
+2. ~~Moza Pit House compatibility settings.~~ Not needed, and not something a
+   mod can ask every user to do.
+3. ~~**Register a Rewired hardware map** for the R12 (`346E:0006`) with a
+   Racing Wheel Template.~~ Well-scoped, and it would have given real axis
+   names — but it fixes exactly one VID/PID. `WheelCalibration` zeroing the
+   deadzone gets the same driving result for *every* unrecognised device, which
+   is most modern direct-drive bases, so that is what shipped.
 
-A binding utility is still the wrong answer - see the xoutput section below.
-Teaching Rewired the device beats flattening it to a gamepad.
+For devices Rewired cannot read at all, none of the three would have helped;
+see "read the wheel directly" below. A binding utility remains the wrong answer
+either way — see the xoutput section.
 
 ### Raw Input vs DirectInput — tried at runtime, abandoned (2026-09-02/03)
 
@@ -198,7 +205,8 @@ Verified 2026-09-03 on the MOZA rig: all three controllers open, the base
 reads through the FFB handle (steering centred at 32669), pedals on the base
 at rest. Driven on the owner's rig 2026-09-03: steering, throttle and brake through
 the direct read, once the steering assignment was made direction-independent
-(a left turn during Assign had made left positive). Fanatec verification pending.
+(a left turn during Assign had made left positive). Fanatec verification is
+still outstanding — [KI-3](KNOWN-ISSUES.md#ki-3--fanatec-fixes-are-unverified-on-fanatec-hardware).
 
 ### Why the device presents unusually
 
@@ -212,8 +220,9 @@ various games, which is the same root cause seen from a different angle.
 ### This does not block force feedback
 
 Force feedback goes through DirectInput, which reports the R12 with FFB
-actuators on X and Y - a direct match for `SetDeviceForcesXY`. Binding trouble
-and FFB are independent problems; phase 0 can proceed regardless.
+actuators on X and Y — a direct match for `SetDeviceForcesXY`. Binding trouble
+and FFB are independent problems, and that has held up in practice: force
+feedback shipped and works on devices whose input Rewired cannot read at all.
 
 ## Where bindings persist
 
@@ -228,9 +237,10 @@ It saves controller maps, player data, input behaviours **and joystick
 calibration** (`LoadJoystickCalibrationData`), so deadzones, axis ranges and
 inversion survive restarts.
 
-On this machine that key does not exist yet, i.e. the game has never been
-launched here — the LocalLow folder holds only Steam Cloud saves. The key
-appearing is the confirmation that bindings were written.
+That key was absent when this project started, which is how "the game has never
+been launched on this machine" was established. It exists now. Deleting it is
+the clean way to reset every binding and calibration the game holds — the mod's
+own settings live in UMM's `Settings.xml` and are untouched by that.
 
 ## Do NOT route the wheel through xoutput / XInput
 
@@ -260,21 +270,29 @@ feedback is possible at all.
 - **H-shifter**: `LogiGetShifterMode` is bound, so Logitech shifter mode is
   understood natively.
 
-## To verify with real hardware
+## Verified with real hardware (2026-08-31 onwards)
 
-1. Plug in the wheel, launch the game, open the controls screen. Note whether
-   it is named correctly or shows as "Unknown Controller".
-2. Bind throttle and brake as **separate** axes — this is what the split-axis
-   polling exists for.
-3. Confirm `HKCU\Software\Funselektor Labs\art of rally` appears afterwards.
-4. If pedals or an H-shifter enumerate as their own USB devices, confirm they
-   bind alongside the wheel. `ControlsRemapper.joystickCount` implies
-   multi-device is anticipated, but this has not been observed.
+All four questions this section originally posed are answered:
 
-Then move to [ROADMAP.md](ROADMAP.md) phase 0, the force feedback test.
+1. The wheel shows as an **Unknown Controller** — all-zero `hardwareGuid`, no
+   Racing Wheel Template, no element names, no glyphs.
+2. Throttle and brake **do** bind as separate axes; the split-axis polling
+   works as the assemblies suggested.
+3. `HKCU\Software\Funselektor Labs\art of rally` appears once bindings are
+   written, and holds calibration as well as maps.
+4. Multi-device **is** anticipated and does work, but only one device at a time
+   is bindable through the stock screen — hence `BindAnyDevice`, and hence the
+   shifter and wheel being read directly rather than bound.
 
-## Related risk
+What is *not* verified is any of this on a Fanatec base, which is the one class
+of device known to defeat Rewired entirely. See
+[KNOWN-ISSUES.md](KNOWN-ISSUES.md).
+
+## Related risk — settled
 
 The FFB plugin needs `DISCL_EXCLUSIVE` on the wheel while Rewired already holds
-it for input. See the "fighting Rewired for the device" section in
-[FORCE-FEEDBACK.md](FORCE-FEEDBACK.md).
+it for input. This works: DirectInput permits the exclusive acquire alongside
+Rewired's non-exclusive one, on this stack and on every user stack reported so
+far. Losing the foreground *does* return the device non-exclusively, which is a
+different problem with its own fix — see "fighting Rewired for the device" and
+the `0x80040205` section in [FORCE-FEEDBACK.md](FORCE-FEEDBACK.md).

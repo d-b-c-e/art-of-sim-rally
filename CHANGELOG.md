@@ -40,6 +40,35 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`SetPreferredDeviceGuid`, `CreatePeriodicEffect`, `UpdatePeriodicEffect`,
   `ReleasePeriodicEffects`), which is the next work in docs/ROADMAP.md.
 
+### Documentation
+
+- **`docs/KNOWN-ISSUES.md`** - a defect register: open issues with severity and
+  ranked hypotheses, resolved ones with their causes, and the things that were
+  deliberately abandoned with the reasoning. The end-of-stage camera issue moved
+  here from CAMERA.md, and #1's mechanism is written up in full.
+- **Corrected diagnostic instructions that no longer worked.** FORCE-FEEDBACK.md
+  and ROADMAP.md told you to set `AOSR_FFB_LOG=1` to get a native log. That
+  variable ceased to exist when the native layer moved to the toolkit; it is
+  `DBCE_FFB_LOG` now, and logging is **on by default**, so no variable is needed.
+- **Corrected the plugin's install location.** RELEASING.md said
+  `UnityForceFeedback.dll` belongs in `artofrally_Data/Plugins/x86_64/` and that
+  a wrong location fails silently. It ships inside the mod folder and is loaded
+  from there; a stale copy in the plugin folder is itself a failure mode.
+- ROADMAP.md rewritten around what is left. Phases 0-5 were all shipped while
+  the file still said phase 0 was next and blocked on plugging in a wheel.
+- FORCE-FEEDBACK.md no longer says the native plugin is "not yet
+  runtime-verified", which its own phase 0 section had contradicted since
+  2026-08-31; FINDINGS.md's four open questions are answered in place; CAMERA.md
+  no longer says the camera is unimplemented; CONTROLS.md's resolved symptoms
+  and completed checklists are marked as such.
+- README: Strength's recommended starting point is 50, matching the two retunes
+  and TROUBLESHOOTING.md, not 70. Thrustmaster T300 RS GT added to the tested
+  list.
+- CLAUDE.md: `dotnet test` runs nothing in this repo and must not be quoted as a
+  gate; **the game no longer accepts injected keyboard input**, so anything
+  needing a stage driven needs a person; the two-object camera rig recorded as a
+  finding; repository structure and status brought up to date.
+
 ## [0.2.2] - 2026-09-03
 
 ### Changed
