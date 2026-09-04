@@ -35,10 +35,10 @@ namespace ArtOfSimRally.Mod
         // Their own constants imply the intended range: clampValue 20,
         // multiplier 0.5, factor 1000 -> +/-10000 == DI_FFNOMINALMAX.
         private const float GameForceFeedbackRange = 20f;
-        private const float FadeStartKmh = 3f;
-        private const float FadeFullKmh = 12f;
-        // Trail at twice the ideal slip angle, as a fraction of the straight-ahead trail.
-        private const float LimitTrail = 0.6f;
+
+        // The fade speeds, the trail floor and the curve itself live in
+        // ForceCurve, which has no Unity dependency so it can be evaluated
+        // outside the game.
 
         private static float _smoothed;
         private static float _peakMz;
@@ -100,35 +100,20 @@ namespace ArtOfSimRally.Mod
             if (float.IsNaN(fy) || float.IsInfinity(fy)) return;
 
             float absSlip = 0.5f * (Mathf.Abs(lw.slipAngle) + Mathf.Abs(rw.slipAngle));
-            float ideal = Mathf.Max(1f, lw.idealSlipAngle);
-            float trail = Mathf.Lerp(1f, LimitTrail, Mathf.Clamp01(absSlip / (2f * ideal)));
-
-            // Sign set at the wheel, not derived: on a MOZA R12 (DirectInput
-            // constant force on X) +Fy is the one that centres - a left turn
-            // pushes the wheel right. The mirrored default pulled toward lock
-            // on every corner (2026-09-02). Invert covers devices that read the
-            // axis the other way.
-            float normalised = fy * trail / Mathf.Max(1f, cfg.FyReference);
-            normalised *= cfg.GainFromStrength;
-
-            // Low-speed fade. The aligning-torque model is a 1989 Pacejka curve,
-            // which peaks at a few degrees of slip and then falls through zero
-            // and reverses. At walking pace the slip angle is
-            // -atan(lateral / forward velocity) with a tiny denominator, so any
-            // steering angle lands past the peak and the wheel is pushed *into*
-            // the turn, on both sides of centre - "there is no centre". Real
-            // cars have no aligning torque at parking speed either; every sim
-            // fades it out below roughly 10 km/h.
             float speedKmh = __instance.velo * 3.6f;
-            normalised *= Mathf.SmoothStep(0f, 1f, (speedKmh - FadeStartKmh) / (FadeFullKmh - FadeStartKmh));
 
-            if (cfg.Invert) normalised = -normalised;
-            normalised = Mathf.Clamp(normalised, -1f, 1f);
+            // The curve itself lives in ForceCurve, as pure arithmetic with no
+            // Unity dependency, so it can be evaluated outside the game - see
+            // tools/force-vector. Sign is set at the wheel, not derived: on a
+            // MOZA R12 (DirectInput constant force on X) +Fy is the one that
+            // centres, a left turn pushing the wheel right. The mirrored default
+            // pulled toward lock on every corner (2026-09-02); Invert covers
+            // devices that read the axis the other way.
+            float normalised = ForceCurve.Normalised(
+                fy, absSlip, lw.idealSlipAngle, speedKmh,
+                cfg.FyReference, cfg.GainFromStrength, cfg.Invert);
 
-            // First-order smoothing. Raw per-step Mz is noisy over kerbs and
-            // rocks, and an unfiltered signal reads as rattle rather than detail.
-            float a = Mathf.Clamp01(cfg.Smoothing);
-            _smoothed = Mathf.Lerp(normalised, _smoothed, a);
+            _smoothed = ForceCurve.Smooth(_smoothed, normalised, cfg.Smoothing);
 
             // Publish in the game's own units so anything reading this field -
             // including the game's orphaned ForceFeedback component, if a future
@@ -139,7 +124,7 @@ namespace ArtOfSimRally.Mod
 
             if (cfg.DiagnosticLogging)
             {
-                Diagnose(fy * trail, speedKmh);
+                Diagnose(fy * ForceCurve.Trail(absSlip, lw.idealSlipAngle), speedKmh);
                 Trace(front.leftWheel, front.rightWheel, speedKmh);
             }
         }
