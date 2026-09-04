@@ -55,6 +55,15 @@ namespace ArtOfSimRally.Mod
         [DllImport(Dll)]
         private static extern int GetDeviceInfo(int index, out int axes, out int buttons);
 
+        // Encoded major*10000 + minor*100 + patch: 100 is 0.1.0, 400 is 0.4.0,
+        // 301 would be 0.3.1. Read off the toolkit's own kVersion, not guessed -
+        // the obvious reading of "400" as 4.0.0 is wrong.
+        [DllImport(Dll)]
+        private static extern int GetWheelFfbVersion();
+
+        [DllImport(Dll)]
+        private static extern int GetLastHResult();
+
         /// <summary>DirectInput's nominal full-scale force.</summary>
         public const int ForceMax = 10000;
 
@@ -63,6 +72,60 @@ namespace ArtOfSimRally.Mod
 
         /// <summary>True once the device is open and an effect is running.</summary>
         public static bool Ready => _initialised && !_failed;
+
+        /// <summary>
+        /// The file the native plugin was actually loaded from, for the support
+        /// bundle. Worth reporting because the resolution order has a fallback
+        /// (see <see cref="ResolveDllPath"/>): a copy left in the game's plugin
+        /// folder by an old manual install can be loaded in preference to the
+        /// current one and then fail on an export it predates, which looks
+        /// exactly like force feedback being broken for no reason.
+        /// </summary>
+        public static string LoadedPath { get; private set; } = "(not loaded)";
+
+        /// <summary>
+        /// The native layer's version, as "0.4.0", or why it could not be read.
+        /// </summary>
+        /// <remarks>
+        /// The plugin is vendored from dbce-wheel-mod-toolkit and pinned per
+        /// release, so a user's bundle has to say which one they are actually
+        /// running - the managed assembly version does not imply it, and a stale
+        /// DLL is a real failure mode. An <c>EntryPointNotFoundException</c> here
+        /// is itself the diagnosis: the export landed in toolkit 0.1.0, so a DLL
+        /// without it predates the split entirely.
+        /// </remarks>
+        public static string NativeVersion
+        {
+            get
+            {
+                try
+                {
+                    int v = GetWheelFfbVersion();
+                    if (v <= 0) return "(reported " + v + ")";
+                    return string.Format("{0}.{1}.{2}", v / 10000, (v / 100) % 100, v % 100);
+                }
+                catch (EntryPointNotFoundException)
+                {
+                    return "(pre-0.1.0 - no version export; the DLL is older than the toolkit split)";
+                }
+                catch (Exception ex) { return "(unavailable: " + ex.GetType().Name + ")"; }
+            }
+        }
+
+        /// <summary>
+        /// The last HRESULT the native layer recorded, in hex. <c>0x80040205</c>
+        /// is <c>DIERR_NOTEXCLUSIVEACQUIRED</c>, <c>0x80040154</c> a device with
+        /// no actuator; both have entries in docs/TROUBLESHOOTING.md.
+        /// </summary>
+        public static string LastHResult
+        {
+            get
+            {
+                try { return "0x" + GetLastHResult().ToString("X8"); }
+                catch (EntryPointNotFoundException) { return "(not supported by this DLL)"; }
+                catch (Exception ex) { return "(unavailable: " + ex.GetType().Name + ")"; }
+            }
+        }
 
         /// <summary>
         /// Opens the wheel and starts the constant-force effect. Safe to call repeatedly.
@@ -95,10 +158,16 @@ namespace ArtOfSimRally.Mod
                 // DllNotFoundException from inside a physics callback.
                 string dllPath = ResolveDllPath(pluginDir);
                 if (LoadLibraryW(dllPath) == IntPtr.Zero)
+                {
+                    LoadedPath = dllPath + "  (preload FAILED - using the default search order)";
                     ModLog.Warning(
                         "Could not preload " + dllPath + "; relying on the default search order.");
+                }
                 else
-                    ModLog.Info("Native plugin loaded from " + dllPath);
+                {
+                    LoadedPath = dllPath;
+                    ModLog.Info("Native plugin loaded from " + dllPath + " (version " + NativeVersion + ")");
+                }
 
                 // The toolkit DLL logs to %LOCALAPPDATA%' + BS + 'DbceWheel by default; keep this
                 // mod's historical location so support bundles and docs stay right.

@@ -87,6 +87,15 @@ namespace ArtOfSimRally.Mod
             sb.AppendLine("os        : " + SystemInfo.operatingSystem);
             sb.AppendLine("unity     : " + Application.unityVersion);
             sb.AppendLine("game      : " + Application.productName + " " + Application.version);
+
+            // The native plugin is vendored from dbce-wheel-mod-toolkit and pinned
+            // per release, so the managed version above does not imply it. Both
+            // lines earn their place: a version older than the mod means a stale
+            // DLL is being loaded - usually a copy left in the game's plugin
+            // folder by an old manual install, which is why the path is here too.
+            sb.AppendLine("native ffb: " + FfbNative.NativeVersion + "  (UnityForceFeedback.dll, from dbce-wheel-mod-toolkit)");
+            sb.AppendLine("  loaded from : " + FfbNative.LoadedPath);
+            sb.AppendLine("  last hresult: " + FfbNative.LastHResult);
             sb.AppendLine();
         }
 

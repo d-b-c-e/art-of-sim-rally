@@ -68,6 +68,17 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   overwrite a vendored file that was edited locally, exiting non-zero rather
   than clobbering it.
 
+### Added
+
+- **The support file now reports the native plugin's version, where it was
+  loaded from, and its last HRESULT.** The native layer is vendored from
+  dbce-wheel-mod-toolkit and pinned per release, so the mod's own version says
+  nothing about which one a user is running - and a stale `UnityForceFeedback.dll`
+  left in the game's plugin folder by an old manual install can be loaded in
+  preference to the current one, then fail on an export it predates. That looks
+  exactly like force feedback being broken for no reason, and now takes one line
+  of a support file to spot.
+
 ### Documentation
 
 - **`docs/KNOWN-ISSUES.md`** - a defect register: open issues with severity and
