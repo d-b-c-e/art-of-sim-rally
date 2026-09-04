@@ -36,6 +36,12 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Device dropdowns show axis and button counts, so two devices with the same
   name (a Fanatec base's two `FANATEC Wheel` entries) can be told apart.
 
+### Changed
+
+- **Default force feedback is 30% lighter** (`FyReference` 8,000 → 11,500 N).
+  At Strength 50 the 0.2.1 default was still too strong on a MOZA R12; the
+  slider midpoint now sits where that rig wanted it.
+
 ### Fixed
 
 - **Direct wheel input steered inverted** when the wheel had been turned left

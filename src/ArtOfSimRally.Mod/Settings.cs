@@ -74,11 +74,12 @@ namespace ArtOfSimRally.Mod
         /// is a different thing from how strong the wheel feels, and having two
         /// dials for one sensation - one of them inverted, where lower means
         /// stronger - confused everyone who met it. Strength is the only dial now;
-        /// this stays as the reference it scales against. 8,000 N: a hard
-        /// corner at 100 km/h measured 6,000-7,000 N on 2026-09-02 and the owner
-        /// found that a little strong at Strength 50, so it clips a bit later.
+        /// this stays as the reference it scales against. 11,500 N: a hard corner
+        /// at 100 km/h measured 6,000-7,000 N (2026-09-02); 6,000 then 8,000 were both
+        /// judged too strong at Strength 50 on a MOZA R12 (the owner settled at 20
+        /// with 8,000), so the default is 30% lighter again.
         /// </remarks>
-        public float FyReference = 8000f;
+        public float FyReference = 11500f;
 
         public float Smoothing = 0.2f;
 

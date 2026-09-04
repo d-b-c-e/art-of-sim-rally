@@ -365,5 +365,7 @@ keeps the "lightening" cue as the front starts to slide. A **low-speed fade**
 are meaningless. The sign was set at the wheel: on a MOZA R12 `+Fy` centres;
 `Invert` remains for devices that read the axis the other way.
 
-`FyReference` defaults to 8,000 N — a hard corner at ~100 km/h measured
-6,000–7,000 N, and 6,000 felt a little strong at Strength 50.
+`FyReference` defaults to 11,500 N — a hard corner at ~100 km/h measured
+6,000–7,000 N; 6,000 and then 8,000 were both too strong at Strength 50 on a
+MOZA R12 (the owner settled at 20 with 8,000), so the default is 30% lighter
+again (2026-09-03).
