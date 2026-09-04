@@ -78,6 +78,28 @@ namespace ArtOfSimRally.Mod
             }
         }
 
+        /// <summary>
+        /// The vendored dbce-wheel-mod-toolkit release, baked in at build time by
+        /// the csproj from lib/toolkit/VERSION, which is not shipped.
+        /// </summary>
+        private static string ToolkitPin
+        {
+            get
+            {
+                try
+                {
+                    foreach (var a in Assembly.GetExecutingAssembly()
+                                 .GetCustomAttributes(typeof(AssemblyMetadataAttribute), false))
+                    {
+                        var m = (AssemblyMetadataAttribute)a;
+                        if (m.Key == "ToolkitPin") return m.Value;
+                    }
+                }
+                catch { }
+                return "(unknown)";
+            }
+        }
+
         private static void WriteHeader(StringBuilder sb)
         {
             sb.AppendLine("art of sim rally - support bundle");
@@ -88,12 +110,21 @@ namespace ArtOfSimRally.Mod
             sb.AppendLine("unity     : " + Application.unityVersion);
             sb.AppendLine("game      : " + Application.productName + " " + Application.version);
 
-            // The native plugin is vendored from dbce-wheel-mod-toolkit and pinned
-            // per release, so the managed version above does not imply it. Both
-            // lines earn their place: a version older than the mod means a stale
-            // DLL is being loaded - usually a copy left in the game's plugin
-            // folder by an old manual install, which is why the path is here too.
-            sb.AppendLine("native ffb: " + FfbNative.NativeVersion + "  (UnityForceFeedback.dll, from dbce-wheel-mod-toolkit)");
+            // Two different numbers, and conflating them produces a false alarm.
+            //
+            // "toolkit pin" is the vendored release, baked in at build time.
+            // "native abi" is the DLL's own GetWheelFfbVersion, which moves only
+            // when native\wheelffb changes - so a build pinned at v0.7.1 reports
+            // an ABI of 0.4.0 and that is CORRECT, because nothing in the native
+            // layer moved across those releases. An earlier revision printed only
+            // the ABI and told people a number lower than their release meant a
+            // stale DLL, which would have flagged every healthy install.
+            //
+            // The path is the reliable staleness signal: if it resolves to the
+            // game's plugin folder rather than the mod folder, an old manual
+            // install left a copy there and it is winning.
+            sb.AppendLine("toolkit pin: " + ToolkitPin + "  (dbce-wheel-mod-toolkit, vendored)");
+            sb.AppendLine("native abi : " + FfbNative.NativeVersion + "  (UnityForceFeedback.dll; only moves when the native layer does)");
             sb.AppendLine("  loaded from : " + FfbNative.LoadedPath);
             sb.AppendLine("  last hresult: " + FfbNative.LastHResult);
             sb.AppendLine();

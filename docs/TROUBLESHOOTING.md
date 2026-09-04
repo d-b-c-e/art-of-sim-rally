@@ -59,12 +59,15 @@ it. If you still see it, the support file's force-feedback section will show
 
 ## No force feedback at all
 
-- **Check the support file's header first.** `native ffb:` is the version of
-  `UnityForceFeedback.dll` actually loaded, and `loaded from:` is the file it
-  came from. If that path is inside `artofrally_Data\Plugins\x86_64`, an old
-  manual install left a copy there and it is being used instead of the one in
-  the mod folder - delete it. A version older than the release you installed
-  means the same thing.
+- **Check `loaded from:` in the support file's header.** That is the file
+  `UnityForceFeedback.dll` was actually loaded from. If the path is inside
+  `artofrally_Data\Plugins\x86_64`, an old manual install left a copy there
+  and it is being used instead of the one in the mod folder - delete it. The
+  path is the reliable signal here.
+- **`native abi:` being lower than `toolkit pin:` is normal**, not a stale DLL.
+  The ABI number moves only when the native layer itself changes, so a mod
+  pinned at toolkit v0.7.1 reporting an ABI of 0.4.0 is healthy - nothing in the
+  native layer moved between those releases.
 - The support file's force-feedback section says whether the mod computed
   forces and whether the device refused them (`SetParameters FAILED`).
 - Another program holding the wheel exclusively (a second game instance, a

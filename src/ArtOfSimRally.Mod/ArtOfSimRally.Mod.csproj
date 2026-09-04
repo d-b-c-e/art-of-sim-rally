@@ -40,6 +40,31 @@
   </ItemGroup>
 
   <!--
+    Bake the vendored toolkit pin into the assembly so a support file can report
+    it. It cannot be read at runtime: lib\toolkit\VERSION is a build-time file
+    and is not shipped.
+
+    This is not the same number as the native DLL's own GetWheelFfbVersion().
+    That one moves only when native\wheelffb changes, so a mod pinned at toolkit
+    v0.7.1 correctly reports a native layer of 0.4.0 - nothing in the native
+    layer moved between them. Reporting only one of the two made a normal
+    install look like a stale DLL.
+  -->
+  <PropertyGroup>
+    <_ToolkitVersionFile>$(MSBuildThisFileDirectory)..\..\lib\toolkit\VERSION</_ToolkitVersionFile>
+    <_ToolkitVersionRaw Condition="Exists('$(_ToolkitVersionFile)')">$([System.IO.File]::ReadAllText($(_ToolkitVersionFile)))</_ToolkitVersionRaw>
+    <ToolkitPin Condition="'$(_ToolkitVersionRaw)' != ''">$(_ToolkitVersionRaw.Split('%0A')[0].Trim())</ToolkitPin>
+    <ToolkitPin Condition="'$(ToolkitPin)' == ''">(unknown)</ToolkitPin>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ToolkitPin</_Parameter1>
+      <_Parameter2>$(ToolkitPin)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <!--
     Private=false everywhere: these must NOT be copied to the output folder. The
     game already has them loaded, and shipping a second copy of UnityEngine or
     Assembly-CSharp alongside the plugin is a classic way to get type-identity

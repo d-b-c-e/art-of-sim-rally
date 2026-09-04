@@ -110,6 +110,15 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   arithmetic with no Unity dependency, so it can be evaluated outside the game.
   Arithmetic order is unchanged and the output is identical.
 
+- The support file reports the **vendored toolkit pin** as well as the native
+  ABI version, and no longer implies that a lower ABI means a stale DLL. Those
+  are two different numbers: the ABI moves only when `native/wheelffb` changes,
+  so a build pinned at toolkit v0.7.1 correctly reports an ABI of 0.4.0. The
+  first version of this feature printed only the ABI and told users a number
+  below their release meant a stale copy, which would have flagged every healthy
+  install the moment the pin moved. The `loaded from:` path is the reliable
+  staleness signal and the guidance now says so.
+
 - **The support file now reports the native plugin's version, where it was
   loaded from, and its last HRESULT.** The native layer is vendored from
   dbce-wheel-mod-toolkit and pinned per release, so the mod's own version says
