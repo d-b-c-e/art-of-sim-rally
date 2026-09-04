@@ -75,6 +75,11 @@ This is the surviving substance of the old phase 3 — surface texture per
 `TCSTriggered` as discrete effects. The game already computes every input
 needed; see the `Wheel` field list in [FINDINGS.md](FINDINGS.md).
 
+Before any of it, note [U-3](KNOWN-ISSUES.md#u-3--the-low-speed-fade-scales-the-force-it-does-not-cap-it):
+the low-speed fade multiplies, it does not cap. Harmless today, but an impact
+effect is a transient several times cornering `Fy` and can arrive at any speed,
+so impacts need their own limit rather than leaning on the fade.
+
 **Take a damper first, before any of the texture work.** The output today is a
 pure centring force with nothing opposing the wheel's rate of movement, so it
 overshoots when a slide gathers up and oscillates on a direct-drive base
@@ -143,8 +148,12 @@ Order matters, and step 1 gates everything after it.
      `force-profiles.ini`. The ini adds a deployed data file, a `package.ps1`
      payload and a new install surface, for a user-editable-tunes feature nobody
      has asked for.
-   - Settle the clamp order first
-     ([U-2](KNOWN-ISSUES.md#u-2--clamp-order-differs-from-the-toolkit-deliberately)).
+   - The clamp order is settled: the toolkit adopted ours in v0.7.0
+     ([U-2](KNOWN-ISSUES.md#u-2--clamp-order-resolved-the-toolkit-adopted-ours)).
+     Note what came with it - `ForceShaper` has a soft-saturation stage this mod
+     has never had, and adopting the shaper means adopting a soft knee above full
+     scale. That is probably an improvement, but it is a change in feel and has
+     to be judged at the wheel, not assumed.
 
 Staying here regardless, because it is game-specific and belongs nowhere else:
 `WheelInput`, the cameras, `TelemetryPump`, the panel, `GameState`, and the

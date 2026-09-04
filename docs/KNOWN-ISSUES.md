@@ -391,18 +391,62 @@ defaults, so adopting it in code would silently import a deadzone and a soft
 knee this game has never had. This corrects the guidance written here before the
 vector existed.
 
-### U-2 — Clamp order differs from the toolkit, deliberately
+### U-2 — Clamp order: resolved, the toolkit adopted ours
 
-We fade then clamp; `ForceModel.Compute` clamps then fades. Four of 640 vector
-rows differ, all at 5–7.5 km/h, worst 1,086/10,000 at the wheel. Reaching it
-needs a force past full scale *and* a partial fade at once — a low-speed slide or
-an impact. Detail and the table are in
+We fade then clamp; `ForceModel.Compute` used to clamp then fade. Four of 640
+vector rows differed, all at 5–7.5 km/h, worst 1,086/10,000 at the wheel. Detail
+and the table are in
 [FORCE-FEEDBACK.md](FORCE-FEEDBACK.md#clamp-order-fade-first-clamp-last-measured-2026-09-04).
 
-Ours is the better order — a device limit should not be applied before a model
-term — but changing the toolkit moves every profile's output and a cross-language
-golden file, so it is the toolkit owner's decision, held open pending a call. It
-changes nothing here today: this mod does not consume `ForceModel`.
+**Aligned to our order in toolkit v0.7.0** (2026-09-04), on the reasoning that a
+device limit applied before a model term stops being a boundary constraint and
+becomes a silent soft knee. Nothing in production moved: no consumer references
+`Dbce.Wheel.Ffb`, and OutRun — the only user of the shared model, through the C++
+port — defaults to its own legacy model and its profiles have no fade.
+
+Two things came out of building it that are worth knowing here:
+
+- **The bigger casualty was soft saturation, not the fade.** `ForceShaper`'s
+  `tanh` was receiving an already-clamped value, so everything from full scale
+  upward arrived as exactly 1.0 and there was nothing left to compress — a hard
+  clip where a profile had asked for a soft knee. A model output of 1.5 reached
+  the wheel as 7,615/10,000, identical to what 1.0 produced; it now reaches
+  9,051. That matters at [step 3](ROADMAP.md#de-duplicating-against-the-toolkit)
+  only if we adopt `ForceShaper` — this mod has no soft saturation at all today.
+- **The conformance sequence could not see the change.** Applying it produced a
+  zero-line golden diff, because the sequence never drove the model past full
+  scale. A record that cannot see the class of change it is recording is worse
+  than no record. Ours has the same shape of risk: `force-curve-vector.csv`
+  covers saturation because the grid deliberately includes 14,000 N, but any
+  future addition to `ForceCurve` needs its own straddling rows or the CSV will
+  keep passing while proving nothing.
+
+### U-3 — The low-speed fade scales the force, it does not cap it
+
+Inherent to fade-then-clamp, not to anyone's implementation, and true of this
+mod since 0.2.1. The fade multiplies; a large enough force simply overwhelms it
+and reaches full output at walking pace, where a clamp applied earlier would have
+limited it by accident.
+
+Front lateral force (both wheels, trail 1.0) needed to reach **full** output:
+
+| km/h | fade | Strength 15 | Strength 26 | Strength 50 | Strength 100 |
+|---:|---:|---:|---:|---:|---:|
+| 5 | 0.126 | 303,750 N | 175,240 N | 91,125 N | 45,563 N |
+| 7.5 | 0.500 | 76,667 N | 44,231 N | 23,000 N | 11,500 N |
+| 10 | 0.874 | 43,870 N | 25,309 N | 13,161 N | 6,580 N |
+
+Against a **measured hard-cornering peak of about 8,800 N** total. Inside the
+fade band proper (3–8 km/h) the threshold is 5× to 35× anything the game has been
+seen to produce, so at the strengths people actually run — 15 and 26 in the two
+reports we have — this is unreachable. It is not a present defect.
+
+It becomes live in one specific future: **impact and kerb effects**
+([ROADMAP.md](ROADMAP.md)). An impact spike is exactly the kind of transient that
+can be several times cornering `Fy`, and it happens at any speed. If those are
+added, the fade must not be relied on as the thing that keeps a low-speed
+collision from slamming the wheel — that needs its own limit.
+
 
 ## Will not fix
 
