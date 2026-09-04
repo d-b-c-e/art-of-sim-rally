@@ -313,6 +313,17 @@ namespace ArtOfSimRally.Mod
             Status = "";
         }
 
+        /// <summary>Mirrors a bound axis around its rest value, for a wheel whose axis runs the other way.</summary>
+        public static void Flip(Channel c)
+        {
+            if (!_bindings.TryGetValue(c, out var b) || b.IsButton) return;
+            b.Far = b.Rest - (b.Far - b.Rest);
+            var cfg = Main.Settings;
+            if (cfg != null) { Store(cfg, c, b.ToString()); Main.SaveSettings(); }
+            Status = c + " flipped.";
+            ModLog.Info("Wheel input: " + c + " flipped to " + b);
+        }
+
         public static void Clear(Channel c)
         {
             _bindings.Remove(c);
@@ -338,7 +349,14 @@ namespace ArtOfSimRally.Mod
                 {
                     int delta = d.Axes[i] - d.BaseAxes[i];
                     if (Math.Abs(delta) < AssignThreshold) continue;
-                    Bind(cfg, c, new Binding { Device = d.Name, DeviceIndex = d.Index, IsButton = false, Element = i, Rest = d.BaseAxes[i], Far = d.Axes[i] });
+                    // Steering: +1 must mean right whichever way the wheel was turned
+                    // during Assign. DirectInput's steering axis increases to the right
+                    // on every wheel, so the far end is always the increasing side; a
+                    // left turn during Assign used to make left positive, and the car
+                    // steered inverted (owner's rig, 2026-09-03). Pedals keep the moved
+                    // direction: rest -> pressed is unambiguous.
+                    int far = c == Channel.Steer ? d.BaseAxes[i] + Math.Abs(delta) : d.Axes[i];
+                    Bind(cfg, c, new Binding { Device = d.Name, DeviceIndex = d.Index, IsButton = false, Element = i, Rest = d.BaseAxes[i], Far = far });
                     return;
                 }
                 for (int i = 0; i < ButtonCount; i++)

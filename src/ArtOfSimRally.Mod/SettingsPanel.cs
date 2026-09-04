@@ -152,6 +152,8 @@ namespace ArtOfSimRally.Mod
                 {
                     if (assigning) WheelInput.CancelAssign(); else WheelInput.BeginAssign(ch);
                 }
+                if (WheelInput.IsBound(ch) && GUILayout.Button("Flip", GUILayout.Width(50)))
+                    WheelInput.Flip(ch);
                 if (WheelInput.IsBound(ch) && GUILayout.Button("Clear", GUILayout.Width(60)))
                     WheelInput.Clear(ch);
                 GUILayout.EndHorizontal();

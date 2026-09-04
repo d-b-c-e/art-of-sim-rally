@@ -38,6 +38,11 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Direct wheel input steered inverted** when the wheel had been turned left
+  during Assign: the moved direction became +1, and the game reads +1 as
+  right. Steering assignment now always takes the increasing side of the
+  axis as right (DirectInput's convention on every wheel), and each bound
+  channel has a Flip button.
 - **Crash when choosing a shifter** whenever force feedback had failed to
   initialise (reported with a Fanatec bundle). Listing controllers created a
   temporary DirectInput instance and released it, leaving the device table
