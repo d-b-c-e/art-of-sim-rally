@@ -9,6 +9,20 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **The game's own camera angles rendered reversed once a bonnet or bumper view
+  had been used** ([#1](https://github.com/d-b-c-e/art-of-sim-rally/issues/1),
+  reported on a Thrustmaster T300 RS GT). The stage camera is two objects:
+  `CarCameras` drives the GameObject "Stage Camera", but the camera that renders
+  is its child "Camera Main", which the game pins at local identity. The mounted
+  views are positioned by writing world-space transforms to `Camera.main` - the
+  child - which Unity stores as a local offset from the parent, and nothing put
+  it back. Cycling on to a stock angle then placed the parent correctly and left
+  the child looking roughly 180 degrees the wrong way, for the rest of the stage.
+  The handback now clears the child's local transform, restoring the invariant
+  `CameraManager` asserts in its own constructor. The same hole is the likely
+  cause of the residual swing at the end of a stage, which should now be gone
+  too. **Neither is confirmed on screen yet** - see docs/KNOWN-ISSUES.md.
+
 - **The vendored toolkit was never actually committed.** `.gitignore` excluded
   the `lib/` *directory*, and git does not descend into an excluded directory,
   so the `!lib/toolkit/**` re-include below it could never match. A fresh clone

@@ -112,20 +112,42 @@ namespace ArtOfSimRally.Mod
                 bool shouldDrive = view != View.None && GameState.IsPlayerView;
 
                 // Hand the camera back cleanly for the end-of-stage cinematic,
-                // replays and the intro.
+                // replays, the intro, and - the one that bit - the player simply
+                // cycling on to a stock camera angle.
                 //
-                // Simply stopping is not enough. The stock rig damps toward its
-                // target from wherever the camera currently is, and we leave it
-                // mounted inside the car - so it swings out through the bodywork to
-                // the chase position, which is the "goes berserk" people see after
-                // the finish line. The game has its own method for putting the
-                // camera where it belongs in one step; call that as we let go.
+                // Two things have to be undone, because the rig is two objects.
+                // CarCameras lives on "Stage Camera" and drives only that; the
+                // camera that renders is "Camera Main", ITS CHILD, which the game
+                // pins at local identity (CameraManager's constructor zeroes the
+                // child's localPosition and localRotation - it is the invariant
+                // stated out loud). We mount by writing world-space position and
+                // rotation to Camera.main, i.e. to the child, which Unity stores as
+                // a local offset from the parent.
+                //
+                //  - The parent damps toward its target from wherever it currently
+                //    is, so releasing it mid-corner swept it out through the
+                //    bodywork to the chase position - the "goes berserk" after the
+                //    finish line. SetToWantedPositionImmediate places it in one step.
+                //  - The child keeps our offset forever unless we clear it. Relative
+                //    to a parent 30-46 m behind and 15-45 m above the car looking
+                //    back down at it, a bonnet mount is close to a 180 degree yaw -
+                //    so every stock angle rendered backwards for as long as the
+                //    stage lasted. Reported as issue #1 and invisible here, because
+                //    this rig never cycles out of the bonnet view.
+                //
+                // Clear the child first so the parent's placement is the last word.
                 if (!shouldDrive)
                 {
                     _lateralOffset = 0f;
                     if (_wasDriving)
                     {
                         _wasDriving = false;
+                        var released = UIManager.Instance?.PanelManager?.mainCamera;
+                        if (released != null)
+                        {
+                            released.transform.localPosition = Vector3.zero;
+                            released.transform.localRotation = Quaternion.identity;
+                        }
                         try { __instance.SetToWantedPositionImmediate(); }
                         catch { /* handing back is best-effort */ }
                     }
