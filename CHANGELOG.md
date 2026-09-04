@@ -9,6 +9,17 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Stage start stuttered and briefly locked up for the first 10-15 seconds**
+  (new in 0.2.2). `WheelInput` learns each axis's full range the first time the
+  control is used - the opening seconds of a stage - and wrote `Settings.xml`
+  from the per-frame path each time it extended, rate-limited to once every five
+  seconds. A synchronous XML serialise and disk write, landing at roughly t+0,
+  t+5 and t+10, in the one moment the player is trying to drive. The settings
+  object is still updated on the frame, so the panel shows the live range; only
+  the disk write is deferred, to when the player stops driving and to shutdown.
+  Reported but **not yet confirmed fixed** - see docs/KNOWN-ISSUES.md KI-5 for
+  the alternatives if it survives.
+
 - **The game's own camera angles rendered reversed once a bonnet or bumper view
   had been used** ([#1](https://github.com/d-b-c-e/art-of-sim-rally/issues/1),
   reported on a Thrustmaster T300 RS GT). The stage camera is two objects:

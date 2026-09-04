@@ -107,7 +107,7 @@ namespace ArtOfSimRally.Mod
         private static bool _open;
         private static Channel? _assigning;
         private static float _assignDeadline;
-        private static float _nextSave = -1f;
+        private static bool _rangeDirty;
         private static float _nextOpenRetry;
         private static bool _firstReadLogged;
 
@@ -269,13 +269,44 @@ namespace ArtOfSimRally.Mod
                 _values[c] = c == Channel.Steer ? Mathf.Clamp(v, -1f, 1f) : Mathf.Clamp01(v);
             }
 
-            if (extended && Time.realtimeSinceStartup >= _nextSave)
+            if (extended)
             {
-                // Persist the learned range, but not more than once every few seconds.
-                _nextSave = Time.realtimeSinceStartup + 5f;
+                // Update the settings object immediately - that is a few string
+                // assignments, and it keeps the panel showing the live range.
+                // Do NOT write the file here.
+                //
+                // This runs every frame the player is driving, and the range
+                // extends exactly when they first reach full lock and full pedal
+                // travel: the opening seconds of a stage. Writing Settings.xml
+                // from here - a synchronous XML serialise and disk write, worse
+                // again with a virus scanner watching the Mods folder - put a
+                // hitch into the one moment the player is trying to drive, at
+                // roughly t+0, t+5 and t+10 before the range settled. Reported
+                // as "massive stutter and brief lockups for the first 10-15
+                // seconds" (KI-5). Nothing needs it on disk *now*; it only has
+                // to survive the session.
                 foreach (var kv in _bindings) Store(cfg, kv.Key, kv.Value.ToString());
-                Main.SaveSettings();
+                _rangeDirty = true;
             }
+        }
+
+        /// <summary>
+        /// Writes a learned axis range to disk, if one was learned since the last
+        /// write. Called when the player stops driving and on shutdown - never
+        /// from the driving path.
+        /// </summary>
+        /// <remarks>
+        /// The cost of deferring is that a crash mid-stage loses a range that was
+        /// only just learned, and the next stage re-learns it in the same few
+        /// seconds it would have taken anyway. That is a better trade than a disk
+        /// write landing in the middle of a corner.
+        /// </remarks>
+        public static void FlushLearnedRanges()
+        {
+            if (!_rangeDirty) return;
+            _rangeDirty = false;
+            Main.SaveSettings();
+            ModLog.Info("Wheel input: saved the calibrated axis ranges.");
         }
 
         private static Device Resolve(Binding b)

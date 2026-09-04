@@ -241,7 +241,7 @@ third time on one rig's opinion.
 |---|---|
 | **Reported** | 2026-09-04, Reddit, second user (motion platform, wheel model not stated) |
 | **Severity** | major — it happens exactly when you are trying to drive |
-| **Status** | open, **regression in 0.2.2**, cause not established |
+| **Status** | open, **regression in 0.2.2**; the leading cause is fixed in the working tree, unreleased and unconfirmed |
 
 > "when starting a new stage for the first time there's massive stutter and
 > brief lockups when attempting to drive for the first 10-15 seconds almost
@@ -251,17 +251,26 @@ Not yet known whether it recurs on every stage change or only once per session;
 the reporter had not tested that. Establish that first — it separates
 "initialisation happens once" from "something is retrying".
 
-**Leading hypothesis: `Settings.xml` is written from the per-frame input path.**
-`WheelInput.Update` self-calibrates each axis by extending its `Far` end
-whenever a raw value exceeds the recorded range, and on extension it calls
+**Leading cause, now fixed: `Settings.xml` was written from the per-frame input
+path.** `WheelInput.Update` self-calibrates each axis by extending its `Far` end
+whenever a raw value exceeds the recorded range, and on extension it called
 `Main.SaveSettings()` — a synchronous XML serialise and disk write, rate-limited
 to once every five seconds. The first hard corner and the first full pedal
-presses are exactly when the range keeps extending, so saves fire at roughly
-t+0, t+5 and t+10 and then stop once the range is learned. That shape matches
-the report closely, it is new in 0.2.2 (`WheelInput` is), and it would be worse
-on a slow disk or with a virus scanner watching the `Mods` folder. Writing a
-file from a hot path is wrong regardless of whether it turns out to be the whole
-story.
+presses are exactly when the range keeps extending, so saves fired at roughly
+t+0, t+5 and t+10 and then stopped once the range was learned. That shape
+matches the report closely, it is new in 0.2.2 (`WheelInput` is), and it would
+be worse on a slow disk or with a virus scanner watching the `Mods` folder.
+
+The settings *object* is still updated on the frame the range extends — that is
+a few string assignments, and it keeps the panel showing the live range. Only
+the disk write is deferred, to `WheelInput.FlushLearnedRanges()`, which the
+watchdog calls when the player stops driving and again on shutdown. The cost is
+that a crash mid-stage loses a range learned moments earlier, and the next stage
+re-learns it in the same few seconds it would have taken anyway.
+
+Writing a file from a hot path was wrong regardless of whether it turns out to
+be the whole story, which is why it was fixed before being confirmed. **If the
+stutter survives, this entry is not closed** — go to the alternative below.
 
 **Alternative: the device-open retry loop.** If `Open()` fails, `WheelInput`
 retries every five seconds, and each attempt is a full DirectInput enumeration
@@ -272,12 +281,24 @@ cadence — but it would not stop after 15 seconds, so it fits less well.
 (`artofrally_Data\Managed\UnityModManager\Log.txt`): `Open()` logs
 `Wheel input: opened N controller(s)` every attempt. Repeated lines during the
 stutter means the retry loop; a single line at load with the stutter happening
-anyway points at the save path.
+anyway pointed at the save path.
+
+A third possibility neither of those covers: the stutter is the game's own and
+was always there, and 0.2.2 only changed the timing enough to expose it. The
+reporter's own "almost like shader caching" reading. Test with the mod disabled
+from the UMM panel before spending anything on it.
 
 Ruled out already: `InputBackend.Tick` runs every frame but returns immediately
 unless the abandoned backend experiment is active; the force-feedback
 `FixedUpdate` prefix and postfix are arithmetic only; the `GetInput` postfix
 reads cached values.
+
+**Left alone deliberately:** `CameraTuner` also writes settings from
+`LateUpdate`, one second after the last numpad adjustment. It is the same class
+of thing, but it fires only when the player is deliberately holding a tuning key
+rather than on every stage start, and deferring it to the end of the stage would
+lose the adjustment to a crash for no real gain. Revisit only if someone reports
+a hitch while nudging the camera.
 
 ---
 

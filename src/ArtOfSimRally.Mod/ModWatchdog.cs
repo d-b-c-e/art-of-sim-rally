@@ -68,6 +68,12 @@ namespace ArtOfSimRally.Mod
                 _wheelReleased = true;
                 FfbNative.SetForce(0);
                 TelemetryPump.Park();
+
+                // The moment the player stops driving is the right one to write
+                // anything to disk. WheelInput learns each axis's full range as
+                // the control is first used, which is the opening seconds of a
+                // stage; saving it there hitched the frame (KI-5).
+                WheelInput.FlushLearnedRanges();
             }
         }
 
@@ -84,6 +90,10 @@ namespace ArtOfSimRally.Mod
         /// <summary>Zeroes the wheel, parks telemetry, and releases both.</summary>
         public static void Shutdown()
         {
+            // Persist first: quitting straight from a stage is the one path where
+            // a range learned this session would otherwise be lost.
+            try { WheelInput.FlushLearnedRanges(); } catch { }
+
             // Order matters: park telemetry while the socket is still open, and
             // zero the wheel before releasing the device, or the last non-zero
             // force can remain latched in the driver.
