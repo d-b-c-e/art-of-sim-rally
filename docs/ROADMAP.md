@@ -139,21 +139,28 @@ Order matters, and step 1 gates everything after it.
    and `SetLogPath` keeping the historical `ArtOfSimRallyfb.log` location.
    Verifiable by "does the wheel still work", cheap to revert.
 3. **Adopt `ForceModel`**, only once the vector says the numbers match.
-   - Take **`simlite@2`'s shaper values**, not `ForceModelSettings.SimLite()`.
-     That helper still returns the toolkit's own `ForceShaper` defaults, which is
-     exactly the defect the vector exposed — adopting it would silently import a
-     deadzone, an output deadband, soft saturation, a slew limit and a ramp that
-     this game has never had.
-   - Take the settings **in code**, not `ForceProfile` reading
-     `force-profiles.ini`. The ini adds a deployed data file, a `package.ps1`
-     payload and a new install surface, for a user-editable-tunes feature nobody
-     has asked for.
+   - Take **`ForceProfile.SimLite()`** (toolkit 0.7.1+), which returns the model
+     and its conditioning together as an in-code literal — no file IO. Not
+     `ForceModelSettings.SimLite()`, which is half a tune; it now derives from
+     the profile and says so in its own doc comment, but pairing it with a
+     default `ForceShaper` is exactly the defect the vector exposed.
+   - That also settles the **in code, not the ini** question in our favour
+     without argument: the preset is a literal, so `force-profiles.ini` need not
+     be deployed. The toolkit's own advice is to prefer `LoadFrom`, because a
+     file can be A/B tested and player-overridden without a rebuild. Worth
+     revisiting only if someone asks for user-editable tunes; today it would add
+     a deployed data file, a `package.ps1` payload and an install surface for
+     nothing.
    - The clamp order is settled: the toolkit adopted ours in v0.7.0
      ([U-2](KNOWN-ISSUES.md#u-2--clamp-order-resolved-the-toolkit-adopted-ours)).
-     Note what came with it - `ForceShaper` has a soft-saturation stage this mod
-     has never had, and adopting the shaper means adopting a soft knee above full
-     scale. That is probably an improvement, but it is a change in feel and has
-     to be judged at the wheel, not assumed.
+   - **`simlite@2` is feel-neutral by construction**, which is the whole point of
+     it. Its shaper states every value rather than inheriting: `Deadzone` 0,
+     `SoftSaturation` 0, `SlewPerSecond` 0, `OutputDeadband` 0, `RampSeconds` 0,
+     `PeakLimit` 1, fade 3→12 km/h, and `AttackSmoothing` = `DecaySmoothing` =
+     0.2, matching our single symmetric coefficient. So adopting it does **not**
+     bring a soft knee, a deadzone or an asymmetric filter. An earlier note here
+     said it would; that was wrong, and it was wrong in the direction of
+     inventing work.
 
 Staying here regardless, because it is game-specific and belongs nowhere else:
 `WheelInput`, the cameras, `TelemetryPump`, the panel, `GameState`, and the

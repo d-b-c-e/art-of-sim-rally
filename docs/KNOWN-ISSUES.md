@@ -385,11 +385,23 @@ Fixed upstream as `simlite@2`. `simlite@1` was annotated rather than edited, so 
 published version stays immutable.
 
 **Consequence for us:** if the toolkit's `ForceModel` is ever adopted here
-([ROADMAP.md](ROADMAP.md) step 3), take **`simlite@2`'s shaper values**, not
-`ForceModelSettings.SimLite()` — that helper still returns the old `ForceShaper`
-defaults, so adopting it in code would silently import a deadzone and a soft
-knee this game has never had. This corrects the guidance written here before the
-vector existed.
+([ROADMAP.md](ROADMAP.md) step 3), take **`ForceProfile.SimLite()`** — from
+toolkit 0.7.1, an in-code literal returning the model and its conditioning
+together. Not `ForceModelSettings.SimLite()`, which is half a tune; it now
+derives from the profile and its doc comment says so, but pairing it with a
+default `ForceShaper` reproduces exactly this defect.
+
+Fixed structurally in 0.7.1, which matters more than the value fix: every value
+in a preset is now **stated rather than inherited**, so a changed default cannot
+quietly retune one, and a drift test pins each preset to the section it names in
+the profiles file key by key. `arcade` had the same defect from the other side —
+its conditioning wants soft saturation 1.0 and a slew limit of 3.6, neither of
+them `ForceShaper` defaults — so the bug was in the pattern, not in one preset.
+
+Read the shaper values before assuming what adoption costs: `simlite@2` sets
+`Deadzone` 0, `SoftSaturation` 0, `SlewPerSecond` 0, `OutputDeadband` 0,
+`RampSeconds` 0 and `AttackSmoothing` = `DecaySmoothing` = 0.2. It is
+**feel-neutral against what this mod does today**, by construction.
 
 ### U-2 — Clamp order: resolved, the toolkit adopted ours
 
@@ -411,8 +423,11 @@ Two things came out of building it that are worth knowing here:
   upward arrived as exactly 1.0 and there was nothing left to compress — a hard
   clip where a profile had asked for a soft knee. A model output of 1.5 reached
   the wheel as 7,615/10,000, identical to what 1.0 produced; it now reaches
-  9,051. That matters at [step 3](ROADMAP.md#de-duplicating-against-the-toolkit)
-  only if we adopt `ForceShaper` — this mod has no soft saturation at all today.
+  9,051. **This does not reach us**, at step 3 or otherwise: `simlite@2` sets
+  `SoftSaturation` to 0, so the stage is inert for our tune. It matters to
+  `arcade-outrun@1`, which asks for 1.0 precisely so a crash outweighs a hard
+  corner. A note here previously said adopting the shaper would bring us a soft
+  knee to judge at the wheel; it would not.
 - **The conformance sequence could not see the change.** Applying it produced a
   zero-line golden diff, because the sequence never drove the model past full
   scale. A record that cannot see the class of change it is recording is worse

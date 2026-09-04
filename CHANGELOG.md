@@ -84,6 +84,15 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   FORCE-FEEDBACK.md, including the two things that came out of building it - the
   bigger casualty was soft saturation rather than the fade, and their conformance
   sequence could not see the change at all until it was extended past full scale.
+- Corrected the step 3 guidance again, this time in the direction of less work.
+  Toolkit 0.7.1 makes `ForceProfile.SimLite()` return a model and its
+  conditioning together as an in-code literal, and `simlite@2`'s shaper states
+  every value rather than inheriting: deadzone 0, soft saturation 0, slew 0,
+  output deadband 0, ramp 0, and attack smoothing equal to decay at 0.2. So it is
+  feel-neutral against what this mod does today, and an earlier note here saying
+  adoption would bring a soft knee to judge at the wheel was wrong. It also
+  settles the in-code-versus-ini question without argument, since a literal needs
+  no deployed file.
 - U-3: the low-speed fade scales the force, it does not cap it. Harmless at the
   strengths anyone runs - inside the fade band the threshold is 5x to 35x
   anything the game has been measured producing - but it is a constraint on ever
