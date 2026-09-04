@@ -65,6 +65,15 @@ This is the surviving substance of the old phase 3 — surface texture per
 `TCSTriggered` as discrete effects. The game already computes every input
 needed; see the `Wheel` field list in [FINDINGS.md](FINDINGS.md).
 
+**Take a damper first, before any of the texture work.** The output today is a
+pure centring force with nothing opposing the wheel's rate of movement, so it
+overshoots when a slide gathers up and oscillates on a direct-drive base
+([KI-6](KNOWN-ISSUES.md#ki-6--the-wheel-snaps-back-as-the-car-straightens-out-of-a-slide)).
+`Smoothing` is the only thing resisting that now and it is the wrong tool — a
+low-pass on the force delays every cue, not just the unwanted one. A damper is
+smaller than the texture work, fixes a thing a user has actually complained
+about, and proves the effect plumbing before anything subtle rides on it.
+
 Do it after the GUID work: it is the larger change, it needs tuning at a
 powered base, and it wants a settled device-selection story underneath it.
 

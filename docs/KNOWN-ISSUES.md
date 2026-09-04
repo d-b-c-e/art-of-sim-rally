@@ -66,6 +66,12 @@ correctly places and aims the **parent** — and the child renders from its stal
 offset, looking the wrong way. Every stock camera is affected, permanently,
 until the next `CameraManager` construction resets the child.
 
+**Replays are the same bug.** A second user on 0.2.2 reports "the camera is
+still broken in replays and at stage end". `GameState.IsPlayerView` returns
+false for `REPLAY` exactly as it does for the end-of-stage cinematic, so both go
+through the same handback and inherit the same stale child transform. The fix
+covers all three paths; confirm replays in the same test run.
+
 #### Why nobody here saw it
 
 The `CameraAnglesList` append and the `CAMERA1` tag reuse — the first two
@@ -118,7 +124,7 @@ stage also clears the stale offset on its own.
 
 | | |
 |---|---|
-| **Reported** | 2026-09-01, reproduced on every stage finish |
+| **Reported** | 2026-09-01, reproduced on every stage finish; independently reported by a second user on 0.2.2, 2026-09-04 |
 | **Severity** | cosmetic — results cinematic only, never while driving |
 | **Status** | open, partially fixed |
 
@@ -214,6 +220,98 @@ Logitech and a 12 Nm direct-drive base want very different numbers, and only
 This is tuning, not incompatibility — nothing in the force path is
 vendor-specific. It stays open because there is no per-wheel default and no way
 to acquire one without reports.
+
+Data points so far:
+
+| Rig | Base gain | Strength | Smoothing | Notes |
+|---|---|---|---|---|
+| MOZA R12 (owner) | — | 20 → 50 | 0.2 | `FyReference` retuned 6,000 → 8,000 → 11,500 N to move the usable setting toward the slider midpoint |
+| Unstated wheel + motion platform (Reddit, 2026-09-04) | 100% | **15** | **0.50** | "works perfect"; raised smoothing specifically to kill notchiness over low-poly inclines |
+
+Both users ended up well below Strength 50 — the second at 15 with the base at
+full gain. That is two of two, and it suggests the default is still hot for
+anyone who does not turn their base down. Worth watching before retuning a
+third time on one rig's opinion.
+
+---
+
+### KI-5 — Stage start stutters and briefly locks up for 10–15 seconds
+
+| | |
+|---|---|
+| **Reported** | 2026-09-04, Reddit, second user (motion platform, wheel model not stated) |
+| **Severity** | major — it happens exactly when you are trying to drive |
+| **Status** | open, **regression in 0.2.2**, cause not established |
+
+> "when starting a new stage for the first time there's massive stutter and
+> brief lockups when attempting to drive for the first 10-15 seconds almost
+> like shader caching or something. This only just started with this patch."
+
+Not yet known whether it recurs on every stage change or only once per session;
+the reporter had not tested that. Establish that first — it separates
+"initialisation happens once" from "something is retrying".
+
+**Leading hypothesis: `Settings.xml` is written from the per-frame input path.**
+`WheelInput.Update` self-calibrates each axis by extending its `Far` end
+whenever a raw value exceeds the recorded range, and on extension it calls
+`Main.SaveSettings()` — a synchronous XML serialise and disk write, rate-limited
+to once every five seconds. The first hard corner and the first full pedal
+presses are exactly when the range keeps extending, so saves fire at roughly
+t+0, t+5 and t+10 and then stop once the range is learned. That shape matches
+the report closely, it is new in 0.2.2 (`WheelInput` is), and it would be worse
+on a slow disk or with a virus scanner watching the `Mods` folder. Writing a
+file from a hot path is wrong regardless of whether it turns out to be the whole
+story.
+
+**Alternative: the device-open retry loop.** If `Open()` fails, `WheelInput`
+retries every five seconds, and each attempt is a full DirectInput enumeration
+plus an open per device on the main thread. That would stutter on the same
+cadence — but it would not stop after 15 seconds, so it fits less well.
+
+**The two are trivial to tell apart** in the UMM log
+(`artofrally_Data\Managed\UnityModManager\Log.txt`): `Open()` logs
+`Wheel input: opened N controller(s)` every attempt. Repeated lines during the
+stutter means the retry loop; a single line at load with the stutter happening
+anyway points at the save path.
+
+Ruled out already: `InputBackend.Tick` runs every frame but returns immediately
+unless the abandoned backend experiment is active; the force-feedback
+`FixedUpdate` prefix and postfix are arithmetic only; the `GetInput` postfix
+reads cached values.
+
+---
+
+### KI-6 — The wheel snaps back as the car straightens out of a slide
+
+| | |
+|---|---|
+| **Reported** | 2026-09-04, Reddit, second user |
+| **Severity** | major for feel on powerful RWD cars; not a defect so much as a missing effect |
+| **Status** | open |
+
+> "the steering tends to snap back suddenly as the car is straightening up and
+> get stuck in a tank slapper … you have to be so incredibly gentle on the
+> throttle if you're sliding"
+
+Part of this is the car — art of rally's high-power RWD cars genuinely dislike
+big slip angles, and that is physics the mod must not touch (see
+[WNF-4](#wnf-4--physics-grip-or-assist-changes)). But the snap itself is ours:
+the output is a **pure spring-like force with no damping term**. Force is
+`(FyL + FyR) × trail / FyReference`, low-passed by `Smoothing`, and nothing
+opposes the *rate* at which the wheel moves. When a slide gathers up, `Fy`
+collapses quickly, the centring force drops with it, and there is nothing to
+absorb the wheel's own inertia — so it overshoots, and on a direct-drive base
+with no friction to speak of it oscillates.
+
+`Smoothing` is the only thing resisting it today, and it is the wrong tool: it
+is a low-pass on the force signal, so raising it delays every cue including the
+ones you want. The reporter raised it to 0.50 (default 0.2) and reports it
+helping with a different symptom — notchiness over low-poly inclines — which is
+consistent with it being a blunt instrument.
+
+The right fix is a **damper effect**, which DirectInput supports natively and
+the wheelbase renders itself. Toolkit 0.2.0's periodic-effect surface is the
+route in; see [ROADMAP.md](ROADMAP.md).
 
 ---
 
