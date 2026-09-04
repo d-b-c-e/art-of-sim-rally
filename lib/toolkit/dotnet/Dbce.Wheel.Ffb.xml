@@ -163,26 +163,34 @@
         </member>
         <member name="M:Dbce.Wheel.Ffb.ForceModelSettings.SimLite">
             <summary>
-            The sim-like preset: lateral tyre force through a pneumatic trail that
-            shrinks toward the limit; no virtual spring. art-of-sim-rally's shipped
-            model (2026-09-02), where the game exposes per-wheel lateral force.
+            The model half of <see cref="M:Dbce.Wheel.Ffb.ForceProfile.SimLite"/>: lateral tyre force
+            through a pneumatic trail that shrinks toward the limit, no virtual
+            spring. art of rally 0.2.2, where the game exposes per-wheel lateral
+            force.
             </summary>
             <remarks>
-            Equivalent to the profile <c>simlite@1</c>. Prefer loading a named,
-            versioned profile (<see cref="T:Dbce.Wheel.Ffb.ForceProfile"/>): a profile can be swapped
-            or A/B tested without rebuilding the game, and it pins what was tuned.
+            <b>This is half a tune.</b> Pairing it with a default
+            <see cref="T:Dbce.Wheel.Ffb.ForceShaper"/> adds a deadzone, an output deadband and a ramp
+            that the game does not have — which is exactly what shipped as
+            <c>simlite@1</c>, and stood until the game's own force curve was
+            compared against. Use <see cref="M:Dbce.Wheel.Ffb.ForceProfile.SimLite"/> for the whole
+            tune, or better, load a named version from the file beside the game.
             </remarks>
         </member>
         <member name="M:Dbce.Wheel.Ffb.ForceModelSettings.Arcade">
             <summary>
-            The arcade preset: OutRun2006Tweaks-FFB's "center-out" model — spring +
-            damper + lateral load lightening in a drift, weight transfer, events.
-            Starting values, not truth; every game retunes.
+            The model half of <see cref="M:Dbce.Wheel.Ffb.ForceProfile.Arcade"/>: the "center-out"
+            model — spring + damper + lateral load lightening in a drift, weight
+            transfer, events. Starting values, not truth; every game retunes.
             </summary>
             <remarks>
-            This is <b>not</b> OutRun's shipped tuning; several constants differ.
-            <c>arcade-outrun@1</c> in <c>profiles/force-profiles.ini</c> is the one
-            that matches the game, and is what OutRun2006Tweaks-FFB loads.
+            <b>This is half a tune</b>, and the missing half matters here too: the
+            arcade conditioning wants soft saturation and a slew limit, and neither
+            is a <see cref="T:Dbce.Wheel.Ffb.ForceShaper"/> default. Use
+            <see cref="M:Dbce.Wheel.Ffb.ForceProfile.Arcade"/>.
+            This is also <b>not</b> OutRun's shipped tuning; several constants
+            differ. <c>arcade-outrun@1</c> in <c>profiles/force-profiles.ini</c> is
+            the one that matches the game, and is what OutRun2006Tweaks-FFB loads.
             </remarks>
         </member>
         <member name="T:Dbce.Wheel.Ffb.ForceModel">
@@ -214,7 +222,13 @@
             <summary>Last structural (non-event) force, for traces.</summary>
         </member>
         <member name="M:Dbce.Wheel.Ffb.ForceModel.Compute(Dbce.Wheel.Ffb.ForceInputs@,System.Single)">
-            <summary>One tick. <paramref name="dt"/> in seconds.</summary>
+            <summary>
+            One tick. <paramref name="dt"/> in seconds. The result is normalised
+            against the profile's references but is <b>not</b> bounded: a force
+            past full scale is real information, and clamping it here would throw
+            away exactly the headroom the fade and the soft saturation exist to
+            shape. <see cref="T:Dbce.Wheel.Ffb.ForceShaper"/> bounds the output at the device edge.
+            </summary>
         </member>
         <member name="T:Dbce.Wheel.Ffb.InputValidator">
             <summary>
@@ -274,6 +288,29 @@
         </member>
         <member name="F:Dbce.Wheel.Ffb.ForceProfile.UnknownKeys">
             <summary>Keys the file carried that this build does not understand. Never silently dropped.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.ForceProfile.SimLite">
+            <summary>
+            <c>simlite@2</c> in code: art of rally 0.2.2, model and conditioning
+            together, as evidenced by its own force curve.
+            </summary>
+            <remarks>
+            Prefer <see cref="M:Dbce.Wheel.Ffb.ForceProfile.LoadFrom(System.String,System.String,System.String@)"/>. A profile read from the file beside the
+            game can be swapped, A/B tested and overridden by the player without a
+            rebuild; a preset compiled in can do none of those. This is for a
+            consumer that has no profiles file yet.
+            </remarks>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.ForceProfile.Arcade">
+            <summary>
+            <c>arcade-generic@1</c> in code: the neutral starting point for an
+            arcade racer that has no tune of its own yet. Retune it per game and
+            publish that as its own family.
+            </summary>
+            <remarks>
+            Not OutRun's tuning. <c>arcade-outrun@1</c> in the profiles file is the
+            one that matches that game, and is what OutRun2006Tweaks-FFB loads.
+            </remarks>
         </member>
         <member name="M:Dbce.Wheel.Ffb.ForceProfile.Get(System.String)">
             <summary>Current value of a key, for round-tripping and for the conformance test.</summary>
