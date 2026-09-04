@@ -161,6 +161,27 @@ Order matters, and step 1 gates everything after it.
      bring a soft knee, a deadzone or an asymmetric filter. An earlier note here
      said it would; that was wrong, and it was wrong in the direction of
      inventing work.
+   - Know which half of that each test carries, because they are not equal proof.
+     **Ten of the eleven shaper terms are verified against our own vector on all
+     640 rows** (the toolkit's `FullCurveMatches`, asserting the float to 1e-4
+     and the truncated integer the device receives). The eleventh is the
+     smoothing, which that test zeroes, and it is carried separately by the
+     step-response block — which is why the profile insists attack equals decay.
+   - **Do not apply the gain twice.** `ForceShaper.GainFromStrength` is
+     `Math.Max(0, Strength) / 50f`; ours is `Strength / 50f`. They are the same
+     scale, so `Strength` passes straight through with no rescaling — and that
+     is exactly the trap. If we adopt `ForceShaper` and keep handing
+     `cfg.GainFromStrength` to `ForceCurve.Normalised` *while* also setting
+     `ForceShaper.Strength`, the gain is squared: a user at 26 would get 0.27
+     instead of 0.52, roughly halving the force for the two people who actually
+     report. The vector cannot catch it, because it tests the curve rather than
+     the integration.
+   - One ordering caveat behind the equivalence. Their chain is deadzone → EMA
+     → soft saturation → slew → fade → ramp → gain/invert → clamp, so gain lands
+     *after* the fade; ours multiplies gain before it. Identical only because
+     both are pure multiplies with nothing between them **for `simlite@2`, which
+     zeroes every intervening stage**. Enable soft saturation or slew and the
+     orders stop agreeing.
 
 Staying here regardless, because it is game-specific and belongs nowhere else:
 `WheelInput`, the cameras, `TelemetryPump`, the panel, `GameState`, and the

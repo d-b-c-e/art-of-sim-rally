@@ -84,6 +84,13 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   FORCE-FEEDBACK.md, including the two things that came out of building it - the
   bigger casualty was soft saturation rather than the fade, and their conformance
   sequence could not see the change at all until it was extended past full scale.
+- Step 3 notes gained the integration hazard the vector cannot catch:
+  `ForceShaper.GainFromStrength` is the same `Strength / 50` scale as ours, so
+  Strength passes through unrescaled - which means keeping our own gain AND
+  setting `ForceShaper.Strength` would square it, taking a user at 26 from 0.52
+  to 0.27. Also recorded which half of the feel-neutrality claim each test
+  carries: ten of eleven shaper terms against our vector on all 640 rows, the
+  smoothing against the step response.
 - Corrected the step 3 guidance again, this time in the direction of less work.
   Toolkit 0.7.1 makes `ForceProfile.SimLite()` return a model and its
   conditioning together as an in-code literal, and `simlite@2`'s shaper states
