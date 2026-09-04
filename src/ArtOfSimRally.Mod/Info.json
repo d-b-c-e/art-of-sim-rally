@@ -2,7 +2,7 @@
   "Id": "ArtOfSimRally",
   "DisplayName": "art of sim rally",
   "Author": "d-b-c-e",
-  "Version": "0.2.1",
+  "Version": "0.2.2",
   "ManagerVersion": "0.27.0",
   "AssemblyName": "ArtOfSimRally.Mod.dll",
   "EntryMethod": "ArtOfSimRally.Mod.Main.Load",

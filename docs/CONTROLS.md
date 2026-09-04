@@ -196,7 +196,9 @@ are untouched; menus still use keyboard or pad.
 
 Verified 2026-09-03 on the MOZA rig: all three controllers open, the base
 reads through the FFB handle (steering centred at 32669), pedals on the base
-at rest. Driving with bound channels: see the release notes.
+at rest. Driven on the owner's rig 2026-09-03: steering, throttle and brake through
+the direct read, once the steering assignment was made direction-independent
+(a left turn during Assign had made left positive). Fanatec verification pending.
 
 ### Why the device presents unusually
 

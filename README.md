@@ -74,6 +74,14 @@ support file on Desktop**. It collects your settings, your controllers, what is
 actually bound, and the logs into one file. Attach that to an
 [issue](../../issues) — it usually contains the answer.
 
+
+**Fanatec owners:** your base shows up as two identical `FANATEC Wheel` devices
+and the game's controls screen cannot read either of them. Use *Wheel input
+(direct)* in the mod panel instead — Assign steering and pedals by moving them —
+and pick the 8-axis / 108-button entry in the *Wheel* dropdown for force
+feedback. Step by step, with the other common problems, in
+[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+
 ## Worth knowing
 
 **Steering assist is a separate switch.** *Direct steering* and *Remove hidden
@@ -89,9 +97,11 @@ and does not need the game to know about it.
 **Bonnet, not cockpit.** The cars have no modelled interiors, so a cockpit view
 isn't possible.
 
-**Tested on one wheel**, a MOZA R12 Base. The force feedback is plain DirectInput
-constant force with nothing vendor-specific in it, so it should work on anything
-that does force feedback — but that is reasoning rather than testing.
+**Tested on a MOZA R12 Base** (the developer's rig), and by users on a MOZA R5
+and Fanatec CSL DD. The force feedback is plain DirectInput constant force with
+nothing vendor-specific in it, so it should work on anything that does force
+feedback; per-wheel differences that turned up are handled (see
+[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)).
 
 **Known issue:** the camera can move about for a second when the game takes over
 at the end of a stage. Cosmetic, and confined to the results cinematic.
@@ -151,7 +161,7 @@ under `lib/toolkit` (`tools\Sync-Toolkit.ps1` refreshes the pin).
 
 ```
 dotnet build ArtOfSimRally.sln -c Release
-tools\package\package.ps1 -Version 0.2.1
+tools\package\package.ps1 -Version 0.2.2
 ```
 
 Referencing the game's assemblies requires art of rally installed; override

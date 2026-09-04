@@ -5,7 +5,7 @@ Notable changes to art of sim rally.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.2] - 2026-09-03
 
 ### Changed
 
@@ -18,6 +18,9 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   both, the telemetry tests, the probe and the synth tool are removed from this
   repo (`tools/forza` in the toolkit replaces the last two). No behaviour change
   intended.
+- **Default force feedback is 30% lighter** (`FyReference` 8,000 → 11,500 N).
+  At Strength 50 the 0.2.1 default was still too strong on a MOZA R12; the
+  slider midpoint now sits where that rig wanted it.
 
 ### Added
 
@@ -33,14 +36,9 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and left the menus dead both times; it remains only as a Settings.xml
   experiment, not in the panel.
 - Support bundle now records which input backend was active.
+- `docs/TROUBLESHOOTING.md`, with a Fanatec section first.
 - Device dropdowns show axis and button counts, so two devices with the same
   name (a Fanatec base's two `FANATEC Wheel` entries) can be told apart.
-
-### Changed
-
-- **Default force feedback is 30% lighter** (`FyReference` 8,000 → 11,500 N).
-  At Strength 50 the 0.2.1 default was still too strong on a MOZA R12; the
-  slider midpoint now sits where that rig wanted it.
 
 ### Fixed
 

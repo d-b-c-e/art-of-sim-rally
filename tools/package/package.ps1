@@ -18,7 +18,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Version = "0.2.1"
+    [string]$Version = "0.2.2"
 )
 
 $ErrorActionPreference = 'Stop'
@@ -83,6 +83,10 @@ Launch the game and press Ctrl+F10 for the settings panel.
   wheel pulls toward lock instead of back to centre, tick "Invert direction".
   There is no force below about 12 km/h - that is deliberate.
 
+* Fanatec, or any wheel the game's controls screen ignores: open Wheel input
+  (direct) in the mod panel, tick "Read the wheel directly", then Assign
+  steering and each pedal by moving it. Flip a row if it runs backwards.
+  Menus still use the keyboard or a pad. See docs/TROUBLESHOOTING.md.
 * Pick your wheel from the Wheel dropdown under Force feedback. If two devices
   share a name, choose one and turn the wheel - if nothing happens, choose the
   other. Switching takes effect immediately.

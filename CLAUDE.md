@@ -25,23 +25,24 @@ third-party binaries, nothing that would force the repo private.
 
 | Path | Contents |
 |---|---|
+| `docs/TROUBLESHOOTING.md` | User-facing fixes by symptom; the Fanatec section is the most-needed page. |
 | `lib/toolkit/` | **Vendored** from dbce-wheel-mod-toolkit (pinned by `VERSION`; refresh with `tools/Sync-Toolkit.ps1`): `native/WheelFfb.dll` (shipped as `UnityForceFeedback.dll`, the name the mod P/Invokes) and `dotnet/Dbce.Wheel.Telemetry.dll`. The native source and the encoder live in that repo now. |
 | `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP, RELEASING |
 
 ## Status (2026-09-03) — do not overstate this
 
-Released: **0.2.1** (2026-09-02). "Verified" means confirmed on the owner's MOZA
+Released: **0.2.2** (2026-09-03). "Verified" means confirmed on the owner's MOZA
 R12 rig unless stated otherwise.
 
 | Component | State |
 |---|---|
-| Force feedback | Verified. Front-axle lateral force × pneumatic trail, faded out below 12 km/h, re-acquires the wheel after alt-tab. Sign confirmed on a MOZA R12; the MOZA R5 one-sided inversion fixed by user report. |
+| Force feedback | Verified. Front-axle lateral force × pneumatic trail (reference 11,500 N after two retunes), faded out below 12 km/h, re-acquires the wheel after alt-tab. Sign confirmed on a MOZA R12; the MOZA R5 one-sided inversion fixed by user report. |
 | Steering fixes, bind-any-device, glyph text fallback | Verified. |
 | Shifter (sequential + H-pattern), read directly from the device | Verified by users. |
 | Bonnet + bumper cameras | Verified. End-of-stage cinematic wobble is a known cosmetic issue (docs/CAMERA.md). |
 | Telemetry (Forza format) | Verified with SimHub + ButtKicker, live from the start line. |
-| **Direct wheel input** (`WheelInput`) | Built 2026-09-03; all devices open and read on this rig; **not yet driven**. Unreleased. |
-| Crash fix (shifter choice after FFB failure), FFB candidate fallback, capability labels | Built 2026-09-03, init verified here. Unreleased. |
+| **Direct wheel input** (`WheelInput`) | Verified driving on the owner's rig 2026-09-03 after the steering-sign fix (assignment is direction-independent; Flip per channel). Released in 0.2.2. Fanatec user pending. |
+| Crash fix (shifter choice after FFB failure), FFB candidate fallback, capability labels | Released in 0.2.2; init verified here, Fanatec user pending. |
 | Rewired DirectInput backend switch (`InputBackend`) | **Abandoned** after four attempts. Settings.xml-only experiment. Do not retry — see below. |
 
 The game's force feedback was half-built: `ForceFeedback` is never attached,
