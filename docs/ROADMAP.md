@@ -172,16 +172,37 @@ Order matters, and step 1 gates everything after it.
      scale, so `Strength` passes straight through with no rescaling — and that
      is exactly the trap. If we adopt `ForceShaper` and keep handing
      `cfg.GainFromStrength` to `ForceCurve.Normalised` *while* also setting
-     `ForceShaper.Strength`, the gain is squared: a user at 26 would get 0.27
-     instead of 0.52, roughly halving the force for the two people who actually
-     report. The vector cannot catch it, because it tests the curve rather than
-     the integration.
-   - One ordering caveat behind the equivalence. Their chain is deadzone → EMA
-     → soft saturation → slew → fade → ramp → gain/invert → clamp, so gain lands
-     *after* the fade; ours multiplies gain before it. Identical only because
-     both are pure multiplies with nothing between them **for `simlite@2`, which
-     zeroes every intervening stage**. Enable soft saturation or slew and the
-     orders stop agreeing.
+     `ForceShaper.Strength`, the gain is squared: a user at 26 gets 0.27 instead
+     of 0.52, roughly halving the force for the two people who actually report.
+     The vector cannot catch it, because it tests the curve rather than the
+     integration.
+
+     Toolkit 0.8.0 moved gain ahead of the soft-saturation knee, so in general
+     a squared gain now lands somewhere else on the `tanh` rather than simply
+     halving. **For us the 0.27 still holds exactly**, because `simlite@2` sets
+     `SoftSaturation` to 0 and the knee is skipped entirely.
+   - The chain reordered in toolkit 0.8.0 and is now deadzone → EMA →
+     gain/invert → soft saturation → slew → fade → ramp → clamp → output
+     deadband. Gain lands *before* the fade, as ours does, so the ordering
+     caveat recorded here previously is resolved rather than merely tolerated.
+
+     **What remains is the EMA.** Theirs is stage 2, before gain and before the
+     fade; ours is last, applied to the already-faded and already-clamped value.
+     The coefficient semantics are identical (0.2 means keep 20% of the previous
+     output on both sides), and a constant gain commutes with an EMA — but the
+     **fade does not**, because it varies with speed. So the two orders agree at
+     steady speed and diverge while crossing the 3–12 km/h band, which is every
+     launch from the start line.
+
+     Simulated at 50 Hz with a steady pre-fade force of 0.5 and the shipped
+     smoothing of 0.2, the peak difference is **25/10,000 at the wheel for a
+     gentle launch, 104/10,000 for a violent one**, always near the middle of the
+     fade band. That is a quarter of one percent to one percent of full scale,
+     for about a second. Negligible — but it is *not covered by either test*:
+     `FullCurveMatches` zeroes attack and decay so the EMA is inert, and the
+     step-response block holds no speed at all. The feel-neutrality proof is a
+     **steady-state** proof. Worth knowing before someone measures a launch and
+     thinks something broke.
 
 Staying here regardless, because it is game-specific and belongs nowhere else:
 `WheelInput`, the cameras, `TelemetryPump`, the panel, `GameState`, and the
