@@ -358,13 +358,22 @@
         <member name="T:Dbce.Wheel.Ffb.ForceShaper">
             <summary>
             The output conditioning chain every wheel mod ends up writing: deadzone,
-            dual-rate smoothing, soft saturation, slew limiting with event bypass,
-            low-speed fade, warm-up ramp, gain and inversion. Pure math, no device.
+            dual-rate smoothing, gain, soft saturation, slew limiting with event
+            bypass, low-speed fade, warm-up ramp and inversion. Pure math, no device.
             </summary>
             <remarks>
             Order matters and is fixed (see knowledge/FFB-SIGNAL-DESIGN.md):
-            deadzone → EMA → soft saturation → slew → fade → ramp → gain/invert →
-            clamp. Structural force goes through all of it; an <c>isEvent</c> update
+            deadzone → EMA → <b>gain/invert</b> → soft saturation → slew → fade →
+            ramp → clamp. Gain and invert are the boundary: above them the value is
+            in model units, below them in true output units and true output sign, and
+            every stage below is a device-side limit. They moved there in 0.8.0.
+            Applied last, gain re-inflated an already-saturated value into the hard
+            clamp - above about Strength 65 the slew limiter then latched the output
+            at full scale in whichever direction it first clipped, and the model could
+            not recover it. Invert applied last gave the slew limiter a <c>_last</c> of
+            the opposite sign, so with <c>Invert</c> on a steady input oscillated near
+            zero and no force ever arrived.
+            Structural force goes through all of it; an <c>isEvent</c> update
             (crash impulse, shift pulse) bypasses the EMA and slew so it arrives as
             a pulse rather than a shove. Rules lifted from OutRun2006Tweaks-FFB
             (chain), art-of-sim-rally (fade, Strength as the only dial) and
