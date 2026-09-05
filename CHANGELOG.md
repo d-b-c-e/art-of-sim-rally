@@ -84,6 +84,19 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   FORCE-FEEDBACK.md, including the two things that came out of building it - the
   bigger casualty was soft saturation rather than the fade, and their conformance
   sequence could not see the change at all until it was extended past full scale.
+- Toolkit pin v0.7.1 -> v0.8.0 (two catch-up commits from the toolkit session,
+  v0.7.2 and v0.8.0). Verified pin-only again: the native DLL is still 4 bytes
+  from the v0.4.0 binary we checked - a rebuild stamp - `GetWheelFfbVersion`
+  still reports 400, 37 exports with all 20 the mod imports present, and
+  `Dbce.Wheel.Telemetry.xml` byte-identical.
+- Step 3 notes updated for the reshaped `ForceShaper` chain. Gain now runs before
+  the fade as ours does, so the ordering caveat is resolved; what remains is the
+  EMA, which sits before the fade in their chain and after it in ours. A constant
+  gain commutes with an EMA but a speed-varying fade does not, so the two agree
+  at steady speed and diverge across the 3-12 km/h band - simulated at 25 to 104
+  of 10,000 at the wheel during a launch, for about a second. Not covered by
+  either test, so the feel-neutrality proof is a steady-state proof.
+
 - Step 3 notes gained the integration hazard the vector cannot catch:
   `ForceShaper.GainFromStrength` is the same `Strength / 50` scale as ours, so
   Strength passes through unrescaled - which means keeping our own gain AND

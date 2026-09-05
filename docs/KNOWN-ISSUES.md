@@ -436,6 +436,15 @@ Two things came out of building it that are worth knowing here:
   future addition to `ForceCurve` needs its own straddling rows or the CSV will
   keep passing while proving nothing.
 
+  It happened a third time in toolkit 0.8.0: every shipped profile used strength
+  50, where gain is exactly 1.0 and a gain *reordering* is unobservable, so a
+  chain reshuffle that fixed two severe defects would have produced another
+  zero-line diff. The general rule, better than the way it was first written
+  down here: **a conformance set must contain a case where every parameter that
+  can change behaviour is off its default.** Strength 50 and smoothing 0 are
+  defaults hiding in plain sight — and our own vector uses gain 1.0 throughout,
+  for exactly the reason it nearly missed saturation.
+
 ### U-3 — The low-speed fade scales the force, it does not cap it
 
 Inherent to fade-then-clamp, not to anyone's implementation, and true of this
