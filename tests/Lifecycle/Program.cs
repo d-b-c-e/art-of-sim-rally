@@ -65,34 +65,12 @@ static class Program
         ArtOfSimRally.Mod.Main.Enabled=false; ModWatchdog.Shutdown(unloading:true); Released(camera);
         Check(BonnetCamera.ActiveView(rig)==BonnetCamera.View.None,"unload left mounted placeholder active");
     }
-    static string Capture(string root)
-    {
-        GameState.IsDriving=true; DriveCapture.Start(root); Check(!DriveCapture.Active,"capture started during driving");
-        GameState.IsDriving=false; DriveCapture.Start(root); Check(DriveCapture.Active,"capture did not start");
-        ArtOfSimRally.Mod.Main.Settings=new Settings();
-        for(int i=0;i<3;i++)
-        {
-            Time.frameCount=i+1; Time.realtimeSinceStartup=1+i*.02f;
-            DriveCapture.RecordFrame(.02f,true);
-            DriveCapture.RecordForce(5750,0,8.5f,12,i == 0 ? 0 : .5f,.5f);
-        }
-        DriveCapture.RecordForceReset();
-        Time.realtimeSinceStartup += .02f;
-        DriveCapture.RecordForce(-5750,0,8.5f,12,0,-.5f);
-        GameState.IsDriving=true; DriveCapture.Stop(); Check(DriveCapture.Active,"capture wrote while driving");
-        Check(!Directory.Exists(root),"record callbacks wrote to disk");
-        GameState.IsDriving=false; DriveCapture.Stop(); Check(!DriveCapture.Pending,"capture not finalized");
-        string path=Directory.GetDirectories(root).Single();
-        var manifest=XDocument.Load(Path.Combine(path,"manifest.xml")).Root;
-        Check((string)manifest.Attribute("complete")=="true" && (int)manifest.Element("frames").Attribute("count")==3,"bad capture receipt");
-        return path;
-    }
     static int Main(string[] args)
     {
         try
         {
-            Cameras(); Shutdown(); string capture=Capture(Path.GetFullPath(args[0]));
-            Console.WriteLine(JsonSerializer.Serialize(new {status="passed",assertions,syntheticCapture=capture})); return 0;
+            Cameras(); Shutdown();
+            Console.WriteLine(JsonSerializer.Serialize(new {status="passed",assertions})); return 0;
         }
         catch(Exception ex) { Console.Error.WriteLine(ex); return 1; }
     }

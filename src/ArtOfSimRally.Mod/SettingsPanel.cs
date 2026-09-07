@@ -252,17 +252,6 @@ namespace ArtOfSimRally.Mod
                   "to a bug report."
                 : SupportBundle.LastResult, Wrap);
 
-            GUILayout.Space(6);
-            GUI.enabled = !GameState.IsDriving;
-            if (GUILayout.Button(DriveCapture.Pending ? "Stop and save drive capture" : "Start drive capture",
-                    GUILayout.Width(260)))
-            {
-                if (DriveCapture.Pending) DriveCapture.Stop();
-                else DriveCapture.Start();
-            }
-            GUI.enabled = true;
-            GUILayout.Label(DriveCapture.Status + " Start/stop while paused or in a menu.", Wrap);
-
             End();
         }
 

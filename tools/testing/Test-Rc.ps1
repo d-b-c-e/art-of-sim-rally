@@ -1,7 +1,7 @@
 <# Builds an immutable RC, runs offline gates, and creates an attended test checklist.
    Never installs into the real game or sends input/force to hardware. #>
 [CmdletBinding()]
-param([Parameter(Mandatory)][string]$Version)
+param([Parameter(Mandatory)][string]$Version, [string]$Corpus)
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 if ($Version -notmatch '^\d+\.\d+\.\d+-rc\.[1-9]\d*$') { throw 'An explicit X.Y.Z-rc.N is required' }
@@ -34,31 +34,45 @@ try {
     $snapshot | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $run 'source.json') -Encoding UTF8
     $null = Run 'build' 'dotnet' @('build','ArtOfSimRally.sln','-c','Release','--nologo','-warnaserror')
     Checkpoint 'build' 1
+    $null = Run 'telemetry-build' 'dotnet' @('build','tests/Telemetry/Telemetry.csproj','-c','Release','--nologo','-warnaserror')
+    $result = Run 'telemetry-loopback' (Join-Path $root 'tests/Telemetry/bin/Release/net48/Telemetry.exe') @($root,'D:/Program Files (x86)/Steam/steamapps/common/artofrally')
+    $telemetry = $result | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($telemetry.status -eq 'passed' -and $telemetry.assertions -gt 0) 'Telemetry runner ran no assertions'
+    Checkpoint 'telemetry-loopback' $telemetry.assertions
     $result = Run 'regression' 'dotnet' @('run','--project','tests/Regression/Regression.csproj','-c','Release','--','--native','lib/toolkit/native/WheelFfb.dll')
     $regression = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($regression.status -eq 'passed' -and $regression.assertions -gt 0) 'Regression runner ran no assertions'
     Checkpoint 'regression' $regression.assertions
-    $result = Run 'lifecycle' 'dotnet' @('run','--project','tests/Lifecycle/Lifecycle.csproj','-c','Release','--',(Join-Path $run 'synthetic'))
+    $result = Run 'lifecycle' 'dotnet' @('run','--project','tests/Lifecycle/Lifecycle.csproj','-c','Release')
     $lifecycle = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($lifecycle.status -eq 'passed' -and $lifecycle.assertions -gt 0) 'Lifecycle runner ran no assertions'
     Checkpoint 'lifecycle' $lifecycle.assertions
-    $result = Run 'replay' 'dotnet' @('run','--no-build','--project','tests/Regression/Regression.csproj','-c','Release','--','--replay',$lifecycle.syntheticCapture)
+    $null = Run 'recorder-build' 'dotnet' @('build','tools/testing/Recorder/Recorder.csproj','-c','Release','--nologo','-warnaserror')
+    $result = Run 'recorder-tests' 'dotnet' @('run','--project','tests/Recorder/Recorder.csproj','-c','Release','--',(Join-Path $run 'synthetic'),'src/ArtOfSimRally.Mod/bin/Release/ArtOfSimRally.Mod.dll','D:/Program Files (x86)/Steam/steamapps/common/artofrally')
+    $recorder = $result | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($recorder.status -eq 'passed' -and $recorder.assertions -gt 0) 'Recorder runner ran no assertions'
+    $null = Run 'probe-hooks-build' 'dotnet' @('build','tests/ProbeHooks/ProbeHooks.csproj','-c','Release','--nologo','-warnaserror')
+    $result = Run 'probe-hooks' (Join-Path $root 'tests/ProbeHooks/bin/Release/net48/ProbeHooks.exe') @($root,'D:/Program Files (x86)/Steam/steamapps/common/artofrally')
+    $hooks = $result | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($hooks.status -eq 'passed' -and $hooks.assertions -gt 0) 'Probe hooks runner ran no assertions'
+    Checkpoint 'dev-recorder' ($recorder.assertions+$hooks.assertions)
+    $result = Run 'replay' 'dotnet' @('run','--project','tools/testing/Replay/Replay.csproj','-c','Release','--','--replay',$recorder.syntheticCapture)
     $replay = $result | Select-Object -Last 1 | ConvertFrom-Json
     Checkpoint 'replay' $replay.assertions
     # Tampering or missing completion receipts must fail, not become a short pass.
     $badCapture = Join-Path $run 'tampered-capture'
-    Copy-Item -LiteralPath $lifecycle.syntheticCapture -Destination $badCapture -Recurse
+    Copy-Item -LiteralPath $recorder.syntheticCapture -Destination $badCapture -Recurse
     Add-Content -LiteralPath (Join-Path $badCapture 'forces.csv') -Value '0,0'
-    $null = Run 'replay-tampered' 'dotnet' @('run','--no-build','--project','tests/Regression/Regression.csproj','-c','Release','--','--replay',$badCapture) $true
+    $null = Run 'replay-tampered' 'dotnet' @('run','--no-build','--project','tools/testing/Replay/Replay.csproj','-c','Release','--','--replay',$badCapture) $true
     Rename-Item -LiteralPath (Join-Path $badCapture 'manifest.xml') -NewName 'manifest.incomplete.xml'
-    $null = Run 'replay-incomplete' 'dotnet' @('run','--no-build','--project','tests/Regression/Regression.csproj','-c','Release','--','--replay',$badCapture) $true
+    $null = Run 'replay-incomplete' 'dotnet' @('run','--no-build','--project','tools/testing/Replay/Replay.csproj','-c','Release','--','--replay',$badCapture) $true
     $truncated = Join-Path $run 'truncated-capture'
-    Copy-Item -LiteralPath $lifecycle.syntheticCapture -Destination $truncated -Recurse
+    Copy-Item -LiteralPath $recorder.syntheticCapture -Destination $truncated -Recurse
     $receipt = [xml](Get-Content -LiteralPath (Join-Path $truncated 'manifest.xml') -Raw)
     $receipt.capture.complete = 'false'; $receipt.Save((Join-Path $truncated 'manifest.xml'))
-    $null = Run 'replay-truncated' 'dotnet' @('run','--no-build','--project','tests/Regression/Regression.csproj','-c','Release','--','--replay',$truncated) $true
+    $null = Run 'replay-truncated' 'dotnet' @('run','--no-build','--project','tools/testing/Replay/Replay.csproj','-c','Release','--','--replay',$truncated) $true
     $badHistory = Join-Path $run 'discontinuous-capture'
-    Copy-Item -LiteralPath $lifecycle.syntheticCapture -Destination $badHistory -Recurse
+    Copy-Item -LiteralPath $recorder.syntheticCapture -Destination $badHistory -Recurse
     $forcePath = Join-Path $badHistory 'forces.csv'
     $rows = @(Get-Content -LiteralPath $forcePath)
     $cells = $rows[2].Split(','); $cells[9] = '0.125'; $rows[2] = $cells -join ','
@@ -66,9 +80,16 @@ try {
     $receipt = [xml](Get-Content -LiteralPath (Join-Path $badHistory 'manifest.xml') -Raw)
     $receipt.capture.forces.InnerText = (Get-FileHash -LiteralPath $forcePath).Hash
     $receipt.Save((Join-Path $badHistory 'manifest.xml'))
-    $historyOutput = Run 'replay-discontinuous' 'dotnet' @('run','--no-build','--project','tests/Regression/Regression.csproj','-c','Release','--','--replay',$badHistory) $true
+    $historyOutput = Run 'replay-discontinuous' 'dotnet' @('run','--no-build','--project','tools/testing/Replay/Replay.csproj','-c','Release','--','--replay',$badHistory) $true
     Assert (($historyOutput -join "`n") -match 'filter history is discontinuous') 'Bad filter history was not detected'
     Checkpoint 'replay-rejection' 4
+    $corpusReport = [ordered]@{ status='not supplied'; cases=0 }
+    if ($Corpus) {
+        $result = Run 'recorded-corpus' 'dotnet' @('run','--no-build','--project','tools/testing/Replay/Replay.csproj','-c','Release','--','--corpus',([IO.Path]::GetFullPath($Corpus)))
+        $recorded = $result | Select-Object -Last 1 | ConvertFrom-Json
+        Assert ($recorded.status -eq 'passed' -and $recorded.detail.caseCount -gt 0) 'Recorded corpus ran no cases'
+        $corpusReport = [ordered]@{ status='passed'; cases=$recorded.detail.caseCount; index=([IO.Path]::GetFullPath($Corpus)); sha256=(Get-FileHash -LiteralPath $Corpus).Hash }
+    }
     $gateOutput = Run 'gate-tests' 'python' @('-m','unittest','discover','-s','tests/testing','-v')
     Assert (($gateOutput -join "`n") -match 'Ran ([1-9]\d*) tests?') 'Release gate test discovery ran nothing'
     Checkpoint 'release-gate' ([int]$Matches[1])
@@ -102,6 +123,11 @@ try {
     $versionInfo = [Diagnostics.FileVersionInfo]::GetVersionInfo((Join-Path $extracted 'ArtOfSimRally/ArtOfSimRally.Mod.dll'))
     Assert ($versionInfo.ProductVersion -eq $build.identity) 'Archive build identity differs'
     Checkpoint 'package' $PayloadFiles.Count
+    $result = Run 'no-recorder' 'dotnet' @('run','--no-build','--project','tools/testing/Replay/Replay.csproj','-c','Release','--','--verify-release',(Join-Path $extracted 'ArtOfSimRally/ArtOfSimRally.Mod.dll'))
+    $absence = $result | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($absence.detail.recordingFeatureAbsent) 'Recorder leaked into release'
+    $null = Run 'no-recorder-rejection' 'dotnet' @('run','--no-build','--project','tools/testing/Replay/Replay.csproj','-c','Release','--','--verify-release','tools/testing/Recorder/bin/Release/net48/ArtOfSimRally.DevRecorder.dll') $true
+    Checkpoint 'no-recorder' ($absence.assertions+1)
 
     # A synthetic game layout, never the Steam install. No executable is launched.
     $game = Join-Path $run 'fake-game'
@@ -117,6 +143,17 @@ try {
     $installer = Join-Path $extracted 'install.ps1'
     $null = Run 'install' $shell @('-NoProfile','-File',$installer,'-GameDir',$game)
     $null = Run 'upgrade' $shell @('-NoProfile','-File',$installer,'-GameDir',$game)
+    $probeInstaller = Join-Path $root 'tools/testing/Install-Recorder.ps1'
+    $modHash = (Get-FileHash -LiteralPath (Join-Path $mod 'ArtOfSimRally.Mod.dll')).Hash
+    $null = Run 'probe-install' $shell @('-NoProfile','-File',$probeInstaller,'-GameDir',$game,'-SkipBuild')
+    $probe = Join-Path $game 'Mods/ArtOfSimRally.DevRecorder'
+    Assert (@(Get-ChildItem -LiteralPath $probe -File).Count -eq 2) 'Probe copied unexpected dependencies'
+    Set-Content -LiteralPath (Join-Path $probe 'user-notes.txt') -Value 'keep'
+    $null = Run 'probe-uninstall' $shell @('-NoProfile','-File',$probeInstaller,'-GameDir',$game,'-Uninstall')
+    Assert (-not (Test-Path -LiteralPath (Join-Path $probe 'ArtOfSimRally.DevRecorder.dll'))) 'Probe uninstall left recorder DLL'
+    Assert (Test-Path -LiteralPath (Join-Path $probe 'user-notes.txt')) 'Probe uninstall removed user files'
+    Assert ((Get-FileHash -LiteralPath (Join-Path $mod 'ArtOfSimRally.Mod.dll')).Hash -eq $modHash) 'Probe changed production mod'
+    Checkpoint 'dev-installer' 4
     Assert ((Get-FileHash -LiteralPath $settings).Hash -eq $settingsHash) 'Upgrade changed settings'
     foreach ($name in @('Mods/ArtOfSimRally/UnityForceFeedback.dll','artofrally_Data/Plugins/x86_64/UnityForceFeedback.dll')) {
         Assert ((Get-FileHash -LiteralPath (Join-Path $game $name)).Hash -eq $manifest.files.'ArtOfSimRally/UnityForceFeedback.dll') 'Installed native copy differs'
@@ -138,7 +175,7 @@ try {
     $finalFiles = @(& git ls-files --cached --others --exclude-standard | Sort-Object -Unique)
     Assert (@(Compare-Object $sourceFiles $finalFiles).Count -eq 0) 'Source file list changed during gate'
     Checkpoint 'source-stability' $sourceFiles.Count
-    $report = [ordered]@{ schema=1; status='passed'; release=$Version; artifact=$zip; artifactSha256=(Get-FileHash -LiteralPath $zip).Hash; identity=$build.identity; sourceState=$build.sourceState; completedUtc=[DateTime]::UtcNow.ToString('o'); checks=$checks; runtime='pending'; syntheticOnly=$true }
+    $report = [ordered]@{ schema=1; status='passed'; release=$Version; artifact=$zip; artifactSha256=(Get-FileHash -LiteralPath $zip).Hash; identity=$build.identity; sourceState=$build.sourceState; completedUtc=[DateTime]::UtcNow.ToString('o'); checks=$checks; runtime='pending'; syntheticOnly=($corpusReport.status -ne 'passed'); recordedCorpus=$corpusReport }
     $reportPath = Join-Path $run 'automated.json'
     $report | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $reportPath -Encoding UTF8
     $null = Run 'manual-template' 'python' @('tools/testing/rc_gate.py','init',$reportPath,(Join-Path $run 'manual.json'))

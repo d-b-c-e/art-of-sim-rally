@@ -212,6 +212,16 @@ No new force tune is introduced.
 
 ---
 
+### KI-11 — Telemetry could stay disabled after correcting a failed destination
+
+**Supportability; fixed in candidate source, live consumer check pending (2026-09-07).**
+`_senderFailed` was checked before endpoint changes and was not reset by shutdown.
+After one connection/send failure, editing host/port or toggling telemetry could
+leave it disabled for the rest of the session. Failed attempts now remember their
+endpoint, stay quiet until it changes or is explicitly restarted, and dispose the
+failed socket. Production-code loopback tests cover recovery, three parked packets,
+destination switching and repeat shutdown. SimHub remains an attended gate.
+
 ## Resolved
 
 Kept because each one cost real time to find, and because a regression in any of

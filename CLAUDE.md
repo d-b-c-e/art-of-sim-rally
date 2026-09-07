@@ -215,6 +215,12 @@ package/installer checks, and creates an attended checklist. `dotnet test
 ArtOfSimRally.sln` still runs nothing and is not evidence. Game/UMM references
 are local and never packaged. Native and encoder source tests stay upstream.
 
+Recorder/playback are **development-only**, never shipping features. Capture is
+the separately installed `tools/testing/Recorder` UMM probe; external commands
+control it and `tools/testing/Replay` works without game/Unity/wheel dependencies.
+Packaging rejects recorder types/dependencies. Use `-Corpus <index.json>` on the
+RC runner once real captures exist. Synthetic fixtures are not playthrough evidence.
+
 The release requires the **exact packaged artifact** installed with the game
 closed and tested by a person. Automated capture replay evaluates force arithmetic
 without native hardware output; it does not recreate Unity or drive a stage.

@@ -35,16 +35,19 @@ static class Program
         foreach (float gain in new[] { 0f, .3f, .52f, 1f, 2f })
         foreach (bool invert in new[] { false, true })
         {
-            float expected = 0, actual = 0;
+            float expected = 0, actual = 0, portable = 0;
             for (int i = 0; i < 2000; i++)
             {
                 float fy = (float)(random.NextDouble() * 80000 - 40000);
                 float speed = i % 5 == 0 ? 0 : (float)(random.NextDouble() * 16);
                 float ideal = i % 7 == 0 ? 0 : 8.5f;
                 float slip = (float)(random.NextDouble() * 45);
-                if (i % 251 == 0) expected = actual = 0; // stage/reset boundary
+                if (i % 251 == 0) expected = actual = portable = 0; // stage/reset boundary
                 expected = Baseline(fy, slip, ideal, speed, 11500, gain, invert, smoothing, expected);
                 actual = ForceCurve.Smooth(actual, ForceCurve.Normalised(fy, slip, ideal, speed, 11500, gain, invert), smoothing);
+                portable = ArtOfSimRally.Testing.LegacyForceCurve.Evaluate(fy,slip,ideal,speed,11500,gain,invert,smoothing,portable);
+                Same(portable,expected,"portable baseline differs from game Mathf");
+                Check((int)(portable*10000)==(int)(expected*10000),"portable baseline changed device magnitude");
                 Same(actual, expected, $"dynamic curve step {i}");
                 Check((int)(actual * 10000) == (int)(expected * 10000), "device magnitude changed");
             }
@@ -108,10 +111,6 @@ static class Program
         Check(!save.Flush(10, false, false, () => throw new IOException()) && save.Pending, "exception lost dirty state");
         Check(save.Flush(10.1, false, true, ok) && !save.Pending, "shutdown retry skipped");
         Check(!save.Flush(20, false, true, ok) && writes == 3, "duplicate shutdown saved twice");
-        var buffer = new CaptureBuffer<int>(2);
-        buffer.Add(1); buffer.Add(2); buffer.Add(3);
-        Check(buffer.Count == 2 && buffer.Items[0] == 1 && buffer.Items[1] == 2 && buffer.Truncated, "capture overwrote evidence");
-
         // Real disk failure through the production writer, with the actual
         // Settings type and UMM-compatible XML, not a successful-save mock.
         string directory=Path.GetFullPath(Path.Combine("results","settings-"+Guid.NewGuid().ToString("N")));
@@ -182,81 +181,12 @@ static class Program
             conclusion="adopted compatibility pipeline preserves the baseline; simlite@2 remains a different tune" };
     }
 
-    static object Replay(string directory)
-    {
-        var manifest = XDocument.Load(Path.Combine(directory, "manifest.xml")).Root!;
-        int schema = (int?)manifest.Attribute("schema") ?? 0;
-        Check(schema == 1 || schema == 2, "unknown capture schema");
-        Check((string?)manifest.Attribute("complete") == "true", "truncated/incomplete capture");
-        Check(!string.IsNullOrWhiteSpace((string?)manifest.Element("modSha256")), "missing build identity");
-        var frames = File.ReadAllLines(Path.Combine(directory, "frames.csv"));
-        var forces = File.ReadAllLines(Path.Combine(directory, "forces.csv"));
-        foreach (string kind in new[] { "frames", "forces" })
-        {
-            var element = manifest.Element(kind)!;
-            Check(NativeDiagnostics.FileHash(Path.Combine(directory, kind + ".csv")) == element.Value, kind + " hash mismatch");
-            int count = kind == "frames" ? frames.Length - 1 : forces.Length - 1;
-            Check(count > 0 && count == (int?)element.Attribute("count"), kind + " count mismatch/empty");
-        }
-        Check(frames[0] == "frame,time_s,delta_s,driving,direct_input,steer,throttle,brake,clutch,handbrake", "frame schema mismatch");
-        Check(forces[0] == "time_s,fy_n,slip_deg,ideal_deg,speed_kmh,reference_n,gain,invert,smoothing,previous,output,device" + (schema == 2 ? ",epoch" : ""), "force schema mismatch");
-        float time = -1, baselineState = 0, toolkitState = 0, maxFloatDelta = 0;
-        int epoch = -1, resets = 0;
-        foreach (string line in forces.Skip(1))
-        {
-            var p = line.Split(',').Select(F).ToArray();
-            Check(p.Length == (schema == 2 ? 13 : 12) && p.All(float.IsFinite), "invalid force row");
-            Check(p[0] >= time && (p[7] == 0 || p[7] == 1), "invalid force time/inversion"); time = p[0];
-            if (schema == 1 || epoch < 0) { baselineState = toolkitState = p[9]; }
-            if (schema == 2)
-            {
-                Check(p[12] >= 0 && p[12] == (int)p[12] && p[12] >= epoch, "invalid reset epoch");
-                if (epoch >= 0 && p[12] != epoch) { baselineState = toolkitState = 0; resets++; }
-                epoch = (int)p[12];
-                Same(toolkitState, p[9], "filter history is discontinuous");
-            }
-            baselineState = Baseline(p[1], p[2], p[3], p[4], p[5], p[6], p[7] == 1, p[8], baselineState);
-            toolkitState = ForceCurve.Smooth(toolkitState, ForceCurve.Normalised(p[1], p[2], p[3], p[4], p[5], p[6], p[7] == 1), p[8]);
-            maxFloatDelta = Math.Max(maxFloatDelta, Math.Abs(toolkitState - baselineState));
-            Same(toolkitState, baselineState, "before/after force comparison");
-            Same(toolkitState, p[10], "offline force replay");
-            Check((int)(toolkitState * 10000) == (int)(baselineState * 10000), "adoption changed device magnitude");
-            Check((int)(toolkitState * 10000) == p[11], "offline device magnitude mismatch");
-        }
-        var timings = new List<float>(); var first15 = new List<float>(); var later = new List<float>();
-        int previousFrame = -1; float previousTime = -1, segmentStart = -1; bool wasDriving = false;
-        foreach (string line in frames.Skip(1))
-        {
-            var p = line.Split(',').Select(F).ToArray();
-            Check(p.Length == 10 && p.All(float.IsFinite) && p[2] > 0, "invalid frame row");
-            Check((previousFrame == -1 || p[0] == previousFrame + 1) && p[1] >= previousTime, "missing/nonmonotonic frames");
-            Check((p[3] == 0 || p[3] == 1) && (p[4] == 0 || p[4] == 1), "invalid frame flags");
-            previousFrame = (int)p[0]; previousTime = p[1];
-            if (p[3] == 1)
-            {
-                if (!wasDriving) segmentStart = p[1];
-                float milliseconds = p[2] * 1000;
-                timings.Add(milliseconds);
-                (p[1] - segmentStart <= 15 ? first15 : later).Add(milliseconds);
-            }
-            wasDriving = p[3] == 1;
-        }
-        Check(timings.Count >= 2, "capture contains no drive");
-        timings.Sort();
-        return new { pipeline = "AxleForceCurve@" + AxleForceCurve.CompatibilityVersion, maxFloatDelta, deviceMismatches = 0, resetBoundaries = resets, stateful = schema == 2, forceRows = forces.Length - 1, drivingFrames = timings.Count,
-            p95FrameMs = timings[(int)((timings.Count - 1) * .95)], maxFrameMs = timings[^1],
-            first15Seconds = new { frames = first15.Count, maxFrameMs = first15.Count == 0 ? 0 : first15.Max(), hitchesOver100Ms = first15.Count(t => t > 100) },
-            after15Seconds = new { frames = later.Count, maxFrameMs = later.Count == 0 ? 0 : later.Max(), hitchesOver100Ms = later.Count(t => t > 100) },
-            hitchesOver100Ms = timings.Count(t => t > 100), scope = "force arithmetic and timing evidence; no game or hardware playback" };
-    }
-
     static int Main(string[] args)
     {
         try
         {
             object? detail = null;
-            if (args.Length == 2 && args[0] == "--replay") detail = Replay(Path.GetFullPath(args[1]));
-            else if (args.Length == 2 && args[0] == "--native") { Curve(); WheelIdentity(); Saves(); Native(args[1]); detail=ToolkitComparison(); }
+            if (args.Length == 2 && args[0] == "--native") { Curve(); WheelIdentity(); Saves(); Native(args[1]); detail=ToolkitComparison(); }
             else { Curve(); WheelIdentity(); Saves(); detail=ToolkitComparison(); }
             Console.WriteLine(JsonSerializer.Serialize(new { status = "passed", assertions, detail })); return 0;
         }

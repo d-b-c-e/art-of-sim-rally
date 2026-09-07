@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><TreatWarningsAsErrors>true</TreatWarningsAsErrors></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../tools/testing/Recorder/CaptureBuffer.cs" Link="CaptureBuffer.cs" />
+    <Compile Include="../../tools/testing/Recorder/CaptureSession.cs" Link="CaptureSession.cs" />
+    <Compile Include="../../tools/testing/Recorder/ControlServer.cs" Link="ControlServer.cs" />
+    <Compile Include="../../tools/testing/Recorder/SubjectAccess.cs" Link="SubjectAccess.cs" />
+    <Compile Include="../../tools/testing/Common/ArtifactHash.cs" Link="ArtifactHash.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/NativeDiagnostics.cs" Link="NativeDiagnostics.cs" />
+    <Compile Include="../reference/LegacyForceCurve.cs" Link="LegacyForceCurve.cs" />
+  </ItemGroup>
+</Project>

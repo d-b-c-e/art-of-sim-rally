@@ -61,6 +61,10 @@ if ($entries -lt 3) { throw 'Incomplete toolkit manifest' }
 Write-Host "Building managed mod..." -ForegroundColor Cyan
 & dotnet build (Join-Path $root 'src\ArtOfSimRally.Mod\ArtOfSimRally.Mod.csproj') -c Release -v q --nologo -warnaserror "-p:ReleaseLabel=$Version" "-p:SourceRevisionId=$revision" "-p:BuildSourceState=$sourceState"
 if ($LASTEXITCODE -ne 0) { throw "Managed build failed" }
+# Inspect the compiled metadata without running game code. A stray recorder
+# source file in the production project must fail even if its DLL isn't copied.
+& dotnet run --project (Join-Path $root 'tools/testing/Replay/Replay.csproj') -c Release -- --verify-release (Join-Path $root 'src/ArtOfSimRally.Mod/bin/Release/ArtOfSimRally.Mod.dll')
+if ($LASTEXITCODE -ne 0) { throw 'Release assembly contains developer recorder code or dependencies.' }
 
 Write-Host "Using verified vendored native plugin..." -ForegroundColor Cyan
 # Native FFB layer and telemetry encoder are vendored from dbce-wheel-mod-toolkit (lib\toolkit).
@@ -116,7 +120,7 @@ Launch the game and press Ctrl+F10 for the settings panel.
 
 * Force feedback strength is a 0-100 slider; 50 is the tuned default. If the
   wheel pulls toward lock instead of back to centre, tick "Invert direction".
-  There is no force below about 12 km/h - that is deliberate.
+  Force fades in between 3 and 12 km/h - that is deliberate.
 
 * Fanatec, or any wheel the game's controls screen ignores: open Wheel input
   (direct) in the mod panel, tick "Read the wheel directly", then Assign

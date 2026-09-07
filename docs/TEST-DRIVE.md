@@ -1,64 +1,82 @@
 # Candidate test drive
 
-Use the exact ZIP named by the latest successful `results/rc-*/automated.json`.
-Do not install an intermediate build from `bin/`. Estimated hands-on time:
-20–30 minutes, longer if reproducing a problem.
+The release mod has **no recorder or playback feature**. A separate, removable
+developer mod observes game signals; a standalone command replays them without
+the game or wheel. Record a representative drive once, then reuse that case on
+subsequent builds. Allow about 20–30 minutes for attended release checks.
 
-1. **Prepare.** Close art of rally, keep a copy of the old ZIP and Settings.xml,
-   then install the candidate using your normal route. Leave strength, smoothing,
-   wheelbase settings and bindings unchanged. Note wheel, car, stage, controller
-   attachments and game build. Confirm the mod version in its support file.
-2. **Record.** Before driving (or while paused), open Ctrl+F10 → Devices and
-   troubleshooting → Start drive capture. The recorder keeps samples in memory;
-   it writes the files after you pause and stop the capture.
-3. **Cold stage.** Drive a familiar stage. Pay attention to the first 15 seconds,
-   then try gentle corners, a controlled slide, bumps, braking, clutch, handbrake
-   and shifter. Note stutters and any change in steering feel at the same tune.
-4. **Cameras and lifecycle.** Cycle the stock cameras, bonnet and bumper; repeat
-   the stock views after using a mounted view. Finish the stage and watch a replay.
-   Check pause/resume, alt-tab/return and disabling/re-enabling the mod. The wheel
-   should release when driving stops and resume without a stale force.
-5. **Repeat/new stage.** Restart the same stage, then load a different one. Note
-   which starts stutter. Pause and choose Stop and save drive capture. Keep the
-   complete folder and its manifest, frames.csv and forces.csv. The panel shows
-   its location under `%LOCALAPPDATA%\ArtOfSimRally\captures`.
-6. **Persistence.** Choose your wheel explicitly in the picker to save its GUID.
-   Exercise the full learned steering/pedal ranges, pause, quit, and relaunch.
-   Confirm the wheel selection, ranges and tune survived. If practical, test a
-   launch with that saved wheel disconnected: FFB should report it missing.
-7. **Evidence.** Save a support bundle and short notes. Screenshots/video are
-   useful for replay and finish-camera problems. If a PS5 pad is available, repeat
-   the camera check with it attached and absent, and inspect ChangeCamera bindings.
-   Confirm SimHub/your normal telemetry consumers work from the start line through
-   pause, finish and exit.
+1. **Prepare the candidate.** Close art of rally, retain the previous ZIP and
+   Settings.xml, and install the exact ZIP identified by the successful
+   `results/rc-*/automated.json`. Keep strength, smoothing, bindings and wheelbase
+   settings unchanged. Note wheel, car, stage, game build and attached controllers.
+2. **Install the developer probe**, with the game still closed:
 
-Start with the same settings used before adoption. If you reduce strength for an
-initial check, record that value and compare using the same value. Stop driving if
-force behavior is unexpected; note the situation rather than repeatedly testing it.
+   ```powershell
+   ./tools/testing/Install-Recorder.ps1
+   ```
 
-## What the recording tells us
+   This adds only `Mods/ArtOfSimRally.DevRecorder`; it does not replace the release
+   mod or its toolkit DLLs. Launch the game normally. UMM's log should say
+   `Developer capture probe ready`. FFB must be enabled and connected for a force
+   regression capture.
+3. **Start recording from PowerShell**, with the game paused or at a menu:
 
-Offline replay runs each recorded signal through the original 0.2.2 formula and
-`AxleForceCurve@1` from the pinned toolkit. It compares normalized outputs and the
-exact integers sent to the native API, carrying separate smoothing histories and
-honoring recorded resets. Expected result: zero device-force mismatches. Existing
-schema-1 captures remain usable for per-row comparisons; schema 2 checks continuous
-filter history as well. Neither path sends force to the wheel.
+   ```powershell
+   ./tools/testing/Record-Drive.ps1 -Command Start
+   ./tools/testing/Record-Drive.ps1 -Command Status
+   ```
 
-```powershell
-dotnet run --project tests/Regression/Regression.csproj -c Release -- --replay "C:/path/to/capture-folder"
-```
+   Resume and drive normally. Include gentle corners, a controlled slide, bumps,
+   braking, clutch, handbrake and shifter. Watch the first 15 seconds for stutter.
+   Samples stay in memory; no CSV is written while driving. Status reports frame
+   and force counts so a missing observation hook is visible.
+4. **Exercise transitions.** Cycle stock views, bonnet and bumper, then stock
+   views again. Finish the stage and watch a replay. Check pause/resume,
+   alt-tab/return and mod disable/re-enable. Restart the same stage, then try a
+   different one. Note which starts stutter and whether the wheel releases.
+   Pause, then stop from PowerShell:
 
-Timing analysis reports the first 15 seconds of each driving segment separately
-from later frames. If stutter persists, compare a similar run with capture off,
-then with the mod disabled. Different drives are useful timing evidence, but are
-not deterministic physics replays.
+   ```powershell
+   ./tools/testing/Record-Drive.ps1 -Command Stop
+   ```
 
-Calculated force is not a measurement of physical torque. A matching replay does
-not validate camera pixels, successful Unity/Mono loading, force delivery, or the
-recorder's in-game performance. Those need your observations and support log.
+   The reply identifies a folder under
+   `%LOCALAPPDATA%/ArtOfSimRally/dev-captures`. Keep its `manifest.xml`,
+   `frames.csv` and `forces.csv` together. After a save error, keep the game open,
+   remain paused and retry Stop; the probe retains its buffers.
+5. **Replay and preserve the case**, outside the game:
 
-Fill in the candidate's `manual.json` with tester/rig, a result and observations
-for every case, plus paths and SHA-256 hashes for its evidence. An untested or failed
-case keeps the release gate closed. See [PRE-RELEASE-TESTING.md](PRE-RELEASE-TESTING.md)
-for the complete evidence workflow.
+   ```powershell
+   dotnet run --project tools/testing/Replay -c Release -- --replay 'C:/path/to/capture'
+   ./tools/testing/Add-RegressionCapture.ps1 -Capture 'C:/path/to/capture' -Corpus './results/regression-corpus' -Name cold-stage-r12
+   dotnet run --project tools/testing/Replay -c Release -- --corpus './results/regression-corpus/index.json'
+   ```
+
+   Expected: zero device-force mismatches against the frozen original formula.
+   Case names cannot overwrite existing evidence. Frame timing and native-call
+   acceptance/rejection counts are reported when available; matching arithmetic
+   does not establish physical torque delivery.
+6. **Remove the probe and check the shipped setup.** Close the game, then run:
+
+   ```powershell
+   ./tools/testing/Install-Recorder.ps1 -Uninstall
+   ```
+
+   Relaunch and confirm normal loading, camera transitions and steering with the
+   probe absent. Choose your wheel explicitly, exercise learned ranges, pause,
+   quit and relaunch to check GUID, binding and tune persistence. If practical,
+   test launching without the saved wheel: FFB must not choose another device.
+
+Save a support file and notes. Check SimHub from start line through driving,
+pause, finish and exit. Capture screenshots/video for camera problems. If a PS5
+pad is available, compare with it attached and absent and inspect ChangeCamera
+bindings; that was relevant to issue #1's original report.
+
+If stutter persists, compare capture off and then a mod-disabled run with the same
+settings. Different drives supply timing evidence, not deterministic physics
+playback. Stop if force behavior is unexpected and record the situation. Keep tune
+changes labelled so comparisons use the same settings.
+
+Fill in the exact candidate's `manual.json` with tester/rig, outcomes, notes and
+hashed evidence. See [PRE-RELEASE-TESTING.md](PRE-RELEASE-TESTING.md) for gates and
+limits. Signal replay does not automate full game input, rendering or wheel feel.

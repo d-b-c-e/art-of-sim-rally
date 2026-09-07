@@ -47,32 +47,11 @@ namespace ArtOfSimRally.Mod
         private static void Emit(CarDynamics __instance)
         {
             var cfg = Main.Settings;
-            if (!Main.Enabled || cfg == null || !cfg.TelemetryEnabled || _senderFailed) return;
+            if (!Main.Enabled || cfg == null || !cfg.TelemetryEnabled) return;
+            if (!EnsureSender(cfg)) return;
 
             try
             {
-                bool changed = _sender != null &&
-                               (_senderPort != cfg.TelemetryPort ||
-                                !string.Equals(_senderHost, cfg.TelemetryHost, StringComparison.Ordinal));
-
-                if (changed)
-                {
-                    // Park the old destination before moving, or whatever was
-                    // listening there sits frozen on the last packet forever.
-                    Park();
-                    Shutdown();
-                }
-
-                if (_sender == null)
-                {
-                    if (string.IsNullOrEmpty(cfg.TelemetryHost)) return;
-                    _sender = new TelemetrySender(cfg.TelemetryHost, cfg.TelemetryPort);
-                    _senderHost = cfg.TelemetryHost;
-                    _senderPort = cfg.TelemetryPort;
-                    _senderFailed = false;
-                    ModLog.Info($"Telemetry -> udp://{cfg.TelemetryHost}:{cfg.TelemetryPort}");
-                }
-
                 if (!ReferenceEquals(_cachedFor, __instance))
                 {
                     _cachedFor  = __instance;
@@ -86,10 +65,41 @@ namespace ArtOfSimRally.Mod
             }
             catch (Exception ex)
             {
-                // Telemetry must never break the game. One report, then stay quiet.
-                ModLog.Error($"Telemetry disabled after error: {ex.Message}");
-                _senderFailed = true;
+                Failed(ex);
             }
+        }
+
+        // A failed destination stays quiet until it changes or telemetry is
+        // explicitly restarted. Remember failed attempts too, so an invalid
+        // hostname/port cannot trigger connection work on every physics step.
+        private static bool EnsureSender(Settings cfg)
+        {
+            bool changed = _senderPort != cfg.TelemetryPort ||
+                !string.Equals(_senderHost, cfg.TelemetryHost, StringComparison.Ordinal);
+            if (_senderFailed && !changed) return false;
+            try
+            {
+                if (changed) { Park(); Shutdown(); }
+                if (_sender == null)
+                {
+                    if (string.IsNullOrEmpty(cfg.TelemetryHost)) return false;
+                    _senderHost = cfg.TelemetryHost;
+                    _senderPort = cfg.TelemetryPort;
+                    _sender = new TelemetrySender(_senderHost, _senderPort);
+                    _senderFailed = false;
+                    ModLog.Info($"Telemetry -> udp://{_senderHost}:{_senderPort}");
+                }
+                return true;
+            }
+            catch (Exception ex) { Failed(ex); return false; }
+        }
+
+        private static void Failed(Exception ex)
+        {
+            _senderFailed = true;
+            _sender?.Dispose();
+            _sender = null;
+            ModLog.Error($"Telemetry disabled after error: {ex.Message}");
         }
 
         private static TelemetryFrame BuildFrame(CarDynamics cd)
@@ -279,6 +289,7 @@ namespace ArtOfSimRally.Mod
             _sender = null;
             _senderHost = null;
             _senderPort = 0;
+            _senderFailed = false;
             _cachedFor = null;
         }
     }

@@ -236,11 +236,11 @@ namespace ArtOfSimRally.Mod
                 // extends exactly when they first reach full lock and full pedal
                 // travel: the opening seconds of a stage. Writing Settings.xml
                 // from here - a synchronous XML serialise and disk write, worse
-                // again with a virus scanner watching the Mods folder - put a
+                // again with a virus scanner watching the Mods folder - could put a
                 // hitch into the one moment the player is trying to drive, at
                 // roughly t+0, t+5 and t+10 before the range settled. Reported
                 // as "massive stutter and brief lockups for the first 10-15
-                // seconds" (KI-5). Nothing needs it on disk *now*; it only has
+                // seconds" (KI-5); causation is not confirmed. Nothing needs it on disk now; it only has
                 // to survive the session.
                 foreach (var kv in _bindings) Store(cfg, kv.Key, kv.Value.ToString());
                 RangeSave.MarkDirty();

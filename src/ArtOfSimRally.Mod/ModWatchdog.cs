@@ -52,13 +52,11 @@ namespace ArtOfSimRally.Mod
         {
             if (!Main.Enabled)
             {
-                DriveCapture.RecordFrame(Time.unscaledDeltaTime, false);
                 WheelInput.FlushLearnedRanges();
                 return;
             }
             InputBackend.Tick();
             WheelInput.Update();
-            DriveCapture.RecordFrame(Time.unscaledDeltaTime, GameState.IsDriving);
 
             // Independent of whether any game object is still ticking. The
             // FixedUpdate postfix normally gets here first; this exists for when
@@ -79,7 +77,7 @@ namespace ArtOfSimRally.Mod
                 // The moment the player stops driving is the right one to write
                 // anything to disk. WheelInput learns each axis's full range as
                 // the control is first used, which is the opening seconds of a
-                // stage; saving it there hitched the frame (KI-5).
+                // stage; saving it there could contribute to the reported KI-5 hitch.
             }
             // Retry failed writes at most once per five seconds, only while idle.
             WheelInput.FlushLearnedRanges();
@@ -114,7 +112,6 @@ namespace ArtOfSimRally.Mod
             FfbNative.ReleaseInputs();
             // No file writes until force and telemetry outputs are released.
             try { WheelInput.FlushLearnedRanges(shutdown: true); } catch { }
-            DriveCapture.Stop("shutdown");
         }
     }
 }

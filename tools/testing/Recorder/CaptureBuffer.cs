@@ -1,4 +1,4 @@
-namespace ArtOfSimRally.Mod
+namespace ArtOfSimRally.Testing
 {
     internal sealed class CaptureBuffer<T> where T : struct
     {

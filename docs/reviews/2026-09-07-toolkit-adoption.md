@@ -28,6 +28,14 @@ shipped there; native lifecycle and force implementation stay upstream.
   Replay runs separate original/toolkit histories and compares exact device
   integers. Schema 1 remains readable with its narrower per-row scope.
 
+Later in the same session, the user clarified that recorder/playback must remain
+development-only. Capture was removed from the production assembly and panel,
+moved to a separate removable UMM probe, and controlled through external commands.
+Replay now builds without game assemblies and supports a reusable recorded corpus.
+Packaging inspects the production metadata and rejects recorder types/dependencies.
+Additional review fixed telemetry recovery after a failed destination (KI-11),
+with production-code loopback tests. See PRE-RELEASE-TESTING for current coverage.
+
 Offline consumer coverage includes 125,000 generated steps (changing signals,
 settings, clipping and resets), the unchanged 703-row reference, picker identity,
 settings persistence, camera ownership/lifecycle, capture reset continuity,

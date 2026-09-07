@@ -17,7 +17,13 @@ Implemented but not yet verified in a real game session:
   native version diagnostics. A Plugins/x86_64 copy is an intentional install path.
 - Version-consistent packages, full payload integrity checks, and settings-preserving
   install/uninstall. The synthetic installer tests do not exercise UMM's GUI.
-- Optional bounded drive capture, offline force replay and the release evidence gate.
+- Telemetry recovery after a destination failure; loopback regression covers
+  reconnect, parking and shutdown. Live consumer testing remains pending.
+
+Development tooling is separate: bounded capture probe, external Start/Stop,
+game-free force replay, a saved regression corpus and the release evidence gate.
+No recorder ships in the release mod. The first real game case still needs to be
+captured; generated fixtures validate the tooling, not a playthrough.
 
 Run [PRE-RELEASE-TESTING.md](PRE-RELEASE-TESTING.md). The release needs the exact
 packaged candidate tested for camera transitions, cold/repeated/new-stage stutter,

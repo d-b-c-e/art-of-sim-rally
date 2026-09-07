@@ -23,14 +23,18 @@ real rig/UMM behaviour still require the attended checklist before release.
 - Keep vendored toolkit artifacts tracked so a clone can build with local game/UMM
   references. Validate candidate payloads before install and preserve settings and
   user files during uninstall.
+- Recover telemetry after correcting a failed destination or explicitly restarting
+  it. Suppress repeated connection attempts for an unchanged failing endpoint,
+  and dispose the failed socket. Verified with production code and loopback UDP.
 
 ### Added
 
 - Consistent numeric mod versions, embedded RC/revision/source identity, package
   manifests and SHA-256 receipts. Support files observe resident native modules
   and report their actual file paths, hashes and component versions.
-- Optional in-memory drive capture with frame timing, direct input samples and
-  force-signal inputs/results; offline replay never drives hardware.
+- Development-only capture probe and external control scripts, standalone replay
+  without game dependencies, and immutable regression cases. These tools are not
+  shipped; packaging rejects recorder code or dependencies in the release mod.
 - Automated consumer regressions, installer smoke tests and a separate attended
   release gate. See [PRE-RELEASE-TESTING.md](docs/PRE-RELEASE-TESTING.md).
 - A force reference vector shared with the toolkit, plus dynamic regression

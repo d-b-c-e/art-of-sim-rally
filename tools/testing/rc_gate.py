@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
-AUTOMATED = {"build", "regression", "lifecycle", "replay", "replay-rejection", "release-gate", "vector", "native-exports", "package", "installer", "installer-rejection", "source-stability"}
+AUTOMATED = {"build", "telemetry-loopback", "regression", "lifecycle", "dev-recorder", "replay", "replay-rejection", "release-gate", "vector", "native-exports", "package", "no-recorder", "dev-installer", "installer", "installer-rejection", "source-stability"}
 CASES = {
     "camera": "Cycle all stock views before/after bonnet+bumper; finish cinematic; replay; pause; restart; disable/re-enable mod. Repeat with PS5 controller attached and absent when available; inspect ChangeCamera binding.",
     "stutter": "Capture cold stage first 15s, same-stage restart, and a different stage. Compare warm/cold runs and a mod-disabled run if stutter persists. Note any 100ms+ hitches and rig settings.",
