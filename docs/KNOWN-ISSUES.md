@@ -3,7 +3,7 @@
 The register of what is broken, what is unverified, and what was deliberately
 abandoned. One entry per problem, newest first within each section.
 
-**Reporting something new:** open an [issue](../../issues) with a support file
+**Reporting something new:** open an [issue](https://github.com/d-b-c-e/art-of-sim-rally/issues) with a support file
 (Ctrl+F10 → *Devices and troubleshooting* → **Create support file on Desktop**).
 User-facing fixes by symptom live in [TROUBLESHOOTING.md](TROUBLESHOOTING.md);
 this file is the engineering view, including things a user cannot act on.
@@ -248,6 +248,10 @@ Detail on R-6 through R-11 is in [FORCE-FEEDBACK.md](FORCE-FEEDBACK.md) and
 
 ## Upstream, recorded here
 
+This is a historical record of the shared-model investigation. The current
+candidate consumes the versioned `AxleForceCurve@1` compatibility pipeline from
+toolkit v0.12.0; the generic ForceModel/SimLite pipeline remains unused.
+
 ### U-1 — `simlite@1` was not art of rally's tuning; `simlite@2` is
 
 dbce-wheel-mod-toolkit's `simlite@1` profile was described as this mod's 0.2.2
@@ -291,7 +295,7 @@ and the table are in
 
 **Aligned to our order in toolkit v0.7.0** (2026-09-04), on the reasoning that a
 device limit applied before a model term stops being a boundary constraint and
-becomes a silent soft knee. Nothing in production moved: no consumer references
+becomes a silent soft knee. At that time nothing in production moved: no consumer referenced
 `Dbce.Wheel.Ffb`, and OutRun — the only user of the shared model, through the C++
 port — defaults to its own legacy model and its profiles have no fade.
 

@@ -98,8 +98,10 @@ core — but keep one as the documented default so support questions stay simple
 The zip contains `ArtOfSimRally/` at its root for UMM, plus Install.bat,
 Uninstall.bat, install.ps1, verify.ps1, README.txt, LICENSE and manifest.json.
 The mod folder contains only Info.json, build.json, ArtOfSimRally.Mod.dll,
-Dbce.Wheel.Telemetry.dll and UnityForceFeedback.dll. No game or UMM assemblies
-or user Settings.xml are packaged. Dbce.Wheel.Ffb.dll remains vendor/test-only.
+Dbce.Wheel.Ffb.dll, Dbce.Wheel.Telemetry.dll and UnityForceFeedback.dll. No game
+or UMM assemblies or user Settings.xml are packaged. The development recorder
+is a separate optional installation; packaging rejects its types/dependencies
+in the production assembly as well as unexpected payload files.
 
 The native artifact is our toolkit's x64 WheelFfb.dll, shipped under the name
 UnityForceFeedback.dll. The batch installer deliberately copies it **both** beside

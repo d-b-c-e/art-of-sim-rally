@@ -47,9 +47,9 @@ whose axis runs backwards would still need it.
 
 ## Force feedback too strong or too weak
 
-*Force feedback → Strength* is the only dial; 50 is the tuned default. Nothing
-below about 12 km/h is deliberate — aligning torque is meaningless at parking
-speed.
+Use *Force feedback → Strength* to adjust force level; 50 is the default.
+Force fades in between 3 and 12 km/h. Smoothing controls how quickly force
+changes reach the wheel; keep it consistent when comparing builds.
 
 ## Force feedback stops after alt-tab (before 0.2.1)
 
@@ -97,5 +97,18 @@ the real wheel explicitly in the *Wheel* dropdown.
 
 ## The camera moves about at the end of a stage
 
-Known, cosmetic: the game takes over the camera for the results cinematic and
-the mounted view hands back a moment late. It does not affect driving.
+The 0.2.3 candidate restores the stock camera when the game enters a replay or
+results cinematic. The code fix still needs visual confirmation. Note which
+mounted/stock view you used beforehand and attach a support file and short video.
+For reversed stock views, also inspect the ChangeCamera binding and record whether
+a PS5 controller is attached: that resolved issue #1's original reporter's symptom.
+See [KNOWN-ISSUES.md](KNOWN-ISSUES.md) for the distinction between the report and
+the camera handback defect.
+
+## Telemetry stays off after a connection error
+
+Check the host and UDP port in the mod panel. In the 0.2.3 candidate, correcting
+the destination retries the connection; turning telemetry off and back on also
+clears the failed state. An unchanged failing destination stays quiet instead of
+repeating connection work every physics step. If it still fails, retain the error
+from the support file and check the receiving application's host/port settings.
