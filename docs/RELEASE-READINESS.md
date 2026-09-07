@@ -1,8 +1,9 @@
 # Release readiness — 2026-09-07
 
 **0.2.3-rc.6 is prepared and passes all 16 automated gates. It is not signed off
-for release.** Public mod release remains 0.2.2. No candidate or developer probe
-was installed into the Steam game, no stage was driven, and nothing was published.
+for release.** Public mod release remains 0.2.2. The automated run did not deploy
+anything. RC6 and the separate developer probe were subsequently installed locally
+on 2026-09-07 for the owner's attended checks; no drive or publication is recorded.
 
 ## Exact candidate
 
@@ -58,10 +59,26 @@ The complete check list is in automated.json. The report explicitly records
 `recordedCorpus.status="not supplied"`, `syntheticOnly=true`, and `runtime=pending`.
 The real gate returns `NOT READY: Tester/rig not recorded`, as it should.
 
-## Tomorrow's remaining work
+## Local test preparation — 2026-09-07
 
-Follow [TEST-DRIVE.md](TEST-DRIVE.md): install RC6 with the game closed, temporarily
-install the developer probe, drive cold/repeated/new-stage cases, pause and save,
+RC6 was installed from the verified ZIP with the game closed. Every installed mod
+payload and both native copies match the package; the assembly identity matches
+the automated report. Settings.xml is byte-for-byte preserved, including Strength
+26 and Smoothing 0.2. The previous installation/settings were backed up beside the
+[installation receipt](../results/rc-0.2.3-rc.6-5bc7ee50847748b59f4309b4cac7ad92/local-install-20260907-195440/receipt.json).
+
+The existing art of rally Stream Deck key already launches Steam app 550320,
+whose installed directory is this game folder. Profile 1, page UUID
+`C881702A-9A40-47FD-A514-0A9E9CA40A8C`, Keypad coordinate `6,3` (bottom row,
+seventh key). Its action/layout/artwork were left intact; launching it now uses
+the installed RC6. The separate developer probe is installed for capture and must
+be removed before the final checks of the shipping setup. The game has not yet
+been launched as part of this preparation.
+
+## Remaining attended work
+
+Follow [TEST-DRIVE.md](TEST-DRIVE.md): launch using the existing Stream Deck key,
+drive cold/repeated/new-stage cases with the developer probe, pause and save,
 then replay and preserve the real capture. Remove the probe and verify the shipped
 setup. Allow about 20–30 minutes, longer if reproducing a problem.
 
