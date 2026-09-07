@@ -49,7 +49,76 @@ namespace ArtOfSimRally.Mod
         private static float _lateralOffset;
 
         // Tracks the moment we stop controlling, so the handback runs once.
-        private static bool _wasDriving;
+        private static Camera _ownedCamera;
+        private static CarCameras _ownedRig;
+        private static float _savedFov;
+
+        // Release the actual child we changed, even if the game's current camera
+        // has since changed or CarCameras has stopped receiving LateUpdate.
+        internal static void Release(bool snapParent)
+        {
+            var camera = _ownedCamera;
+            var rig = _ownedRig;
+            _ownedCamera = null;
+            _ownedRig = null;
+            _lateralOffset = 0f;
+            if (camera == null) return;
+            camera.transform.localPosition = Vector3.zero;
+            camera.transform.localRotation = Quaternion.identity;
+            camera.fieldOfView = _savedFov;
+            if (snapParent && rig != null && rig.enabled && GameState.IsPlayerView)
+            {
+                try
+                {
+                    // Disabling the mod/view while mounted must not leave the
+                    // stock rig using our zero-distance placeholder angle.
+                    SelectStockView(rig);
+                    rig.SetToWantedPositionImmediate();
+                }
+                catch { /* The child invariant is restored even during scene teardown. */ }
+            }
+        }
+
+        private static void SelectStockView(CarCameras rig)
+        {
+            if (ActiveView(rig) == View.None) return;
+            var list = AnglesList(rig);
+            if (list == null || !list.Exists(a => !ReferenceEquals(a, _bonnetAngle) && !ReferenceEquals(a, _bumperAngle))) return;
+            var original = list.ToArray();
+            try
+            {
+                list.RemoveAll(a => ReferenceEquals(a, _bonnetAngle) || ReferenceEquals(a, _bumperAngle));
+                // The game's method clamps the saved preset to the temporary
+                // stock list and updates its private distance/height/pitch too.
+                rig.RefreshCameraType();
+            }
+            finally { list.Clear(); list.AddRange(original); }
+        }
+
+        internal static void ReleaseIfInactive()
+        {
+            if (_ownedCamera == null) return;
+            var cfg = Main.Settings;
+            var view = _ownedRig == null ? View.None : ActiveView(_ownedRig);
+            if (!Main.Enabled || cfg == null || !GameState.IsPlayerView ||
+                _ownedRig == null || !_ownedRig.enabled || view == View.None ||
+                (view == View.Bonnet && !cfg.BonnetCameraEnabled) ||
+                (view == View.Bumper && !cfg.BumperCameraEnabled)) Release(true);
+        }
+
+        // CameraManager disables CarCameras before cinematic/replay rendering.
+        // Its LateUpdate postfix alone cannot perform that handback.
+        [HarmonyPatch(typeof(CameraManager), "EnableCinemachineCamera")]
+        internal static class CinematicHandback
+        {
+            [HarmonyPrefix] private static void Before() => Release(false);
+        }
+
+        [HarmonyPatch(typeof(CameraManager), "DisableCameraManagers")]
+        internal static class IntroHandback
+        {
+            [HarmonyPrefix] private static void Before() => Release(false);
+        }
 
         // CameraAnglesList and cardynamics are private on CarCameras. AccessTools
         // resolves them once at type-init rather than reflecting per frame.
@@ -109,7 +178,9 @@ namespace ArtOfSimRally.Mod
                 var cfg = Main.Settings;
                 if (cfg == null) return;
                 var view = ActiveView(__instance);
-                bool shouldDrive = view != View.None && GameState.IsPlayerView;
+                bool shouldDrive = Main.Enabled && GameState.IsPlayerView &&
+                    ((view == View.Bonnet && cfg.BonnetCameraEnabled) ||
+                     (view == View.Bumper && cfg.BumperCameraEnabled));
 
                 // Hand the camera back cleanly for the end-of-stage cinematic,
                 // replays, the intro, and - the one that bit - the player simply
@@ -132,34 +203,29 @@ namespace ArtOfSimRally.Mod
                 //    to a parent 30-46 m behind and 15-45 m above the car looking
                 //    back down at it, a bonnet mount is close to a 180 degree yaw -
                 //    so every stock angle rendered backwards for as long as the
-                //    stage lasted. Reported as issue #1 and invisible here, because
-                //    this rig never cycles out of the bonnet view.
+                //    stage lasted. This is a code defect; issue #1's reporter
+                //    separately resolved their symptom by unplugging a PS5 pad.
                 //
                 // Clear the child first so the parent's placement is the last word.
                 if (!shouldDrive)
                 {
-                    _lateralOffset = 0f;
-                    if (_wasDriving)
-                    {
-                        _wasDriving = false;
-                        var released = UIManager.Instance?.PanelManager?.mainCamera;
-                        if (released != null)
-                        {
-                            released.transform.localPosition = Vector3.zero;
-                            released.transform.localRotation = Quaternion.identity;
-                        }
-                        try { __instance.SetToWantedPositionImmediate(); }
-                        catch { /* handing back is best-effort */ }
-                    }
+                    Release(true);
+                    if (GameState.IsPlayerView && view != View.None) SelectStockView(__instance);
                     return;
                 }
-                _wasDriving = true;
 
                 var target = __instance.target;
                 if (target == null) return;
 
                 var cam = UIManager.Instance?.PanelManager?.mainCamera;
                 if (cam == null) return;
+                if (_ownedCamera != cam || _ownedRig != __instance)
+                {
+                    Release(false);
+                    _ownedCamera = cam;
+                    _ownedRig = __instance;
+                    _savedFov = cam.fieldOfView;
+                }
 
                 // Mount in the car's own frame, so body roll and pitch come along.
                 var rot = target.rotation;

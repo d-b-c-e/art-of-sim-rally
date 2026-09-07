@@ -85,7 +85,14 @@ namespace ArtOfSimRally.Mod
         {
             if (!Section("Force feedback", ref _openFfb)) return;
 
+            bool wasEnabled = cfg.ForceFeedbackEnabled;
             cfg.ForceFeedbackEnabled = Toggle(cfg.ForceFeedbackEnabled, "Enabled", null);
+            if (wasEnabled != cfg.ForceFeedbackEnabled)
+            {
+                FfbNative.SetForce(0);
+                FfbController.Reset();
+                if (cfg.ForceFeedbackEnabled && !FfbNative.Ready) Main.ReopenForceFeedback();
+            }
 
             if (cfg.ForceFeedbackEnabled)
             {
@@ -244,6 +251,17 @@ namespace ArtOfSimRally.Mod
                 ? "Collects your settings, devices, bindings and logs into one file to attach " +
                   "to a bug report."
                 : SupportBundle.LastResult, Wrap);
+
+            GUILayout.Space(6);
+            GUI.enabled = !GameState.IsDriving;
+            if (GUILayout.Button(DriveCapture.Pending ? "Stop and save drive capture" : "Start drive capture",
+                    GUILayout.Width(260)))
+            {
+                if (DriveCapture.Pending) DriveCapture.Stop();
+                else DriveCapture.Start();
+            }
+            GUI.enabled = true;
+            GUILayout.Label(DriveCapture.Status + " Start/stop while paused or in a menu.", Wrap);
 
             End();
         }

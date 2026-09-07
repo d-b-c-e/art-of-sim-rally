@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Runtime.InteropServices;
+using Dbce.Wheel.Ffb;
 using System.Text;
 using HarmonyLib;
 using UnityEngine;
@@ -41,17 +41,8 @@ namespace ArtOfSimRally.Mod
     /// reads 0 or 1 - useful for a handbrake.
     /// </para>
     /// </remarks>
-    internal static class WheelInput
+    internal static partial class WheelInput
     {
-        private const string Dll = "UnityForceFeedback";
-
-        [DllImport(Dll)] private static extern int EnumerateAllDevices();
-        [DllImport(Dll, CharSet = CharSet.Ansi)]
-        private static extern int GetAnyDeviceName(int index, StringBuilder buffer, int size);
-        [DllImport(Dll)] private static extern int OpenReadDevice(int index);
-        [DllImport(Dll)] private static extern int ReadDeviceState(int slot, int[] axes, byte[] buttons, int buttonCount);
-        [DllImport(Dll)] private static extern void CloseReadDevices();
-
         public enum Channel { Steer, Throttle, Brake, Clutch, Handbrake }
         public static readonly Channel[] Channels = { Channel.Steer, Channel.Throttle, Channel.Brake, Channel.Clutch, Channel.Handbrake };
 
@@ -71,43 +62,13 @@ namespace ArtOfSimRally.Mod
             public bool Ok;
         }
 
-        /// <summary>One bound control. Serialised as "device|index|axis:N or button:N|rest|far".</summary>
-        public sealed class Binding
-        {
-            public string Device = "";
-            public int DeviceIndex = -1;
-            public bool IsButton;
-            public int Element = -1;
-            public int Rest, Far;
-
-            public static Binding Parse(string s)
-            {
-                if (string.IsNullOrEmpty(s)) return null;
-                var p = s.Split('|');
-                if (p.Length < 5) return null;
-                var b = new Binding { Device = p[0] };
-                int.TryParse(p[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out b.DeviceIndex);
-                var el = p[2].Split(':');
-                b.IsButton = el.Length == 2 && el[0] == "button";
-                int.TryParse(el.Length == 2 ? el[1] : "-1", NumberStyles.Integer, CultureInfo.InvariantCulture, out b.Element);
-                int.TryParse(p[3], NumberStyles.Integer, CultureInfo.InvariantCulture, out b.Rest);
-                int.TryParse(p[4], NumberStyles.Integer, CultureInfo.InvariantCulture, out b.Far);
-                return b.Element >= 0 ? b : null;
-            }
-
-            public override string ToString() => string.Format(CultureInfo.InvariantCulture, "{0}|{1}|{2}:{3}|{4}|{5}",
-                Device, DeviceIndex, IsButton ? "button" : "axis", Element, Rest, Far);
-
-            public string Describe() => Device + (IsButton ? " button " + (Element + 1) : " axis " + (Element < AxisNames.Length ? AxisNames[Element] : Element.ToString()));
-        }
-
         private static readonly List<Device> _devices = new List<Device>();
         private static readonly Dictionary<Channel, Binding> _bindings = new Dictionary<Channel, Binding>();
         private static readonly Dictionary<Channel, float> _values = new Dictionary<Channel, float>();
         private static bool _open;
         private static Channel? _assigning;
         private static float _assignDeadline;
-        private static bool _rangeDirty;
+        private static readonly DeferredSave RangeSave = new DeferredSave();
         private static float _nextOpenRetry;
         private static bool _firstReadLogged;
 
@@ -173,15 +134,11 @@ namespace ArtOfSimRally.Mod
             try
             {
                 Close();
-                int count = EnumerateAllDevices();
-                var buf = new StringBuilder(260);
-                for (int i = 0; i < count; i++)
+                foreach (var device in WheelFfbNative.ListAllDevices())
                 {
-                    buf.Length = 0;
-                    string name = GetAnyDeviceName(i, buf, buf.Capacity) != 0 ? buf.ToString() : "(device " + i + ")";
-                    int slot = OpenReadDevice(i);
-                    if (slot < 0) { ModLog.Warning("Wheel input: could not open " + name); continue; }
-                    _devices.Add(new Device { Slot = slot, Index = i, Name = name });
+                    int slot = WheelFfbNative.OpenRead(device.Index);
+                    if (slot < 0) { ModLog.Warning("Wheel input: could not open " + device.Name); continue; }
+                    _devices.Add(new Device { Slot = slot, Index = device.Index, Name = device.Name });
                 }
                 _open = _devices.Count > 0;
                 _firstReadLogged = false;
@@ -200,7 +157,7 @@ namespace ArtOfSimRally.Mod
 
         public static void Close()
         {
-            try { if (_devices.Count > 0 || _open) CloseReadDevices(); } catch { }
+            try { if (_devices.Count > 0 || _open) WheelFfbNative.CloseRead(); } catch { }
             _devices.Clear();
             _open = false;
             _assigning = null;
@@ -226,7 +183,7 @@ namespace ArtOfSimRally.Mod
 
             foreach (var d in _devices)
             {
-                try { d.Ok = ReadDeviceState(d.Slot, d.Axes, d.Buttons, ButtonCount) != 0; }
+                try { d.Ok = WheelFfbNative.Read(d.Slot, d.Axes, d.Buttons); }
                 catch { d.Ok = false; }
             }
             if (!_firstReadLogged)
@@ -286,7 +243,7 @@ namespace ArtOfSimRally.Mod
                 // seconds" (KI-5). Nothing needs it on disk *now*; it only has
                 // to survive the session.
                 foreach (var kv in _bindings) Store(cfg, kv.Key, kv.Value.ToString());
-                _rangeDirty = true;
+                RangeSave.MarkDirty();
             }
         }
 
@@ -301,12 +258,11 @@ namespace ArtOfSimRally.Mod
         /// seconds it would have taken anyway. That is a better trade than a disk
         /// write landing in the middle of a corner.
         /// </remarks>
-        public static void FlushLearnedRanges()
+        public static void FlushLearnedRanges(bool shutdown = false)
         {
-            if (!_rangeDirty) return;
-            _rangeDirty = false;
-            Main.SaveSettings();
-            ModLog.Info("Wheel input: saved the calibrated axis ranges.");
+            if (RangeSave.Flush(Time.realtimeSinceStartup,
+                    !shutdown && Main.Enabled && GameState.IsDriving, shutdown, Main.SaveSettings))
+                ModLog.Info("Wheel input: saved the calibrated axis ranges.");
         }
 
         private static Device Resolve(Binding b)
@@ -329,7 +285,7 @@ namespace ArtOfSimRally.Mod
             if (!_open) return;
             foreach (var d in _devices)
             {
-                try { ReadDeviceState(d.Slot, d.Axes, d.Buttons, ButtonCount); } catch { }
+                try { WheelFfbNative.Read(d.Slot, d.Axes, d.Buttons); } catch { }
                 Array.Copy(d.Axes, d.BaseAxes, AxisCount);
                 Array.Copy(d.Buttons, d.BaseButtons, ButtonCount);
             }
@@ -415,7 +371,7 @@ namespace ArtOfSimRally.Mod
     /// game's own read, so unbound channels keep whatever Rewired produced.
     /// </summary>
     [HarmonyPatch(typeof(AxisCarController), "GetInput")]
-    internal static class WheelInputPatch
+    internal static partial class WheelInputPatch
     {
         [HarmonyPostfix]
         private static void Override(AxisCarController __instance,

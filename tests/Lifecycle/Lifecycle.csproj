@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Dbce.Wheel.Ffb"><HintPath>../../lib/toolkit/dotnet/Dbce.Wheel.Ffb.dll</HintPath></Reference>
+    <Compile Include="../../src/ArtOfSimRally.Mod/BonnetCamera.cs" Link="BonnetCamera.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/ModWatchdog.cs" Link="ModWatchdog.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/DriveCapture.cs" Link="DriveCapture.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/CaptureBuffer.cs" Link="CaptureBuffer.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/NativeDiagnostics.cs" Link="NativeDiagnostics.cs" />
+  </ItemGroup>
+</Project>

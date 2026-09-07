@@ -23,158 +23,45 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ### KI-1 — Stock cameras 3–8 render reversed
 
-| | |
-|---|---|
-| **Reported** | 2026-09-04, [issue #1](https://github.com/d-b-c-e/art-of-sim-rally/issues/1) |
-| **Reporter** | Thrustmaster T300 RS GT, mod 0.2.1 |
-| **Severity** | major — it makes the game's own views unusable, and they are the views most players prefer |
-| **Status** | root cause confirmed and **fixed** 2026-09-04, unreleased; awaiting on-screen confirmation |
+**Major; open pending validation.** Reported on a T300 RS GT with mod 0.2.1 in
+[issue #1](https://github.com/d-b-c-e/art-of-sim-rally/issues/1).
 
-The mod's own bonnet and bumper views are correct. The game's stock camera
-angles, cycled past them, come out reversed. The reporter supplied a
-[video](https://www.youtube.com/watch?v=uBk5wtIIAj0).
+**New evidence (2026-09-06 UTC):** the reporter says unplugging a USB PS5
+controller resolved the symptom. The attached
+[support snapshot](https://github.com/user-attachments/files/31874196/art-of-sim-rally-support-20260905-191759.txt)
+shows both mounted views disabled and `ChangeCamera <- Accelerator -`. It reports
+assembly version 0.1.0.0, which cannot establish the package version. It is an
+after-unplug snapshot, not a before/after reproduction; older log entries in the
+same bundle must not be confused with current settings.
 
-#### Cause: the mod moves the camera, the stock rig moves the camera's parent
+There is also a real code defect: the mod writes the rendering child's world
+transform, while the stock CarCameras rig only moves its parent. CameraManager
+initializes the child at local identity. The original code failed to restore it
+when relinquishing a mounted view. The 2026-09-04 fix restores that invariant,
+but tying it conclusively to this reporter's issue was premature.
 
-`CameraManager`'s constructor names the whole hierarchy:
-
-```csharp
-stageCamera        = GameObject.Find("Stage Camera").GetComponent<CarCameras>();
-CameraMainTransform = GameObject.Find("Stage Camera/Camera Main").transform;
-CameraMainTransform.localPosition = Vector3.zero;
-CameraMainTransform.localRotation = Quaternion.identity;
-```
-
-So `CarCameras` sits on **"Stage Camera"**, and the camera that actually renders
-is **"Camera Main", a child of it**. `CarCameras` drives only the parent —
-`myTransform = base.transform`, positioned and `LookAt`-ed every frame — and the
-game keeps the child pinned at local identity. That reset in the constructor is
-the game declaring the invariant out loud.
-
-`BonnetCamera.DriveCamera.Mount` writes **world-space** position and rotation to
-`UIManager.Instance.PanelManager.mainCamera.transform`, which is `Camera.main`,
-which is the **child**. Unity stores a world-space write on a child as a local
-offset from its parent. So while a mounted view is active the child accumulates
-a large local transform — roughly "at the car, facing forward" expressed
-relative to a parent sitting 30–46 m behind and 15–45 m above the car and aimed
-back down at it, which is close to a 180° yaw.
-
-Nothing ever puts it back. `grep` for `localPosition` / `localRotation` across
-`src/` returns nothing: the mod has never touched the child's local transform.
-When the player cycles to a stock angle, `SetToWantedPositionImmediate()`
-correctly places and aims the **parent** — and the child renders from its stale
-offset, looking the wrong way. Every stock camera is affected, permanently,
-until the next `CameraManager` construction resets the child.
-
-**Replays are the same bug.** A second user on 0.2.2 reports "the camera is
-still broken in replays and at stage end". `GameState.IsPlayerView` returns
-false for `REPLAY` exactly as it does for the end-of-stage cinematic, so both go
-through the same handback and inherit the same stale child transform. The fix
-covers all three paths; confirm replays in the same test run.
-
-#### Why nobody here saw it
-
-The `CameraAnglesList` append and the `CAMERA1` tag reuse — the first two
-suspects — are innocent. The bug needs you to cycle *out of* a mounted view back
-into a stock one, and the developer's rig has been driving the bonnet view since
-the day it shipped. The reporter cycles through all of them, so they see it.
-
-It also explains **[KI-2](#ki-2--the-camera-moves-oddly-at-the-end-of-a-stage)**:
-the end-of-stage handback has exactly the same hole, which is why
-`SetToWantedPositionImmediate()` fixed the long sweep (parent) but left a
-shorter, differently-shaped residue (child).
-
-#### The fix (applied, unreleased)
-
-Restore the invariant the game itself asserts, on the frame the mod stops
-driving — `BonnetCamera.DriveCamera.Mount`, in the `if (!shouldDrive)` branch,
-before the existing `SetToWantedPositionImmediate()` so the parent's placement is
-the last word:
-
-```csharp
-released.transform.localPosition = Vector3.zero;
-released.transform.localRotation = Quaternion.identity;
-```
-
-The handback used to return *before* resolving the camera, so the branch now
-looks it up itself. The driving path needs no equivalent: it writes world-space
-position and rotation every frame, which fully determines the child's local
-transform regardless of what it held before.
-
-#### Still to do
-
-**Confirm on screen.** It was not reproduced in this session: the game no longer
-accepts injected keyboard input (neither virtual-key nor scan-code `SendInput`,
-nor `PostMessage` to the window), so the title screen could not be driven
-unattended — see the machine note in CLAUDE.md. The confirmation is one stage:
-cycle bonnet → bumper → a stock angle, and check the stock angle looks forward.
-Check a stage finish in the same run for
-[KI-2](#ki-2--the-camera-moves-oddly-at-the-end-of-a-stage).
-
-Until that is done this is a fix by reasoning, not a verified one — do not
-release it as confirmed, and do not close the issue on it.
-
-**Workaround for anyone on 0.2.2:** untick both mounted cameras in Ctrl+F10 →
-Camera and restart the stage; the rotation is then unmodified. Restarting the
-stage also clears the stale offset on its own.
-
----
+The RC tracks and restores the exact child it owned, restores FOV, hands back on
+stock-view selection and mod/feature disable, and selects a usable stock view
+instead of leaving a zero-distance placeholder active. Offline ownership tests
+pass; visual confirmation remains required. Check stock views before/after each
+mounted view and compare pad attached/absent where available. Do not close the
+GitHub issue solely from these code tests.
 
 ### KI-2 — The camera moves oddly at the end of a stage
 
-| | |
-|---|---|
-| **Reported** | 2026-09-01, reproduced on every stage finish; independently reported by a second user on 0.2.2, 2026-09-04 |
-| **Severity** | cosmetic — results cinematic only, never while driving |
-| **Status** | open, partially fixed |
+**Cosmetic; implemented fix, game verification pending.** Observed on the owner's
+rig and independently reported on Reddit for replays and stage end in 0.2.2.
 
-A mounted view is in use, the stage ends, the game takes the camera over for the
-results sequence, and it swings for roughly a second before settling.
+The earlier parent snap did not restore the rendering child's local transform.
+The two-line child fix also had a lifecycle gap: CameraManager disables
+CarCameras in `EnableCinemachineCamera` and `DisableCameraManagers`, so its
+LateUpdate callback need not run at the handback. Verified in the installed
+build 17584229 on 2026-09-06.
 
-**What is already fixed, and why it was not enough.** `CarCameras` damps toward
-its wanted position from wherever the camera currently sits. Releasing the
-camera while it was mounted inside the car made the stock rig interpolate out
-through the bodywork to the chase position — a long, obviously wrong sweep.
-`BonnetCamera.Mount` now calls `SetToWantedPositionImmediate()` on the frame it
-stops driving, placing the camera in one step. That removed the long sweep.
-What remains is shorter and different in character, so it is a second cause.
-
-**Most likely the same cause as [KI-1](#ki-1--stock-cameras-38-render-reversed):**
-the handback fixed the parent ("Stage Camera") and left the child
-("Camera Main") holding the local offset the mounted view put on it. That fits
-the evidence exactly — the long sweep was the parent damping out and went away
-when `SetToWantedPositionImmediate()` was added; what remains is shorter and
-different in character because it is the child, which nothing corrected.
-
-**KI-1's fix should close this too**, since it clears the child on exactly the
-same code path. Re-test a stage finish before instrumenting anything; only if
-the residue survives is the list below worth working through.
-
-**Older hypotheses, kept in case the fix does not settle it:**
-
-1. **The handback fires more than once, or at the wrong moment.** `shouldDrive`
-   is `ActiveView() != None && GameState.IsPlayerView`. If `IsPlayerView`
-   flickers as the cinematic starts, the mod would repeatedly hand back and
-   re-mount. Cheapest to confirm and would explain the residue exactly.
-   *Test:* log every `_wasDriving` transition with the frame number.
-2. **The cinematic uses a different camera or rig**, so
-   `SetToWantedPositionImmediate()` tidies an object that is no longer on
-   screen. *Test:* log the active camera's instance id across the transition.
-3. **Write ordering.** The mod mounts from a Harmony postfix; if the game's own
-   camera update runs later in the frame during the cinematic, the last mounted
-   transform could still be read as a starting point. *Test:* compare camera
-   position at the end of the postfix against the start of the next frame.
-4. **Rotation is not covered by the same call.** `SetToWantedPositionImmediate`
-   may settle position while rotation keeps damping from the car's orientation.
-   *Test:* log position and rotation separately across the transition.
-
-One stage finish with a verbose camera trace behind `DiagnosticLogging` —
-`ActiveView`, `IsPlayerView`, `_wasDriving`, active camera instance id, position
-and rotation, per frame across the finish line — separates all four in a single
-run. The failure is only reachable by driving a stage to completion, so it
-cannot be checked from the menu.
-
-Given KI-1 is in the same `LateUpdate` postfix, investigate them together.
+The RC releases the child before those transitions, with a persistent watchdog
+fallback. It does not snap the parent while the cinematic system owns it.
+Finish, replay, intro, pause/resume, stage restart and unload still require
+screen validation; the test doubles cannot establish rendered correctness.
 
 ---
 
@@ -237,112 +124,91 @@ third time on one rig's opinion.
 
 ### KI-5 — Stage start stutters and briefly locks up for 10–15 seconds
 
-| | |
-|---|---|
-| **Reported** | 2026-09-04, Reddit, second user (motion platform, wheel model not stated) |
-| **Severity** | major — it happens exactly when you are trying to drive |
-| **Status** | open, **regression in 0.2.2**; the leading cause is fixed in the working tree, unreleased and unconfirmed |
+**Major; plausible contributor fixed, reported symptom unverified.** A Reddit
+user first noticed this with 0.2.2. It is not established whether it occurs on
+every restart, every new stage or only a cold launch.
 
-> "when starting a new stage for the first time there's massive stutter and
-> brief lockups when attempting to drive for the first 10-15 seconds almost
-> like shader caching or something. This only just started with this patch."
+`WheelInput` previously saved Settings.xml synchronously when learned ranges
+extended, rate-limited to five seconds. Those writes could occur during the
+opening seconds of driving. The 2026-09-04 change keeps range updates in memory
+and defers disk writes. RC review additionally fixes a failed-save path that
+cleared the dirty flag anyway, and moves shutdown persistence after output release.
+Failed saves now stay pending and retry at most every five seconds while idle.
 
-Not yet known whether it recurs on every stage change or only once per session;
-the reporter had not tested that. Establish that first — it separates
-"initialisation happens once" from "something is retrying".
+Offline policy and shutdown-order checks pass. They do not demonstrate that disk
+IO caused the user's stutter or that it is gone. Compare cold stage, same-stage
+restart, different stage, and mod-disabled baseline using the optional capture
+and [testing checklist](PRE-RELEASE-TESTING.md).
 
-**Leading cause, now fixed: `Settings.xml` was written from the per-frame input
-path.** `WheelInput.Update` self-calibrates each axis by extending its `Far` end
-whenever a raw value exceeds the recorded range, and on extension it called
-`Main.SaveSettings()` — a synchronous XML serialise and disk write, rate-limited
-to once every five seconds. The first hard corner and the first full pedal
-presses are exactly when the range keeps extending, so saves fired at roughly
-t+0, t+5 and t+10 and then stopped once the range was learned. That shape
-matches the report closely, it is new in 0.2.2 (`WheelInput` is), and it would
-be worse on a slow disk or with a virus scanner watching the `Mods` folder.
-
-The settings *object* is still updated on the frame the range extends — that is
-a few string assignments, and it keeps the panel showing the live range. Only
-the disk write is deferred, to `WheelInput.FlushLearnedRanges()`, which the
-watchdog calls when the player stops driving and again on shutdown. The cost is
-that a crash mid-stage loses a range learned moments earlier, and the next stage
-re-learns it in the same few seconds it would have taken anyway.
-
-Writing a file from a hot path was wrong regardless of whether it turns out to
-be the whole story, which is why it was fixed before being confirmed. **If the
-stutter survives, this entry is not closed** — go to the alternative below.
-
-**Alternative: the device-open retry loop.** If `Open()` fails, `WheelInput`
-retries every five seconds, and each attempt is a full DirectInput enumeration
-plus an open per device on the main thread. That would stutter on the same
-cadence — but it would not stop after 15 seconds, so it fits less well.
-
-**The two are trivial to tell apart** in the UMM log
-(`artofrally_Data\Managed\UnityModManager\Log.txt`): `Open()` logs
-`Wheel input: opened N controller(s)` every attempt. Repeated lines during the
-stutter means the retry loop; a single line at load with the stutter happening
-anyway pointed at the save path.
-
-A third possibility neither of those covers: the stutter is the game's own and
-was always there, and 0.2.2 only changed the timing enough to expose it. The
-reporter's own "almost like shader caching" reading. Test with the mod disabled
-from the UMM panel before spending anything on it.
-
-Ruled out already: `InputBackend.Tick` runs every frame but returns immediately
-unless the abandoned backend experiment is active; the force-feedback
-`FixedUpdate` prefix and postfix are arithmetic only; the `GetInput` postfix
-reads cached values.
-
-**Left alone deliberately:** `CameraTuner` also writes settings from
-`LateUpdate`, one second after the last numpad adjustment. It is the same class
-of thing, but it fires only when the player is deliberately holding a tuning key
-rather than on every stage start, and deferring it to the end of the stage would
-lose the adjustment to a crash for no real gain. Revisit only if someone reports
-a hitch while nudging the camera.
-
----
+If it persists, investigate device discovery/opening on the first direct-input
+update, native driver polling, and game/shader loading. FFB is not strictly
+arithmetic-only: it calls native SetForce, and DiagnosticLogging formats/writes
+traces. Keep diagnostic settings consistent across comparisons. Explicit camera
+tuner and UI saves remain user-triggered and are not the learned-range hot path.
 
 ### KI-6 — The wheel snaps back as the car straightens out of a slide
 
-| | |
-|---|---|
-| **Reported** | 2026-09-04, Reddit, second user |
-| **Severity** | major for feel on powerful RWD cars; not a defect so much as a missing effect |
-| **Status** | open |
+**Major for feel; open.** The Reddit user praised 0.2.2 with wheel FFB at 100%,
+mod Strength 15 and Smoothing 0.50, but reported snapback/tank slappers in powerful
+RWD cars. That report does not establish a single cause or justify physics changes.
 
-> "the steering tends to snap back suddenly as the car is straightening up and
-> get stuck in a tank slapper … you have to be so incredibly gentle on the
-> throttle if you're sliding"
+The current output has a lateral-force/trail signal and smoothing, with no explicit
+wheel-rate damper. A hardware damper is a candidate experiment; wheelbase settings,
+filter delay, changing tyre forces and the car's own behaviour also matter.
+Toolkit condition effects are available but unused. Keep this work out of the
+maintenance RC; tune against attended captures and compare at the reporter's settings.
 
-Part of this is the car — art of rally's high-power RWD cars genuinely dislike
-big slip angles, and that is physics the mod must not touch (see
-[WNF-4](#wnf-4--physics-grip-or-assist-changes)). But the snap itself is ours:
-the output is a **pure spring-like force with no damping term**. Force is
-`(FyL + FyR) × trail / FyReference`, low-passed by `Smoothing`, and nothing
-opposes the *rate* at which the wheel moves. When a slide gathers up, `Fy`
-collapses quickly, the centring force drops with it, and there is nothing to
-absorb the wheel's own inertia — so it overshoots, and on a direct-drive base
-with no friction to speak of it oscillates.
+### KI-7 — Candidate identity and native-path diagnostics were misleading
 
-`Smoothing` is the only thing resisting it today, and it is the wrong tool: it
-is a low-pass on the force signal, so raising it delays every cue including the
-ones you want. The reporter raised it to 0.50 (default 0.2) and reports it
-helping with a different symptom — notchiness over low-poly inclines — which is
-consistent with it being a blunt instrument.
+**Supportability; fixed in RC, live support output pending.** Info.json remained
+0.2.2 and the assembly remained 0.1.0.0 regardless of the requested zip name.
+LoadedPath only recorded a preload request, and version diagnostics could load
+the plugin. Documentation incorrectly told users to delete the installer’s
+intentional Plugins/x86_64 copy.
 
-The right fix is a **damper effect**, which DirectInput supports natively and
-the wheelbase renders itself. Toolkit 0.4.0 exports one
-(`CreateConditionEffect(1)` for a damper, then `UpdateConditionEffect`), so the
-API exists as of the current pin.
+RC packages now enforce numeric version consistency and embed the RC/revision/
+source state; support reports include the managed file hash and observed resident
+native modules, their versions and disk hashes, without loading a module for
+inspection. Multiple mapped copies are reported as ambiguous. Compare against
+the candidate manifest; a plugin path or a lower native version alone is not stale.
 
-It will not be the whole answer on its own. A hardware damper is computed by the
-base from axis velocity, continuously and between our updates — which is why it
-is smoother than anything synthesised at 60 Hz — but it knows nothing about road
-speed or grip, so it cannot be scaled with the car's state. Expect to want a
-small constant hardware damper for stability *plus* a speed-scaled term in our
-own force model for feel. And expect `CreateConditionEffect` to return −1 on
-devices whose drivers expose no condition effects, which is a normal answer to
-fall back from, not a failure. Plan in [ROADMAP.md](ROADMAP.md).
+### KI-8 — A failed deferred save discarded the retry; shutdown saved before release
+
+**Major lifecycle defect; fixed in RC, game persistence check pending.** The
+dirty flag was cleared before Main.SaveSettings, which swallowed write errors.
+Shutdown also wrote settings before zeroing the wheel. The save API now returns
+success, dirty state survives failures and output release happens before disk IO.
+Executable regression checks cover failures, retry timing and ordering.
+
+The installed UMM implementation also catches errors internally in ModSettings.Save.
+The RC therefore uses the same XML serialization format through an exception-reporting
+writer, then atomically replaces Settings.xml. A real locked-file regression confirms
+failure leaves the previous XML intact, keeps the retry pending, and recovers after
+the lock is released. Actual Settings fields roundtrip through the serializer.
+
+### KI-9 — Toolkit sync can leave a mixed pin on failure
+
+**Tooling; fixed upstream and adopted, 2026-09-07.** Sync preflights all requested
+parts/files/local edits, stages a replacement and rolls back a failed commit.
+Unknown/missing/empty parts fail before destination changes. Partial syncs retain
+other manifest entries and nested paths; forced edits retain backups. Upstream
+real-filesystem regression covers copying failure and rollback. Local pins name
+the full source revision and dirty state. Hashes prove integrity, not independent
+release provenance.
+
+### KI-10: Toolkit adoption lifecycle defects
+
+**Major; fixed upstream/consumer, attended verification pending.** Shared wrapper
+could bind the wrong native filename on Mono; selectors could remain stale; a
+shared read slot could follow a different FFB wheel; Panic left managed readiness
+true; final input-only shutdown could retain DirectInput. Toolkit 0.12 addresses
+these with exact-handle bindings, strict GUID selection, slot identity, corrected
+readiness and final ShutdownAll. Consumer readers refresh on FFB switches and all
+inputs release before persistence. The FFB checkbox immediately zeroes output when
+disabled and initializes FFB when enabled after a disabled launch. Nonfinite force
+is zeroed before conversion to a device integer. Malformed saved bindings are rejected before indexing axis/button arrays.
+No new force tune is introduced.
+
 
 ---
 
@@ -401,7 +267,10 @@ them `ForceShaper` defaults — so the bug was in the pattern, not in one preset
 Read the shaper values before assuming what adoption costs: `simlite@2` sets
 `Deadzone` 0, `SoftSaturation` 0, `SlewPerSecond` 0, `OutputDeadband` 0,
 `RampSeconds` 0 and `AttackSmoothing` = `DecaySmoothing` = 0.2. It is
-**feel-neutral against what this mod does today**, by construction.
+**equal on the unsmoothed grid**, not dynamically equivalent. The 2026-09-06
+consumer regression against the pinned DLL demonstrates a clamp/EMA difference
+even at constant speed: 0.80 then 0.16 here versus 1.00 then 0.32 upstream for
+23,000 N then zero at 40 km/h. See ROADMAP.md before adoption.
 
 ### U-2 — Clamp order: resolved, the toolkit adopted ours
 

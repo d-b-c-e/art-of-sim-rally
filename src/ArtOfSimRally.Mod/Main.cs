@@ -56,10 +56,11 @@ namespace ArtOfSimRally.Mod
             modEntry.OnToggle    = OnToggle;
             modEntry.OnUnload    = OnUnload;
 
+            FfbNative.Load(modEntry.Path);
             if (Settings.ForceFeedbackEnabled)
                 // modEntry.Path IS the mod folder; do not take its parent.
                 FfbNative.Initialise(modEntry.Path,
-                                     Settings.PreferredDevice, Settings.PreferredDeviceIndex);
+                                     Settings.PreferredDevice, Settings.PreferredDeviceIndex, Settings.PreferredDeviceGuid);
 
             try
             {
@@ -71,6 +72,9 @@ namespace ArtOfSimRally.Mod
             {
                 // Report and keep the game playable rather than taking it down.
                 ModLog.Error($"Harmony patching failed: {ex}");
+                FfbNative.Shutdown();
+                FfbNative.ReleaseInputs();
+                _harmony?.UnpatchAll(modEntry.Info.Id);
                 return false;
             }
 
@@ -99,6 +103,8 @@ namespace ArtOfSimRally.Mod
                 // disables the mod, rather than leaving a force applied and a
                 // dashboard frozen.
                 FfbNative.SetForce(0);
+                FfbController.Reset();
+                BonnetCamera.Release(true);
                 TelemetryPump.Park();
                 TelemetryPump.Shutdown();
             }
@@ -108,11 +114,12 @@ namespace ArtOfSimRally.Mod
         private static void OnGUI(UnityModManager.ModEntry modEntry) => SettingsPanel.Draw();
 
         private static void OnSaveGUI(UnityModManager.ModEntry modEntry)
-            => Settings.Save(modEntry);
+            => SaveSettings();
 
         private static bool OnUnload(UnityModManager.ModEntry modEntry)
         {
-            ModWatchdog.Shutdown();
+            Enabled = false;
+            ModWatchdog.Shutdown(unloading: true);
             WheelInput.Close();
             _harmony?.UnpatchAll(modEntry.Info.Id);
             return true;
@@ -124,15 +131,29 @@ namespace ArtOfSimRally.Mod
         public static bool ReopenForceFeedback()
         {
             if (_modEntry == null || Settings == null || !Settings.ForceFeedbackEnabled) return false;
-            return FfbNative.Reinitialise(_modEntry.Path,
-                                          Settings.PreferredDevice, Settings.PreferredDeviceIndex);
+            // Reader slots may share the old FFB handle. Reopen them after the
+            // device switch, and release nonexclusive readers before acquiring FFB.
+            WheelInput.Close();
+            bool ready = FfbNative.Reinitialise(_modEntry.Path,
+                Settings.PreferredDevice, Settings.PreferredDeviceIndex, Settings.PreferredDeviceGuid);
+            if (Enabled && Settings.WheelInputEnabled) WheelInput.Open();
+            return ready;
         }
 
         /// <summary>Persists settings changed outside the panel, e.g. by the camera hotkeys.</summary>
-        public static void SaveSettings()
+        public static bool SaveSettings()
         {
-            try { Settings.Save(_modEntry); }
-            catch (Exception ex) { ModLog.Warning($"Could not save settings: {ex.Message}"); }
+            try
+            {
+                if (Settings == null || _modEntry == null) return false;
+                Settings.Save(_modEntry);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ModLog.Warning($"Could not save settings: {ex.Message}");
+                return false;
+            }
         }
     }
 }

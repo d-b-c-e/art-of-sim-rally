@@ -1,6 +1,5 @@
 using System;
-using System.Runtime.InteropServices;
-using System.Text;
+using Dbce.Wheel.Ffb;
 
 namespace ArtOfSimRally.Mod
 {
@@ -30,16 +29,8 @@ namespace ArtOfSimRally.Mod
     /// </remarks>
     internal static class Shifter
     {
-        private const string Dll = "UnityForceFeedback";
         private const int MaxButtons = 128;
-
-        [DllImport(Dll)] private static extern int  EnumerateAllDevices();
-        [DllImport(Dll, CharSet = CharSet.Ansi)]
-        private static extern int  GetAnyDeviceName(int index, StringBuilder buffer, int size);
-        [DllImport(Dll)] private static extern int  GetAnyDeviceInfo(int index, out int axes, out int buttons, out int ffb);
-        [DllImport(Dll)] private static extern int  OpenAuxDevice(int index);
-        [DllImport(Dll)] private static extern int  ReadAuxButtons(byte[] buffer, int length);
-        [DllImport(Dll)] private static extern void CloseAuxDevice();
+        private static WheelFfbNative.DeviceInfo[] _devices = new WheelFfbNative.DeviceInfo[0];
 
         /// <summary>Gear-ratio index for neutral.</summary>
         public const int Neutral = 1;
@@ -65,44 +56,12 @@ namespace ArtOfSimRally.Mod
         /// <summary>Every attached controller, force feedback or not.</summary>
         public static string[] ListDevices()
         {
-            try
-            {
-                int count = EnumerateAllDevices();
-                if (count <= 0) return new string[0];
-
-                var names = new string[count];
-                var buf = new StringBuilder(260);
-                for (int i = 0; i < count; i++)
-                {
-                    buf.Length = 0;
-                    names[i] = GetAnyDeviceName(i, buf, buf.Capacity) != 0
-                        ? buf.ToString() : "(device " + i + ")";
-                }
-                return names;
-            }
-            catch (Exception ex)
-            {
-                ModLog.Warning("Could not list controllers: " + ex.Message);
-                return new string[0];
-            }
+            _devices = WheelFfbNative.ListAllDevices();
+            return Array.ConvertAll(_devices, d => d.Name);
         }
 
-        /// <summary>Display labels for <see cref="ListDevices"/> - name plus capabilities. Not for storing.</summary>
         public static string[] ListDeviceLabels(string[] names)
-        {
-            var labels = new string[names.Length];
-            for (int i = 0; i < names.Length; i++)
-            {
-                labels[i] = names[i];
-                try
-                {
-                    if (GetAnyDeviceInfo(i, out int axes, out int buttons, out int ffb) != 0 && (axes > 0 || buttons > 0))
-                        labels[i] = names[i] + "  (" + axes + " axes, " + buttons + " buttons" + (ffb != 0 ? ", force feedback" : "") + ")";
-                }
-                catch { }
-            }
-            return labels;
-        }
+            => Array.ConvertAll(_devices, d => d.Label);
 
         /// <summary>Opens the chosen device for reading. Safe to call repeatedly.</summary>
         public static bool Open(int index)
@@ -110,7 +69,7 @@ namespace ArtOfSimRally.Mod
             if (index < 0) { Close(); return false; }
             try
             {
-                _open = OpenAuxDevice(index) != 0;
+                _open = WheelFfbNative.OpenAux(index);
                 if (!_open) ModLog.Warning("Could not open shifter device " + index);
                 return _open;
             }
@@ -126,7 +85,7 @@ namespace ArtOfSimRally.Mod
         public static void Close()
         {
             if (!_open) return;
-            try { CloseAuxDevice(); } catch { }
+            try { WheelFfbNative.CloseAux(); } catch { }
             _open = false;
             PressedButton = -1;
         }
@@ -150,7 +109,7 @@ namespace ArtOfSimRally.Mod
             if (cfg == null) return;
 
             int n;
-            try { n = ReadAuxButtons(_buttons, MaxButtons); }
+            try { n = WheelFfbNative.ReadAux(_buttons); }
             catch (Exception ex)
             {
                 ModLog.Error("Shifter read failed, closing: " + ex.Message);
@@ -244,7 +203,7 @@ namespace ArtOfSimRally.Mod
             if (!_open) return;
             try
             {
-                int n = ReadAuxButtons(_buttons, MaxButtons);
+                int n = WheelFfbNative.ReadAux(_buttons);
                 for (int i = 0; i < n; i++)
                     if (_buttons[i] != 0) { PressedButton = i; return; }
             }

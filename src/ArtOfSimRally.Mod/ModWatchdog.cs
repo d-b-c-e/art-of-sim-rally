@@ -50,9 +50,15 @@ namespace ArtOfSimRally.Mod
 
         private void Update()
         {
-            if (!Main.Enabled) return;
+            if (!Main.Enabled)
+            {
+                DriveCapture.RecordFrame(Time.unscaledDeltaTime, false);
+                WheelInput.FlushLearnedRanges();
+                return;
+            }
             InputBackend.Tick();
             WheelInput.Update();
+            DriveCapture.RecordFrame(Time.unscaledDeltaTime, GameState.IsDriving);
 
             // Independent of whether any game object is still ticking. The
             // FixedUpdate postfix normally gets here first; this exists for when
@@ -67,15 +73,19 @@ namespace ArtOfSimRally.Mod
             {
                 _wheelReleased = true;
                 FfbNative.SetForce(0);
+                FfbController.Reset();
                 TelemetryPump.Park();
 
                 // The moment the player stops driving is the right one to write
                 // anything to disk. WheelInput learns each axis's full range as
                 // the control is first used, which is the opening seconds of a
                 // stage; saving it there hitched the frame (KI-5).
-                WheelInput.FlushLearnedRanges();
             }
+            // Retry failed writes at most once per five seconds, only while idle.
+            WheelInput.FlushLearnedRanges();
         }
+
+        private void LateUpdate() => BonnetCamera.ReleaseIfInactive();
 
         private void OnApplicationQuit()
         {
@@ -88,22 +98,23 @@ namespace ArtOfSimRally.Mod
         }
 
         /// <summary>Zeroes the wheel, parks telemetry, and releases both.</summary>
-        public static void Shutdown()
+        public static void Shutdown(bool unloading = false)
         {
-            // Persist first: quitting straight from a stage is the one path where
-            // a range learned this session would otherwise be lost.
-            try { WheelInput.FlushLearnedRanges(); } catch { }
-
             // Order matters: park telemetry while the socket is still open, and
             // zero the wheel before releasing the device, or the last non-zero
             // force can remain latched in the driver.
+            FfbNative.SetForce(0);
+            FfbController.Reset();
+            FfbNative.Shutdown();
             TelemetryPump.Park();
             TelemetryPump.Shutdown();
-
-            FfbNative.SetForce(0);
-            FfbNative.Shutdown();
-
+            BonnetCamera.Release(unloading);
             Shifter.Close();
+            WheelInput.Close();
+            FfbNative.ReleaseInputs();
+            // No file writes until force and telemetry outputs are released.
+            try { WheelInput.FlushLearnedRanges(shutdown: true); } catch { }
+            DriveCapture.Stop("shutdown");
         }
     }
 }

@@ -92,20 +92,22 @@ Of the design notes, two were followed exactly and one was not:
   every frame for the chase camera, so the mounted views set a fixed FOV after
   it rather than reusing the speed curve. Nobody has asked for the curve.
 
-### Open issues
+### Open issues and RC handback
 
-Two, both tracked in [KNOWN-ISSUES.md](KNOWN-ISSUES.md):
+KI-1 and KI-2 are tracked in [KNOWN-ISSUES.md](KNOWN-ISSUES.md). The issue #1
+reporter says removing a PS5 controller resolved their symptom; the stale child
+transform is a separately established code defect, not a confirmed diagnosis of
+that report.
 
-- **[KI-1](KNOWN-ISSUES.md#ki-1--stock-cameras-38-render-reversed)** — the
-  game's stock camera angles 3–8 render reversed for at least one user
-  ([issue #1](https://github.com/d-b-c-e/art-of-sim-rally/issues/1)). Major:
-  it affects the views the mod does not add. Appending to `CameraAnglesList`
-  and the `SetToWantedPositionImmediate()` handback are the suspects.
-- **[KI-2](KNOWN-ISSUES.md#ki-2--the-camera-moves-oddly-at-the-end-of-a-stage)**
-  — the camera still moves oddly for about a second at the end of a stage.
-  Cosmetic, partially fixed, four ranked hypotheses recorded.
+The RC restores the owned camera child's local identity and prior FOV. Stock-view
+handback may snap the parent; cinematic handback does not. CameraManager disables
+CarCameras when enabling Cinemachine, so explicit transition prefixes and a
+persistent watchdog cover paths where the LateUpdate postfix never runs.
+Disabling an active mounted view returns to a usable stock angle. New rotation
+entries still require a stage start if they were disabled when the stage loaded.
 
-Both live in the same `LateUpdate` postfix, so instrument them together.
+Offline ownership/callback tests pass. The rendered stock views, replay, finish,
+restart and mod-disable transitions remain in the attended RC checklist.
 
 ## Bumper view
 

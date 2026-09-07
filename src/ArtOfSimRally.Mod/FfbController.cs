@@ -73,6 +73,7 @@ namespace ArtOfSimRally.Mod
                 if (_smoothed != 0f)
                 {
                     _smoothed = 0f;
+                    DriveCapture.RecordForceReset();
                     FfbNative.SetForce(0);
                 }
                 return;
@@ -97,7 +98,10 @@ namespace ArtOfSimRally.Mod
             // keeps the "lightening" cue without the reversal.
             var lw = front.leftWheel; var rw = front.rightWheel;
             float fy = lw.Fy + rw.Fy;
-            if (float.IsNaN(fy) || float.IsInfinity(fy)) return;
+            if (float.IsNaN(fy) || float.IsInfinity(fy))
+            {
+                Reset(); FfbNative.SetForce(0); return;
+            }
 
             float absSlip = 0.5f * (Mathf.Abs(lw.slipAngle) + Mathf.Abs(rw.slipAngle));
             float speedKmh = __instance.velo * 3.6f;
@@ -113,7 +117,14 @@ namespace ArtOfSimRally.Mod
                 fy, absSlip, lw.idealSlipAngle, speedKmh,
                 cfg.FyReference, cfg.GainFromStrength, cfg.Invert);
 
+            float previous = _smoothed;
             _smoothed = ForceCurve.Smooth(_smoothed, normalised, cfg.Smoothing);
+            // Invalid game/settings signals must never reach the float-to-int
+            // conversion, where NaN could become a full-scale negative force.
+            if (float.IsNaN(_smoothed) || float.IsInfinity(_smoothed))
+            {
+                Reset(); FfbNative.SetForce(0); return;
+            }
 
             // Publish in the game's own units so anything reading this field -
             // including the game's orphaned ForceFeedback component, if a future
@@ -121,6 +132,7 @@ namespace ArtOfSimRally.Mod
             __instance.forceFeedback = _smoothed * GameForceFeedbackRange;
 
             FfbNative.SetForce((int)(_smoothed * FfbNative.ForceMax));
+            DriveCapture.RecordForce(fy, absSlip, lw.idealSlipAngle, speedKmh, previous, _smoothed);
 
             if (cfg.DiagnosticLogging)
             {
@@ -168,6 +180,7 @@ namespace ArtOfSimRally.Mod
         /// <summary>Clears filter state between stages so a stale force is not carried over.</summary>
         public static void Reset()
         {
+            DriveCapture.RecordForceReset();
             _smoothed = 0f;
             _peakMz = 0f;
         }

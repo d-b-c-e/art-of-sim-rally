@@ -106,6 +106,10 @@ namespace ArtOfSimRally.Mod
             sb.AppendLine("=================================");
             sb.AppendLine("generated : " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             sb.AppendLine("mod       : " + (Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?"));
+            var identity = (AssemblyInformationalVersionAttribute)Attribute.GetCustomAttribute(
+                Assembly.GetExecutingAssembly(), typeof(AssemblyInformationalVersionAttribute));
+            sb.AppendLine("build     : " + (identity?.InformationalVersion ?? "(unknown)"));
+            sb.AppendLine("mod sha256: " + NativeDiagnostics.FileHash(Assembly.GetExecutingAssembly().Location));
             sb.AppendLine("os        : " + SystemInfo.operatingSystem);
             sb.AppendLine("unity     : " + Application.unityVersion);
             sb.AppendLine("game      : " + Application.productName + " " + Application.version);
@@ -120,13 +124,18 @@ namespace ArtOfSimRally.Mod
             // the ABI and told people a number lower than their release meant a
             // stale DLL, which would have flagged every healthy install.
             //
-            // The path is the reliable staleness signal: if it resolves to the
-            // game's plugin folder rather than the mod folder, an old manual
-            // install left a copy there and it is winning.
+            // The installer intentionally installs two copies. Compare hashes
+            // against the candidate manifest; a plugin-directory path alone is
+            // not evidence of a stale DLL. Report every resident same-name copy.
             sb.AppendLine("toolkit pin: " + ToolkitPin + "  (dbce-wheel-mod-toolkit, vendored)");
-            sb.AppendLine("native abi : " + FfbNative.NativeVersion + "  (UnityForceFeedback.dll; only moves when the native layer does)");
-            sb.AppendLine("  loaded from : " + FfbNative.LoadedPath);
-            sb.AppendLine("  last hresult: " + FfbNative.LastHResult);
+            var forceLibrary = typeof(Dbce.Wheel.Ffb.AxleForceCurve).Assembly;
+            sb.AppendLine("force pipeline: AxleForceCurve@" + Dbce.Wheel.Ffb.AxleForceCurve.CompatibilityVersion);
+            sb.AppendLine("managed force library: " + forceLibrary.GetName().Version + "  " + forceLibrary.Location);
+            sb.AppendLine("managed force library SHA-256: " + NativeDiagnostics.FileHash(forceLibrary.Location));
+            sb.AppendLine("native binding: " + (Dbce.Wheel.Ffb.WheelFfbNative.LoadedFrom ?? "(not loaded)"));
+            sb.AppendLine("native last error: " + (Dbce.Wheel.Ffb.WheelFfbNative.LastError ?? "(none)"));
+            sb.AppendLine("preload requested: " + FfbNative.RequestedPath);
+            sb.AppendLine(NativeDiagnostics.Describe("UnityForceFeedback.dll"));
             sb.AppendLine();
         }
 

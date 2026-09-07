@@ -59,15 +59,17 @@ it. If you still see it, the support file's force-feedback section will show
 
 ## No force feedback at all
 
-- **Check `loaded from:` in the support file's header.** That is the file
-  `UnityForceFeedback.dll` was actually loaded from. If the path is inside
-  `artofrally_Data\Plugins\x86_64`, an old manual install left a copy there
-  and it is being used instead of the one in the mod folder - delete it. The
-  path is the reliable signal here.
-- **`native abi:` being lower than `toolkit pin:` is normal**, not a stale DLL.
-  The ABI number moves only when the native layer itself changes, so a mod
-  pinned at toolkit v0.7.1 reporting an ABI of 0.4.0 is healthy - nothing in the
-  native layer moved between those releases.
+- In 0.2.3 candidate support files, compare **build**, **mod sha256**, **mapped
+  file** and **file sha256** with the candidate manifest. `preload requested` is
+  only the path requested, not proof of which module was bound. Inspection does
+  not load the plugin; `(not loaded)` may simply mean FFB/input is disabled.
+- The installer intentionally puts UnityForceFeedback.dll in both the mod folder
+  and Plugins/x86_64. **Do not delete a copy just because it is in Plugins.**
+  If hashes differ, close the game and reinstall the complete package, then
+  capture a fresh support file. Multiple resident modules are reported as ambiguous.
+- Toolkit pin **v0.12.0** and native component **0.5.0** are different version
+  sequences; that combination is expected. Older support files call the latter
+  `native abi`, and their `loaded from` field only recorded the preload request.
 - The support file's force-feedback section says whether the mod computed
   forces and whether the device refused them (`SetParameters FAILED`).
 - Another program holding the wheel exclusively (a second game instance, a

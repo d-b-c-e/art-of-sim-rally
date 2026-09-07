@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../Version.props" />
 
   <!--
     net48 to match Unity Mod Manager's own assemblies, which are built against
@@ -15,8 +16,6 @@
     <!-- Unity assemblies are not deterministic-friendly and pull no NuGet deps. -->
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <AssemblyVersion>0.1.0.0</AssemblyVersion>
-    <FileVersion>0.1.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -33,6 +32,10 @@
     beside the mod.
   -->
   <ItemGroup>
+    <Reference Include="Dbce.Wheel.Ffb">
+      <HintPath>..\..\lib\toolkit\dotnet\Dbce.Wheel.Ffb.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
     <Reference Include="Dbce.Wheel.Telemetry">
       <HintPath>..\..\lib\toolkit\dotnet\Dbce.Wheel.Telemetry.dll</HintPath>
       <Private>true</Private>

@@ -386,40 +386,35 @@ keeps the "lightening" cue as the front starts to slide. A **low-speed fade**
 are meaningless. The sign was set at the wheel: on a MOZA R12 `+Fy` centres;
 `Invert` remains for devices that read the axis the other way.
 
-### Clamp order: fade first, clamp last (measured 2026-09-04)
+### Toolkit conformance: static and dynamic evidence
 
-`ForceCurve.Normalised` scales, fades, and **then** clamps to ±1. The clamp is a
-*device* constraint — DirectInput takes ±10,000 — so it belongs at the boundary,
-after the model has had its say. dbce-wheel-mod-toolkit's `ForceModel.Compute`
-does the opposite: it clamps before returning, and `ForceShaper` applies the fade
-to an already-clamped value.
+Production now forwards ForceCurve calls to toolkit `AxleForceCurve@1`, the
+versioned compatibility pipeline added for this migration. The managed wrapper
+and force library are packaged. Generic ForceModel/SimLite remains unused.
 
-The difference only appears when a force past full scale meets a partial fade at
-the same instant — which is a low-speed slide, and nothing else. Across the 640
-grid rows of `force-curve-vector.csv`, 16 saturate and **4 differ**, all at 5 and
-7.5 km/h:
+Historically, toolkit versions before 0.7.0 clamped before the fade. Four of the
+640 grid rows differed (largest 1,086/10,000 at 14,000 N, zero slip, 7.5 km/h).
+That ordering was aligned upstream in 0.7.0. The shared CSV also records 63
+smoothing steps, but independent grid/filter tests do not prove their composition.
 
-| Fy total | slip | km/h | pre-fade | fade | ours | clamp-first | Δ at the wheel |
-|---:|---:|---:|---:|---:|---:|---:|---:|
-| 14,000 | 0° | 7.5 | 1.217 | 0.500 | 0.609 | 0.500 | 1,086 / 10,000 |
-| 14,000 | 4.25° | 7.5 | 1.096 | 0.500 | 0.548 | 0.500 | 478 |
-| 14,000 | 0° | 5 | 1.217 | 0.126 | 0.154 | 0.126 | 274 |
-| 14,000 | 4.25° | 5 | 1.096 | 0.126 | 0.138 | 0.126 | 120 |
+The previously pinned 0.8.0 toolkit filters before gain, fade and clamp; the mod smooths the
+already-scaled/faded/clamped output. This matters even with constant speed and
+gain when clipping is active. The consumer regression executes the vendored DLL:
 
-Note what those rows require: over 11,500 N of front lateral force at 5–7.5 km/h.
-That is barely reachable in the real game — a car doing walking pace cannot
-generate cornering force like that — so the divergence is most likely confined to
-an impact or a low-speed slide where `Fy` spikes. It is real, it is measured, and
-it is probably never felt.
+| Input, at 40 km/h | Mod, Strength 50 / Smoothing 0.2 | Toolkit SimLite, sign mapped |
+|---|---:|---:|
+| 23,000 N, zero slip, first step from rest | 0.80 | 1.00 |
+| Zero force, next step | 0.16 | 0.32 |
 
-Ours is the better order on layering grounds: the fade is a speed-based
-authority scale on the *model*, and applying a *device* limit before it throws
-away headroom the fade was meant to shape. The toolkit asserts the difference
-rather than hiding it (`ClampOrderDiffersAndIsMeasured`); aligning it is a
-decision for the toolkit, not a fix, because it moves every profile's output and
-a cross-language golden file.
+The toolkit smooths an unclamped internal force of 2; the mod smooths a clamped
+force of 1. Moving a linear gain across a linear filter does not resolve clipping,
+nor does it resolve a speed-varying fade. The earlier steady-speed/feel-neutral
+claim was too strong. Do not adopt this pipeline as a behaviour-preserving refactor.
 
-`FyReference` defaults to 11,500 N — a hard corner at ~100 km/h measured
-6,000–7,000 N; 6,000 and then 8,000 were both too strong at Strength 50 on a
-MOZA R12 (the owner settled at 20 with 8,000), so the default is 30% lighter
-again (2026-09-03).
+For the adoption RC, 125,000 dynamic steps compare the shared curve against our original
+v0.2.2 formula using the installed game's actual managed Mathf helpers. Both float
+outputs and device integers match in that coverage. Force feel, native delivery
+and game lifecycle still require attended tests. See PRE-RELEASE-TESTING.md.
+
+`FyReference` remains 11,500 N; Strength and Smoothing remain the user's existing
+settings. There is no force retune, new damper or physics change in this RC.

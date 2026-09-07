@@ -90,6 +90,7 @@ if (-not $GameDir -or -not (Test-Path (Join-Path $GameDir 'artofrally.exe'))) {
     exit 1
 }
 Ok "Game found: $GameDir"
+$GameDir = [IO.Path]::GetFullPath($GameDir).TrimEnd('\', '/')
 
 # --- check Unity Mod Manager ----------------------------------------------
 
@@ -125,6 +126,24 @@ Ok "Unity Mod Manager present"
 
 $modDir    = Join-Path $GameDir 'Mods\ArtOfSimRally'
 $nativeDir = Join-Path $GameDir 'artofrally_Data\Plugins\x86_64'
+$modFiles = 'ArtOfSimRally.Mod.dll', 'Dbce.Wheel.Telemetry.dll', 'Dbce.Wheel.Ffb.dll', 'UnityForceFeedback.dll', 'Info.json', 'build.json'
+
+# Do not follow a junction/symlink while replacing or removing installed files.
+foreach ($target in @($modDir, $nativeDir)) {
+    $path = [IO.Path]::GetFullPath($target)
+    if (-not $path.StartsWith($GameDir + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Target is outside the game directory' }
+    while ($path.Length -ge $GameDir.Length) {
+        if ((Test-Path -LiteralPath $path) -and ((Get-Item -LiteralPath $path).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw "Refusing linked install target: $path"
+        }
+        $path = Split-Path -Parent $path
+    }
+}
+foreach ($targetFile in (@($modFiles | ForEach-Object { Join-Path $modDir $_ }) + (Join-Path $nativeDir 'UnityForceFeedback.dll'))) {
+    if ((Test-Path -LiteralPath $targetFile) -and ((Get-Item -LiteralPath $targetFile).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        throw "Refusing linked install file: $targetFile"
+    }
+}
 
 # --- uninstall -------------------------------------------------------------
 
@@ -132,27 +151,16 @@ if ($Uninstall) {
     Say ""
     Say "Removing..."
 
-    # Settings.xml lives inside the mod folder, so removing the folder would take
-    # a user's force feedback and camera tuning with it. Keep it to one side and
-    # put it back, so reinstalling later resumes where they left off.
-    $settings = Join-Path $modDir 'Settings.xml'
-    $keptSettings = $null
-    if (Test-Path $settings) {
-        $keptSettings = Join-Path $env:TEMP 'ArtOfSimRally.Settings.xml'
-        Copy-Item $settings $keptSettings -Force
+    # Remove only our payload. Settings and unknown user files stay in place;
+    # no recursive deletion or shared temporary Settings.xml backup is needed.
+    foreach ($name in $modFiles) {
+        $file = Join-Path $modDir $name
+        if (Test-Path -LiteralPath $file) { Remove-Item -LiteralPath $file -Force }
     }
-
-    if (Test-Path $modDir) { Remove-Item $modDir -Recurse -Force; Ok "Removed $modDir" }
-    else { Warn "Nothing at $modDir" }
 
     $native = Join-Path $nativeDir 'UnityForceFeedback.dll'
-    if (Test-Path $native) { Remove-Item $native -Force; Ok "Removed $native" }
-
-    if ($keptSettings) {
-        New-Item -ItemType Directory -Force -Path $modDir | Out-Null
-        Move-Item $keptSettings $settings -Force
-        Ok "Kept your settings at $settings"
-    }
+    if (Test-Path -LiteralPath $native) { Remove-Item -LiteralPath $native -Force; Ok "Removed $native" }
+    Ok 'Kept settings and user files in place'
 
     Say ""
     Say "Done. Your key bindings are untouched - they live in the game's own" Green
@@ -163,17 +171,20 @@ if ($Uninstall) {
 
 # --- install ---------------------------------------------------------------
 
-$source = Join-Path $here 'Mods\ArtOfSimRally'
-if (-not (Test-Path $source)) { $source = Join-Path $here 'ArtOfSimRally' }
+$source = Join-Path $here 'ArtOfSimRally'
 if (-not (Test-Path $source)) {
     Fail "Cannot find the mod files next to this script."
     Say "  Extract the whole zip first, then run Install.bat from inside it."
     exit 1
 }
 
+# Validate the entire extracted package before touching the game directory.
+. (Join-Path $here 'verify.ps1')
+$manifest = Assert-Payload $here
+
 try {
     New-Item -ItemType Directory -Force -Path $modDir | Out-Null
-    Copy-Item (Join-Path $source '*') $modDir -Recurse -Force
+    foreach ($name in $modFiles) { Copy-Item -LiteralPath (Join-Path $source $name) -Destination $modDir -Force }
     Ok "Mod installed to $modDir"
 
     # The native plugin goes in both places on purpose. The mod loads it by
@@ -185,9 +196,7 @@ try {
         New-Item -ItemType Directory -Force -Path $nativeDir | Out-Null
         Copy-Item $native $nativeDir -Force
         Ok "Force feedback plugin installed"
-    } else {
-        Warn "UnityForceFeedback.dll not found in the package - force feedback will not work"
-    }
+    } else { throw 'Native DLL missing from verified package' }
 }
 catch [System.UnauthorizedAccessException] {
     Fail "Access denied writing to the game folder."
@@ -202,11 +211,19 @@ catch [System.UnauthorizedAccessException] {
 
 Say ""
 Say "Verifying..."
-$expected = 'ArtOfSimRally.Mod.dll', 'Dbce.Wheel.Telemetry.dll', 'Info.json'
+$expected = $modFiles
 $missing = $expected | Where-Object { -not (Test-Path (Join-Path $modDir $_)) }
 if ($missing) {
     Fail "Missing after install: $($missing -join ', ')"
     exit 1
+}
+foreach ($name in $modFiles) {
+    if ((Get-FileHash -LiteralPath (Join-Path $modDir $name) -Algorithm SHA256).Hash -ne $manifest.files."ArtOfSimRally/$name") {
+        throw "Installed file does not match package: $name"
+    }
+}
+if ((Get-FileHash -LiteralPath (Join-Path $nativeDir 'UnityForceFeedback.dll') -Algorithm SHA256).Hash -ne $manifest.files.'ArtOfSimRally/UnityForceFeedback.dll') {
+    throw 'Installed plugin copy does not match package'
 }
 Ok "All files in place"
 
@@ -215,9 +232,8 @@ Say "Done." Green
 Say ""
 Say "  1. Launch art of rally"
 Say "  2. Press Ctrl+F10 for the mod settings"
-Say "  3. Force feedback strength is 'Reference torque' - LOWER IS STRONGER."
-Say "     The default is a starting guess; turn on 'Log peak torque', drive a"
-Say "     minute, and the log tells you what to set."
+Say "  3. Set Force feedback Strength (0-100; 50 is the default)."
+Say "     If the wheel pulls away from centre, enable Invert direction."
 Say ""
 Say "  Trouble? In the settings panel press 'Create support file on Desktop'"
 Say "  and attach that file to a bug report."

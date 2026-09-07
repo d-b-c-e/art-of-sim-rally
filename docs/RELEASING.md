@@ -93,57 +93,46 @@ Two build notes worth keeping:
 Shipping both loaders remains possible — two thin entry assemblies over the shared
 core — but keep one as the documented default so support questions stay simple.
 
-## Package contents
+## Package contents and native placement
 
-A release zip needs:
+The zip contains `ArtOfSimRally/` at its root for UMM, plus Install.bat,
+Uninstall.bat, install.ps1, verify.ps1, README.txt, LICENSE and manifest.json.
+The mod folder contains only Info.json, build.json, ArtOfSimRally.Mod.dll,
+Dbce.Wheel.Telemetry.dll and UnityForceFeedback.dll. No game or UMM assemblies
+or user Settings.xml are packaged. Dbce.Wheel.Ffb.dll remains vendor/test-only.
 
-```
-ArtOfSimRally.Mod.dll          the mod
-Dbce.Wheel.Telemetry.dll       the Forza encoder (from dbce-wheel-mod-toolkit)
-UnityForceFeedback.dll         the native plugin the GAME is missing
-README / install instructions
-```
-
-`UnityForceFeedback.dll` is ours — a clean-room implementation against a
-documented DirectInput API and a P/Invoke signature read from the game's own
-metadata. It ships with the mod. **No game files are redistributed**, and none
-should ever be added to this repo.
-
-**It ships inside the mod folder**, beside `ArtOfSimRally.Mod.dll`, and is
-loaded from there by absolute path — `FfbNative.ResolveDllPath` looks in the mod
-folder first, then its parent, and only then falls back to
-`artofrally_Data/Plugins/x86_64/`. An earlier revision of this document said the
-plugin folder was the required location; it is not, and a stale copy left there
-by an old manual install is a real failure mode, because it can be loaded in
-preference to the current one and then fail on an export it predates.
-
-The binary itself is vendored, not built here: it is `WheelFfb.dll` from
-dbce-wheel-mod-toolkit (`lib/toolkit/native`, pinned by `lib/toolkit/VERSION`),
-copied to `UnityForceFeedback.dll` by `tools/package/package.ps1`.
+The native artifact is our toolkit's x64 WheelFfb.dll, shipped under the name
+UnityForceFeedback.dll. The batch installer deliberately copies it **both** beside
+the mod and into `artofrally_Data/Plugins/x86_64`. UMM's archive route installs the
+mod-folder copy. Neither path proves staleness: compare observed module hashes
+with the tested package. If multiple copies differ, close the game and reinstall
+the complete candidate; do not delete a correct plugin copy merely for its path.
 
 ## Cutting a release
 
-Done once per version, in this order. The repo went public at 0.1.0 and the
-pre-publication checklist that used to live here is complete: MIT licence, a
-user-facing README, no game assemblies ever committed
-(`git log --stat --all | grep -iE "Assembly-CSharp|\.CT$"` stays empty), and
-tagged releases with the zip attached.
+1. Vendor released toolkit v0.12.0 using the transactional Sync-Toolkit.ps1.
+   Confirm VERSION and hashes; never label a local build as a release.
+2. Keep `Version.props` and source Info.json on the same numeric UMM version.
+   Run `tools/testing/Test-Rc.ps1 -Version 0.2.3-rc.N` with an unused RC number.
+   It builds with warnings as errors, runs consumer checks, validates vendor
+   hashes/exports and packages the identified artifact. Existing RCs are immutable.
+3. Close the game, install that zip and complete the generated attended checklist.
+   See [PRE-RELEASE-TESTING.md](PRE-RELEASE-TESTING.md) for captures and evidence.
+4. Run `python tools/testing/rc_gate.py check <manual.json>`. Pending cases,
+   missing evidence and changed archives return nonzero. A build alone is not a gate.
+5. Review the concise Unreleased notes; keep unconfirmed hardware reports open.
+   Commit the source, prepare the final-labelled artifact from a clean tree, and
+   validate that exact artifact before tagging or publishing. Rebuilding changes
+   its identity and invalidates the earlier artifact's sign-off.
 
-1. **Refresh the toolkit pin if it moved.** `tools\Sync-Toolkit.ps1 -Version
-   vX.Y.Z`, then confirm the native exports are still a superset of what the mod
-   P/Invokes — `dumpbin /exports` on the new `lib\toolkit\native\WheelFfb.dll`
-   against the previous release's `UnityForceFeedback.dll`. The vendored
-   binaries are committed, so the bump shows up as a diff.
-2. **Close the game.** The DLLs are locked while it runs, and a deploy that
-   "succeeds" over a running game leaves you testing the previous build.
-3. `dotnet build ArtOfSimRally.sln -c Release`
-4. `tools\package\package.ps1 -Version X.Y.Z`
-5. Install the packaged zip, not the working tree, and drive a stage.
-6. Update `CHANGELOG.md`, tag, and attach the zip to a GitHub release.
+`tools/package/package.ps1 -Version X.Y.Z` remains the packaging entry point for
+a final clean-tree build; it does not itself authorize publication or claim game
+tests passed. Numeric UMM/assembly versions and the full informational build
+identity are validated before archiving. Archive and payload hashes are retained.
 
-There are no unit tests in this repo — the telemetry encoder's suite moved to
-dbce-wheel-mod-toolkit with the encoder. `dotnet test` here succeeds while
-running nothing, so it proves nothing; step 5 is the real gate.
+`dotnet test ArtOfSimRally.sln` runs no tests; the explicit executable runners in
+the RC script are the automated evidence. Native/telemetry source suites live in
+the toolkit. No automated path in this repo recreates a Unity playthrough.
 
 ## Channels
 

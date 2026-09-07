@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <!-- UMM expects a numeric version; the complete RC identity lives in the assembly. -->
+    <ModVersion>0.2.3</ModVersion>
+    <ReleaseLabel Condition="'$(ReleaseLabel)' == ''">0.2.3-dev</ReleaseLabel>
+    <BuildSourceState Condition="'$(BuildSourceState)' == ''">unpackaged</BuildSourceState>
+    <AssemblyVersion>$(ModVersion).0</AssemblyVersion>
+    <FileVersion>$(ModVersion).0</FileVersion>
+    <InformationalVersion Condition="'$(SourceRevisionId)' == ''">$(ReleaseLabel)+$(BuildSourceState)</InformationalVersion>
+    <InformationalVersion Condition="'$(SourceRevisionId)' != ''">$(ReleaseLabel)+$(SourceRevisionId).$(BuildSourceState)</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+</Project>

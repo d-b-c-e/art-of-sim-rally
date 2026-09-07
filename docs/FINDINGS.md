@@ -1,11 +1,21 @@
 # Findings — art of rally, verified on disk
 
-Everything here was read directly out of the shipped game files on 2026-08-31.
+The original survey below was read from shipped game files on 2026-08-31.
+Later verified additions are explicitly dated; the install table is historical.
 Nothing in this document is inferred from forum posts. Where something is
 *suspected* rather than proven, it says so explicitly.
 
 Re-deriving these costs an hour of assembly spelunking, so treat this file as
 the source of truth and don't repeat the work.
+
+## Camera lifecycle addendum — 2026-09-06
+
+Verified in build 17584229: CameraManager.EnableCinemachineCamera disables
+stageCamera (CarCameras) and enables CinemachineBrain. DisableCameraManagers
+disables both. Finish/replay take the former path; intro can take the latter.
+A CarCameras.LateUpdate postfix cannot be relied on to release a mounted child
+after its component is disabled. Current RC patches those transitions and retains
+a watchdog fallback. This is code evidence, not a rendered-game test.
 
 ## Install under test
 

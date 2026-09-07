@@ -94,6 +94,8 @@ namespace ArtOfSimRally.Mod
         public string PreferredDevice = "";
 
         public int PreferredDeviceIndex = -1;
+        // Set only by an explicit picker selection; old name/index settings remain readable.
+        public string PreferredDeviceGuid = "";
 
         // ---- Camera ---------------------------------------------------------
 
@@ -215,6 +217,7 @@ namespace ArtOfSimRally.Mod
 
         public int TelemetryPort = 8000;
 
-        public override void Save(UnityModManager.ModEntry modEntry) => Save(this, modEntry);
+        public override void Save(UnityModManager.ModEntry modEntry)
+            => SettingsPersistence.Write(this, GetPath(modEntry));
     }
 }

@@ -7,175 +7,45 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+Preparing **0.2.3**. Automated RC checks pass; camera, stutter, support output and
+real rig/UMM behaviour still require the attended checklist before release.
+
 ### Fixed
 
-- **Stage start stuttered and briefly locked up for the first 10-15 seconds**
-  (new in 0.2.2). `WheelInput` learns each axis's full range the first time the
-  control is used - the opening seconds of a stage - and wrote `Settings.xml`
-  from the per-frame path each time it extended, rate-limited to once every five
-  seconds. A synchronous XML serialise and disk write, landing at roughly t+0,
-  t+5 and t+10, in the one moment the player is trying to drive. The settings
-  object is still updated on the frame, so the panel shows the live range; only
-  the disk write is deferred, to when the player stops driving and to shutdown.
-  Reported but **not yet confirmed fixed** - see docs/KNOWN-ISSUES.md KI-5 for
-  the alternatives if it survives.
-
-- **The game's own camera angles rendered reversed once a bonnet or bumper view
-  had been used** ([#1](https://github.com/d-b-c-e/art-of-sim-rally/issues/1),
-  reported on a Thrustmaster T300 RS GT). The stage camera is two objects:
-  `CarCameras` drives the GameObject "Stage Camera", but the camera that renders
-  is its child "Camera Main", which the game pins at local identity. The mounted
-  views are positioned by writing world-space transforms to `Camera.main` - the
-  child - which Unity stores as a local offset from the parent, and nothing put
-  it back. Cycling on to a stock angle then placed the parent correctly and left
-  the child looking roughly 180 degrees the wrong way, for the rest of the stage.
-  The handback now clears the child's local transform, restoring the invariant
-  `CameraManager` asserts in its own constructor. The same hole is the likely
-  cause of the residual swing at the end of a stage, which should now be gone
-  too. **Neither is confirmed on screen yet** - see docs/KNOWN-ISSUES.md.
-
-- **The vendored toolkit was never actually committed.** `.gitignore` excluded
-  the `lib/` *directory*, and git does not descend into an excluded directory,
-  so the `!lib/toolkit/**` re-include below it could never match. A fresh clone
-  had no `lib/toolkit`, so `tools/package/package.ps1` failed at its own guard
-  and the "pinned by VERSION, diffable bump" convention was untrue in practice
-  for the whole of 0.2.2. The rule is now `lib/*`, and the pinned binaries are
-  committed.
-
-### Changed
-
-- **Toolkit pin v0.1.0 -> v0.4.0.** The native DLL is a drop-in: 37 undecorated
-  exports against the 28 that shipped in 0.2.2, nothing removed, still x64,
-  every entry point the mod P/Invokes present. Verified with `dumpbin /exports`
-  against the previous release's binary. The telemetry encoder's public surface
-  is byte-for-byte identical and the toolkit's 39 encoder tests pass at the
-  release commit, including the `Speed`@256 anchor.
-
-  No behaviour change - the mod calls none of the new surface yet. What it
-  unlocks: `GetDeviceGuid` / `GetAnyDeviceGuid` (added at this repo's request,
-  and the thing that makes `SetPreferredDeviceGuid` usable from a mod with no
-  DirectInput layer of its own), `CreateConditionEffect` /
-  `UpdateConditionEffect` / `ReleaseConditionEffects` for the damper KI-6 wants,
-  and the periodic effects for surface texture. See docs/ROADMAP.md.
-
-  `Dbce.Wheel.Ffb` gained `ForceModelSettings` parameters and a `ForceProfile`
-  type in toolkit 0.3.0. This mod does not reference that assembly, so nothing
-  moves; the vendored copy is unused and only ships because the sync script
-  copies `Dbce.Wheel.*`.
-
-- `tools/Sync-Toolkit.ps1` refreshed from the toolkit (it changed in 0.3.1). It
-  now hashes everything it writes into `lib/toolkit/MANIFEST.txt` and refuses to
-  overwrite a vendored file that was edited locally, exiting non-zero rather
-  than clobbering it.
+- Restore the mounted camera's child transform and FOV on handback, including
+  replay/cinematic transitions where the game disables CarCameras; stop camera
+  control when the mod/view is disabled. Visual verification pending. Issue #1's
+  reporter separately resolved their symptom by unplugging a PS5 controller.
+- Defer learned-axis settings writes until driving stops. Retain pending changes
+  after a failed save, throttle retries and release FFB/telemetry before shutdown
+  persistence. Use compatible XML with atomic replacement so failed saves keep
+  the previous settings intact. The reported stage-start stutter is not yet confirmed fixed.
+- Keep vendored toolkit artifacts tracked so a clone can build with local game/UMM
+  references. Validate candidate payloads before install and preserve settings and
+  user files during uninstall.
 
 ### Added
 
-- The vector found a defect upstream on its first run: `simlite@1` in
-  dbce-wheel-mod-toolkit was described as this mod's tuning, but only its model
-  half was - its shaper half was the toolkit's own defaults, which this game does
-  not use. Fixed there as `simlite@2`. Recorded here as U-1 because it changes
-  what a future adoption of `ForceModel` must take, and it corrects guidance
-  written before the vector existed.
-- Clamp order was a measured difference from the toolkit: we fade then clamp,
-  `ForceModel.Compute` clamped then faded. 4 of 640 vector rows differ, all at
-  5-7.5 km/h, worst 1,086/10,000 at the wheel, and only reachable when a force
-  past full scale meets a partial fade. The toolkit adopted our order in v0.7.0;
-  nothing in production moved. Recorded as U-2 with the table in
-  FORCE-FEEDBACK.md, including the two things that came out of building it - the
-  bigger casualty was soft saturation rather than the fade, and their conformance
-  sequence could not see the change at all until it was extended past full scale.
-- Toolkit pin v0.7.1 -> v0.8.0 (two catch-up commits from the toolkit session,
-  v0.7.2 and v0.8.0). Verified pin-only again: the native DLL is still 4 bytes
-  from the v0.4.0 binary we checked - a rebuild stamp - `GetWheelFfbVersion`
-  still reports 400, 37 exports with all 20 the mod imports present, and
-  `Dbce.Wheel.Telemetry.xml` byte-identical.
-- Step 3 notes updated for the reshaped `ForceShaper` chain. Gain now runs before
-  the fade as ours does, so the ordering caveat is resolved; what remains is the
-  EMA, which sits before the fade in their chain and after it in ours. A constant
-  gain commutes with an EMA but a speed-varying fade does not, so the two agree
-  at steady speed and diverge across the 3-12 km/h band - simulated at 25 to 104
-  of 10,000 at the wheel during a launch, for about a second. Not covered by
-  either test, so the feel-neutrality proof is a steady-state proof.
+- Consistent numeric mod versions, embedded RC/revision/source identity, package
+  manifests and SHA-256 receipts. Support files observe resident native modules
+  and report their actual file paths, hashes and component versions.
+- Optional in-memory drive capture with frame timing, direct input samples and
+  force-signal inputs/results; offline replay never drives hardware.
+- Automated consumer regressions, installer smoke tests and a separate attended
+  release gate. See [PRE-RELEASE-TESTING.md](docs/PRE-RELEASE-TESTING.md).
+- A force reference vector shared with the toolkit, plus dynamic regression
+  coverage against the original formula and stateful before/after capture replay.
 
-- Step 3 notes gained the integration hazard the vector cannot catch:
-  `ForceShaper.GainFromStrength` is the same `Strength / 50` scale as ours, so
-  Strength passes through unrescaled - which means keeping our own gain AND
-  setting `ForceShaper.Strength` would square it, taking a user at 26 from 0.52
-  to 0.27. Also recorded which half of the feel-neutrality claim each test
-  carries: ten of eleven shaper terms against our vector on all 640 rows, the
-  smoothing against the step response.
-- Corrected the step 3 guidance again, this time in the direction of less work.
-  Toolkit 0.7.1 makes `ForceProfile.SimLite()` return a model and its
-  conditioning together as an in-code literal, and `simlite@2`'s shaper states
-  every value rather than inheriting: deadzone 0, soft saturation 0, slew 0,
-  output deadband 0, ramp 0, and attack smoothing equal to decay at 0.2. So it is
-  feel-neutral against what this mod does today, and an earlier note here saying
-  adoption would bring a soft knee to judge at the wheel was wrong. It also
-  settles the in-code-versus-ini question without argument, since a literal needs
-  no deployed file.
-- U-3: the low-speed fade scales the force, it does not cap it. Harmless at the
-  strengths anyone runs - inside the fade band the threshold is 5x to 35x
-  anything the game has been measured producing - but it is a constraint on ever
-  adding impact effects, which are transients several times cornering Fy and
-  arrive at any speed.
+### Changed
 
-- **A conformance vector for the steering force curve**, `docs/force-curve-vector.csv`,
-  generated by `tools/force-vector`. The curve is duplicated - `ForceCurve` here,
-  `simlite@1` in dbce-wheel-mod-toolkit - and nothing enforced that the two
-  agreed. The failure mode is silent: a subtly wrong force does not throw, it
-  just feels like the mod got worse. The generator links the mod's own
-  `ForceCurve.cs` rather than copying it, so the vector is produced by the code
-  that ships.
-- The force curve moved out of `FfbController` into `ForceCurve`, pure
-  arithmetic with no Unity dependency, so it can be evaluated outside the game.
-  Arithmetic order is unchanged and the output is identical.
-
-- The support file reports the **vendored toolkit pin** as well as the native
-  ABI version, and no longer implies that a lower ABI means a stale DLL. Those
-  are two different numbers: the ABI moves only when `native/wheelffb` changes,
-  so a build pinned at toolkit v0.7.1 correctly reports an ABI of 0.4.0. The
-  first version of this feature printed only the ABI and told users a number
-  below their release meant a stale copy, which would have flagged every healthy
-  install the moment the pin moved. The `loaded from:` path is the reliable
-  staleness signal and the guidance now says so.
-
-- **The support file now reports the native plugin's version, where it was
-  loaded from, and its last HRESULT.** The native layer is vendored from
-  dbce-wheel-mod-toolkit and pinned per release, so the mod's own version says
-  nothing about which one a user is running - and a stale `UnityForceFeedback.dll`
-  left in the game's plugin folder by an old manual install can be loaded in
-  preference to the current one, then fail on an export it predates. That looks
-  exactly like force feedback being broken for no reason, and now takes one line
-  of a support file to spot.
-
-### Documentation
-
-- **`docs/KNOWN-ISSUES.md`** - a defect register: open issues with severity and
-  ranked hypotheses, resolved ones with their causes, and the things that were
-  deliberately abandoned with the reasoning. The end-of-stage camera issue moved
-  here from CAMERA.md, and #1's mechanism is written up in full.
-- **Corrected diagnostic instructions that no longer worked.** FORCE-FEEDBACK.md
-  and ROADMAP.md told you to set `AOSR_FFB_LOG=1` to get a native log. That
-  variable ceased to exist when the native layer moved to the toolkit; it is
-  `DBCE_FFB_LOG` now, and logging is **on by default**, so no variable is needed.
-- **Corrected the plugin's install location.** RELEASING.md said
-  `UnityForceFeedback.dll` belongs in `artofrally_Data/Plugins/x86_64/` and that
-  a wrong location fails silently. It ships inside the mod folder and is loaded
-  from there; a stale copy in the plugin folder is itself a failure mode.
-- ROADMAP.md rewritten around what is left. Phases 0-5 were all shipped while
-  the file still said phase 0 was next and blocked on plugging in a wheel.
-- FORCE-FEEDBACK.md no longer says the native plugin is "not yet
-  runtime-verified", which its own phase 0 section had contradicted since
-  2026-08-31; FINDINGS.md's four open questions are answered in place; CAMERA.md
-  no longer says the camera is unimplemented; CONTROLS.md's resolved symptoms
-  and completed checklists are marked as such.
-- README: Strength's recommended starting point is 50, matching the two retunes
-  and TROUBLESHOOTING.md, not 70. Thrustmaster T300 RS GT added to the tested
-  list.
-- CLAUDE.md: `dotnet test` runs nothing in this repo and must not be quoted as a
-  gate; **the game no longer accepts injected keyboard input**, so anything
-  needing a stage driven needs a person; the two-object camera rig recorded as a
-  finding; repository structure and status brought up to date.
+- Adopt toolkit 0.12's managed wrapper and `AxleForceCurve@1`, preserving the
+  existing gain/fade/clamp/smoothing pipeline. Package Dbce.Wheel.Ffb.dll. New wheel
+  selections save strict GUIDs; legacy settings remain readable.
+- Transactional sync, shared reader identity across FFB switching, panic recovery
+  and complete input shutdown. Disabling FFB releases output immediately; enabling
+  it after a disabled launch initializes the wheel.
+- Corrected native installation guidance, issue certainty and the roadmap.
+  Detailed engineering review: [2026-09-06-rc-review.md](docs/reviews/2026-09-06-rc-review.md).
 
 ## [0.2.2] - 2026-09-03
 

@@ -43,7 +43,7 @@ namespace ArtOfSimRally.Mod
             if (!_ffbListed) { _ffbDevices = FfbNative.ListDevices(); _ffbLabels = FfbNative.ListDeviceLabels(_ffbDevices); _ffbListed = true; }
 
             int chosen = DeviceDropdown.Draw(
-                "wheel", "Wheel", _ffbLabels, cfg.PreferredDeviceIndex,
+                "wheel", "Wheel", _ffbLabels, FfbNative.SelectedPosition(cfg),
                 "No force-feedback device found. Check the wheel is powered on and not held " +
                 "by another program.");
 
@@ -51,6 +51,7 @@ namespace ArtOfSimRally.Mod
             {
                 cfg.PreferredDeviceIndex = chosen;
                 cfg.PreferredDevice = _ffbDevices[chosen];
+                cfg.PreferredDeviceGuid = FfbNative.DeviceGuid(chosen);
                 Main.SaveSettings();
 
                 // Switch immediately rather than at next launch. Trying each of two
@@ -62,6 +63,9 @@ namespace ArtOfSimRally.Mod
                     ModLog.Warning("Could not switch to " + _ffbDevices[chosen] +
                                    "; a restart may be needed.");
             }
+
+            if (!string.IsNullOrEmpty(FfbNative.Status) && !FfbNative.Ready)
+                GUILayout.Label("      " + FfbNative.Status, Wrap);
 
             if (_ffbDevices != null && _ffbDevices.Length > 1)
                 GUILayout.Label("      Two devices with the same name? Pick one and turn the " +

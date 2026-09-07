@@ -1,3 +1,8 @@
+Current adoption: linked ForceCurve forwards to pinned `AxleForceCurve@1`.
+The committed 703-row vector remains the original reference. Consumer regression
+separately calls the frozen original formula with Unity's real managed Mathf;
+vector regeneration alone is not independent evidence. Historical rationale follows.
+
 # force-vector
 
 Emits `docs/force-curve-vector.csv`, the conformance vector for art of rally's
@@ -19,11 +24,16 @@ This turns *"does it feel the same?"* into *"is the number the same?"* — the
 same move that keeps the telemetry packet honest, where a wrong offset renders a
 plausible and completely incorrect dashboard rather than failing.
 
-It is also the gate for ever adopting the toolkit's `ForceModel` in place of the
+It is one prerequisite for adopting the toolkit's `ForceModel` in place of the
 local one. That swap is otherwise unverifiable without a wheel and a driver, and
 judged only by feel; with a vector it is arithmetic.
 
 ## What it does not prove
+
+The grid and separate smoothing block do not prove the combined dynamic
+pipeline. The pinned toolkit filters before clipping/fade, while this mod filters
+after them; a constant-speed clipping counterexample is now in
+tests/Regression. See docs/ROADMAP.md. There is no full force-model equivalence.
 
 Nothing about how the force *feels*, and nothing about the parts of the signal
 path outside `ForceCurve` — the sign convention at the device, the device's own

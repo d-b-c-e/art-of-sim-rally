@@ -165,8 +165,18 @@ under `lib/toolkit` (`tools\Sync-Toolkit.ps1` refreshes the pin).
 
 ```
 dotnet build ArtOfSimRally.sln -c Release
-tools\package\package.ps1 -Version 0.2.3
+tools\testing\Test-Rc.ps1 -Version 0.2.3-rc.4
 ```
+
+The public release is **0.2.2**. The working tree prepares **0.2.3**; camera
+handback, opening-stutter changes and the new diagnostics still need real game
+testing. See the [RC checklist and capture guide](docs/PRE-RELEASE-TESTING.md).
+The optional drive capture is under Devices and troubleshooting; start/stop while
+paused. It records evidence for offline force analysis, not game input playback.
+
+Toolkit pin: **v0.12.0** (recorded in `lib/toolkit/VERSION`). The mod
+consumes its native driver, managed device wrapper, versioned axle-force pipeline
+and telemetry encoder. See [TEST-DRIVE.md](docs/TEST-DRIVE.md) for attended checks.
 
 The vendored toolkit binaries are committed, so a clone builds and packages
 without needing the toolkit repo. Release steps are in

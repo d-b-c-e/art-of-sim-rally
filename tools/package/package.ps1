@@ -18,37 +18,72 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$Version = "0.2.2"
+    [Parameter(Mandatory)][string]$Version
 )
 
 $ErrorActionPreference = 'Stop'
 $root  = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+if ($Version -notmatch '^\d+\.\d+\.\d+(-rc\.[1-9]\d*)?$') { throw 'Use X.Y.Z or X.Y.Z-rc.N' }
+$props = [xml](Get-Content -LiteralPath (Join-Path $root 'Version.props') -Raw)
+$modVersion = [string]$props.Project.PropertyGroup.ModVersion
+if (($Version -split '-')[0] -ne $modVersion) { throw "Version must match Version.props ($modVersion)" }
+$info = Get-Content -LiteralPath (Join-Path $root 'src/ArtOfSimRally.Mod/Info.json') -Raw | ConvertFrom-Json
+if ($info.Version -ne $modVersion) { throw 'Info.json and Version.props disagree' }
 $dist  = Join-Path $root 'dist'
 $stage = Join-Path $dist "stage-$Version"
+$zip = Join-Path $dist "ArtOfSimRally-$Version.zip"
+if ((Test-Path -LiteralPath $stage) -or (Test-Path -LiteralPath $zip)) {
+    throw 'Candidate already exists. Keep its evidence; choose a new RC number.'
+}
+$revision = (& git -C $root rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0) { throw 'Cannot identify source revision' }
+$sourceState = if (& git -C $root status --porcelain --untracked-files=all) { 'dirty' } else { 'clean' }
+if ($LASTEXITCODE -ne 0) { throw 'Cannot identify source state' }
+if ($Version -notmatch '-rc\.' -and $sourceState -ne 'clean') { throw 'Final release requires a clean source tree' }
+$identity = "$Version+$revision.$sourceState"
+. (Join-Path $root 'tools/installer/verify.ps1')
+
+# Validate every pinned artifact before building; do not silently package a
+# locally edited vendor binary or omit a missing DLL.
+$toolkit = Join-Path $root 'lib/toolkit'
+$entries = 0
+foreach ($line in Get-Content -LiteralPath (Join-Path $toolkit 'MANIFEST.txt')) {
+    if ($line.StartsWith('#') -or [string]::IsNullOrWhiteSpace($line)) { continue }
+    if ($line -notmatch '^([A-Fa-f0-9]{64})\s+(.+)$') { throw 'Malformed toolkit manifest' }
+    $hash = $Matches[1]; $relative = $Matches[2]
+    $vendorPath = [IO.Path]::GetFullPath((Join-Path $toolkit $relative))
+    if (-not $vendorPath.StartsWith([IO.Path]::GetFullPath($toolkit) + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Invalid toolkit path' }
+    if ((Get-FileHash -LiteralPath $vendorPath -Algorithm SHA256).Hash -ne $hash) { throw "Toolkit hash mismatch: $relative" }
+    $entries++
+}
+if ($entries -lt 3) { throw 'Incomplete toolkit manifest' }
 
 Write-Host "Building managed mod..." -ForegroundColor Cyan
-& dotnet build (Join-Path $root 'src\ArtOfSimRally.Mod\ArtOfSimRally.Mod.csproj') -c Release -v q --nologo
+& dotnet build (Join-Path $root 'src\ArtOfSimRally.Mod\ArtOfSimRally.Mod.csproj') -c Release -v q --nologo -warnaserror "-p:ReleaseLabel=$Version" "-p:SourceRevisionId=$revision" "-p:BuildSourceState=$sourceState"
 if ($LASTEXITCODE -ne 0) { throw "Managed build failed" }
 
-Write-Host "Building native plugin..." -ForegroundColor Cyan
+Write-Host "Using verified vendored native plugin..." -ForegroundColor Cyan
 # Native FFB layer and telemetry encoder are vendored from dbce-wheel-mod-toolkit (lib\toolkit).
 $toolkit = Join-Path $root 'lib\toolkit'
 if (-not (Test-Path (Join-Path $toolkit 'native\WheelFfb.dll'))) { throw 'lib\toolkit is missing - run tools\Sync-Toolkit.ps1' }
-if ($LASTEXITCODE -ne 0) { throw "Native build failed" }
-
-if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 $modDir    = Join-Path $stage 'ArtOfSimRally'
 New-Item -ItemType Directory -Force -Path $modDir | Out-Null
 
 $bin = Join-Path $root 'src\ArtOfSimRally.Mod\bin\Release'
 Copy-Item (Join-Path $bin 'ArtOfSimRally.Mod.dll')       $modDir
 Copy-Item (Join-Path $bin 'Dbce.Wheel.Telemetry.dll') $modDir
+Copy-Item (Join-Path $bin 'Dbce.Wheel.Ffb.dll') $modDir
 Copy-Item (Join-Path $root 'src\ArtOfSimRally.Mod\Info.json') $modDir
 Copy-Item (Join-Path $toolkit 'native\WheelFfb.dll') (Join-Path $modDir 'UnityForceFeedback.dll')   # the file name the mod P/Invokes
 Copy-Item (Join-Path $root 'LICENSE') $stage
 Copy-Item (Join-Path $root 'tools\installer\Install.bat')   $stage
 Copy-Item (Join-Path $root 'tools\installer\Uninstall.bat') $stage
 Copy-Item (Join-Path $root 'tools\installer\install.ps1')   $stage
+Copy-Item (Join-Path $root 'tools\installer\verify.ps1')   $stage
+$build = [ordered]@{ schema=1; release=$Version; modVersion=$modVersion; identity=$identity; sourceRevision=$revision; sourceState=$sourceState; toolkitPin=(Get-Content -LiteralPath (Join-Path $toolkit 'VERSION') -First 1); builtUtc=[DateTime]::UtcNow.ToString('o') }
+$build | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $modDir 'build.json') -Encoding UTF8
+$fileVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo((Join-Path $modDir 'ArtOfSimRally.Mod.dll'))
+if ($fileVersion.ProductVersion -ne $identity -or $fileVersion.FileVersion -ne "$modVersion.0") { throw 'Built assembly identity does not match candidate' }
 
 $readme = @'
 art of sim rally
@@ -117,8 +152,8 @@ KNOWN LIMITS
   should apply to any wheel Rewired does not recognise, which is likely most
   modern direct-drive bases, but that is reasoning rather than testing.
 
-* The camera can swing about for a moment when the game takes control at the
-  end of a stage. Cosmetic, and only during the results cinematic.
+* Camera handback and stage-start stutter fixes in 0.2.3 require game testing.
+  RC packages are test candidates, not a claim that these reports are resolved.
 
 * This is a bonnet camera, not a cockpit camera. art of rally's cars have no
   modelled interiors, so there is nothing to sit inside of.
@@ -133,9 +168,13 @@ https://github.com/d-b-c-e/art-of-sim-rally
 
 $readme | Set-Content (Join-Path $stage 'README.txt') -Encoding UTF8
 
-$zip = Join-Path $dist "ArtOfSimRally-$Version.zip"
-if (Test-Path $zip) { Remove-Item $zip -Force }
+$files = [ordered]@{}
+foreach ($relative in $PayloadFiles) { $files[$relative] = (Get-FileHash -LiteralPath (Join-Path $stage $relative) -Algorithm SHA256).Hash }
+[ordered]@{ schema=1; release=$Version; files=$files } | ConvertTo-Json -Depth 4 |
+    Set-Content -LiteralPath (Join-Path $stage 'manifest.json') -Encoding UTF8
+$null = Assert-Payload $stage
 Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip
+(Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash | Set-Content -LiteralPath "$zip.sha256" -Encoding ASCII
 
 Write-Host "Packaged $zip" -ForegroundColor Green
 Get-ChildItem $zip | Select-Object Name, Length

@@ -24,6 +24,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="Dbce.Wheel.Ffb"><HintPath>../../lib/toolkit/dotnet/Dbce.Wheel.Ffb.dll</HintPath></Reference>
     <Compile Include="..\..\src\ArtOfSimRally.Mod\ForceCurve.cs" Link="ForceCurve.cs" />
   </ItemGroup>
 

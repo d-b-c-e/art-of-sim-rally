@@ -29,17 +29,19 @@ third-party binaries, nothing that would force the repo private.
 | Path | Contents |
 |---|---|
 | `src/ArtOfSimRally.Mod/` | The whole mod. One project, one assembly. `Main.cs` is the only loader-aware file. |
-| `lib/toolkit/` | **Vendored** from dbce-wheel-mod-toolkit (pinned by `VERSION`; refresh with `tools/Sync-Toolkit.ps1`): `native/WheelFfb.dll` (shipped as `UnityForceFeedback.dll`, the name the mod P/Invokes) and `dotnet/Dbce.Wheel.Telemetry.dll`. The native source and the encoder live in that repo now. **These binaries are committed** — see the gitignore note under Findings. |
+| `lib/toolkit/` | **Vendored** from dbce-wheel-mod-toolkit (pinned by `VERSION`; refresh with `tools/Sync-Toolkit.ps1`): `native/WheelFfb.dll` (shipped as `UnityForceFeedback.dll`, the name the mod P/Invokes) and `dotnet/Dbce.Wheel.Ffb.dll` / `Dbce.Wheel.Telemetry.dll`. The native source and the encoder live in that repo now. **These binaries are committed** — see the gitignore note under Findings. |
 | `lib/umm/` | UnityModManager.dll + 0Harmony.dll, extracted locally, **never committed**. |
 | `tools/` | `Sync-Toolkit.ps1` (toolkit pin), `package/` (release zip), `installer/` (the double-click installer), `dinput-enum/` (lists DirectInput devices without launching the game). |
 | `docs/KNOWN-ISSUES.md` | **The defect register.** Open, resolved and will-not-fix, with severities. Read before diagnosing anything. |
 | `docs/TROUBLESHOOTING.md` | User-facing fixes by symptom; the Fanatec section is the most-needed page. |
 | `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP, RELEASING |
 
-## Status (2026-09-04) — do not overstate this
+## Status (2026-09-07) — do not overstate this
 
-Released: **0.2.2** (2026-09-04). Toolkit pin: **v0.4.0**, bumped 2026-09-04, no
-mod code using its new surface yet. "Verified" means confirmed on the owner's
+Released: **0.2.2** (2026-09-04). Toolkit pin: **v0.12.0**, native component **0.5.0**. Production uses the shared
+managed wrapper, AxleForceCurve@1 and telemetry. Working tree prepares 0.2.3.
+Read docs/PRE-RELEASE-TESTING.md and docs/reviews/2026-09-06-rc-review.md.
+Offline tests pass; the new RC work has not been driven or visually validated. "Verified" means confirmed on the owner's
 MOZA R12 rig unless stated otherwise.
 
 | Component | State |
@@ -47,12 +49,12 @@ MOZA R12 rig unless stated otherwise.
 | Force feedback | Verified. Front-axle lateral force × pneumatic trail (reference 11,500 N after two retunes), faded out below 12 km/h, re-acquires the wheel after alt-tab. Sign confirmed on a MOZA R12; the MOZA R5 one-sided inversion fixed by user report. |
 | Steering fixes, bind-any-device, glyph text fallback | Verified. |
 | Shifter (sequential + H-pattern), read directly from the device | Verified by users. |
-| Bonnet + bumper cameras | Verified. The game's own angles 3-8 rendered reversed once a mounted view had been used (issue #1); **root-caused and fixed in the working tree, unreleased, not yet confirmed on screen** (KI-1). The same fix should close the end-of-stage wobble (KI-2). |
+| Bonnet + bumper cameras | Mounted views were verified in prior releases. RC handback fixes have offline ownership tests only; stock/replay/finish need screen tests. Issue #1 reporter separately says unplugging a PS5 pad resolved their symptom (KI-1/KI-2). |
 | Telemetry (Forza format) | Verified with SimHub + ButtKicker, live from the start line. |
 | **Direct wheel input** (`WheelInput`) | Verified driving on the owner's rig 2026-09-03 after the steering-sign fix (assignment is direction-independent; Flip per channel). Released in 0.2.2. Fanatec user pending. |
 | Crash fix (shifter choice after FFB failure), FFB candidate fallback, capability labels | Released in 0.2.2; init verified here, Fanatec user pending. |
 | Rewired DirectInput backend switch (`InputBackend`) | **Abandoned** after four attempts. Settings.xml-only experiment. Do not retry — see below. |
-| Toolkit GUID device selection, condition (damper) and periodic effects | Available since the v0.4.0 pin, **unused**. The next two pieces of work (docs/ROADMAP.md). `GetDeviceGuid`/`GetAnyDeviceGuid` were added at this repo's request - without them `SetPreferredDeviceGuid` was unusable here. |
+| Toolkit adoption | Managed wrapper and AxleForceCurve@1 adopted; new explicit FFB selections persist strict GUIDs. Offline tests pass; game verification pending. Damper/periodic effects remain unused. |
 
 The game's force feedback was half-built: `ForceFeedback` is never attached,
 `Wheel.Mz` is computed only `if (cardynamics.enableForceFeedback)`, which
@@ -195,7 +197,7 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
   the game pins at local identity (`CameraManager`'s constructor zeroes
   `localPosition`/`localRotation`). Writing a world-space transform to
   `Camera.main` therefore leaves a local offset on the child that the stock rig
-  never clears — the cause of KI-1. Anything touching the camera must restore
+  never clears — a code defect relevant to KI-1, not a confirmed diagnosis of its reporter. Anything touching the camera must restore
   that invariant when it lets go.
 - `ilspycmd` (dotnet tool) is installed: `ilspycmd -t <Type> Assembly-CSharp.dll`
   for one type, `-p -o <dir>` for the whole assembly. `Rewired_Core.dll` is
@@ -207,17 +209,19 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
 
 ## Testing
 
-**There are no unit tests in this repo.** `tests/` is empty and the solution
-holds one project, so `dotnet test ArtOfSimRally.sln` succeeds while running
-nothing — do not quote it as evidence of anything. The telemetry encoder's suite
-moved to dbce-wheel-mod-toolkit along with the encoder; run it there when
-touching packet layout.
+Use `tools/testing/Test-Rc.ps1 -Version 0.2.3-rc.N` with a new RC number.
+It explicitly runs consumer arithmetic, save, camera/lifecycle and capture tests,
+package/installer checks, and creates an attended checklist. `dotnet test
+ArtOfSimRally.sln` still runs nothing and is not evidence. Game/UMM references
+are local and never packaged. Native and encoder source tests stay upstream.
 
-What actually gates a change here is installing the packaged zip and driving a
-stage (docs/RELEASING.md), plus:
+The release requires the **exact packaged artifact** installed with the game
+closed and tested by a person. Automated capture replay evaluates force arithmetic
+without native hardware output; it does not recreate Unity or drive a stage.
+Do not mark camera, stutter or hardware fixes verified based on offline tests.
 
 ```powershell
-dotnet build ArtOfSimRally.sln -c Release   # must be warning-free
+dotnet build ArtOfSimRally.sln -c Release -warnaserror
 ```
 
 End-to-end telemetry check, no game required — run the probe in one shell and

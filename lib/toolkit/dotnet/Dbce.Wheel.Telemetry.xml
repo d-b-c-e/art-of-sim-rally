@@ -204,6 +204,9 @@
             (1-based; 0 or out of range infers the gear from speed).
             </summary>
         </member>
+        <member name="T:Dbce.Wheel.Telemetry.SignalSample">
+            <summary>Scalar provenance alongside TelemetryFrame; never added implicitly to a Forza packet.</summary>
+        </member>
         <member name="T:Dbce.Wheel.Telemetry.WheelValues">
             <summary>Per-wheel values, always front-left, front-right, rear-left, rear-right.</summary>
             <remarks>
@@ -313,10 +316,10 @@
             </summary>
             <remarks>
             <para>
-            Called from the game's physics loop, so the two rules are: never allocate per
-            frame, and never let a network error reach the caller. A telemetry problem
-            must not stall or crash the game — dropping a packet is always the right
-            answer, and UDP callers expect loss anyway.
+            Uses a reusable serialization buffer and contains network exceptions. Send
+            is synchronous: callers with a strict physics deadline should invoke it
+            from a bounded latest-sample worker rather than assume a nonblocking send.
+            UDP callers must tolerate dropped packets.
             </para>
             <para>
             Not thread-safe: the shared scratch buffer assumes a single caller. That
