@@ -136,9 +136,13 @@ Launch the game and press Ctrl+F10 for the settings panel.
   cannot see most shifters - this reads yours directly, so it works anyway.
 
 * Bonnet and bumper cameras are added to the game's normal view rotation - press
-  your change-view button to cycle onto them. Adjust it live on the numpad while you
+  your change-view button to cycle onto them. Adjust the active mount on the numpad while you
   are looking through it: 8/2 up-down, 7/9 back-forward, 4/6 left-right,
-  1/3 tilt, +/- field of view, 0 resets. Changes save on their own.
+  1/3 tilt, +/- field of view, 0 resets. In the mod's Camera panel you can
+  rebind or clear each key and restore the numpad defaults. Choose single keys
+  that do not overlap your game controls. Tuning is suspended while the panel
+  is open. Changes save automatically when paused or otherwise idle, including
+  after you switch back to a stock view.
 
 * Telemetry is off by default. Switch it on and point SimHub at a Forza
   Horizon 5 profile on UDP port 8000. Host and port can be changed while the
@@ -156,8 +160,11 @@ KNOWN LIMITS
   should apply to any wheel Rewired does not recognise, which is likely most
   modern direct-drive bases, but that is reasoning rather than testing.
 
-* Owner RC6 testing reported working cameras, no stutter and no control issues
-  so far. The full attended matrix and hardware-specific reports remain open.
+* Owner testing of 0.2.3-rc.6 reported working cameras, no stutter and no control
+  issues so far. That result applies to the earlier artifact. The new 0.2.4
+  camera-key and direct-input changes have automated coverage; attended camera,
+  control and hardware checks remain pending. See the release readiness notes
+  in the source repository for results tied to each exact artifact.
 
 * This is a bonnet camera, not a cockpit camera. art of rally's cars have no
   modelled interiors, so there is nothing to sit inside of.
