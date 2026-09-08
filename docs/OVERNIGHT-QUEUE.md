@@ -1,9 +1,10 @@
 # Overnight investigation and implementation queue
 
 Prepared 2026-09-08 UTC after [0.2.3 publication](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3).
-This is a handoff for the next work session, not a scheduled automation or a
-claim that the items below have been implemented. Start from current main on a
-`codex/` branch. Keep the published tag and archive unchanged.
+Executed on `codex/overnight-improvements` at the owner's request. The unattended
+implementation and research items below are complete; the 0.2.4 candidate is being
+validated separately. Published 0.2.3 and its installed Stream Deck target are
+unchanged. No scheduled automation is needed for this completed work session.
 
 Read [USER-FEEDBACK.md](USER-FEEDBACK.md), [KNOWN-ISSUES.md](KNOWN-ISSUES.md) and
 [RELEASE-READINESS.md](RELEASE-READINESS.md). The full attended matrix is still
@@ -11,19 +12,24 @@ pending; RC6 owner smoke passed for cameras, stutter and controls only.
 
 ## Work order
 
-| Order | Priority / item | Ready for unattended work | Completion evidence |
+| Order | Priority / item | Status | Completion evidence / remaining work |
 |---|---|---|---|
-| 1 | P1 — Camera tuner persistence and log volume, KI-14 | Yes: reproduce failed save and view handback in the harness, then fix | Locked-file failure retains retry, recovery saves latest values, view change/disable does not silently lose pending edits; held tuning key no longer logs every frame |
-| 2 | P1 — Camera tuning key remapping, FR-1 | Yes, after item 1 | All 11 actions remappable without numpad, cancel/reset work, duplicate choices handled visibly, bind capture cannot move/reset camera; settings roundtrip and legacy defaults pass |
-| 3 | P1 — TSS handbrake support and input regression, KI-13 | Docs are done; add focused input tests independently | 0, intermediate values and 1 remain analog through normalization and override; unbound controls unchanged; actual TSS response marked pending |
-| 4 | P2 — T300 rotation investigation, KI-12 | Static review/diagnostic design only | Written call-path inventory and a minimal A/B procedure separating degrees, physical lock and logical axis range; upstream change only after reproduced toolkit cause |
-| 5 | P2 — Light steering with road/impact feedback, FR-2; RWD snapback, KI-6 | Research and offline signal experiments only | Candidate signal availability, units, limits, resets and independent gains documented; numerical spike/dropout tests; no changed default tune or unattended hardware effects |
-| 6 | P2 — GitHub #1 / hardware follow-ups, KI-1/KI-3/KI-5 | Audit and reply drafts complete; external response pending | Reporter verifies 0.2.3 with pad/binding/camera-mod context; Fanatec and original stutter reports get identified builds and scoped outcomes |
-| 7 | P1 validation — First real capture and complete 0.2.3 checks | Requires owner drive; prepare commands/checklist only | Final package driven without probe, then separately installed probe captures completed real case; replay passes, case promoted and corpus rerun |
+| 1 | P1 — Camera tuner persistence and log volume, KI-14 | Implemented; offline pass | Actual locked-file reproduction now recovers through watchdog; idle retry, view handback, disable/shutdown and log-volume checks pass |
+| 2 | P1 — Camera tuning key remapping, FR-1 | Implemented; UI drive pending | All 11 actions, clear/cancel/defaults, duplicate/modifier validation, XML and panel/capture isolation covered in 182 camera assertions |
+| 3 | P1 — TSS handbrake support and input regression, KI-13 | Implemented; TSS pending | 90 input assertions; also reproduced/fixed KI-15 cache, Flip and assignment-read defects. Added live values and confirmed proportional game torque path |
+| 4 | P2 — T300 rotation investigation, KI-12 | Static audit and A/B procedure complete | No explicit degrees request in pinned paths; hardware/driver response still unknown; no upstream change justified yet |
+| 5 | P2 — Light steering with road/impact feedback, FR-2; RWD snapback, KI-6 | Research and numerical study complete | 10,242 assertions / 4,848 synthetic rows against shared mixer. Headroom retunes steering even without events. New telemetry sampling defects KI-16 need separate follow-up |
+| 6 | P2 — GitHub #1 / hardware follow-ups, KI-1/KI-3/KI-5 | Audit refreshed; drafts ready | Still one issue and its existing PS5-unplug comment. No messages sent; reporter/hardware results pending |
+| 7 | P1 validation — Real capture and attended checks | Instructions/checklist updated; requires owner | TEST-DRIVE and generated gate include new key/Flip/reconnect cases. No stage driven or real capture obtained overnight |
+
+See [the signal audit](research/2026-09-08-wheel-signals.md) for items 4–5 and
+[TEST-DRIVE.md](TEST-DRIVE.md) for the next attended session. The sections below
+retain the task rationale and acceptance criteria; statuses above describe the
+completed implementation, not a completed hardware sign-off.
 
 ## 1. Camera tuner save failures and logging
 
-New source finding in `CameraTuner.Update`: `_dirty` is cleared before calling
+The 0.2.3 baseline finding in `CameraTuner.Update`: `_dirty` was cleared before calling
 `Main.SaveSettings()`, its boolean failure result is ignored, and "saved" is
 logged regardless. Its timer only runs while a mounted view is active. Therefore
 the new learned-axis save retry does not cover camera tuning; toggling to a stock

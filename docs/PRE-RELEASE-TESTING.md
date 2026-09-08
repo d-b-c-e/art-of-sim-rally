@@ -18,11 +18,11 @@ Framework 4.8, Python 3, installed game/UMM build references, and the Visual Stu
 x64 `dumpbin` path in the script. Close the game for installer guards.
 
 ```powershell
-./tools/testing/Test-Rc.ps1 -Version 0.2.3-rc.6
+./tools/testing/Test-Rc.ps1 -Version 0.2.4-rc.1
 # Once real cases exist, include them on every candidate:
-./tools/testing/Test-Rc.ps1 -Version 0.2.3-rc.7 -Corpus './results/regression-corpus/index.json'
+./tools/testing/Test-Rc.ps1 -Version 0.2.4-rc.2 -Corpus './results/regression-corpus/index.json'
 # Validate the exact final-labelled artifact with the same offline suite:
-./tools/testing/Test-Rc.ps1 -Version 0.2.3 -Final
+./tools/testing/Test-Rc.ps1 -Version 0.2.4 -Final
 ```
 
 Choose a new RC number for every rebuild. Existing ZIPs/staging directories are
@@ -31,7 +31,7 @@ and a unique `results/rc-*` folder containing logs, `source.json`, `automated.js
 and `manual.json`. Installer tests use a fake game directory; nothing is installed
 in Steam, launched, published or sent to a physical wheel.
 
-`Version.props` and Info.json hold numeric UMM version 0.2.3. The assembly also
+`Version.props` and Info.json hold numeric UMM version 0.2.4. The assembly also
 embeds the RC label, full Git revision and source state. `build.json` and the
 allowlisted package manifest identify its bytes. Hashes detect changes; they are
 not signatures. An omitted corpus is reported as `recordedCorpus.status="not supplied"`
@@ -45,7 +45,9 @@ missing or failing corpus fails the run.
 | Production build | net48, warnings as errors. |
 | Force regression | 125,000 dynamic steps against the original formula using the game's real managed Mathf; also verifies the portable frozen replay baseline over 100,000 steps. Floats and device integers, changing tune, resets, fading, clipping and reversals. |
 | Save and binding regression | No learned-range disk writes during driving; locked-file preservation and retry, actual Settings XML roundtrip; malformed bindings and wheel GUID selection. |
+| Direct-input integration | Actual assignment/normalization/override with fake transport: analog handbrake travel, unbound controls, failed reads/reopen, reversed axes, Flip roundtrip, valid assignment baseline, zero span and button input. No TSS hardware claim. Included in the regression checkpoint. |
 | Camera/lifecycle | Production camera/watchdog with test doubles: handback, disabled callbacks, feature disable, output release before save. Rendering and Unity destroyed-object semantics remain attended. |
+| Camera tuning and bindings | Actual tuner/writer/Settings plus clock/input doubles: locked-file retry, leaving mounted view, save timing, held-key log volume, all 11 actions, cancel/clear/duplicates/defaults, XML and panel/capture/modifier isolation. Included in the lifecycle checkpoint. UMM rendering/key delivery remain attended. |
 | Telemetry loopback | Production connection code plus real pinned sender: failed destination suppression, recovery after editing settings, three parked packets, destination switch, restart and idempotent shutdown. No SimHub or game physics. |
 | Developer probe | Bounded writer, truncation/failure receipts, no disk writes while sampling, retry and IPC; cached observation getters bound to the actual production assembly. |
 | Probe hooks | Actual net48 recorder and installed Harmony: attach all hooks, observe Reset and an uninitialized wrapper's rejected force call, unpatch; external PowerShell Start/Status/Stop through the actual named pipe. Unity ECall callbacks still need a live game. |
@@ -60,6 +62,10 @@ the executable suites and Python tests. Native/encoder source suites stay upstre
 in dbce-wheel-mod-toolkit. No game or UMM assemblies are committed or packaged.
 
 ## Capture and reuse a drive
+
+The independent `tools/testing/EffectsLab` study is development-only and synthetic.
+Its numerical scenarios investigate future effect mixing and signal quality;
+they are not a force-tune change, a release gate or a real capture corpus.
 
 Follow [TEST-DRIVE.md](TEST-DRIVE.md) for the short walkthrough. Install the probe
 only with the game closed; it observes the installed candidate without rebuilding

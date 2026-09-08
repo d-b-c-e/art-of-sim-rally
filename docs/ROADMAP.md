@@ -8,9 +8,14 @@ is [2026-09-06-rc-review.md](reviews/2026-09-06-rc-review.md).
 The next implementation session is ordered in [OVERNIGHT-QUEUE.md](OVERNIGHT-QUEUE.md).
 [USER-FEEDBACK.md](USER-FEEDBACK.md) records the T300/TSS report, camera-key
 remapping request and the post-release GitHub audit with unsent support drafts.
-Ready work: camera-tuner save retry/logging (KI-14), keyboard remapping (FR-1),
-and focused analog-handbrake regression coverage (KI-13). Rotation (KI-12) and
-independent road/landing/crash gains (FR-2) begin with investigation.
+Implemented for the **0.2.4 candidate**: camera-tuner save retry/logging (KI-14),
+keyboard remapping (FR-1), and analog-handbrake regression coverage (KI-13) with
+cache/Flip/assignment fixes (KI-15). Camera and input harnesses pass offline;
+the new candidate has not been driven or deployed. Rotation and effect-signal
+investigations are documented in [the signal audit](research/2026-09-08-wheel-signals.md).
+Next code work is telemetry sampling correction (KI-16), with an explicit
+motion/shaker comparison before shipping changed units/axes. New FFB effects and
+RWD damping remain a separate attended tuning cycle.
 
 ## Now — finish 0.2.3 attended validation
 

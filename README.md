@@ -63,6 +63,11 @@ once more for the bumper view. Adjust whichever is on screen with the numpad:
 
 Changes save automatically.
 
+**0.2.4 candidate:** the Camera panel adds keyboard remapping, cancel/clear and
+restore-defaults for all tuning actions. Edits save when paused or otherwise idle,
+including after leaving a mounted view. See [camera controls](docs/CAMERA.md).
+These additions have offline coverage and still need an attended UI check.
+
 **Telemetry** — off by default. Turn it on and point SimHub at a **Forza
 Horizon 5** profile on UDP port **8000**. Host and port can be changed while the
 game runs, which helps if something else already owns the port.
@@ -166,7 +171,7 @@ under `lib/toolkit` (`tools\Sync-Toolkit.ps1` refreshes the pin).
 
 ```
 dotnet build ArtOfSimRally.sln -c Release
-tools\testing\Test-Rc.ps1 -Version 0.2.3-rc.6
+tools\testing\Test-Rc.ps1 -Version 0.2.4-rc.1
 ```
 
 Release **0.2.3** adopts the shared toolkit force/device code and improves camera

@@ -31,7 +31,7 @@ third-party binaries, nothing that would force the repo private.
 | `src/ArtOfSimRally.Mod/` | The whole mod. One project, one assembly. `Main.cs` is the only loader-aware file. |
 | `lib/toolkit/` | **Vendored** from dbce-wheel-mod-toolkit (pinned by `VERSION`; refresh with `tools/Sync-Toolkit.ps1`): `native/WheelFfb.dll` (shipped as `UnityForceFeedback.dll`, the name the mod P/Invokes) and `dotnet/Dbce.Wheel.Ffb.dll` / `Dbce.Wheel.Telemetry.dll`. The native source and the encoder live in that repo now. **These binaries are committed** — see the gitignore note under Findings. |
 | `lib/umm/` | UnityModManager.dll + 0Harmony.dll, extracted locally, **never committed**. |
-| `tests/` | Executable consumer regression, lifecycle, telemetry, recorder and hook suites; Python replay/evidence tests. Run through `tools/testing/Test-Rc.ps1`. |
+| `tests/` | Executable consumer regression, CameraTuning, WheelInput, lifecycle, telemetry, recorder and hook suites; Python replay/evidence tests. Run through `tools/testing/Test-Rc.ps1`. |
 | `tools/` | `Sync-Toolkit.ps1` (toolkit pin), `package/` (release zip), `installer/` (the double-click installer), `dinput-enum/` (lists DirectInput devices without launching the game). |
 | `docs/OVERNIGHT-QUEUE.md` / `docs/USER-FEEDBACK.md` | Prioritized follow-up work, user reports and unsent support drafts. |
 | `docs/KNOWN-ISSUES.md` | **The defect register.** Open, resolved and will-not-fix, with severities. Read before diagnosing anything. |
@@ -41,7 +41,7 @@ third-party binaries, nothing that would force the repo private.
 ## Status (2026-09-08) — do not overstate this
 
 Release: **0.2.3** (2026-09-08). Toolkit pin: **v0.12.0**, native component **0.5.0**. Production uses the shared
-managed wrapper, AxleForceCurve@1 and telemetry. The attended checklist remains pending.
+managed wrapper, AxleForceCurve@1 and telemetry. The attended checklist remains pending. Current branch prepares 0.2.4: camera keys/save recovery and direct-input cache/Flip/assignment fixes (KI-14/KI-15). Camera suite 182 assertions; input suite 90; no game validation or deployment of the new candidate.
 Read docs/RELEASE-READINESS.md for the final artifact, docs/OVERNIGHT-QUEUE.md for next work, and docs/USER-FEEDBACK.md for support drafts. The final ZIP is installed behind the Stream Deck Steam 550320 key, with settings preserved and the developer probe removed.
 Offline tests pass. Owner RC6 feedback (2026-09-08 UTC): no stutter, camera worked great, no control issues so far. A game log confirms mod/probe loading and force evaluation. The complete attended matrix and final-labelled drive remain pending. "Verified" means confirmed on the owner's
 MOZA R12 rig unless stated otherwise.
@@ -52,7 +52,7 @@ MOZA R12 rig unless stated otherwise.
 | Steering fixes, bind-any-device, glyph text fallback | Verified. |
 | Shifter (sequential + H-pattern), read directly from the device | Verified by users. |
 | Bonnet + bumper cameras | Owner RC6 camera smoke passed; offline handback tests pass. The complete stock/replay/finish transition matrix remains pending. Issue #1 reporter separately says unplugging a PS5 pad resolved their symptom (KI-1/KI-2). |
-| Telemetry (Forza format) | Verified with SimHub + ButtKicker, live from the start line. |
+| Telemetry (Forza format) | Previously verified live with SimHub + ButtKicker. New signal audit found suspension-unit/local-axis sampling defects (KI-16); correction and motion/shaker comparison remain queued. |
 | **Direct wheel input** (`WheelInput`) | Verified driving on the owner's rig 2026-09-03 after the steering-sign fix (assignment is direction-independent; Flip per channel). Released in 0.2.2. Fanatec user pending. |
 | Crash fix (shifter choice after FFB failure), FFB candidate fallback, capability labels | Released in 0.2.2; init verified here, Fanatec user pending. |
 | Rewired DirectInput backend switch (`InputBackend`) | **Abandoned** after four attempts. Settings.xml-only experiment. Do not retry — see below. |
@@ -211,7 +211,7 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
 
 ## Testing
 
-Use `tools/testing/Test-Rc.ps1 -Version 0.2.3-rc.N` with a new RC number, or
+Use `tools/testing/Test-Rc.ps1 -Version 0.2.4-rc.N` with a new RC number, or
 `-Version X.Y.Z -Final` for a final-labelled artifact; neither grants runtime sign-off.
 It explicitly runs consumer arithmetic, save, camera/lifecycle and capture tests,
 package/installer checks, and creates an attended checklist. `dotnet test

@@ -30,7 +30,10 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Record the 0.2.3 publication and verified local installation, GitHub audit,
   T300/TSS feedback and prioritized overnight queue. Add direct handbrake setup
-  and a camera-key XML example. No new runtime behavior after 0.2.3.
+  and a camera-key XML example.
+- Audit T300 rotation, proportional handbrake input and available road/landing
+  signals. Add a synthetic managed effects lab; retain the production force tune.
+  Track separate telemetry sampling corrections as KI-16.
 
 ## [0.2.3] - 2026-09-08
 

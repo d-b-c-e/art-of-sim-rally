@@ -191,7 +191,6 @@ namespace ArtOfSimRally.Mod
                 cfg.BonnetLean   = Slider(cfg.BonnetLean, 0f, 1f, "Lean in corners",
                     "Sells the mounted feel, but is also the first thing to cause motion " +
                     "sickness. 0 turns it off. Shared by both mounted views.", "F2");
-
             }
 
             cfg.BumperCameraEnabled = Toggle(cfg.BumperCameraEnabled, "Bumper camera",

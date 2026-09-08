@@ -1,5 +1,10 @@
 # Release readiness — 2026-09-08
 
+The 0.2.4 overnight candidate adds camera key/persistence and direct-input fixes.
+It is being validated separately; the published/installed 0.2.3 evidence below
+remains intact. [Overnight status](OVERNIGHT-QUEUE.md) and
+[extra drive checks](TEST-DRIVE.md#extra-checks-for-024) describe the new scope.
+
 **[0.2.3 is published](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3)
 and installed locally.** RC6 passes
 all 16 automated gates and was driven after local installation. Owner feedback:

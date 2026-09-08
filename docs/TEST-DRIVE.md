@@ -5,6 +5,10 @@ developer mod observes game signals; a standalone command replays them without
 the game or wheel. Record a representative drive once, then reuse that case on
 subsequent builds. Allow about 20–30 minutes for attended release checks.
 
+The installed Stream Deck target currently uses published 0.2.3. The overnight
+0.2.4 candidate is separate; install it explicitly with the game closed before
+testing its camera-key and direct-input changes. Keep the 0.2.3 ZIP/settings backup.
+
 1. **Prepare the candidate.** Close art of rally, retain the previous ZIP and
    Settings.xml, and install the exact ZIP identified by the successful
    `results/rc-*/automated.json`. Keep strength, smoothing, bindings and wheelbase
@@ -80,3 +84,25 @@ changes labelled so comparisons use the same settings.
 Fill in the exact candidate's `manual.json` with tester/rig, outcomes, notes and
 hashed evidence. See [PRE-RELEASE-TESTING.md](PRE-RELEASE-TESTING.md) for gates and
 limits. Signal replay does not automate full game input, rendering or wheel feel.
+
+## Extra checks for 0.2.4
+
+- Open Camera in Ctrl+F10; rebind Up/Down and Reset to unused keyboard keys.
+  Test Escape/cancel, duplicate rejection, Clear and Restore numpad defaults.
+  Try a bumper-only setup. Typing/capturing in the panel and modifier chords
+  must not adjust the mount; close the panel, release keys, then use the new keys.
+- Adjust a mount, switch straight to stock view, then pause. Quit and relaunch:
+  the edit and custom keys should persist even though the mounted view stopped
+  updating. Inspect logs for a successful save, without a line for every held-key
+  frame. Locked-file retry itself has an offline reproduction/test.
+- With the car stationary, check direct Handbrake live values at rest, quarter,
+  half and full pull, then release. Use full travel before Flip. Test Flip and
+  double Flip, and restart with a deliberately flipped axis. Steering should
+  invert around center; pedals invert between endpoints. Restore desired mappings.
+- Test a reader disconnect/reconnect or device reopen while parked: stale throttle
+  or handbrake must not remain held. When Assign begins during a failed read,
+  recovery should establish a rest sample before waiting for deliberate movement.
+
+T300 rotation needs the separate A/B procedure in
+[the signal audit](research/2026-09-08-wheel-signals.md), on that hardware. New
+effects and the telemetry sampling corrections (KI-16) are not part of this RC.

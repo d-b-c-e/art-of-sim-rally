@@ -5,6 +5,13 @@ and setups; they are not all tests of 0.2.3. Implementation work is ordered in
 [OVERNIGHT-QUEUE.md](OVERNIGHT-QUEUE.md); defects remain in
 [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 
+Overnight follow-through: camera key remapping and save recovery are implemented
+for the 0.2.4 candidate; the input suite adds 90 assertions and fixes cache, Flip
+and assignment recovery defects (KI-15). T300 rotation and effect-signal research
+are complete to the offline scope in
+[the signal audit](research/2026-09-08-wheel-signals.md). No new hardware result
+or support reply was obtained/sent. Original feedback below retains its context.
+
 ## Owner RC6 drive
 
 Exact feedback: "no stutter, camera worked great, and no issues with the controls
@@ -49,7 +56,7 @@ are inferred.
 Separate feature request supplied by the owner: allow camera control buttons to
 be remapped for keyboards without a numpad. `Settings.cs` already stores 11
 `KeyCode` fields and `CameraTuner` reads them, but the panel only exposes the
-numpad toggle and fixed help text. The work is a binding UI, conflict handling,
+numpad toggle and fixed help text in 0.2.3. The work is a binding UI, conflict handling,
 clear help and persistence, preserving existing defaults/settings. It concerns
 mounted-view tuning; the game's ChangeCamera binding remains separate. Keyboard
 remapping addresses the reported need; wheel/controller button support would
@@ -95,8 +102,9 @@ Thanks for the detailed setup report. For the TSS, open Ctrl+F10, expand Wheel
 input (direct), enable Read the wheel directly, and select Assign on Handbrake
 while the lever is released. Pull it, then use its full travel once to calibrate.
 The mod supports an analog handbrake axis; you can leave working steering and
-pedal channels unbound in this section. Check that the displayed handbrake value
-increases gradually and returns to zero; use Flip only if the direction is wrong.
+pedal channels unbound in this section. The upcoming 0.2.4 adds a displayed live
+value and corrects Flip; on 0.2.3 reassign from the released position instead of
+using pedal Flip. In the candidate, verify gradual values and return to zero.
 
 The current FFB is a steering-force signal. It has no dedicated landing/crash
 rumble channel, so lowering Strength also lowers any detail already in that

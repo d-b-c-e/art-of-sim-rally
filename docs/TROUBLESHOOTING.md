@@ -45,6 +45,10 @@ Use the mod's binding panel if the game's controls screen only offers shifting
 or never detects the handbrake. You can bind just the handbrake and leave working
 steering/pedal channels on the game's input path.
 
+The 0.2.4 candidate adds live values and fixes Flip/reopen/assignment failures
+(KI-15). On published 0.2.3, prefer assigning from a released lever and using full
+travel; pedal Flip has a known defect. Live numeric values below are a 0.2.4 addition.
+
 1. Put the TSS in handbrake mode. Open Ctrl+F10 → **Wheel input (direct)** and
    enable **Read the wheel directly**.
 2. Release the lever, click **Assign** beside **Handbrake**, then pull it. Avoid

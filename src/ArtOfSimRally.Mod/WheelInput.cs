@@ -35,7 +35,7 @@ namespace ArtOfSimRally.Mod
     /// the value it moved to are recorded, and the far end keeps extending as
     /// the control is used, so a half turn at assignment does not cap the range.
     /// Axes are requested in the range 0-65535 on every device. Steering maps
-    /// rest to 0 and the recorded direction to +1, the other lock to -1; pedals
+    /// center to 0 and increasing raw values to +1 (unless flipped); pedals
     /// map rest to 0 and the moved direction to 1, which also handles pedals that
     /// idle at the top of their range. A button can be bound to any channel and
     /// reads 0 or 1 - useful for a handbrake.
