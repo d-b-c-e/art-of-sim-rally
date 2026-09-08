@@ -111,6 +111,11 @@ static class Program
         Check(cfg.BonnetHeight == height, "disabled mod moved mount");
         Host.Enabled = true; CameraTuner.Update(BonnetCamera.View.Bonnet);
         Check(cfg.BonnetHeight > height, "released then re-pressed key never resumed tuning");
+        height = cfg.BonnetHeight;
+        Keys.Held.Add(KeyCode.LeftControl); CameraTuner.Update(BonnetCamera.View.Bonnet);
+        Check(cfg.BonnetHeight == height, "Ctrl chord activated a single-key binding");
+        Keys.Held.Remove(KeyCode.LeftControl); CameraTuner.Update(BonnetCamera.View.Bonnet);
+        Check(cfg.BonnetHeight == height, "releasing modifier leaked held key into tuner");
         Keys.Release(); CameraTuner.Flush(shutdown: true);
     }
     static void Saves()

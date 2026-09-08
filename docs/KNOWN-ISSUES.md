@@ -21,6 +21,22 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-16 — Telemetry suspension units and motion coordinate space
+
+**Motion/shaker signal correctness; source-confirmed, correction queued.**
+`FillWheels` supplies fixed maximum suspension travel as actual travel and clamps
+compression measured in meters directly into the normalized slot. `BuildFrame`
+also sends world-space motion where the Forza contract calls for vehicle-local
+axes. The signal audit records the sources, an explicit 0.20/0.10 m counterexample
+and the official format semantics in
+[2026-09-08-wheel-signals.md](research/2026-09-08-wheel-signals.md).
+
+These are consumer sampling defects, not wire-layout defects. Correct with
+travel/projection/discontinuity tests and an attended SimHub/motion comparison.
+The effects-research step does not change these existing amplitudes/axes or
+claim to explain the user's wheel-FFB complaints. Do not derive new calibrated
+impact effects from the present telemetry values.
+
 ### KI-15 — Direct-input cache, Flip and assignment recovery defects
 
 **Input correctness; reproduced offline in 0.2.3, fixed in next-version source.**

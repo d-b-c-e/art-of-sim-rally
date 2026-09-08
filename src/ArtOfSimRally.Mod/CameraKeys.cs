@@ -44,6 +44,13 @@ namespace ArtOfSimRally.Mod
 
         public static void Cancel() { Listening = -1; Status = ""; }
 
+        public static bool ModifierHeld() =>
+            Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) ||
+            Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) ||
+            Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt) || Input.GetKey(KeyCode.AltGr) ||
+            Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand) ||
+            Input.GetKey(KeyCode.LeftWindows) || Input.GetKey(KeyCode.RightWindows);
+
         private static bool IsKeyboardKey(KeyCode key)
         {
             if (key <= KeyCode.None || key >= KeyCode.Mouse0 || !Enum.IsDefined(typeof(KeyCode), key)) return false;

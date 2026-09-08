@@ -19,6 +19,11 @@ a watchdog fallback. This is code evidence, not a rendered-game test.
 
 ## Install under test
 
+See [the 2026-09-08 signal audit](research/2026-09-08-wheel-signals.md) for newly
+verified analog-handbrake torque propagation, PlayerVibrator landing/gamepad-rumble
+paths, suspension units and the outstanding consumer telemetry sampling defects.
+That addendum records method-body evidence without redistributing game code.
+
 | Property | Value |
 |---|---|
 | Steam app id | 550320 |

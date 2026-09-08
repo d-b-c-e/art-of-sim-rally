@@ -58,7 +58,7 @@ namespace ArtOfSimRally.Mod
             var cfg = Main.Settings;
             if (!Main.Enabled || cfg == null || !cfg.CameraTuningKeys) return;
             if (view == BonnetCamera.View.None) return;
-            if (Main.SettingsVisible || CameraKeys.Listening >= 0)
+            if (Main.SettingsVisible || CameraKeys.Listening >= 0 || CameraKeys.ModifierHeld())
             {
                 SuppressUntilRelease();
                 return;
