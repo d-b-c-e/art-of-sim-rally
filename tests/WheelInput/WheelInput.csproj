@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>disable</Nullable>
+    <GameDir Condition="'$(GameDir)' == ''">D:\Program Files (x86)\Steam\steamapps\common\artofrally</GameDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/ArtOfSimRally.Mod/WheelInput.cs" Link="WheelInput.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/WheelInput.Binding.cs" Link="WheelInput.Binding.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/DeferredSave.cs" Link="DeferredSave.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/Settings.cs" Link="Settings.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/SettingsPersistence.cs" Link="SettingsPersistence.cs" />
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(GameDir)/artofrally_Data/Managed/UnityEngine.CoreModule.dll</HintPath></Reference>
+    <Reference Include="UnityModManager"><HintPath>../../lib/umm/UnityModManager.dll</HintPath></Reference>
+  </ItemGroup>
+</Project>

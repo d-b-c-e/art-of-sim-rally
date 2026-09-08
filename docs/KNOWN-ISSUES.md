@@ -21,6 +21,21 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-15 — Direct-input cache, Flip and assignment recovery defects
+
+**Input correctness; reproduced offline in 0.2.3, fixed in next-version source.**
+Closing readers left cached values active, so a failed reopen could keep applying
+the previous pedal value. Flip reflected pedal calibration around rest, making a
+normal 0..65535 handbrake unusable, and flipped steering could serialize an endpoint
+of -1 that the binding parser rejected on restart. Finally, a failed resting read
+at Assign could make the first successful read look like movement.
+
+Production input tests with fake transport reproduce these failures. Close/reload
+now clear values; pedal Flip swaps physical endpoints; steering supports a bounded
+signed calibration span in the same five-field format. Assignment waits for a valid
+baseline. Tests retain analog intermediate values, unbound channels and finish/mod
+disable behavior. Actual TSS input and in-game recovery remain untested.
+
 ### KI-14 — Camera tuner loses failed-save retry and logs each adjustment frame
 
 **Persistence/supportability; reproduced in 0.2.3, fixed in next-version source.**

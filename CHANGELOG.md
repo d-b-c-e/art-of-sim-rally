@@ -16,6 +16,12 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Clear cached direct-input values when readers close or bindings reload, so
+  a failed reopen cannot retain a held pedal. Flip now swaps pedal endpoints and
+  flipped steering calibration survives restart. Failed assignment reads wait
+  for a valid resting sample before detecting movement. The direct-input panel
+  shows live normalized values for setup checks.
+
 - Camera tuning retains failed saves and retries while idle, including after
   leaving the mounted view or disabling the mod. Save success is logged only
   after a successful write; held adjustments no longer log every frame.

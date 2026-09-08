@@ -152,6 +152,7 @@ namespace ArtOfSimRally.Mod
             if (!cfg.WheelInputEnabled) { End(); return; }
 
             GUILayout.Label("      Reading: " + WheelInput.DeviceSummary, Wrap);
+            GUILayout.Label("Live values: steering -1 to 1; pedals and handbrake 0 to 1.", Wrap);
             GUILayout.Space(4);
 
             foreach (var ch in WheelInput.Channels)
@@ -159,6 +160,7 @@ namespace ArtOfSimRally.Mod
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("  " + ch, GUILayout.Width(110));
                 GUILayout.Label(WheelInput.Describe(ch), GUILayout.Width(260));
+                GUILayout.Label(WheelInput.IsBound(ch) ? WheelInput.Value(ch).ToString("F2") : "-", GUILayout.Width(45));
                 bool assigning = WheelInput.Assigning == ch;
                 if (GUILayout.Button(assigning ? "Move it now... (cancel)" : "Assign", GUILayout.Width(170)))
                 {

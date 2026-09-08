@@ -59,7 +59,7 @@ namespace ArtOfSimRally.Mod
             public byte[] Buttons = new byte[ButtonCount];
             public int[] BaseAxes = new int[AxisCount];
             public byte[] BaseButtons = new byte[ButtonCount];
-            public bool Ok;
+            public bool Ok, HasAssignBaseline;
         }
 
         private static readonly List<Device> _devices = new List<Device>();
@@ -95,10 +95,14 @@ namespace ArtOfSimRally.Mod
         {
             var cfg = Main.Settings;
             _bindings.Clear();
+            _values.Clear();
             if (cfg == null) return;
             foreach (var c in Channels)
             {
                 var b = Binding.Parse(Setting(cfg, c));
+                // Only steering uses reflected calibration endpoints. Pedal
+                // inversion swaps physical endpoints, which stay in raw range.
+                if (b != null && c != Channel.Steer && (b.Far < 0 || b.Far > 65535)) b = null;
                 if (b != null) _bindings[c] = b;
             }
         }
@@ -159,6 +163,7 @@ namespace ArtOfSimRally.Mod
         {
             try { if (_devices.Count > 0 || _open) WheelFfbNative.CloseRead(); } catch { }
             _devices.Clear();
+            _values.Clear();
             _open = false;
             _assigning = null;
         }
@@ -285,9 +290,13 @@ namespace ArtOfSimRally.Mod
             if (!_open) return;
             foreach (var d in _devices)
             {
-                try { WheelFfbNative.Read(d.Slot, d.Axes, d.Buttons); } catch { }
-                Array.Copy(d.Axes, d.BaseAxes, AxisCount);
-                Array.Copy(d.Buttons, d.BaseButtons, ButtonCount);
+                d.HasAssignBaseline = false;
+                try { d.HasAssignBaseline = WheelFfbNative.Read(d.Slot, d.Axes, d.Buttons); } catch { }
+                if (d.HasAssignBaseline)
+                {
+                    Array.Copy(d.Axes, d.BaseAxes, AxisCount);
+                    Array.Copy(d.Buttons, d.BaseButtons, ButtonCount);
+                }
             }
             _assigning = c;
             _assignDeadline = Time.realtimeSinceStartup + 10f;
@@ -300,11 +309,12 @@ namespace ArtOfSimRally.Mod
             Status = "";
         }
 
-        /// <summary>Mirrors a bound axis around its rest value, for a wheel whose axis runs the other way.</summary>
+        /// <summary>Invert steering around center; swap pedal rest/full endpoints.</summary>
         public static void Flip(Channel c)
         {
             if (!_bindings.TryGetValue(c, out var b) || b.IsButton) return;
-            b.Far = b.Rest - (b.Far - b.Rest);
+            if (c == Channel.Steer) b.Far = b.Rest - (b.Far - b.Rest);
+            else { int rest = b.Rest; b.Rest = b.Far; b.Far = rest; }
             var cfg = Main.Settings;
             if (cfg != null) { Store(cfg, c, b.ToString()); Main.SaveSettings(); }
             Status = c + " flipped.";
@@ -332,6 +342,15 @@ namespace ArtOfSimRally.Mod
             foreach (var d in _devices)
             {
                 if (!d.Ok) continue;
+                if (!d.HasAssignBaseline)
+                {
+                    // A failed initial read supplied no resting sample. Establish
+                    // it now instead of interpreting recovery as physical movement.
+                    Array.Copy(d.Axes, d.BaseAxes, AxisCount);
+                    Array.Copy(d.Buttons, d.BaseButtons, ButtonCount);
+                    d.HasAssignBaseline = true;
+                    continue;
+                }
                 for (int i = 0; i < AxisCount; i++)
                 {
                     int delta = d.Axes[i] - d.BaseAxes[i];

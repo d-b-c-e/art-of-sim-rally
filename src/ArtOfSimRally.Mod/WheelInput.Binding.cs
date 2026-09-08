@@ -28,7 +28,10 @@ namespace ArtOfSimRally.Mod
                     b.Element < 0 || b.Element >= (b.IsButton ? 128 : 8)) return null;
                 if (!int.TryParse(p[3], NumberStyles.Integer, CultureInfo.InvariantCulture, out b.Rest) ||
                     !int.TryParse(p[4], NumberStyles.Integer, CultureInfo.InvariantCulture, out b.Far) ||
-                    b.Rest < 0 || b.Rest > 65535 || b.Far < 0 || b.Far > 65535) return null;
+                    b.Rest < 0 || b.Rest > 65535 || (long)b.Far - b.Rest < -65535 || (long)b.Far - b.Rest > 65535) return null;
+                // Steering Flip reflects a calibrated endpoint around center;
+                // 32767..65535 becomes 32767..-1. The endpoint is a calibration
+                // value, not a raw sample. Bound the span without rejecting it.
                 return b;
             }
 

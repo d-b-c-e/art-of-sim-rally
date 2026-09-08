@@ -45,7 +45,10 @@ try {
     $result = Run 'regression' 'dotnet' @('run','--project','tests/Regression/Regression.csproj','-c','Release','--','--native','lib/toolkit/native/WheelFfb.dll')
     $regression = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($regression.status -eq 'passed' -and $regression.assertions -gt 0) 'Regression runner ran no assertions'
-    Checkpoint 'regression' $regression.assertions
+    $result = Run 'wheel-input' 'dotnet' @('run','--project','tests/WheelInput/WheelInput.csproj','-c','Release')
+    $wheelInput = $result | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($wheelInput.status -eq 'passed' -and $wheelInput.assertions -gt 0) 'Wheel input runner ran no assertions'
+    Checkpoint 'regression' ($regression.assertions+$wheelInput.assertions)
     $result = Run 'lifecycle' 'dotnet' @('run','--project','tests/Lifecycle/Lifecycle.csproj','-c','Release')
     $lifecycle = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($lifecycle.status -eq 'passed' -and $lifecycle.assertions -gt 0) 'Lifecycle runner ran no assertions'
