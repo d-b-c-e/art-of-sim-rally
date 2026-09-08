@@ -29,6 +29,9 @@ namespace ArtOfSimRally.Mod
     {
         private static float _saveDueAt;
         private static readonly DeferredSave Save = new DeferredSave();
+        private static bool _waitForRelease;
+
+        public static void SuppressUntilRelease() => _waitForRelease = true;
 
         internal static void MarkDirty()
         {
@@ -55,6 +58,18 @@ namespace ArtOfSimRally.Mod
             var cfg = Main.Settings;
             if (!Main.Enabled || cfg == null || !cfg.CameraTuningKeys) return;
             if (view == BonnetCamera.View.None) return;
+            if (Main.SettingsVisible || CameraKeys.Listening >= 0)
+            {
+                SuppressUntilRelease();
+                return;
+            }
+            // A captured key or the key that closed the panel must be released
+            // before it can adjust/reset a mount on the next LateUpdate.
+            if (_waitForRelease)
+            {
+                if (Input.anyKey) return;
+                _waitForRelease = false;
+            }
 
             // Per-second rates, scaled by real time so behaviour does not change
             // with frame rate or when the game is paused.

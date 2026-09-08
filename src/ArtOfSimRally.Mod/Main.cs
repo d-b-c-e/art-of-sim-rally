@@ -20,6 +20,7 @@ namespace ArtOfSimRally.Mod
     {
         internal static Settings Settings { get; private set; }
         internal static bool Enabled { get; private set; }
+        internal static bool SettingsVisible => UnityModManager.UI.Instance != null && UnityModManager.UI.Instance.Opened;
 
         private static Harmony _harmony;
         private static UnityModManager.ModEntry _modEntry;
@@ -53,6 +54,7 @@ namespace ArtOfSimRally.Mod
 
             modEntry.OnGUI       = OnGUI;
             modEntry.OnSaveGUI   = OnSaveGUI;
+            modEntry.OnHideGUI   = entry => CameraKeys.Cancel();
             modEntry.OnToggle    = OnToggle;
             modEntry.OnUnload    = OnUnload;
 
@@ -99,6 +101,7 @@ namespace ArtOfSimRally.Mod
             Enabled = value;
             if (!value)
             {
+                CameraKeys.Cancel();
                 // Let go of the wheel and park consumers the moment the player
                 // disables the mod, rather than leaving a force applied and a
                 // dashboard frozen.
@@ -119,6 +122,7 @@ namespace ArtOfSimRally.Mod
         private static bool OnUnload(UnityModManager.ModEntry modEntry)
         {
             Enabled = false;
+            CameraKeys.Cancel();
             ModWatchdog.Shutdown(unloading: true);
             WheelInput.Close();
             _harmony?.UnpatchAll(modEntry.Info.Id);

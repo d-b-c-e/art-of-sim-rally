@@ -7,6 +7,13 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Rebind all 11 camera tuning keys in the settings panel, with clear, cancel,
+  duplicate-key feedback and restore-defaults. Existing XML/numpad mappings are
+  preserved. Bumper-only setups can configure keys; editing the panel suppresses
+  camera hotkeys until held input is released. In-game UI validation pending.
+
 ### Fixed
 
 - Camera tuning retains failed saves and retries while idle, including after

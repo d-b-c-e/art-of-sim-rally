@@ -40,6 +40,11 @@ namespace ArtOfSimRally.Mod
             var cfg = Main.Settings;
             if (cfg == null) return;
 
+            var keyEvent = Event.current;
+            if (keyEvent.type == EventType.KeyDown && CameraKeys.HandleKey(cfg, keyEvent.keyCode,
+                    keyEvent.shift || keyEvent.control || keyEvent.alt || keyEvent.command))
+                keyEvent.Use();
+
             DrawSteering(cfg);
             DrawForceFeedback(cfg);
             DrawShifter(cfg);
@@ -172,7 +177,7 @@ namespace ArtOfSimRally.Mod
 
         private static void DrawCamera(Settings cfg)
         {
-            if (!Section("Camera", ref _openCamera)) return;
+            if (!Section("Camera", ref _openCamera)) { CameraKeys.Cancel(); return; }
 
             cfg.BonnetCameraEnabled = Toggle(cfg.BonnetCameraEnabled, "Bonnet camera",
                 "Adds a bonnet view to the game's normal view rotation - press your change-view " +
@@ -180,27 +185,55 @@ namespace ArtOfSimRally.Mod
 
             if (cfg.BonnetCameraEnabled)
             {
-                cfg.CameraTuningKeys = Toggle(cfg.CameraTuningKeys, "Adjust with the numpad",
-                    "While looking through it: 8/2 up-down, 7/9 back-forward, 4/6 left-right, " +
-                    "1/3 tilt, +/- field of view, 0 resets. Saves automatically.");
-
                 cfg.BonnetFOV    = Slider(cfg.BonnetFOV, 40f, 120f, "Bonnet field of view", null, "F0");
                 cfg.BonnetLean   = Slider(cfg.BonnetLean, 0f, 1f, "Lean in corners",
                     "Sells the mounted feel, but is also the first thing to cause motion " +
                     "sickness. 0 turns it off. Shared by both mounted views.", "F2");
 
-                GUILayout.Label("Position is easiest to set with the numpad while driving.", Wrap);
             }
 
             cfg.BumperCameraEnabled = Toggle(cfg.BumperCameraEnabled, "Bumper camera",
                 "A second mounted view, lower and further forward, after the bonnet view in " +
-                "the rotation. The numpad adjusts whichever of the two is on screen. " +
+                "the rotation. Camera tuning keys adjust whichever of the two is on screen. " +
                 "Takes effect on the next stage.");
 
             if (cfg.BumperCameraEnabled)
                 cfg.BumperFOV = Slider(cfg.BumperFOV, 40f, 120f, "Bumper field of view", null, "F0");
 
+            if (CameraKeys.Available(cfg))
+            {
+                cfg.CameraTuningKeys = Toggle(cfg.CameraTuningKeys, "Enable camera tuning keys",
+                    "Adjust the active bonnet or bumper view after closing this panel. Changes save " +
+                    "when paused or otherwise idle. These are separate from the game's ChangeCamera binding.");
+                if (cfg.CameraTuningKeys) DrawCameraKeys(cfg);
+                else CameraKeys.Cancel();
+            }
+            else CameraKeys.Cancel();
+
             End();
+        }
+
+        private static void DrawCameraKeys(Settings cfg)
+        {
+            GUILayout.Label("Choose keyboard keys that do not overlap your game controls. " +
+                "Single keys only; modifier combinations and wheel buttons are not supported here.", Wrap);
+            for (int i = 0; i < CameraKeys.Bindings.Length; i++)
+            {
+                var binding = CameraKeys.Bindings[i];
+                GUILayout.BeginHorizontal();
+                GUILayout.Label(binding.Label, GUILayout.Width(175));
+                GUILayout.Label(CameraKeys.Name(binding.Get(cfg)), GUILayout.Width(125));
+                bool listening = CameraKeys.Listening == i;
+                if (GUILayout.Button(listening ? "Cancel" : "Rebind", GUILayout.Width(80)))
+                {
+                    if (listening) CameraKeys.Cancel();
+                    else { GUIUtility.keyboardControl = 0; CameraKeys.Begin(i); }
+                }
+                if (GUILayout.Button("Clear", GUILayout.Width(60))) CameraKeys.Clear(cfg, i);
+                GUILayout.EndHorizontal();
+            }
+            if (GUILayout.Button("Restore numpad defaults", GUILayout.Width(230))) CameraKeys.Reset(cfg);
+            if (!string.IsNullOrEmpty(CameraKeys.Status)) Help(CameraKeys.Status);
         }
 
         private static void DrawTelemetry(Settings cfg)
