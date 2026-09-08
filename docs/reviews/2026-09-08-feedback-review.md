@@ -43,6 +43,13 @@ passed. The full candidate report will identify its exact archive and source.
 Offline tests do not establish Unity rendering, physical torque, actual TSS travel
 or SimHub motion amplitudes. Use [TEST-DRIVE.md](../TEST-DRIVE.md).
 
+RC3 stopped at the developer probe's actual Harmony attachment test: putting
+Unity timing/focus ECalls directly in the patched watchdog Update broke CLR hook
+generation. Moved that sampling behind a non-inlined runtime helper; the actual
+14-assertion attach/observe/unpatch test and lifecycle suite now pass. No gate was
+skipped or weakened. The failed run remains under
+`results/rc-0.2.4-rc.3-66b66f482e2b41de9fc750cdd78b8ff1`; packaging had not started.
+
 FFB `AxleForceCurve@1`, native driver, toolkit pin v0.12.0 and tuning defaults stay
 unchanged. FR-2 separate effect gains and KI-6 snapback remain a captured-signal
 and attended tuning task; the earlier [effects study](../research/2026-09-08-wheel-signals.md)

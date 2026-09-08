@@ -50,8 +50,7 @@ namespace ArtOfSimRally.Mod
 
         private void Update()
         {
-            FrameHealth.Current.Observe(Main.Enabled && Main.Settings != null && Main.Settings.DiagnosticLogging,
-                GameState.IsDriving && Application.isFocused, Time.realtimeSinceStartup);
+            ObserveFrameHealth();
             if (!Main.Enabled)
             {
                 WheelInput.FlushLearnedRanges();
@@ -88,6 +87,16 @@ namespace ArtOfSimRally.Mod
         }
 
         private void LateUpdate() => BonnetCamera.ReleaseIfInactive();
+
+        // Keep Unity ECalls behind a non-inlined runtime boundary. The separate
+        // developer probe must be able to attach its Update hook on the CLR for
+        // offline verification without attempting to resolve Unity's native calls.
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        private static void ObserveFrameHealth()
+        {
+            FrameHealth.Current.Observe(Main.Enabled && Main.Settings != null && Main.Settings.DiagnosticLogging,
+                GameState.IsDriving && Application.isFocused, Time.realtimeSinceStartup);
+        }
 
         private void OnApplicationQuit()
         {
