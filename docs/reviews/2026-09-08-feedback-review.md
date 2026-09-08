@@ -3,7 +3,8 @@
 The owner authorized implementing related roadmap work while away and requested
 a [short reply](../replies/2026-09-08-t300-tss.md). Work continues on
 `codex/overnight-improvements`. Stable 0.2.3 and its Stream Deck install remain
-intact. The previous RC2 is immutable; new changes require another candidate.
+intact. **0.2.4-rc.4 passes all 16 automated checks**; attended tests remain pending.
+The previous RC2 and failed RC3 run remain immutable historical evidence.
 
 ## Findings and changes
 
@@ -39,9 +40,32 @@ conflict nor the user's unmeasured video proves the cause of rare FPS drops.
 
 Individual checks: production warnings-as-errors build, 182 camera tuning,
 90 direct input, 36 lifecycle/compatibility, 25 support and 1,230 signal assertions
-passed. The full candidate report will identify its exact archive and source.
+passed. The full RC4 gate also passed all 16 checks, including 1,266 telemetry,
+450,194 regression and 218 combined lifecycle/camera assertions, package/installer
+validation and developer-recorder exclusion.
 Offline tests do not establish Unity rendering, physical torque, actual TSS travel
 or SimHub motion amplitudes. Use [TEST-DRIVE.md](../TEST-DRIVE.md).
+
+### Exact candidate and handoff
+
+- [ArtOfSimRally-0.2.4-rc.4.zip](../../dist/ArtOfSimRally-0.2.4-rc.4.zip).
+- Identity: `0.2.4-rc.4+38c1bff31ff1ca20696c15a8b7de9298ec04dbf3.clean`.
+- ZIP SHA-256: `C5284CDF7F0B2991F8E013246857A414CD15FADCCE583AD54F923251B8F47887`;
+  independently rehashed after the gate and matched its report.
+- [Automated report](../../results/rc-0.2.4-rc.4-744b3572e72e4404a229e5d10fbec92e/automated.json):
+  passed 2026-09-08 20:11:12 UTC, clean source, synthetic evidence only, no recorded corpus.
+- [Attended checklist](../../results/rc-0.2.4-rc.4-744b3572e72e4404a229e5d10fbec92e/manual.json):
+  all seven cases pending. The release gate correctly rejects it with
+  `NOT READY: Tester/rig not recorded`; no prior smoke results were copied in.
+- Not installed, driven or published. Stable 0.2.3's six installed payload hashes
+  and Settings.xml still match its final-install receipt. The existing Steam
+  550320 Stream Deck launcher still targets that installation.
+
+These archive/report links are generated local artifacts outside Git. Later
+documentation commits do not rebuild or change RC4. Install this exact archive
+with the game closed before recording attended evidence. Prioritize combined
+CameraMod views, corrected telemetry with SimHub/shaker/motion, input Flip/reopen,
+camera-key persistence and a paused support bundle after a diagnostic drive.
 
 RC3 stopped at the developer probe's actual Harmony attachment test: putting
 Unity timing/focus ECalls directly in the patched watchdog Update broke CLR hook

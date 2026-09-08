@@ -15,6 +15,8 @@ Later T300/TSS feedback authorized another implementation pass. See
 [the follow-up review](reviews/2026-09-08-feedback-review.md): CameraMod isolation,
 support-log/frame-health improvements, clearer assist help, KI-16 telemetry
 correction and actual failed-send handling are now implemented beyond RC2.
+**0.2.4-rc.4 passes all 16 automated checks** with those changes; its exact
+archive, source identity and pending attended checklist are in that review.
 The original work-order table below records the first pass. New wheel effects
 and T300 rotation changes still require measured signals/hardware evidence.
 
