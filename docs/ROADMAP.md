@@ -5,6 +5,13 @@ Status reviewed 2026-09-08 for the 0.2.3 release.
 The defect register is [KNOWN-ISSUES.md](KNOWN-ISSUES.md); the implementation review
 is [2026-09-06-rc-review.md](reviews/2026-09-06-rc-review.md).
 
+The next implementation session is ordered in [OVERNIGHT-QUEUE.md](OVERNIGHT-QUEUE.md).
+[USER-FEEDBACK.md](USER-FEEDBACK.md) records the T300/TSS report, camera-key
+remapping request and the post-release GitHub audit with unsent support drafts.
+Ready work: camera-tuner save retry/logging (KI-14), keyboard remapping (FR-1),
+and focused analog-handbrake regression coverage (KI-13). Rotation (KI-12) and
+independent road/landing/crash gains (FR-2) begin with investigation.
+
 ## Now — finish 0.2.3 attended validation
 
 Owner RC6 testing reported no stutter, working cameras and no control issues so

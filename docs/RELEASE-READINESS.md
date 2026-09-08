@@ -1,6 +1,7 @@
 # Release readiness — 2026-09-08
 
-**0.2.3 is being prepared for publication at the owner's request.** RC6 passes
+**[0.2.3 is published](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3)
+and installed locally.** RC6 passes
 all 16 automated gates and was driven after local installation. Owner feedback:
 "no stutter, camera worked great, and no issues with the controls so far."
 The full attended matrix remains pending. Publication is a scoped release decision,
@@ -9,9 +10,33 @@ run and checklist; it has not been driven yet.
 
 The RC6 UMM log confirms toolkit/Mono loading and live force evaluation. Local
 log and exact owner report are preserved under `results/release-0.2.3-preparation`.
-No real capture was completed. The candidate evidence below remains historical
-and immutable; final release identity and installation evidence will be added
-after packaging and publication.
+No real capture was completed. RC6 evidence below remains historical and immutable.
+
+## Published final artifact
+
+- Published 2026-09-08 05:08:05 UTC; stable/latest GitHub release.
+- Tag `v0.2.3`, source `1a9df539bad2f3bddfc80adc36ec9e4ef3b1c2a8`.
+- Identity `0.2.3+1a9df539bad2f3bddfc80adc36ec9e4ef3b1c2a8.clean`.
+- ZIP SHA-256 `0C82AC79A91093C82732EDAA2878597D429AB4A480A61EADD657C655BDFE9F3F`.
+- [Final automated report](../results/rc-0.2.3-5898189c119e4483af6d7a4a0110ff5b/automated.json):
+  all 16 checks pass, including 450,079 consumer assertions and 703 reference rows.
+- [Final attended checklist](../results/rc-0.2.3-5898189c119e4483af6d7a4a0110ff5b/manual.json):
+  pending; no real corpus. RC6 smoke results are not copied as final-artifact passes.
+- Downloaded the published ZIP and checksum and matched local SHA-256 plus GitHub's
+  asset digest. Production source, Version.props and toolkit are unchanged from RC6.
+- Installed that downloaded archive with the game closed. All six mod files and
+  the second native plugin copy match its manifest. Settings.xml was preserved
+  byte-for-byte, including the owner's current Strength 50 and Smoothing 0.2.
+- Removed the separately installed developer probe for the shipping setup; prior
+  mod, settings and probe are backed up locally. No game was launched after this
+  final installation. [Install receipt](../results/release-0.2.3-preparation/final-install-receipt.json).
+- Existing Stream Deck key still launches Steam app 550320 into this installation.
+  No button/profile change was needed. The RC6 install description below is history.
+
+The owner explicitly requested publication and supplied the scoped RC6 smoke
+result. That decision leaves the full manual gate incomplete; it does not change
+the gate's rejection of missing evidence. Follow-up work and a new source finding
+in camera tuning persistence (KI-14) are in [OVERNIGHT-QUEUE.md](OVERNIGHT-QUEUE.md).
 
 ## Exact candidate
 
@@ -79,9 +104,9 @@ The existing art of rally Stream Deck key already launches Steam app 550320,
 whose installed directory is this game folder. Profile 1, page UUID
 `C881702A-9A40-47FD-A514-0A9E9CA40A8C`, Keypad coordinate `6,3` (bottom row,
 seventh key). Its action/layout/artwork were left intact; launching it now uses
-the installed RC6. The separate developer probe is installed for capture and must
-be removed before the final checks of the shipping setup. The game has not yet
-been launched as part of this preparation.
+the installed RC6 at that time. The separate developer probe was installed for
+capture. The later owner drive and final stable installation are recorded above;
+the probe has now been removed.
 
 ## Remaining attended work
 
@@ -102,5 +127,5 @@ close KI-1/KI-2/KI-5 or mark Fanatec/PS5/T300 reports tested from these offline 
 
 Keep RWD snapback tuning, damper/road/impact effects, new wheel defaults and full
 Unity input playback after the maintenance release. They need a separate tuning
-and test cycle. Once the attended gate passes, prepare and verify the exact final
-artifact intended for distribution before tagging or publishing it.
+and test cycle. Use new candidate identities for future runtime changes; do not
+replace the published artifact or silently mark these pending checks passed.

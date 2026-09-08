@@ -74,6 +74,28 @@ the mod's settings UI with force feedback and telemetry.
 same day; both are in the game's own view rotation with a numpad tuner, and both
 are verified on the owner's rig.
 
+## Keys without a numpad
+
+In-panel remapping is requested and queued as FR-1 in
+[USER-FEEDBACK.md](USER-FEEDBACK.md). The existing tuner already reads key fields
+from `Mods/ArtOfSimRally/Settings.xml`. With the game closed, back up that file
+and edit existing fields, for example:
+
+```xml
+<KeyUp>PageUp</KeyUp>
+<KeyDown>PageDown</KeyDown>
+```
+
+This changes vertical adjustment for the active mounted view. Other fields are
+KeyForward, KeyBack, KeyLeft, KeyRight, KeyPitchDown, KeyPitchUp, KeyFovUp,
+KeyFovDown and KeyReset. Values must be valid Unity `KeyCode` names; choose keys
+that do not conflict with your game bindings. These keys tune bonnet/bumper
+position, not the game's ChangeCamera action or another mod's chase camera.
+The XML route is supported by the existing settings model; the example has not
+been exercised in an attended game session. Default mappings remain numpad keys.
+
+## Implementation
+
 Implementation is [`BonnetCamera.cs`](../src/ArtOfSimRally.Mod/BonnetCamera.cs)
 and [`CameraTuner.cs`](../src/ArtOfSimRally.Mod/CameraTuner.cs). The mechanism is
 smaller than the design notes above imply: `CarCameras.SetCameraFromSave` wraps

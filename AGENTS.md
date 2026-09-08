@@ -33,6 +33,7 @@ third-party binaries, nothing that would force the repo private.
 | `lib/umm/` | UnityModManager.dll + 0Harmony.dll, extracted locally, **never committed**. |
 | `tests/` | Executable consumer regression, lifecycle, telemetry, recorder and hook suites; Python replay/evidence tests. Run through `tools/testing/Test-Rc.ps1`. |
 | `tools/` | `Sync-Toolkit.ps1` (toolkit pin), `package/` (release zip), `installer/` (the double-click installer), `dinput-enum/` (lists DirectInput devices without launching the game). |
+| `docs/OVERNIGHT-QUEUE.md` / `docs/USER-FEEDBACK.md` | Prioritized follow-up work, user reports and unsent support drafts. |
 | `docs/KNOWN-ISSUES.md` | **The defect register.** Open, resolved and will-not-fix, with severities. Read before diagnosing anything. |
 | `docs/TROUBLESHOOTING.md` | User-facing fixes by symptom; the Fanatec section is the most-needed page. |
 | `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP, RELEASING |
@@ -41,7 +42,7 @@ third-party binaries, nothing that would force the repo private.
 
 Release: **0.2.3** (2026-09-08). Toolkit pin: **v0.12.0**, native component **0.5.0**. Production uses the shared
 managed wrapper, AxleForceCurve@1 and telemetry. The attended checklist remains pending.
-Read docs/PRE-RELEASE-TESTING.md and docs/reviews/2026-09-06-rc-review.md.
+Read docs/RELEASE-READINESS.md for the final artifact, docs/OVERNIGHT-QUEUE.md for next work, and docs/USER-FEEDBACK.md for support drafts. The final ZIP is installed behind the Stream Deck Steam 550320 key, with settings preserved and the developer probe removed.
 Offline tests pass. Owner RC6 feedback (2026-09-08 UTC): no stutter, camera worked great, no control issues so far. A game log confirms mod/probe loading and force evaluation. The complete attended matrix and final-labelled drive remain pending. "Verified" means confirmed on the owner's
 MOZA R12 rig unless stated otherwise.
 

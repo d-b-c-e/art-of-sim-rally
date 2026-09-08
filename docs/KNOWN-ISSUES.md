@@ -21,6 +21,45 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-14 — Camera tuner loses failed-save retry and logs each adjustment frame
+
+**Persistence/supportability; source-confirmed in 0.2.3, reproduction queued.**
+`CameraTuner.Update` clears `_dirty` before `Main.SaveSettings()`, ignores its
+failure result and logs success unconditionally. Its timer only runs while a
+mounted view is active, so switching away before the timer expires can leave the
+edit unsaved until another save or mounted-view update. Held tuning keys also
+produce a log line per frame. These are separate from the learned-axis save
+policy fixed in KI-8; there is no evidence they caused KI-5's stage-start stutter.
+
+Reproduce locked-file failure and view handback, then retain/retry pending camera
+edits and rate-limit logs. First item in [OVERNIGHT-QUEUE.md](OVERNIGHT-QUEUE.md).
+No runtime regression was reported by the owner and no fix is in 0.2.3.
+
+### KI-13 — TSS handbrake assignment is not discoverable through stock controls
+
+**Setup; user report, TSS validation pending.** T300 RS GT + TSS user can assign
+shifts but not handbrake in the game's controls UI. Mod version was not supplied.
+The mod's direct-input panel already supports a Handbrake axis: it normalizes to
+0..1 and overrides the game's float handbrake input, retaining unbound channels.
+This is not evidence that TSS is unsupported or that the mod handbrake is digital.
+
+[Direct binding steps](TROUBLESHOOTING.md#separate-handbrake-tss-or-other-usb-device)
+are documented. Confirm intermediate travel, release and actual braking behavior
+on the TSS before claiming hardware verification. See [user feedback](USER-FEEDBACK.md).
+
+### KI-12 — T300 rotation panel changes from 700 to 1080 degrees after launch
+
+**Unverified cause and physical effect; reported 2026-09-08 UTC.** The user sets
+700 degrees in the Thrustmaster panel and sees 1080 after starting the modded game,
+while steering still feels near 700. Driver/firmware and mod version are unknown.
+
+No physical degrees-setting call was found in the consumer or pinned toolkit
+v0.12.0 native source. The toolkit does set logical `DIPROP_RANGE` to 0..65535 and
+disable autocenter. A logical axis range is not a physical rotation request;
+driver response to initialization remains untested. Compare vanilla/mod/FFB/direct
+input with consistent profiles and record actual lock separately from the panel.
+Do not change rotation behavior or blame a component before reproducing it.
+
 ### KI-1 — Stock cameras 3–8 render reversed
 
 **Major; open pending validation.** Reported on a T300 RS GT with mod 0.2.1 in
@@ -114,13 +153,14 @@ Data points so far:
 
 | Rig | Base gain | Strength | Smoothing | Notes |
 |---|---|---|---|---|
-| MOZA R12 (owner) | — | **26** | 0.2 | `FyReference` retuned 6,000 → 8,000 → 11,500 N to move the usable setting toward the slider midpoint; it was 20 at 8,000 N, and the live setting is still 26, not the 50 default |
+| MOZA R12 (owner, 2026-09-04) | — | **26** | 0.2 | Historical setting after the `FyReference` retunes; not the current installation |
 | Unstated wheel + motion platform (Reddit, 2026-09-04) | 100% | **15** | **0.50** | "works perfect"; raised smoothing specifically to kill notchiness over low-poly inclines |
+| MOZA R12 (owner, RC6 drive 2026-09-08 UTC) | — | **50** | 0.2 | Strength from live log and preserved settings; owner reports no control issues, not a separate force-tuning comparison |
+| Thrustmaster T300 RS GT (message recorded 2026-09-08 UTC) | 80–90% overall; effect categories 100% | not supplied | not supplied | Wants light steering with strong surface/landing/crash feedback; see FR-2 in USER-FEEDBACK |
 
-Both users ended up well below Strength 50 — the second at 15 with the base at
-full gain. That is two of two, and it suggests the default is still hot for
-anyone who does not turn their base down. Worth watching before retuning a
-third time on one rig's opinion.
+The first two reports favored lower gain; the owner subsequently used 50. These
+observations do not justify a universal new default. The T300 request also needs
+independent effect gains rather than merely a third retune on one rig's opinion.
 
 ---
 
@@ -164,7 +204,7 @@ maintenance RC; tune against attended captures and compare at the reporter's set
 
 ### KI-7 — Candidate identity and native-path diagnostics were misleading
 
-**Supportability; fixed in RC, live support output pending.** Info.json remained
+**Supportability; fixed in 0.2.3, live support output pending.** Info.json remained
 0.2.2 and the assembly remained 0.1.0.0 regardless of the requested zip name.
 LoadedPath only recorded a preload request, and version diagnostics could load
 the plugin. Documentation incorrectly told users to delete the installer’s
@@ -178,7 +218,7 @@ the candidate manifest; a plugin path or a lower native version alone is not sta
 
 ### KI-8 — A failed deferred save discarded the retry; shutdown saved before release
 
-**Major lifecycle defect; fixed in RC, game persistence check pending.** The
+**Major lifecycle defect; fixed in 0.2.3, game persistence check pending.** The
 dirty flag was cleared before Main.SaveSettings, which swallowed write errors.
 Shutdown also wrote settings before zeroing the wheel. The save API now returns
 success, dirty state survives failures and output release happens before disk IO.
@@ -218,7 +258,7 @@ No new force tune is introduced.
 
 ### KI-11 — Telemetry could stay disabled after correcting a failed destination
 
-**Supportability; fixed in candidate source, live consumer check pending (2026-09-07).**
+**Supportability; fixed in 0.2.3, live consumer check pending.**
 `_senderFailed` was checked before endpoint changes and was not reset by shutdown.
 After one connection/send failure, editing host/port or toggling telemetry could
 leave it disabled for the rest of the session. Failed attempts now remember their

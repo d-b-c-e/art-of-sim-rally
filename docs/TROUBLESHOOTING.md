@@ -39,6 +39,26 @@ a Fanatec was the wrong-twin case above.
 **Pedals on a separate USB cable** (ClubSport V3 etc.) appear as their own
 device and are read the same way: Assign, press the pedal.
 
+## Separate handbrake (TSS or other USB device)
+
+Use the mod's binding panel if the game's controls screen only offers shifting
+or never detects the handbrake. You can bind just the handbrake and leave working
+steering/pedal channels on the game's input path.
+
+1. Put the TSS in handbrake mode. Open Ctrl+F10 → **Wheel input (direct)** and
+   enable **Read the wheel directly**.
+2. Release the lever, click **Assign** beside **Handbrake**, then pull it. Avoid
+   moving other controls during assignment.
+3. Use the lever's full travel once to learn its range, then release it. The value
+   should move gradually between 0 and 1 and return to 0. If reversed, use **Flip**.
+4. Leave unrelated direct-input rows unbound if their existing game bindings work.
+   Clear conflicting shift bindings if pulling the lever also changes gear.
+
+The direct axis supplies an analog float to the game; a button binding is on/off.
+Actual TSS travel and braking response still await hardware confirmation. If it
+does not bind or shows only 0/1, create a support file and record the device mode,
+binding and displayed values at rest, partial pull and full pull.
+
 ## The wheel steers the wrong way with direct input
 
 Press **Flip** on the Steer row (Ctrl+F10 → Wheel input (direct)). From 0.2.2

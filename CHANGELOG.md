@@ -7,6 +7,12 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Documentation
+
+- Record the 0.2.3 publication and verified local installation, GitHub audit,
+  T300/TSS feedback and prioritized overnight queue. Add direct handbrake setup
+  and a camera-key XML example. No new runtime behavior after 0.2.3.
+
 ## [0.2.3] - 2026-09-08
 
 Owner RC6 testing found no stutter, working cameras and no control issues so far.

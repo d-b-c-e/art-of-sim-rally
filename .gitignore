@@ -452,3 +452,7 @@ lib/*
 # Vendored dbce-wheel-mod-toolkit artifacts, pinned by lib/toolkit/VERSION
 !lib/toolkit/
 !lib/toolkit/**
+
+# Release notes are source documents, not Visual Studio build artifacts.
+!docs/releases/
+!docs/releases/**

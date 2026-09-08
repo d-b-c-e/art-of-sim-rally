@@ -175,6 +175,10 @@ checks pass. Owner RC6 testing reported no stutter, good cameras and no control
 issues so far. The full attended checklist and hardware-specific reports remain
 open. See the [release notes](docs/releases/0.2.3.md) and
 [testing guide](docs/PRE-RELEASE-TESTING.md).
+
+Next work and outstanding user reports are tracked in the
+[roadmap](docs/ROADMAP.md) and [investigation queue](docs/OVERNIGHT-QUEUE.md).
+
 Recording is development-only: a separately installed probe captures signals,
 and an external runner replays saved cases without the game or wheel. The release
 mod has no recorder or playback feature.
