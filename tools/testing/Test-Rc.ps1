@@ -41,14 +41,20 @@ try {
     $result = Run 'telemetry-loopback' (Join-Path $root 'tests/Telemetry/bin/Release/net48/Telemetry.exe') @($root,'D:/Program Files (x86)/Steam/steamapps/common/artofrally')
     $telemetry = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($telemetry.status -eq 'passed' -and $telemetry.assertions -gt 0) 'Telemetry runner ran no assertions'
-    Checkpoint 'telemetry-loopback' $telemetry.assertions
+    $result = Run 'signals' 'dotnet' @('run','--project','tests/Signals/Signals.csproj','-c','Release')
+    $signals = $result | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($signals.status -eq 'passed' -and $signals.assertions -gt 0) 'Signal runner ran no assertions'
+    Checkpoint 'telemetry-loopback' ($telemetry.assertions + $signals.assertions)
+    $result = Run 'support' 'dotnet' @('run','--project','tests/Support/Support.csproj','-c','Release')
+    $support = $result | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($support.status -eq 'passed' -and $support.assertions -gt 0) 'Support runner ran no assertions'
     $result = Run 'regression' 'dotnet' @('run','--project','tests/Regression/Regression.csproj','-c','Release','--','--native','lib/toolkit/native/WheelFfb.dll')
     $regression = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($regression.status -eq 'passed' -and $regression.assertions -gt 0) 'Regression runner ran no assertions'
     $result = Run 'wheel-input' 'dotnet' @('run','--project','tests/WheelInput/WheelInput.csproj','-c','Release')
     $wheelInput = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($wheelInput.status -eq 'passed' -and $wheelInput.assertions -gt 0) 'Wheel input runner ran no assertions'
-    Checkpoint 'regression' ($regression.assertions+$wheelInput.assertions)
+    Checkpoint 'regression' ($regression.assertions+$wheelInput.assertions+$support.assertions)
     $result = Run 'lifecycle' 'dotnet' @('run','--project','tests/Lifecycle/Lifecycle.csproj','-c','Release')
     $lifecycle = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($lifecycle.status -eq 'passed' -and $lifecycle.assertions -gt 0) 'Lifecycle runner ran no assertions'

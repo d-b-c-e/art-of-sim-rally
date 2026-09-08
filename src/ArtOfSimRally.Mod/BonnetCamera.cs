@@ -45,6 +45,10 @@ namespace ArtOfSimRally.Mod
         // casting out-of-range ints and hoping nothing switches on them.
         private static CameraAngle _bonnetAngle;
         private static CameraAngle _bumperAngle;
+        private static bool _cameraModOwnsRotation;
+        internal const string ExternalCameraHelp = "Camera Mod is loaded. Its chase views keep control of the camera rotation; " +
+            "our bonnet/bumper views and tuning keys are suspended for compatibility. To use our mounted views, " +
+            "disable Camera Mod before launching the game again. Your saved mount settings are kept.";
 
         private static float _lateralOffset;
 
@@ -144,6 +148,17 @@ namespace ArtOfSimRally.Mod
             {
                 var cfg = Main.Settings;
                 if (cfg == null) return;
+                _cameraModOwnsRotation = Main.OtherCameraModLoaded;
+                if (_cameraModOwnsRotation)
+                {
+                    // CameraMod 0.3.1 assumes its two views occupy slots 8/9
+                    // and edits by enum index. Sharing the list can mutate the
+                    // wrong camera even when our reference-based lookup is correct.
+                    Release(false);
+                    _bonnetAngle = _bumperAngle = null;
+                    ModLog.Info(ExternalCameraHelp);
+                    return;
+                }
                 var list = AnglesList(__instance);
                 if (list == null) return;
 
@@ -178,7 +193,7 @@ namespace ArtOfSimRally.Mod
                 var cfg = Main.Settings;
                 if (cfg == null) return;
                 var view = ActiveView(__instance);
-                bool shouldDrive = Main.Enabled && GameState.IsPlayerView &&
+                bool shouldDrive = Main.Enabled && !_cameraModOwnsRotation && GameState.IsPlayerView &&
                     ((view == View.Bonnet && cfg.BonnetCameraEnabled) ||
                      (view == View.Bumper && cfg.BumperCameraEnabled));
 

@@ -50,6 +50,8 @@ namespace ArtOfSimRally.Mod
 
         private void Update()
         {
+            FrameHealth.Current.Observe(Main.Enabled && Main.Settings != null && Main.Settings.DiagnosticLogging,
+                GameState.IsDriving && Application.isFocused, Time.realtimeSinceStartup);
             if (!Main.Enabled)
             {
                 WheelInput.FlushLearnedRanges();

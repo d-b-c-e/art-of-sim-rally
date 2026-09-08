@@ -70,11 +70,35 @@ static class Program
         ArtOfSimRally.Mod.Main.Enabled=false; ModWatchdog.Shutdown(unloading:true); Released(camera);
         Check(BonnetCamera.ActiveView(rig)==BonnetCamera.View.None,"unload left mounted placeholder active");
     }
+    static void CameraCompatibility()
+    {
+        ArtOfSimRally.Mod.Main.OtherCameraModLoaded=true;
+        foreach(bool externalFirst in new[]{false,true})
+        {
+            var rig=new CarCameras();
+            for(int i=0;i<8;i++) rig.CameraAnglesList.Add(new CameraAngle(1,1,1,CameraAngle.CameraAngles.CAMERA1));
+            var externalA=new CameraAngle(7,2,-1,CameraAngle.CameraAngles.CAMERA1);
+            var externalB=new CameraAngle(10,3,-1.5f,CameraAngle.CameraAngles.CAMERA1);
+            if(externalFirst) { rig.CameraAnglesList.Add(externalA); rig.CameraAnglesList.Add(externalB); }
+            Patch("AddToRotation","Append",rig);
+            if(!externalFirst) { rig.CameraAnglesList.Add(externalA); rig.CameraAnglesList.Add(externalB); }
+            Check(rig.CameraAnglesList.Count==10,"camera mods competed for rotation slots");
+            Check(ReferenceEquals(rig.CameraAnglesList[8],externalA) && ReferenceEquals(rig.CameraAnglesList[9],externalB),"external camera slots 8/9 displaced");
+            rig.CurrentCameraAngle=externalA;
+            Check(BonnetCamera.ActiveView(rig)==BonnetCamera.View.None,"external camera taken as mounted view");
+            var camera=new Camera(); UIManager.Instance.PanelManager.mainCamera=camera;
+            Patch("DriveCamera","Mount",rig);
+            Check(camera.fieldOfView==60,"mounted FOV applied to external chase camera");
+        }
+        ArtOfSimRally.Mod.Main.OtherCameraModLoaded=false;
+        var own=Mount(); Check(BonnetCamera.ActiveView(own)==BonnetCamera.View.Bonnet,"mounted views did not work without external mod");
+        BonnetCamera.Release(true);
+    }
     static int Main(string[] args)
     {
         try
         {
-            Cameras(); Shutdown();
+            Cameras(); Shutdown(); CameraCompatibility();
             Console.WriteLine(JsonSerializer.Serialize(new {status="passed",assertions})); return 0;
         }
         catch(Exception ex) { Console.Error.WriteLine(ex); return 1; }

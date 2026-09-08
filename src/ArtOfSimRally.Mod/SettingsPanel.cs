@@ -78,10 +78,10 @@ namespace ArtOfSimRally.Mod
                 "box. This puts the button name there instead, e.g. B12.");
 
             GUILayout.Space(4);
-            cfg.DisableSteerAssist = Toggle(cfg.DisableSteerAssist, "Disable steering assist",
-                "CHANGES HOW THE CAR DRIVES. The game reduces your steering authority as the car " +
-                "slides. Unlike the options above this is a driving aid, not a device fix, and " +
-                "art of rally has online leaderboards.");
+            cfg.DisableSteerAssist = Toggle(cfg.DisableSteerAssist, "Disable steering limiter on car spawn (legacy)",
+                "Requires Direct steering and a newly spawned car. This is not the game's numeric assist slider " +
+                "and does not set its saved value to zero. Unticking does not restore the current car: " +
+                "leave this off and use the game's own assist controls. CHANGES HOW THE CAR DRIVES.");
 
             End();
         }
@@ -112,7 +112,10 @@ namespace ArtOfSimRally.Mod
                 cfg.Invert = Toggle(cfg.Invert, "Invert direction",
                     "Turn on if the wheel pulls the wrong way.");
 
-                cfg.DiagnosticLogging = Toggle(cfg.DiagnosticLogging, "Log detail for support", null);
+                cfg.DiagnosticLogging = Toggle(cfg.DiagnosticLogging, "Log detail for support",
+                    "Enable before a short reproduction, then pause and create a support file in this session. " +
+                    "Adds force traces and aggregate frame-hitch counts; switch off afterward. " +
+                    "Normal errors are collected without this option.");
             }
 
             End();
@@ -180,6 +183,13 @@ namespace ArtOfSimRally.Mod
         private static void DrawCamera(Settings cfg)
         {
             if (!Section("Camera", ref _openCamera)) { CameraKeys.Cancel(); return; }
+            if (Main.OtherCameraModLoaded)
+            {
+                CameraKeys.Cancel();
+                Help(BonnetCamera.ExternalCameraHelp);
+                End();
+                return;
+            }
 
             cfg.BonnetCameraEnabled = Toggle(cfg.BonnetCameraEnabled, "Bonnet camera",
                 "Adds a bonnet view to the game's normal view rotation - press your change-view " +
@@ -243,7 +253,7 @@ namespace ArtOfSimRally.Mod
 
             cfg.TelemetryEnabled = Toggle(cfg.TelemetryEnabled, "Send telemetry",
                 "Forza-compatible UDP, for SimHub, dashboards, bass shakers and motion rigs. " +
-                "Use a Forza Horizon 5 profile.");
+                "Use a Forza Horizon 5 profile. This does not add wheel force feedback or rumble.");
 
             if (cfg.TelemetryEnabled)
             {
@@ -274,6 +284,10 @@ namespace ArtOfSimRally.Mod
         private static void DrawTrouble(Settings cfg)
         {
             if (!Section("Devices and troubleshooting", ref _openTrouble)) return;
+
+            cfg.DiagnosticLogging = Toggle(cfg.DiagnosticLogging, "Log detail for support",
+                "For an intermittent problem: enable, reproduce briefly, pause, then create the file below before restarting. " +
+                "Turn off afterward. A support file also works with this off; it cannot recover earlier detailed traces.");
 
             Panel.DrawInputStatus();
 

@@ -60,12 +60,11 @@ namespace ArtOfSimRally.Mod
             __instance.veloSteerReleaseTime  = 0f;
             __instance.steerCorrectionFactor = 1f;
 
-            // SteerAssistance() clamps steering authority by lateral slip
-            // (maxSteer = 1 - |average lateralSlip|), so the more the car slides
-            // the less steering the driver is allowed. Recognised wheels do NOT
-            // escape this - it is a genuine driving aid, not a device fix, and
-            // turning it off changes how the car behaves. Off by default and
-            // clearly labelled, because art of rally has online leaderboards.
+            // Legacy spawn-only override of the boolean steering limiter. This
+            // does not edit a saved numeric assist setting or restore the car on
+            // untick; prefer the game's own controls. SmoothSteer's recognized-
+            // wheel branch already returns before its limiter. Do not extend this
+            // into a live assist controller: physics/assist changes are out of scope.
             if (cfg.DisableSteerAssist)
                 __instance.steerAssistance = false;
 

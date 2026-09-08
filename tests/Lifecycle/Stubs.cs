@@ -50,7 +50,7 @@ namespace UnityEngine
         public static float Lerp(float a,float b,float t) => a+(b-a)*Math.Clamp(t,0,1);
     }
     public static class Time { public static float realtimeSinceStartup, unscaledDeltaTime=.016f; public static int frameCount; }
-    public static class Application { public static string version="fixture", unityVersion="fixture"; }
+    public static class Application { public static string version="fixture", unityVersion="fixture"; public static bool isFocused=true; }
 }
 public class CameraAngle
 {
@@ -87,10 +87,10 @@ namespace ArtOfSimRally.Mod
         public float BonnetLean=0, BonnetSide=0, BonnetHeight=1, BonnetForward=1, BonnetPitch=0, BonnetFOV=75;
         public float BumperSide=0, BumperHeight=1, BumperForward=1, BumperPitch=0, BumperFOV=75;
         public float FyReference=11500, GainFromStrength=1, Smoothing=0;
-        public bool Invert=false;
+        public bool Invert=false, DiagnosticLogging=false;
     }
     internal static class Calls { public static List<string> Log = new List<string>(); }
-    internal static class Main { public static Settings Settings = new Settings(); public static bool Enabled=true; }
+    internal static class Main { public static Settings Settings = new Settings(); public static bool Enabled=true, OtherCameraModLoaded=false; }
     internal static class GameState { public static bool IsDriving=false, IsPlayerView=true; }
     internal static class ModLog { public static void Info(string value) { } }
     internal static class CameraTuner

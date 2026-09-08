@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using Rewired;
 using UnityEngine;
 
@@ -47,11 +46,19 @@ namespace ArtOfSimRally.Mod
         /// <summary>Gathers diagnostics into one file on the desktop.</summary>
         public static void Create()
         {
+            if (GameState.IsDriving)
+            {
+                LastResult = "Pause the game before creating a support file, so collecting logs cannot cause a driving hitch.";
+                return;
+            }
             try
             {
                 var sb = new StringBuilder();
                 WriteHeader(sb);
                 WriteSettings(sb);
+                Main.WriteLoadedMods(sb);
+                FrameHealth.Current.Append(sb);
+                WriteRuntimeInputs(sb);
                 WriteControllers(sb);
                 WriteBindings(sb);
                 WriteFfbLog(sb);
@@ -153,6 +160,28 @@ namespace ArtOfSimRally.Mod
                 try { v = f.GetValue(s); } catch { v = "<unreadable>"; }
                 sb.AppendLine("  " + f.Name.PadRight(24) + " = " + v);
             }
+            sb.AppendLine();
+        }
+
+        private static void WriteRuntimeInputs(StringBuilder sb)
+        {
+            sb.AppendLine("--- direct inputs (cached latest sample; not a history) ---");
+            sb.AppendLine("direct input enabled: " + WheelInput.Enabled);
+            sb.AppendLine("device state: " + WheelInput.DeviceSummary);
+            sb.AppendLine("assignment status: " + WheelInput.Status);
+            foreach (var channel in WheelInput.Channels)
+                sb.AppendLine(channel + ": " + WheelInput.Describe(channel) + "; value=" +
+                    WheelInput.Value(channel).ToString("F4", System.Globalization.CultureInfo.InvariantCulture));
+            sb.AppendLine("game restart active: " + GameState.IsRestarting);
+            sb.AppendLine("other CameraMod loaded: " + Main.OtherCameraModLoaded);
+            try
+            {
+                var car = GameEntryPoint.EventManager?.playerManager?.carcontroller;
+                if (car != null)
+                    sb.AppendLine("live car steering limiter=" + car.steerAssistance + "; correction factor=" + car.steerCorrectionFactor);
+            }
+            catch { sb.AppendLine("live car state unavailable"); }
+            sb.AppendLine("DisableSteerAssist is a legacy spawn-only boolean override, not a saved numeric assist value.");
             sb.AppendLine();
         }
 
@@ -259,142 +288,37 @@ namespace ArtOfSimRally.Mod
             catch (Exception ex) { sb.AppendLine("failed: " + ex.Message); sb.AppendLine(); }
         }
 
-        // UMM's log, which is where every ModLog line from this mod ends up -
-        // including the Rewired calibration before/after dump and the binding
-        // target messages.
         private static void WriteModLog(StringBuilder sb)
         {
             sb.AppendLine("--- mod log (tail) ---");
-            string path = Path.Combine(
-                Path.GetDirectoryName(Application.dataPath) ?? "",
+            string path = Path.Combine(Path.GetDirectoryName(Application.dataPath) ?? "",
                 @"artofrally_Data\Managed\UnityModManager\Log.txt");
-
-            if (!File.Exists(path)) { sb.AppendLine("not found at " + path); sb.AppendLine(); return; }
-            try
-            {
-                var lines = File.ReadAllLines(path);
-                int start = Math.Max(0, lines.Length - 200);
-                for (int i = start; i < lines.Length; i++) sb.AppendLine(lines[i]);
-            }
-            catch (Exception ex) { sb.AppendLine("could not read: " + ex.Message); }
+            SupportLogs.AppendTail(sb, path, 200);
             sb.AppendLine();
         }
 
         private static void WriteFfbLog(StringBuilder sb)
         {
             sb.AppendLine("--- force feedback log ---");
-
-            string path = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "ArtOfSimRally", "ffb.log");
-
-            if (!File.Exists(path))
+            sb.AppendLine("source: " + path);
+            try { SupportLogs.AppendNative(sb, SupportLogs.ReadTail(path)); }
+            catch (Exception ex)
             {
-                sb.AppendLine("NOT FOUND at " + path);
-                sb.AppendLine("The native plugin has never been loaded. Most likely");
-                sb.AppendLine("UnityForceFeedback.dll is missing from artofrally_Data/Plugins/x86_64,");
-                sb.AppendLine("or was put somewhere else.");
-                sb.AppendLine();
-                return;
+                sb.AppendLine("log unavailable: " + ex.Message);
+                sb.AppendLine("Logging can be disabled with DBCE_FFB_LOG=0. An absent log is not proof of a missing plugin; see observed module identity above.");
             }
-
-            string[] lines;
-            try { lines = File.ReadAllLines(path); }
-            catch (Exception ex) { sb.AppendLine("could not read: " + ex.Message); sb.AppendLine(); return; }
-
-            var force = new Regex(@"SetDeviceForcesXY\((-?\d+),\s*(-?\d+)\)");
-            int count = 0, min = int.MaxValue, max = int.MinValue, neg = 0, pos = 0, zero = 0;
-            var kept = new StringBuilder();
-            int keptCount = 0;
-
-            foreach (var line in lines)
-            {
-                var m = force.Match(line);
-                if (m.Success)
-                {
-                    int x = int.Parse(m.Groups[1].Value);
-                    count++;
-                    if (x < min) min = x;
-                    if (x > max) max = x;
-                    if (x < 0) neg++; else if (x > 0) pos++; else zero++;
-                    continue;
-                }
-
-                // Everything else - device enumeration, errors, lifecycle - is the
-                // part a human needs to read. Cap it so a long session cannot
-                // produce an unusable file.
-                if (keptCount < 400) { kept.AppendLine(line); keptCount++; }
-            }
-
-            sb.AppendLine("force updates sent : " + count);
-            if (count > 0)
-            {
-                int peak = Math.Max(Math.Abs(min), Math.Abs(max));
-                sb.AppendLine("  range            : " + min + " .. " + max + "   (full scale is +/-10000)");
-                sb.AppendLine("  peak             : " + (peak / 100.0).ToString("F2") + "% of full scale");
-                sb.AppendLine("  sign balance     : " + neg + " negative, " + pos + " positive, " + zero + " zero");
-                sb.AppendLine();
-                sb.AppendLine(peak < 500
-                    ? "  READING: forces are very weak. This is a tuning problem - lower"
-                    + Environment.NewLine +
-                      "  'Reference torque' until the peak approaches full scale."
-                    : "  READING: the mod is computing strong forces. If the wheel still does"
-                    + Environment.NewLine +
-                      "  nothing, they are being rejected by the device - check for"
-                    + Environment.NewLine +
-                      "  'SetParameters FAILED' below.");
-            }
-            else
-            {
-                sb.AppendLine("  READING: no forces were ever sent. Either force feedback is off in");
-                sb.AppendLine("  the settings, or no stage was driven, or initialisation failed - see below.");
-            }
-
-            sb.AppendLine();
-            sb.AppendLine("non-force log lines (device list, errors, lifecycle):");
-            sb.AppendLine(kept.ToString());
-            if (keptCount >= 400) sb.AppendLine("  ... truncated at 400 lines ...");
             sb.AppendLine();
         }
 
-        // Unity's own log catches anything that threw before our logging existed,
-        // e.g. a DllNotFoundException from a misplaced native plugin.
         private static void WriteUnityLog(StringBuilder sb)
         {
             sb.AppendLine("--- unity player log (tail) ---");
-            string path = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 @"AppData\LocalLow\Funselektor Labs\Art of Rally\Player.log");
-
-            if (!File.Exists(path)) { sb.AppendLine("not found at " + path); return; }
-
-            try
-            {
-                var lines = File.ReadAllLines(path);
-
-                // The controller enumeration is printed once at startup. In a real
-                // session that is tens of thousands of lines back - measured at
-                // line 57,693 of 58,365 on this machine - so a plain tail misses
-                // the single most useful block in the file. Find it instead.
-                int rewired = -1;
-                for (int i = lines.Length - 1; i >= 0; i--)
-                {
-                    if (lines[i].IndexOf("Rewired version", StringComparison.OrdinalIgnoreCase) >= 0)
-                    { rewired = i; break; }
-                }
-                if (rewired >= 0)
-                {
-                    sb.AppendLine("[controller enumeration at line " + (rewired + 1) + "]");
-                    for (int i = rewired; i < Math.Min(lines.Length, rewired + 40); i++)
-                        sb.AppendLine(lines[i]);
-                    sb.AppendLine();
-                }
-
-                sb.AppendLine("[tail]");
-                int start = Math.Max(0, lines.Length - 120);
-                for (int i = start; i < lines.Length; i++) sb.AppendLine(lines[i]);
-            }
-            catch (Exception ex) { sb.AppendLine("could not read: " + ex.Message); }
+            SupportLogs.AppendTail(sb, path, 120);
+            sb.AppendLine();
         }
     }
 }

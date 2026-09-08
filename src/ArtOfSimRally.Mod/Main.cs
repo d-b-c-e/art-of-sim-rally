@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using HarmonyLib;
 using UnityEngine;
 using Rewired;
@@ -21,6 +22,15 @@ namespace ArtOfSimRally.Mod
         internal static Settings Settings { get; private set; }
         internal static bool Enabled { get; private set; }
         internal static bool SettingsVisible => UnityModManager.UI.Instance != null && UnityModManager.UI.Instance.Opened;
+        internal static bool OtherCameraModLoaded => UnityModManager.FindMod("CameraMod")?.Loaded == true;
+
+        internal static void WriteLoadedMods(StringBuilder output)
+        {
+            output.AppendLine("--- UMM mods ---");
+            foreach (var entry in UnityModManager.modEntries)
+                output.AppendLine(entry.Info.Id + " " + entry.Info.Version + " loaded=" + entry.Loaded + " active=" + entry.Active);
+            output.AppendLine();
+        }
 
         private static Harmony _harmony;
         private static UnityModManager.ModEntry _modEntry;

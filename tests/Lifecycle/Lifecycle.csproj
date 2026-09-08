@@ -6,5 +6,6 @@
   <ItemGroup>
     <Compile Include="../../src/ArtOfSimRally.Mod/BonnetCamera.cs" Link="BonnetCamera.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/ModWatchdog.cs" Link="ModWatchdog.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/FrameHealth.cs" Link="FrameHealth.cs" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>disable</Nullable><TreatWarningsAsErrors>true</TreatWarningsAsErrors></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/ArtOfSimRally.Mod/SupportLogs.cs" Link="SupportLogs.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/FrameHealth.cs" Link="FrameHealth.cs" />
+  </ItemGroup>
+</Project>

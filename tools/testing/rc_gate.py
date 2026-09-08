@@ -14,6 +14,10 @@ CASES = {
     "support-identity": "Generate support file. Match build identity, managed hash and observed native hash against this exact candidate; check toolkit pin and native component against build.json/manifest. A plugin path alone is not stale.",
     "umm-upgrade": "With game closed, install the packaged zip using your normal UMM route; verify it loads exactly once and keeps settings. Record route and installed build identity.",
 }
+CASES["camera"] += " In a separate launch with Nexus CameraMod loaded, verify its chase views/editor and the mounted-view compatibility notice; our mounts should resume in a fresh launch without it."
+CASES["stutter"] += " Include rare later-stage slowdowns separately from cold-start hitches; compare detailed logging off/on if needed and retain the candidate's aggregate frame-health report."
+CASES["telemetry"] += " Compare corrected suspension meters/normalized ratios and local axes with the previous build; inspect dashboard/recorded values before motion output. Check pause/restart produces no acceleration spike, then complete an attended shaker/motion comparison."
+CASES["support-identity"] += " Collect while paused immediately after a short diagnostic run; inspect loaded mods, cached input values, frame counts and explicit log-window truncation."
 
 def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest().upper()
