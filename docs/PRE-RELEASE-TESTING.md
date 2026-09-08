@@ -44,10 +44,12 @@ missing or failing corpus fails the run.
 | Check | Evidence and limits |
 |---|---|
 | Production build | net48, warnings as errors. |
+| Signal sampling | Actual managed inverse rotation, compression units and motion-history guards; distinct wheel corners encoded through the pinned toolkit and received over loopback UDP. Included with telemetry transport. No SimHub/motion hardware claim. |
+| Support diagnostics | Real bounded UTF-8 log files, recent errors, corrupt numbers, active writer and truncation; early/later frame aggregates and zero allocation over 100,000 updates. Included in regression. |
 | Force regression | 125,000 dynamic steps against the original formula using the game's real managed Mathf; also verifies the portable frozen replay baseline over 100,000 steps. Floats and device integers, changing tune, resets, fading, clipping and reversals. |
 | Save and binding regression | No learned-range disk writes during driving; locked-file preservation and retry, actual Settings XML roundtrip; malformed bindings and wheel GUID selection. |
 | Direct-input integration | Actual assignment/normalization/override with fake transport: analog handbrake travel, unbound controls, failed reads/reopen, reversed axes, Flip roundtrip, valid assignment baseline, zero span and button input. No TSS hardware claim. Included in the regression checkpoint. |
-| Camera/lifecycle | Production camera/watchdog with test doubles: handback, disabled callbacks, feature disable, output release before save. Rendering and Unity destroyed-object semantics remain attended. |
+| Camera/lifecycle | Production camera/watchdog with test doubles: handback, disabled callbacks, feature disable, output release before save, and external CameraMod slot isolation in both initialization orders. Rendering and Unity destroyed-object semantics remain attended. |
 | Camera tuning and bindings | Actual tuner/writer/Settings plus clock/input doubles: locked-file retry, leaving mounted view, save timing, held-key log volume, all 11 actions, cancel/clear/duplicates/defaults, XML and panel/capture/modifier isolation. Included in the lifecycle checkpoint. UMM rendering/key delivery remain attended. |
 | Telemetry loopback | Production connection code plus real pinned sender: failed destination suppression, recovery after editing settings, three parked packets, destination switch, restart and idempotent shutdown. No SimHub or game physics. |
 | Developer probe | Bounded writer, truncation/failure receipts, no disk writes while sampling, retry and IPC; cached observation getters bound to the actual production assembly. |

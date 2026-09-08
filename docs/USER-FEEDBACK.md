@@ -51,7 +51,41 @@ The pasted message references Discord videos without a direct URL. GitHub issue
 and two video links. Their media was not reviewed in this audit; no video findings
 are inferred.
 
-## Camera controls without a numpad — FR-1
+## T300/TSS follow-up — received 2026-09-08
+
+Same reporter; exact build still unspecified. Both wheel and TSS use separate
+USB cables. The TSS is visible to the mod and can shift, but the reporter has not
+confirmed assigning its axis through **Wheel input (direct) → Handbrake**. This
+supports investigating that binding path rather than adding a virtual controller.
+
+- Rotation: after changing 1080 back to 700 in the driver panel during play, it
+  stays 700. No measured physical travel or axis A/B was supplied (KI-12).
+- Feel: prefers this mod's cornering/sliding forces to x360ce, but wants lighter
+  steering with stronger landing/crash feedback (FR-2). Telemetry is a separate
+  outgoing data path and does not add wheel effects. Shared mixer/event research
+  remains applicable; current force defaults and pipeline are unchanged.
+- Performance: rare, patternless frame-rate drops after longer play (KI-19),
+  not established as the earlier stage-start symptom or a mod regression.
+- Support UI: asks whether detailed logging must precede reproduction and file
+  creation. Help now describes enable → brief repro → pause → bundle → disable;
+  normal logs are available without the switch. New aggregate counters, recent
+  log limits and input/mod inventory make the next report more useful.
+- Assist: asks whether the mod checkbox temporarily changes game assist 20→0→20.
+  Code does not implement that contract (KI-17); the numeric option is unidentified.
+- Camera: explicitly uses thoxx's Nexus CameraMod, whose list/index assumptions
+  conflict with our mounts (KI-18). The candidate now isolates its rotation.
+
+The supplied unlisted x360ce setup and chase-camera videos were sampled
+visually in the browser. The supplied 7:24 timestamp is near the setup video's
+end; earlier samples show x360ce controller/force configuration. The other clip
+shows close third-person driving and the separate lever. No torque, frame timing,
+current mod build or complete driver preset was established from those samples.
+No video download or complete narrated transcript was obtained.
+
+[Implementation and evidence](reviews/2026-09-08-feedback-review.md) ·
+[Short reply ready to paste](replies/2026-09-08-t300-tss.md). Nothing sent externally.
+
+## Camera controls without a numpad — FR-1 (original request)
 
 Separate feature request supplied by the owner: allow camera control buttons to
 be remapped for keyboards without a numpad. `Settings.cs` already stores 11

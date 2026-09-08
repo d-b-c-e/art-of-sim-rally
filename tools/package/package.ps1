@@ -143,16 +143,26 @@ Launch the game and press Ctrl+F10 for the settings panel.
   that do not overlap your game controls. Tuning is suspended while the panel
   is open. Changes save automatically when paused or otherwise idle, including
   after you switch back to a stock view.
+  If Nexus CameraMod is loaded, its chase views keep control and our mounted
+  views/tuning are suspended. Disable CameraMod before a fresh game launch to
+  use our mounts; saved settings are kept.
 
 * Telemetry is off by default. Switch it on and point SimHub at a Forza
   Horizon 5 profile on UDP port 8000. Host and port can be changed while the
   game runs - handy if something else already owns the port.
+  This does not add wheel FFB. Version 0.2.4 corrects suspension units and local
+  motion axes, so compare dashboard channels and motion/shaker response with
+  your previous version before a normal rig session.
 
 SOMETHING NOT WORKING?
 ----------------------
 In the settings panel press "Create support file on Desktop". That collects
 your settings, your controllers, what is actually bound, and the logs into one
 file. Attach it to a bug report - it usually contains the answer.
+For extra detail, enable "Log detail for support", reproduce briefly, pause,
+then create the support file before restarting. Turn detail off afterward.
+Normal logs can be collected with detail off. Frame-hitch counts are aggregate
+observations, not a diagnosis of the cause of a slowdown.
 
 KNOWN LIMITS
 ------------
@@ -169,9 +179,10 @@ KNOWN LIMITS
 * This is a bonnet camera, not a cockpit camera. art of rally's cars have no
   modelled interiors, so there is nothing to sit inside of.
 
-* "Disable steering assist" is OFF by default and genuinely changes how the car
-  behaves. The other steering options only restore what a recognised wheel
-  already gets. art of rally has online leaderboards - enable it deliberately.
+* The legacy steering-limiter checkbox is OFF by default and applies only when
+  a car spawns with Direct steering enabled. It does not set and restore the
+  game's numeric assist slider; unticking does not restore the current car.
+  Leave it off and use the game's own assist controls.
 
 Source, the full technical write-up, and issues:
 https://github.com/d-b-c-e/art-of-sim-rally

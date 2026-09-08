@@ -21,21 +21,65 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-19 — Rare frame-rate drops during longer T300 sessions
+
+**User report; cause unconfirmed.** The follow-up describes occasional slowdowns
+without a repeatable pattern, unlike KI-5's first 10–15 seconds. Exact mod build,
+driver, logging state, location and camera-mod version are unknown. Do not merge
+the reports or claim that camera saves, telemetry or another mod caused this one.
+
+0.2.4 adds opt-in aggregate frame-hitch counters (foreground driving only), bounded
+recent log reads, recent native errors, loaded-mod versions and cached input values
+to support files. No per-frame log/file writes or recorder timeline are added by
+the counters. Existing detailed force traces still have overhead; compare logging
+off/on if needed. Collect immediately after a short reproduction while paused.
+Support creation now refuses to do synchronous disk work while driving. These are
+diagnostic improvements, not a verified slowdown fix.
+
+### KI-18 — Nexus Camera Mod and mounted cameras compete for rotation slots
+
+**Source-confirmed compatibility defect; guarded in 0.2.4, screen test pending.**
+CameraMod 0.3.1 appends two views but assumes its settings live at slots 8/9; its
+editor indexes by camera enum. Our mounted placeholders can occupy those slots
+first, and both tuners share numpad keys. Reproduced slot displacement with the
+actual consumer camera code and the other mod's documented list assumptions.
+This does not establish that it caused issue #1 or the new FPS report.
+
+When UMM has loaded `CameraMod`, the new candidate leaves its rotation alone and
+suspends our mounted views/tuning. Settings remain intact and the panel explains
+the choice. To use our mounts, disable that mod before a fresh game launch. Tests
+cover both initialization orders and normal mounts without it. This is supported
+isolation, not simultaneous operation of both camera editors. See the
+[feedback review](reviews/2026-09-08-feedback-review.md).
+
+### KI-17 — Legacy steering-assist checkbox is not a live numeric override
+
+**Confirmed behavior; help corrected, legacy limitation remains.** The mod sets
+`CarController.steerAssistance=false` only in its Start postfix, only when Direct
+steering is enabled. It does not change saved game settings, force a numeric slider
+to zero, or restore a previously captured value when unticked. The user's "20"
+cannot be mapped to this boolean without identifying the exact game option.
+The new label and help state the spawn-only limitation and direct users to the
+game's controls. No assist behavior was changed. Leave the legacy option off and
+use the game's own settings; a fresh car/game session avoids a retained override.
+
 ### KI-16 — Telemetry suspension units and motion coordinate space
 
-**Motion/shaker signal correctness; source-confirmed, correction queued.**
-`FillWheels` supplies fixed maximum suspension travel as actual travel and clamps
+**Motion/shaker signal correctness; corrected in 0.2.4, rig comparison pending.**
+The 0.2.3 / 0.2.4-rc.2 baseline `FillWheels` supplies fixed maximum suspension travel as actual travel and clamps
 compression measured in meters directly into the normalized slot. `BuildFrame`
 also sends world-space motion where the Forza contract calls for vehicle-local
 axes. The signal audit records the sources, an explicit 0.20/0.10 m counterexample
 and the official format semantics in
 [2026-09-08-wheel-signals.md](research/2026-09-08-wheel-signals.md).
 
-These are consumer sampling defects, not wire-layout defects. Correct with
-travel/projection/discontinuity tests and an attended SimHub/motion comparison.
-The effects-research step does not change these existing amplitudes/axes or
-claim to explain the user's wheel-FFB complaints. Do not derive new calibrated
-impact effects from the present telemetry values.
+The correction uses actual compression in meters, compression/capacity in 0..1,
+and inverse car rotation for velocity, world-differentiated acceleration and
+angular velocity. Acceleration history resets at park/restart/spawn, bad samples,
+clock gaps/rollback and teleports. 1,230 assertions include all headings and actual
+encoded UDP with distinct wheel corners. This changes motion/shaker input units
+and axes; compare on the rig before release. Encoder layout and wheel FFB are
+unchanged. The static signal audit remains the historical baseline evidence.
 
 ### KI-15 — Direct-input cache, Flip and assignment recovery defects
 
@@ -93,6 +137,10 @@ disable autocenter. A logical axis range is not a physical rotation request;
 driver response to initialization remains untested. Compare vanilla/mod/FFB/direct
 input with consistent profiles and record actual lock separately from the panel.
 Do not change rotation behavior or blame a component before reproducing it.
+
+Follow-up: setting the panel back to 700 while the game runs stays at 700 on
+subsequent visits. That narrows the timing but does not prove the first 1080 was
+only visual or identify the physical steering range. No rotation fix claimed.
 
 ### KI-1 — Stock cameras 3–8 render reversed
 
@@ -291,6 +339,13 @@ No new force tune is introduced.
 ---
 
 ### KI-11 — Telemetry could stay disabled after correcting a failed destination
+
+**0.2.4 follow-up:** the shared sender returns false on a socket failure instead
+of throwing. The consumer now observes that return, disposes the failed sender
+and waits for an endpoint edit or explicit restart. The revised transport test
+closes an actual UDP socket under the production sender, exercising the full
+failure path instead of directly calling the consumer error handler. This is a
+consumer contract correction; no toolkit repin or encoder change was needed.
 
 **Supportability; fixed in 0.2.3, live consumer check pending.**
 `_senderFailed` was checked before endpoint changes and was not reset by shutdown.

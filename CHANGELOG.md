@@ -9,12 +9,28 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Opt-in frame-hitch counts, loaded-mod versions and latest direct-input values
+  in support files. Logging help explains how to collect a short reproduction.
+
 - Rebind all 11 camera tuning keys in the settings panel, with clear, cancel,
   duplicate-key feedback and restore-defaults. Existing XML/numpad mappings are
   preserved. Bumper-only setups can configure keys; editing the panel suppresses
   camera hotkeys until held input is released. In-game UI validation pending.
 
 ### Fixed
+
+- Avoid competing with Nexus CameraMod for camera slots: when it is loaded, its
+  chase views keep control and our mounted views/tuning are suspended with an
+  explanation in the panel. Saved mount settings are preserved.
+- Correct telemetry suspension meters/normalized compression and vehicle-local
+  motion axes. Reset acceleration history across pause, restart, spawn, invalid
+  samples and teleports. Changed motion/shaker response needs attended validation.
+- Observe toolkit telemetry send failures returned as false, so a dead socket
+  stops retrying every physics step; correcting/restarting the endpoint recovers.
+- Bound support-log reads and retain recent native errors; collect while paused.
+  Force commands are reported without claiming measured torque or prescribing gain.
+- Clarify the legacy steering-limiter checkbox's spawn-only behavior; it does
+  not temporarily set and restore the game's numeric assist slider.
 
 - Clear cached direct-input values when readers close or bindings reload, so
   a failed reopen cannot retain a held pedal. Flip now swaps pedal endpoints and

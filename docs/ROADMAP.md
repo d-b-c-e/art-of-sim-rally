@@ -13,9 +13,12 @@ keyboard remapping (FR-1), and analog-handbrake regression coverage (KI-13) with
 cache/Flip/assignment fixes (KI-15). Camera and input harnesses pass offline;
 the new candidate has not been driven or deployed. Rotation and effect-signal
 investigations are documented in [the signal audit](research/2026-09-08-wheel-signals.md).
-Next code work is telemetry sampling correction (KI-16), with an explicit
-motion/shaker comparison before shipping changed units/axes. New FFB effects and
-RWD damping remain a separate attended tuning cycle.
+The [follow-up implementation](reviews/2026-09-08-feedback-review.md) adds
+CameraMod isolation, bounded support logs/frame-hitch counts, clearer assist help,
+telemetry sampling correction (KI-16) and actual failed-send handling. These have
+offline coverage; motion/shaker and combined-camera-mod tests remain pending.
+New FFB effects and RWD damping remain a separate captured-signal/attended tuning
+cycle. No rotation override is justified by the current T300 evidence.
 
 ## Now — finish 0.2.3 attended validation
 

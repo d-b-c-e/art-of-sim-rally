@@ -10,6 +10,14 @@ the source of truth and don't repeat the work.
 
 ## Camera lifecycle addendum — 2026-09-06
 
+Later [feedback review](reviews/2026-09-08-feedback-review.md) records the
+CameraMod 0.3.1 slot conflict and support/telemetry corrections. In build 17584229,
+`SettingsManager.SetSteerAssist` reads a saved boolean; `SetSteerCorrection` uses
+a separate numeric setting. Our legacy `DisableSteerAssist` is a one-way Start
+postfix field assignment, not a numeric temporary override. `SmoothSteer` returns
+before its limiter for a recognized wheel. Keep these separate when answering
+the user's unidentified "20" assist option; do not infer UI equivalence.
+
 Verified in build 17584229: CameraManager.EnableCinemachineCamera disables
 stageCamera (CarCameras) and enables CinemachineBrain. DisableCameraManagers
 disables both. Finish/replay take the former path; intro can take the latter.

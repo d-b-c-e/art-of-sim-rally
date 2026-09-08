@@ -1,5 +1,10 @@
 # Release readiness — 2026-09-08
 
+The [feedback follow-up](reviews/2026-09-08-feedback-review.md) implements further
+0.2.4 changes after RC2: CameraMod compatibility isolation, diagnostics, telemetry
+sampling and send-failure handling. Its next immutable candidate needs separate
+attended checks, especially motion/shaker response. RC2 evidence below is historical.
+
 **0.2.4-rc.2 passes all 16 automated checks** with camera key/persistence and
 direct-input fixes. It has not been installed, driven or published. Its
 [exact artifact, results and handoff](reviews/2026-09-08-overnight.md) are separate

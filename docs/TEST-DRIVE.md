@@ -105,4 +105,21 @@ limits. Signal replay does not automate full game input, rendering or wheel feel
 
 T300 rotation needs the separate A/B procedure in
 [the signal audit](research/2026-09-08-wheel-signals.md), on that hardware. New
-effects and the telemetry sampling corrections (KI-16) are not part of this RC.
+wheel effects are not part of this RC. The follow-up candidate after RC2 also needs:
+
+- Launch once with Nexus CameraMod active: its chase views/editor should work,
+  and our Camera panel should explain that mounts/tuning are suspended. Disable
+  CameraMod before a fresh launch and check our mounts again. Do not assume that
+  both editors can share a rotation or that this establishes issue #1's cause.
+- Enable detailed logging, drive long enough to include early and later segments,
+  pause and generate support. Check loaded-mod versions, input values, log windows
+  and frame counts. Counts exclude transitions and do not identify a cause. Compare
+  a short logging-off run if performance changes with logging enabled.
+- Compare corrected suspension channels/local motion axes against 0.2.3 with the
+  same consumer profile. Half travel should now be 0.5 normalized; forward motion
+  should stay on local Z as heading changes. Park/restart must not create a large
+  acceleration impulse. Check dashboard/recorded values before enabling motion and
+  complete an attended motion/shaker comparison; amplitudes changed intentionally.
+
+Leave the legacy steering-limiter checkbox off and use the game's own assist
+setting for comparisons. Its clearer label does not add a live 20→0→20 override.

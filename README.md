@@ -92,7 +92,18 @@ feedback. Step by step, with the other common problems, in
 **Steering assist is a separate switch.** *Direct steering* and *Remove hidden
 deadzone* only restore what the game already gives wheels it recognises, so they
 change nothing about the car. *Disable steering assist* does change how the car
-behaves, and is off by default. The game has online leaderboards.
+behaves, and is off by default. It is a legacy car-spawn boolean override, not a
+temporary replacement of the game's numeric assist setting; unticking does not
+restore the current car. Leave it off and use the game's own assist controls.
+
+**Using Nexus Camera Mod:** the 0.2.4 candidate leaves its chase-camera rotation
+alone and suspends our mounted views/tuning when that mod is loaded. Disable it
+before a fresh game launch to use our bonnet/bumper views. Settings are preserved.
+
+**Reporting a slowdown:** enable *Log detail for support* for a short reproduction,
+pause, then create the support file before restarting. Ordinary logs are available
+without detailed logging. 0.2.4 adds bounded log reads, loaded-mod/input details and
+frame-hitch counts; see [the instructions](docs/TROUBLESHOOTING.md#collecting-an-intermittent-slowdown-or-ffb-report).
 
 **A shifter gate that also accelerates or brakes** means the game auto-bound that
 button to one of its own actions when it saw the shifter as a controller. Reset or

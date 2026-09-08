@@ -42,6 +42,13 @@ dead end recorded in FINDINGS.md.
 
 ## Prior art
 
+**0.2.4 compatibility behavior:** if UMM has loaded thoxx's `CameraMod`, our
+mounted views/tuning are suspended for that setup. Its code assumes its added
+views occupy indices 8/9 and edits by enum index; sharing the list can target the
+wrong camera. Its default editor keys also overlap our numpad controls. The panel
+explains the guard and preserves our settings. Disable CameraMod before a new game
+launch to use our mounts. Combined-mod screen tests remain pending (KI-18).
+
 The Nexus "Camera Mod" already adds extra perspectives and a small camera
 editor via Unity Mod Manager. The approach is proven; the question is only
 whether to build on it or implement independently. Building independently keeps

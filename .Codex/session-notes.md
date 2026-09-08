@@ -5,6 +5,13 @@
 - **Branch:** codex/overnight-improvements
 
 ## What Was Done
+- Follow-up user feedback authorized further roadmap implementation while away and a short unsent reply.
+- Added CameraMod isolation (KI-18), bounded support logs/frame aggregates/live input + mod inventory (KI-19 diagnostics), and corrected legacy assist UI/help (KI-17; behavior unchanged).
+- Corrected telemetry suspension/local-motion sampling and reset acceleration history (KI-16); 1,230 actual sampling/encoded-UDP assertions.
+- Observed toolkit Send=false; actual closed-socket consumer test now passes (36 assertions), replacing a manually invoked error handler.
+- Support tests: 25, with bounded real files and 100,000 allocation-free counter updates. Lifecycle/CameraMod tests: 36.
+- Short reply: docs/replies/2026-09-08-t300-tss.md. New review: docs/reviews/2026-09-08-feedback-review.md.
+- Further changes require RC3 or later; original RC2 details below remain historical until its successor report is recorded.
 - Executed the unattended scope of docs/OVERNIGHT-QUEUE.md after 0.2.3 publication.
 - Reproduced KI-14 with a locked file; camera save retries now survive failure/view changes; removed per-frame tuning logs.
 - Added all 11 keyboard camera bindings with cancel/clear/defaults, duplicate/modifier checks and panel/capture isolation.
@@ -33,11 +40,11 @@
 - [x] Run full candidate gate from clean committed source; record artifact and report.
 - [ ] Attended UMM remapping/camera saves, input Flip/reconnect and final artifact checks.
 - [ ] First real capture; TSS/Fanatec/PS5-specific verification.
-- [ ] KI-16 telemetry sampling correction with explicit motion/shaker validation.
+- [x] KI-16 sampling correction and offline/UDP validation; attended motion/shaker comparison still pending.
 - [ ] KI-12 T300 A/B; FR-2 effects/KI-6 snapback await signal capture/tuning.
 
 ## Next Steps
-1. Review the committed overnight handoff and exact RC2 artifact; any rebuild needs rc.3 or later.
+1. Read the feedback follow-up review for the newest candidate and exact evidence; RC2 is historical.
 2. Follow docs/TEST-DRIVE.md extra 0.2.4 checks with the owner. Install the exact candidate first, with the game closed.
 3. Use docs/research/2026-09-08-wheel-signals.md for KI-16 corrections and hardware follow-up.
 

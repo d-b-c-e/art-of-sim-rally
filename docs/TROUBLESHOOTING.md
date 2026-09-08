@@ -5,6 +5,24 @@ Start with the support file: Ctrl+F10 → *Devices and troubleshooting* →
 what DirectInput sees, and what the mod did — and the two views disagreeing is
 usually the answer. Attach it when you report a problem.
 
+## Collecting an intermittent slowdown or FFB report
+
+Normal errors/settings/devices can be collected with **Log detail for support**
+off. For extra force detail, enable it **before** a short reproduction, then
+pause and create the support file in that same session, before restarting.
+Turn detailed logging off afterward. Include build, driver/firmware, car/stage,
+approximate event time and other active mods. Log tails cannot recover an entire
+earlier drive or show why an FPS drop occurred.
+
+The 0.2.4 candidate adds aggregate foreground-driving frame intervals, including
+100 ms+ counts early/later in each driving segment. A segment also restarts after
+pause/focus return; it is not a stage identifier. These counters write no files
+per frame and are separate from the developer recorder. Existing force traces
+still add logging overhead, so an off/on comparison can be useful. Support creation
+now waits for you to pause; file reading/writing can itself stall the main thread.
+Recent log windows are explicitly bounded/truncated, and the bundle lists loaded
+mods plus cached input values. Export soon after the event to retain useful tails.
+
 ## Fanatec wheels (CSL DD, DD Pro, ClubSport DD, GT DD; PC and compatibility modes)
 
 Fanatec bases present to Windows as **two devices with the same name**,
@@ -74,6 +92,29 @@ whose axis runs backwards would still need it.
 Use *Force feedback → Strength* to adjust force level; 50 is the default.
 Force fades in between 3 and 12 km/h. Smoothing controls how quickly force
 changes reach the wheel; keep it consistent when comparing builds.
+
+The current mod sends a constant steering-force signal. Lowering Strength lowers
+the detail in that signal too; independent road/landing/crash effects are not yet
+shipped. Telemetry sends data to external dashboards/shakers/motion apps and does
+not add vibration or alter the wheel force pipeline.
+
+## Steering assist: does the mod temporarily replace the game's value?
+
+No. The legacy **Disable steering assist** checkbox sets a boolean limiter off
+when a car spawns, only with Direct steering enabled. It neither writes a numeric
+game setting nor restores the current car on untick. 0.2.4 labels this limitation
+explicitly. Leave it off and use the game's own assist controls; start a fresh
+car/game session after removing a retained legacy override. Do not infer a numeric
+"20 → 0 → 20" contract from the checkbox.
+
+## Using Nexus Camera Mod for chase views
+
+The 0.2.4 candidate detects loaded `CameraMod` and suspends our mounted views and
+tuning keys, preserving its camera rotation and your saved mount settings. The
+other mod assumes ownership of slots 8/9 and shares several numpad keys; running
+both editors together can address the wrong camera. Disable CameraMod before a
+fresh game launch to use our bonnet/bumper views. This is a compatibility guard,
+not proof that it caused any particular prior camera or performance report.
 
 ## Force feedback stops after alt-tab (before 0.2.1)
 

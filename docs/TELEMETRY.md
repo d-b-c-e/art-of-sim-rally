@@ -87,26 +87,36 @@ metres) and `ForzaPacket` encodes it. Sources, from
 | `IsRaceOn` | driving **or held on the start line** | true from `WAITING_TO_BEGIN` so a shaker follows the engine while revving before the lights; must go false in menus and cutscenes, or dashboards never park |
 | `CurrentEngineRpm` | `Drivetrain` RPM | |
 | `EngineMaxRpm` / `EngineIdleRpm` | `Drivetrain.maxRPM` / `.minRPM` | |
-| `Speed` | `CarController.veloKmh / 3.6` | m/s |
-| `Velocity` X/Y/Z | `CarController.body.velocity` | Rigidbody, world space |
-| `AngularVelocity` | `body.angularVelocity` | |
-| `Acceleration` | differentiate velocity per `FixedUpdate` | not stored by the game |
+| `Speed` | `CarDynamics.velo` | m/s |
+| `Velocity` X/Y/Z | Rigidbody world velocity projected by inverse car rotation | vehicle-local m/s; corrected in 0.2.4 |
+| `AngularVelocity` | Rigidbody world angular velocity projected by inverse car rotation | vehicle-local rad/s; corrected in 0.2.4 |
+| `Acceleration` | differentiate world velocity, then inverse-rotate | local m/s²; reset on discontinuity, not stored by the game |
 | `Yaw`/`Pitch`/`Roll` | `myTransform.rotation` | convert to radians |
-| `TireSlipRatio` | `Wheel.slipRatio_hat` | |
-| `TireSlipAngle` | `Wheel.slipAngle_hat` | |
+| `TireSlipRatio` | `Wheel.slipRatio` | |
+| `TireSlipAngle` | `Wheel.slipAngle` | |
 | `TireCombinedSlip` | derive from the two above | |
-| `SuspensionTravelMeters` | `Wheel.suspensionTravel` | |
-| `NormalizedSuspensionTravel` | travel ÷ max travel | clamp 0..1 |
+| `SuspensionTravelMeters` | `Wheel.compression` | bounded by available travel; corrected in 0.2.4 |
+| `NormalizedSuspensionTravel` | `compression / suspensionTravel` | clamp 0..1; zero for invalid/zero capacity |
 | `SurfaceRumble` | `Wheel.surfaceType` / `physicMaterial` | the field bass shakers key off |
 | `WheelInPuddleDepth` | `Wheel.isOnPuddle` | |
 | `TireTemp` | not modelled | leave zero |
-| `Power` / `Torque` | `Drivetrain.maxPower`, `.netTorque` | watts, Nm |
-| `Gear` | `Drivetrain.transmission` | 0 = reverse/neutral |
+| `Power` / `Torque` | torque × RPM × π/30; `Drivetrain.torque` | watts, Nm |
+| `Gear` | `max(0, Drivetrain.gear - 1)` | 0 = reverse/neutral |
 | `Accel`/`Brake`/`Clutch`/`HandBrake` | `CarController.*Input` | via `TelemetryFrame.ToPedal` |
 | `Steer` | `CarController.steerInput` | via `TelemetryFrame.ToSteer` |
-| `DrivetrainType` | `Drivetrain` powered axles | 0 FWD, 1 RWD, 2 AWD |
-| `CurrentRaceTime` / `CurrentLap` | stage timer | a rally stage is one "lap" |
+| `DrivetrainType` | fixed 2 placeholder | not a measured drivetrain classification |
+| `CurrentRaceTime` / `CurrentLap` | `Time.timeSinceLevelLoad` | scene time, not an authoritative race timer |
 | `RacePosition`, `LapNumber` | 1 | no wheel-to-wheel racing |
+
+0.2.4 corrects sampling units/axes (KI-16), leaving the toolkit packet layout
+unchanged. A half-compressed 0.20 m suspension now reports 0.10 m / 0.50 normalized
+instead of 0.20 m / 0.10. This changes shaker/motion response and needs an attended
+consumer comparison before release. Telemetry does not add wheel FFB effects.
+Acceleration is zero on the first sample after spawn/park/restart, invalid motion,
+clock rollback/gaps over 250 ms, or a position jump over 5 m beyond predicted
+displacement. These guards are for telemetry differentiation; they do not change
+the game car. Tire-slip semantics and the placeholder fields above are not
+calibrated impact-force signals.
 
 Use `ToPedal` and `ToSteer` rather than casting. The game's smoothed inputs
 overshoot their nominal 0..1 range, and an unchecked cast of `1.01f` wraps to
