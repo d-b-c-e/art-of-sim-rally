@@ -17,6 +17,11 @@
 - Found telemetry sampling defects (KI-16): meters vs normalized travel and world vs local motion. Queued separate correction/rig comparison.
 - Refreshed GitHub audit: still only #1 and existing PS5-unplug comment; no messages sent.
 - Bumped candidate source/Info to 0.2.4 and extended RC/manual checks.
+- Full RC1 and RC2 runs passed all 16 automated checks. RC2 corrects the packaged camera guide and scopes prior owner evidence to 0.2.3-rc.6.
+- Current artifact: dist/ArtOfSimRally-0.2.4-rc.2.zip; identity 0.2.4-rc.2+43334e2ad627674efc71ee4e6a18d65d207619a3.clean.
+- ZIP SHA-256 D2ADF06B614E0925B8C5AA04B54B418713EF7DDD1AE05AB03F4401A40B760CF6.
+- Report: results/rc-0.2.4-rc.2-ee7891e97a444aa08e82bffd07746eb7/automated.json; manual.json correctly remains pending.
+- Handoff: docs/reviews/2026-09-08-overnight.md. Stable install payloads/settings/native copy rechecked; probe DLL and Info absent (historical cache only).
 
 ## Decisions Made
 - Preserve published v0.2.3 and installed Stream Deck Steam 550320 target.
@@ -25,16 +30,16 @@
 - Effect work stays managed research; no speculative T300 rotation override/upstream release.
 
 ## Open Items
-- [ ] Run full 0.2.4-rc.1 gate from clean committed source; record artifact and report.
+- [x] Run full candidate gate from clean committed source; record artifact and report.
 - [ ] Attended UMM remapping/camera saves, input Flip/reconnect and final artifact checks.
 - [ ] First real capture; TSS/Fanatec/PS5-specific verification.
 - [ ] KI-16 telemetry sampling correction with explicit motion/shaker validation.
 - [ ] KI-12 T300 A/B; FR-2 effects/KI-6 snapback await signal capture/tuning.
 
 ## Next Steps
-1. Finish the RC gate and record identity; push the work branch.
-2. Follow docs/TEST-DRIVE.md extra 0.2.4 checks with the owner.
-3. Use docs/research/2026-09-08-wheel-signals.md for signal corrections and hardware follow-up.
+1. Review the committed overnight handoff and exact RC2 artifact; any rebuild needs rc.3 or later.
+2. Follow docs/TEST-DRIVE.md extra 0.2.4 checks with the owner. Install the exact candidate first, with the game closed.
+3. Use docs/research/2026-09-08-wheel-signals.md for KI-16 corrections and hardware follow-up.
 
 ## Context for Next Session
 Published 0.2.3 remains installed, settings preserved, developer probe removed.

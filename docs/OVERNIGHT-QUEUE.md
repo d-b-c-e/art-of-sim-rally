@@ -2,13 +2,14 @@
 
 Prepared 2026-09-08 UTC after [0.2.3 publication](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3).
 Executed on `codex/overnight-improvements` at the owner's request. The unattended
-implementation and research items below are complete; the 0.2.4 candidate is being
-validated separately. Published 0.2.3 and its installed Stream Deck target are
+implementation and research items below are complete; **0.2.4-rc.2 passes all 16
+automated checks** and awaits an attended drive. [Exact artifact and handoff](reviews/2026-09-08-overnight.md).
+Published 0.2.3 and its installed Stream Deck target are
 unchanged. No scheduled automation is needed for this completed work session.
 
 Read [USER-FEEDBACK.md](USER-FEEDBACK.md), [KNOWN-ISSUES.md](KNOWN-ISSUES.md) and
 [RELEASE-READINESS.md](RELEASE-READINESS.md). The full attended matrix is still
-pending; RC6 owner smoke passed for cameras, stutter and controls only.
+pending; 0.2.3-rc.6 owner smoke passed for cameras, stutter and controls only.
 
 ## Work order
 

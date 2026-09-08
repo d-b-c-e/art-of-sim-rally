@@ -1,8 +1,9 @@
 # Release readiness — 2026-09-08
 
-The 0.2.4 overnight candidate adds camera key/persistence and direct-input fixes.
-It is being validated separately; the published/installed 0.2.3 evidence below
-remains intact. [Overnight status](OVERNIGHT-QUEUE.md) and
+**0.2.4-rc.2 passes all 16 automated checks** with camera key/persistence and
+direct-input fixes. It has not been installed, driven or published. Its
+[exact artifact, results and handoff](reviews/2026-09-08-overnight.md) are separate
+from the published/installed 0.2.3 evidence below. [Overnight status](OVERNIGHT-QUEUE.md) and
 [extra drive checks](TEST-DRIVE.md#extra-checks-for-024) describe the new scope.
 
 **[0.2.3 is published](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3)
@@ -43,7 +44,7 @@ result. That decision leaves the full manual gate incomplete; it does not change
 the gate's rejection of missing evidence. Follow-up work and a new source finding
 in camera tuning persistence (KI-14) are in [OVERNIGHT-QUEUE.md](OVERNIGHT-QUEUE.md).
 
-## Exact candidate
+## Historical 0.2.3-rc.6 candidate
 
 - ZIP: [ArtOfSimRally-0.2.3-rc.6.zip](../dist/ArtOfSimRally-0.2.3-rc.6.zip)
 - Source commit: `cf4ceb2263fcb09f44de6ef12c3a436bcde71d81`, clean when packaged.

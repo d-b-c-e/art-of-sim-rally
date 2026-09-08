@@ -18,14 +18,15 @@ Framework 4.8, Python 3, installed game/UMM build references, and the Visual Stu
 x64 `dumpbin` path in the script. Close the game for installer guards.
 
 ```powershell
-./tools/testing/Test-Rc.ps1 -Version 0.2.4-rc.1
+./tools/testing/Test-Rc.ps1 -Version 0.2.4-rc.3
 # Once real cases exist, include them on every candidate:
-./tools/testing/Test-Rc.ps1 -Version 0.2.4-rc.2 -Corpus './results/regression-corpus/index.json'
+./tools/testing/Test-Rc.ps1 -Version 0.2.4-rc.4 -Corpus './results/regression-corpus/index.json'
 # Validate the exact final-labelled artifact with the same offline suite:
 ./tools/testing/Test-Rc.ps1 -Version 0.2.4 -Final
 ```
 
-Choose a new RC number for every rebuild. Existing ZIPs/staging directories are
+RC1 and RC2 already exist; the current [RC2 handoff](reviews/2026-09-08-overnight.md)
+identifies its tested artifact. Choose a new RC number for every rebuild. Existing ZIPs/staging directories are
 never overwritten. The script writes `dist/ArtOfSimRally-<version>.zip`, its SHA-256,
 and a unique `results/rc-*` folder containing logs, `source.json`, `automated.json`
 and `manual.json`. Installer tests use a fake game directory; nothing is installed
