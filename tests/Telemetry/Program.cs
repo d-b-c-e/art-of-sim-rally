@@ -50,9 +50,19 @@ internal static class Program
                 for (int i = 0; i < 3; i++) { IPEndPoint peer = null; Check(listener.Receive(ref peer).Length == 324, "old destination did not park before switch"); }
                 park.Invoke(null, null);
                 for (int i = 0; i < 3; i++) { IPEndPoint peer = null; Check(next.Receive(ref peer).Length == 324, "new destination did not receive"); }
-                pump.GetMethod("Failed", Static).Invoke(null, new object[] { new IOException("simulated send failure") });
+                // Close the actual transport under the shared sender. Its Send
+                // returns false rather than throwing; the consumer must observe it.
+                var senderInstance = pump.GetField("_sender", Static).GetValue(null);
+                var socket = (UdpClient)senderInstance.GetType().GetField("_client", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(senderInstance);
+                socket.Close();
+                var frameType=mod.GetType("ArtOfSimRally.Mod.TelemetryPump", true).GetMethod("SendFrame", Static).GetParameters()[0].ParameterType;
+                pump.GetMethod("SendFrame", Static).Invoke(null, new[] { Activator.CreateInstance(frameType) });
+                Check((long)senderInstance.GetType().GetProperty("SendFailures").GetValue(senderInstance)==1, "real socket failure was not counted");
                 Check(pump.GetProperty("ActiveEndpoint", Static).GetValue(null) == null, "failed socket was retained");
                 Check(!(bool)connect.Invoke(null, new[] { cfg }), "send failure retried unchanged endpoint");
+                int errorsAfterSend=errors;
+                for(int i=0;i<10;i++) pump.GetMethod("SendFrame", Static).Invoke(null,new[]{Activator.CreateInstance(frameType)});
+                Check(errors==errorsAfterSend,"failed send repeatedly logged");
                 shutdown.Invoke(null, null);
                 Check(pump.GetProperty("ActiveEndpoint", Static).GetValue(null) == null, "shutdown retained socket");
                 Check((bool)connect.Invoke(null, new[] { cfg }), "explicit restart failed");

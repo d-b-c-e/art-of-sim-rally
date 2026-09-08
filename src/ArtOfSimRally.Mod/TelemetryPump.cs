@@ -39,7 +39,7 @@ namespace ArtOfSimRally.Mod
         private static Drivetrain  _drivetrain;
         private static Rigidbody   _body;
 
-        private static Vector3 _lastVelocity;
+        private static readonly TelemetryMotion Motion = new TelemetryMotion();
         private static uint    _timestampMs;
         private static float   _distanceTravelled;
 
@@ -57,16 +57,24 @@ namespace ArtOfSimRally.Mod
                     _cachedFor  = __instance;
                     _drivetrain = __instance.GetComponent<Drivetrain>();
                     _body       = __instance.GetComponent<Rigidbody>();
-                    _lastVelocity = Vector3.zero;
+                    Motion.Reset();
                     _distanceTravelled = 0f;
                 }
 
-                _sender.Send(BuildFrame(__instance));
+                SendFrame(BuildFrame(__instance));
             }
             catch (Exception ex)
             {
                 Failed(ex);
             }
+        }
+
+        private static void SendFrame(TelemetryFrame frame)
+        {
+            // The shared sender reports failure with false, not an exception.
+            // Observe that contract so a dead socket is not retried every step.
+            if (_sender != null && !_sender.Send(frame))
+                Failed(new System.IO.IOException(_sender.LastError ?? "Telemetry send failed"));
         }
 
         // A failed destination stays quiet until it changes or telemetry is
@@ -107,16 +115,23 @@ namespace ArtOfSimRally.Mod
             float dt = Time.fixedDeltaTime;
             _timestampMs += (uint)Mathf.Max(1, Mathf.RoundToInt(dt * 1000f));
 
+            if (!GameState.IsEngineLive || GameState.IsRestarting)
+            {
+                Motion.Reset();
+                return new TelemetryFrame { IsRaceOn = false, TimestampMs = _timestampMs };
+            }
+
             var velocity = _body != null ? _body.velocity : Vector3.zero;
-            // The game does not store acceleration, so differentiate velocity.
-            var accel = dt > 0f ? (velocity - _lastVelocity) / dt : Vector3.zero;
-            _lastVelocity = velocity;
+            var t = cd.transform;
+            var rotation = t.rotation;
+            // Differentiate in world space before projecting into the vehicle's
+            // current orientation. Rotating coordinates alone is not acceleration.
+            var accel = Motion.Acceleration(t.position, velocity, Time.fixedTime);
 
             float speed = cd.velo;                       // metres/second
             _distanceTravelled += speed * dt;
 
-            var t = cd.transform;
-            var euler = t.rotation.eulerAngles;
+            var euler = rotation.eulerAngles;
 
             var axles = cd.axles;
             var frame = new TelemetryFrame
@@ -129,13 +144,6 @@ namespace ArtOfSimRally.Mod
                 EngineMaxRpm     = _drivetrain != null ? _drivetrain.maxRPM : 0f,
                 EngineIdleRpm    = _drivetrain != null ? _drivetrain.minRPM : 0f,
                 CurrentEngineRpm = _drivetrain != null ? _drivetrain.rpm    : 0f,
-
-                AccelerationX = accel.x, AccelerationY = accel.y, AccelerationZ = accel.z,
-                VelocityX = velocity.x,  VelocityY = velocity.y,  VelocityZ = velocity.z,
-
-                AngularVelocityX = _body != null ? _body.angularVelocity.x : 0f,
-                AngularVelocityY = _body != null ? _body.angularVelocity.y : 0f,
-                AngularVelocityZ = _body != null ? _body.angularVelocity.z : 0f,
 
                 Yaw   = euler.y * Mathf.Deg2Rad,
                 Pitch = euler.x * Mathf.Deg2Rad,
@@ -158,6 +166,8 @@ namespace ArtOfSimRally.Mod
                 DrivetrainType   = 2,   // rally default; refine from powered axles later
                 NumCylinders     = 4,
             };
+            TelemetrySampling.FillMotion(ref frame, velocity, accel,
+                _body != null ? _body.angularVelocity : Vector3.zero, rotation);
 
             // gearRatios is [reverse, neutral, 1st, 2nd, ...], so Drivetrain.gear
             // is an index, not a gear number. Forza reports 0 for both reverse and
@@ -201,15 +211,11 @@ namespace ArtOfSimRally.Mod
             frame.TireCombinedSlip = new WheelValues(
                 Combined(fl), Combined(fr), Combined(rl), Combined(rr));
 
-            frame.SuspensionTravelMeters = new WheelValues(
-                fl.suspensionTravel, fr.suspensionTravel,
-                rl.suspensionTravel, rr.suspensionTravel);
-
-            // Compression is the normalised form Forza expects here, and it is
-            // what suspension-driven shaker effects actually read.
-            frame.NormalizedSuspensionTravel = new WheelValues(
-                Mathf.Clamp01(fl.compression), Mathf.Clamp01(fr.compression),
-                Mathf.Clamp01(rl.compression), Mathf.Clamp01(rr.compression));
+            // The game stores compression in meters; Forza also needs its ratio
+            // to each wheel's available suspension travel (0 extended, 1 compressed).
+            TelemetrySampling.FillSuspension(ref frame,
+                new WheelValues(fl.compression, fr.compression, rl.compression, rr.compression),
+                new WheelValues(fl.suspensionTravel, fr.suspensionTravel, rl.suspensionTravel, rr.suspensionTravel));
 
             frame.WheelRotationSpeed = new WheelValues(
                 fl.angularVelocity, fr.angularVelocity,
@@ -263,6 +269,7 @@ namespace ArtOfSimRally.Mod
         /// </remarks>
         public static void Park()
         {
+            Motion.Reset();
             if (_sender == null || _senderFailed) return;
             try
             {
@@ -285,6 +292,7 @@ namespace ArtOfSimRally.Mod
         /// <summary>Closes the socket. Called from the mod's teardown.</summary>
         public static void Shutdown()
         {
+            Motion.Reset();
             _sender?.Dispose();
             _sender = null;
             _senderHost = null;

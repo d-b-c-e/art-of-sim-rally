@@ -28,6 +28,15 @@ namespace ArtOfSimRally.Mod
     /// </remarks>
     internal static class GameState
     {
+        public static bool IsRestarting
+        {
+            get
+            {
+                try { return GameEntryPoint.EventManager != null && GameEntryPoint.EventManager.IsRestartingStage(); }
+                catch { return true; }
+            }
+        }
+
         /// <summary>
         /// True only while the player is driving under their own control.
         /// </summary>
