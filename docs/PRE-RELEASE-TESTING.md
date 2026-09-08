@@ -21,6 +21,8 @@ x64 `dumpbin` path in the script. Close the game for installer guards.
 ./tools/testing/Test-Rc.ps1 -Version 0.2.3-rc.6
 # Once real cases exist, include them on every candidate:
 ./tools/testing/Test-Rc.ps1 -Version 0.2.3-rc.7 -Corpus './results/regression-corpus/index.json'
+# Validate the exact final-labelled artifact with the same offline suite:
+./tools/testing/Test-Rc.ps1 -Version 0.2.3 -Final
 ```
 
 Choose a new RC number for every rebuild. Existing ZIPs/staging directories are

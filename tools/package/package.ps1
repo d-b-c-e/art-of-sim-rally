@@ -156,8 +156,8 @@ KNOWN LIMITS
   should apply to any wheel Rewired does not recognise, which is likely most
   modern direct-drive bases, but that is reasoning rather than testing.
 
-* Camera handback and stage-start stutter fixes in 0.2.3 require game testing.
-  RC packages are test candidates, not a claim that these reports are resolved.
+* Owner RC6 testing reported working cameras, no stutter and no control issues
+  so far. The full attended matrix and hardware-specific reports remain open.
 
 * This is a bonnet camera, not a cockpit camera. art of rally's cars have no
   modelled interiors, so there is nothing to sit inside of.

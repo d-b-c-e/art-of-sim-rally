@@ -16,7 +16,7 @@ properly on a racing wheel.
 1. Install [Unity Mod Manager](https://www.nexusmods.com/site/mods/21) and point
    it at art of rally. The game is already in its supported list.
 
-2. Download the latest [release](../../releases/latest) zip, unzip it, and
+2. Download the latest [release](https://github.com/d-b-c-e/art-of-sim-rally/releases/latest) zip, unzip it, and
    double-click **Install.bat**.
 
 That's it. The installer finds your game even on a non-default Steam library,
@@ -72,7 +72,7 @@ game runs, which helps if something else already owns the port.
 In the settings panel, under *Devices and troubleshooting*, press **Create
 support file on Desktop**. It collects your settings, your controllers, what is
 actually bound, and the logs into one file. Attach that to an
-[issue](../../issues) — it usually contains the answer.
+[issue](https://github.com/d-b-c-e/art-of-sim-rally/issues) — it usually contains the answer.
 
 
 **Fanatec owners:** your base shows up as two identical `FANATEC Wheel` devices
@@ -97,18 +97,19 @@ and does not need the game to know about it.
 **Bonnet, not cockpit.** The cars have no modelled interiors, so a cockpit view
 isn't possible.
 
-**Tested on a MOZA R12 Base** (the developer's rig), and by users on a MOZA R5,
-a Fanatec CSL DD and a Thrustmaster T300 RS GT. The force feedback is plain DirectInput constant force with
+**Tested on a MOZA R12 Base** (the developer's rig), with positive user reports
+on a MOZA R5 and a Thrustmaster T300 RS GT. Fanatec-specific fixes still await
+hardware confirmation. The force feedback is plain DirectInput constant force with
 nothing vendor-specific in it, so it should work on anything that does force
 feedback; per-wheel differences that turned up are handled (see
 [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)).
 
 **Known issues** are listed in [docs/KNOWN-ISSUES.md](docs/KNOWN-ISSUES.md).
-On 0.2.2, the game's own camera angles render reversed once you have cycled
-through the bonnet or bumper view ([#1](../../issues/1)); until the next release,
-untick both mounted cameras in Ctrl+F10 → Camera, or just restart the stage. The
-camera also moves about for a second when the game takes over at the end of a
-stage — cosmetic, results cinematic only.
+0.2.3 fixes mounted-camera handback during stock-view, replay and cinematic
+transitions. Owner RC6 testing reported working cameras and no stage-start
+stutter. [Issue #1](https://github.com/d-b-c-e/art-of-sim-rally/issues/1) remains
+open: its reporter separately resolved their symptom by unplugging a PS5 pad,
+so that report is not conclusively tied to the camera code defect.
 
 ## Why the steering felt wrong
 
@@ -133,7 +134,7 @@ the shipped build.
 This mod supplies the missing piece and the missing plugin. The force is the
 front axle's lateral force through a pneumatic trail — centring in proportion
 to load, lightening as the front starts to slide — faded out below 12 km/h.
-Strength is the only dial; *Invert* is there for wheels that read the axis the
+Strength controls output level and Smoothing filters changes; *Invert* is there for wheels that read the axis the
 other way. Confirmed on a MOZA R12 and, via a user's log, a MOZA R5.
 
 ## Shifters
@@ -168,9 +169,12 @@ dotnet build ArtOfSimRally.sln -c Release
 tools\testing\Test-Rc.ps1 -Version 0.2.3-rc.6
 ```
 
-The public release is **0.2.2**. The working tree prepares **0.2.3**; camera
-handback, opening-stutter changes and the new diagnostics still need real game
-testing. See the [RC checklist and capture guide](docs/PRE-RELEASE-TESTING.md).
+Release **0.2.3** adopts the shared toolkit force/device code and improves camera
+handback, settings persistence, diagnostics and telemetry recovery. Automated
+checks pass. Owner RC6 testing reported no stutter, good cameras and no control
+issues so far. The full attended checklist and hardware-specific reports remain
+open. See the [release notes](docs/releases/0.2.3.md) and
+[testing guide](docs/PRE-RELEASE-TESTING.md).
 Recording is development-only: a separately installed probe captures signals,
 and an external runner replays saved cases without the game or wheel. The release
 mod has no recorder or playback feature.

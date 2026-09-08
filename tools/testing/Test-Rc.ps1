@@ -1,10 +1,13 @@
-<# Builds an immutable RC, runs offline gates, and creates an attended test checklist.
+<# Builds an immutable RC (or final-labelled package with -Final), runs offline gates,
+   and creates an attended test checklist. -Final does not provide runtime sign-off.
    Never installs into the real game or sends input/force to hardware. #>
 [CmdletBinding()]
-param([Parameter(Mandatory)][string]$Version, [string]$Corpus)
+param([Parameter(Mandatory)][string]$Version, [string]$Corpus, [switch]$Final)
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
-if ($Version -notmatch '^\d+\.\d+\.\d+-rc\.[1-9]\d*$') { throw 'An explicit X.Y.Z-rc.N is required' }
+if ($Final) {
+    if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw '-Final requires X.Y.Z' }
+} elseif ($Version -notmatch '^\d+\.\d+\.\d+-rc\.[1-9]\d*$') { throw 'Use X.Y.Z-rc.N, or X.Y.Z with -Final' }
 $run = Join-Path $root ('results/rc-' + $Version + '-' + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $run | Out-Null
 $shell = (Get-Process -Id $PID).Path

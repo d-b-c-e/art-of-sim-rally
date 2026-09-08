@@ -7,14 +7,17 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Preparing **0.2.3**. Automated RC checks pass; camera, stutter, support output and
-real rig/UMM behaviour still require the attended checklist before release.
+## [0.2.3] - 2026-09-08
+
+Owner RC6 testing found no stutter, working cameras and no control issues so far.
+Automated checks cover the fixes below. The complete attended matrix and
+hardware-specific reports remain open; see [release notes](docs/releases/0.2.3.md).
 
 ### Fixed
 
 - Restore the mounted camera's child transform and FOV on handback, including
   replay/cinematic transitions where the game disables CarCameras; stop camera
-  control when the mod/view is disabled. Visual verification pending. Issue #1's
+  control when the mod/view is disabled. Owner camera smoke test passed. Issue #1's
   reporter separately resolved their symptom by unplugging a PS5 controller.
 - Defer learned-axis settings writes until driving stops. Retain pending changes
   after a failed save, throttle retries and release FFB/telemetry before shutdown
@@ -248,6 +251,8 @@ First release. Turns art of rally into something you can drive on a wheel.
   motion rigs.
 
 [0.2.0]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.0
+[0.2.3]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3
+[0.2.2]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.2
 [0.1.2]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.1.2
 [0.1.1]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.1.1
 [0.1.0]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.1.0

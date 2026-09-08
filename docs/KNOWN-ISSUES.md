@@ -43,13 +43,14 @@ but tying it conclusively to this reporter's issue was premature.
 The RC tracks and restores the exact child it owned, restores FOV, hands back on
 stock-view selection and mod/feature disable, and selects a usable stock view
 instead of leaving a zero-distance placeholder active. Offline ownership tests
-pass; visual confirmation remains required. Check stock views before/after each
+pass; owner RC6 feedback on 2026-09-08 UTC says the camera worked great. This
+does not reproduce the reporter's pad/binding setup. Check stock views before/after each
 mounted view and compare pad attached/absent where available. Do not close the
 GitHub issue solely from these code tests.
 
 ### KI-2 — The camera moves oddly at the end of a stage
 
-**Cosmetic; implemented fix, game verification pending.** Observed on the owner's
+**Cosmetic; fixed in 0.2.3, owner smoke passed; full matrix pending.** Observed on the owner's
 rig and independently reported on Reddit for replays and stage end in 0.2.2.
 
 The earlier parent snap did not restore the rendering child's local transform.
@@ -60,8 +61,9 @@ build 17584229 on 2026-09-06.
 
 The RC releases the child before those transitions, with a persistent watchdog
 fallback. It does not snap the parent while the cinematic system owns it.
-Finish, replay, intro, pause/resume, stage restart and unload still require
-screen validation; the test doubles cannot establish rendered correctness.
+Owner RC6 feedback on 2026-09-08 UTC: "camera worked great". The report did not
+enumerate every transition. Finish, replay, intro, pause/resume, stage restart
+and unload remain checklist items; test doubles do not establish rendered correctness.
 
 ---
 
@@ -86,9 +88,9 @@ name, which no machine here does. Until a Fanatec owner confirms, treat
 [TROUBLESHOOTING.md](TROUBLESHOOTING.md)'s Fanatec section as a best hypothesis
 rather than a tested procedure.
 
-Toolkit 0.2.0 adds `SetPreferredDeviceGuid`, which would let the right twin be
-selected by DirectInput instance GUID instead of by trying candidates in turn.
-See [ROADMAP.md](ROADMAP.md).
+0.2.3 adopts toolkit v0.12.0 and stores new explicit wheel selections by strict
+DirectInput instance GUID. This distinguishes identically named devices; the
+Fanatec setup still needs confirmation. See [ROADMAP.md](ROADMAP.md).
 
 ---
 
@@ -136,7 +138,9 @@ cleared the dirty flag anyway, and moves shutdown persistence after output relea
 Failed saves now stay pending and retry at most every five seconds while idle.
 
 Offline policy and shutdown-order checks pass. They do not demonstrate that disk
-IO caused the user's stutter or that it is gone. Compare cold stage, same-stage
+IO caused the user's stutter. Owner RC6 testing on 2026-09-08 UTC reported
+"no stutter"; the original Reddit report is not yet confirmed resolved.
+Compare cold stage, same-stage
 restart, different stage, and mod-disabled baseline using the optional capture
 and [testing checklist](PRE-RELEASE-TESTING.md).
 
@@ -229,7 +233,7 @@ them would otherwise look like a new mystery.
 
 | # | Problem | Cause | Fixed in |
 |---|---|---|---|
-| R-1 | Vendored toolkit was never committed; a fresh clone could not package | `.gitignore` excluded the `lib/` **directory**, so git never descended into it and the `!lib/toolkit/**` re-includes could not match | unreleased (2026-09-04) |
+| R-1 | Vendored toolkit was never committed; a fresh clone could not package | `.gitignore` excluded the `lib/` **directory**, so git never descended into it and the `!lib/toolkit/**` re-includes could not match | 0.2.3 |
 | R-2 | Force feedback gave up when the preferred device had no actuator | A Fanatec base presents two `FANATEC Wheel` devices, only one with the motor; `CreateEffect` failed `0x80040154` and nothing tried the other | 0.2.2 |
 | R-3 | Crash when choosing a shifter after force feedback failed | Listing controllers created a temporary DirectInput instance and released it while the device table stayed populated; opening the chosen device then used the released instance | 0.2.2 |
 | R-4 | Direct wheel input steered inverted | Assignment took the moved direction as +1, and the game reads +1 as right, so a left turn during Assign inverted the axis | 0.2.2 |

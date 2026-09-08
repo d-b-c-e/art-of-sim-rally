@@ -132,6 +132,10 @@ a final clean-tree build; it does not itself authorize publication or claim game
 tests passed. Numeric UMM/assembly versions and the full informational build
 identity are validated before archiving. Archive and payload hashes are retained.
 
+Use `tools/testing/Test-Rc.ps1 -Version X.Y.Z -Final` to run the complete offline
+suite against a final-labelled artifact, including packaging and installation
+tests. This creates a new attended checklist; `-Final` does not mark it passed.
+
 `dotnet test ArtOfSimRally.sln` runs no tests; the explicit executable runners in
 the RC script are the automated evidence. Native/telemetry source suites live in
 the toolkit. No automated path in this repo recreates a Unity playthrough.

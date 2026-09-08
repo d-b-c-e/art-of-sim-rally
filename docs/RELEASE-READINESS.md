@@ -1,9 +1,17 @@
-# Release readiness — 2026-09-07
+# Release readiness — 2026-09-08
 
-**0.2.3-rc.6 is prepared and passes all 16 automated gates. It is not signed off
-for release.** Public mod release remains 0.2.2. The automated run did not deploy
-anything. RC6 and the separate developer probe were subsequently installed locally
-on 2026-09-07 for the owner's attended checks; no drive or publication is recorded.
+**0.2.3 is being prepared for publication at the owner's request.** RC6 passes
+all 16 automated gates and was driven after local installation. Owner feedback:
+"no stutter, camera worked great, and no issues with the controls so far."
+The full attended matrix remains pending. Publication is a scoped release decision,
+not a passed manual gate. The final-labelled artifact receives its own automated
+run and checklist; it has not been driven yet.
+
+The RC6 UMM log confirms toolkit/Mono loading and live force evaluation. Local
+log and exact owner report are preserved under `results/release-0.2.3-preparation`.
+No real capture was completed. The candidate evidence below remains historical
+and immutable; final release identity and installation evidence will be added
+after packaging and publication.
 
 ## Exact candidate
 

@@ -1,13 +1,15 @@
 # Roadmap
 
-Status reviewed 2026-09-07 against `v0.2.2..38f553b` and the RC working tree.
-**Public release: 0.2.2. Next maintenance release: 0.2.3, pending attended tests.**
+Status reviewed 2026-09-08 for the 0.2.3 release.
+**Maintenance release: 0.2.3. The full attended checklist remains pending.**
 The defect register is [KNOWN-ISSUES.md](KNOWN-ISSUES.md); the implementation review
 is [2026-09-06-rc-review.md](reviews/2026-09-06-rc-review.md).
 
-## Now — validate the 0.2.3 candidate
+## Now — finish 0.2.3 attended validation
 
-Implemented but not yet verified in a real game session:
+Owner RC6 testing reported no stutter, working cameras and no control issues so
+far. This is a scoped smoke result, not a completed scenario matrix. Implemented;
+still requiring the complete attended checks:
 
 - Camera child-transform restoration, including explicit replay/cinematic
   handback, mod/feature disable and restoration of a usable stock angle.
@@ -22,7 +24,8 @@ Implemented but not yet verified in a real game session:
 
 Development tooling is separate: bounded capture probe, external Start/Stop,
 game-free force replay, a saved regression corpus and the release evidence gate.
-No recorder ships in the release mod. The first real game case still needs to be
+No recorder ships in the release mod. A local drive log confirms loading and force
+evaluation, but no completed capture was saved. The first real game case needs to be
 captured; generated fixtures validate the tooling, not a playthrough.
 
 Run [PRE-RELEASE-TESTING.md](PRE-RELEASE-TESTING.md). The release needs the exact
