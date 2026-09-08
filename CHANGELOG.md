@@ -7,6 +7,12 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Camera tuning retains failed saves and retries while idle, including after
+  leaving the mounted view or disabling the mod. Save success is logged only
+  after a successful write; held adjustments no longer log every frame.
+
 ### Documentation
 
 - Record the 0.2.3 publication and verified local installation, GitHub audit,

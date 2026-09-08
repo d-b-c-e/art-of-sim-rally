@@ -93,7 +93,11 @@ namespace ArtOfSimRally.Mod
     internal static class Main { public static Settings Settings = new Settings(); public static bool Enabled=true; }
     internal static class GameState { public static bool IsDriving=false, IsPlayerView=true; }
     internal static class ModLog { public static void Info(string value) { } }
-    internal static class CameraTuner { public static void Update(BonnetCamera.View view) { } }
+    internal static class CameraTuner
+    {
+        public static void Update(BonnetCamera.View view) { }
+        public static void Flush(bool shutdown=false) => Calls.Log.Add("camera-save");
+    }
     internal static class InputBackend { public static void Tick() { } }
     internal static class WheelInput
     {

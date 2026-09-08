@@ -54,13 +54,18 @@ static class Program
         int disk=Calls.Log.IndexOf("save");
         Check(Calls.Log[0]=="force:0", "shutdown did not zero force first");
         foreach(string call in new[] {"filter-reset","native-close","telemetry-park","telemetry-close","shifter-close","input-close","native-input-close"})
-            Check(Calls.Log.IndexOf(call)>=0 && Calls.Log.IndexOf(call)<disk, call+" happened after save");
+            Check(Calls.Log.IndexOf(call)>=0 && Calls.Log.IndexOf(call)<disk &&
+                Calls.Log.IndexOf(call)<Calls.Log.IndexOf("camera-save"), call+" happened after save");
         var watchdog=new ModWatchdog(); Calls.Log.Clear(); ArtOfSimRally.Mod.Main.Enabled=true; GameState.IsDriving=true;
         typeof(ModWatchdog).GetMethod("Update",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(watchdog,null);
-        Check(!Calls.Log.Contains("save"),"watchdog saved while driving");
+        Check(!Calls.Log.Contains("save") && !Calls.Log.Contains("camera-save"),"watchdog saved while driving");
         GameState.IsDriving=false;
         typeof(ModWatchdog).GetMethod("Update",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(watchdog,null);
         Check(Calls.Log.IndexOf("force:0")<Calls.Log.IndexOf("save"),"idle save preceded release");
+        Check(Calls.Log.IndexOf("force:0")<Calls.Log.IndexOf("camera-save"),"camera save preceded release");
+        Calls.Log.Clear(); ArtOfSimRally.Mod.Main.Enabled=false;
+        typeof(ModWatchdog).GetMethod("Update",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(watchdog,null);
+        Check(Calls.Log.Contains("camera-save"),"disabled mod lost camera save retry");
         var rig=Mount(); var camera=UIManager.Instance.PanelManager.mainCamera;
         ArtOfSimRally.Mod.Main.Enabled=false; ModWatchdog.Shutdown(unloading:true); Released(camera);
         Check(BonnetCamera.ActiveView(rig)==BonnetCamera.View.None,"unload left mounted placeholder active");

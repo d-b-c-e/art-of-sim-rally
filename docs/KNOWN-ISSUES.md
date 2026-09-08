@@ -23,7 +23,7 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ### KI-14 — Camera tuner loses failed-save retry and logs each adjustment frame
 
-**Persistence/supportability; source-confirmed in 0.2.3, reproduction queued.**
+**Persistence/supportability; reproduced in 0.2.3, fixed in next-version source.**
 `CameraTuner.Update` clears `_dirty` before `Main.SaveSettings()`, ignores its
 failure result and logs success unconditionally. Its timer only runs while a
 mounted view is active, so switching away before the timer expires can leave the
@@ -31,9 +31,12 @@ edit unsaved until another save or mounted-view update. Held tuning keys also
 produce a log line per frame. These are separate from the learned-axis save
 policy fixed in KI-8; there is no evidence they caused KI-5's stage-start stutter.
 
-Reproduce locked-file failure and view handback, then retain/retry pending camera
-edits and rate-limit logs. First item in [OVERNIGHT-QUEUE.md](OVERNIGHT-QUEUE.md).
-No runtime regression was reported by the owner and no fix is in 0.2.3.
+Locked-file reproduction recorded one failed attempt, a false success log and no
+retry. The fix uses the persistent watchdog to save while idle and retain failures
+with five-second retry backoff. Held adjustments produce no per-frame log.
+Production tuner/writer tests cover locked-file recovery, latest edits, debounce,
+driving/disable and shutdown; lifecycle tests check output release before writes.
+Attended persistence remains pending. No fix is in the published 0.2.3 archive.
 
 ### KI-13 — TSS handbrake assignment is not discoverable through stock controls
 

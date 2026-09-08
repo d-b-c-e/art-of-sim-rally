@@ -16,19 +16,35 @@ namespace ArtOfSimRally.Mod
     /// </para>
     /// <para>
     /// Saving is debounced rather than immediate: writing the config on every frame
-    /// a key is held would hammer the disk. Changes are written about a second after
-    /// the last adjustment, so it persists without a save key to remember.
+    /// a key is held would hammer the disk. The persistent watchdog saves once idle,
+    /// at least a second after the last adjustment, even after leaving this view.
     /// </para>
     /// <para>
     /// Input is read through <c>UnityEngine.Input</c> rather than Rewired, so these
-    /// keys sit outside the game's binding system and cannot collide with a bound
-    /// action. Numpad by default for the same reason.
+    /// keys sit outside the game's binding system. They can still trigger game
+    /// actions on the same key; the numpad defaults reduce that overlap.
     /// </para>
     /// </remarks>
     internal static class CameraTuner
     {
         private static float _saveDueAt;
-        private static bool  _dirty;
+        private static readonly DeferredSave Save = new DeferredSave();
+
+        internal static void MarkDirty()
+        {
+            Save.MarkDirty();
+            _saveDueAt = Time.unscaledTime + 1f;
+        }
+
+        // Called independently of the mounted camera's LateUpdate. Keep retries
+        // pending after failure and perform no persistence in the driving path.
+        public static void Flush(bool shutdown = false)
+        {
+            if (!shutdown && Time.unscaledTime < _saveDueAt) return;
+            if (Save.Flush(Time.unscaledTime, !shutdown && Main.Enabled && GameState.IsDriving,
+                    shutdown, Main.SaveSettings))
+                ModLog.Info("Camera settings saved.");
+        }
 
         /// <summary>
         /// Polls adjustment keys for the given view. Called from the camera's
@@ -89,29 +105,9 @@ namespace ArtOfSimRally.Mod
                     cfg.BonnetFOV     = defaults.BonnetFOV;
                 }
                 changed = true;
-                ModLog.Info((bumper ? "Bumper" : "Bonnet") + " camera reset to defaults.");
             }
 
-            if (changed)
-            {
-                _dirty = true;
-                _saveDueAt = Time.unscaledTime + 1f;
-                if (bumper)
-                    ModLog.Info(
-                        $"Bumper camera  height={cfg.BumperHeight:F2}  forward={cfg.BumperForward:F2}  " +
-                        $"side={cfg.BumperSide:F2}  pitch={cfg.BumperPitch:F1}  fov={cfg.BumperFOV:F0}");
-                else
-                    ModLog.Info(
-                        $"Bonnet camera  height={cfg.BonnetHeight:F2}  forward={cfg.BonnetForward:F2}  " +
-                        $"side={cfg.BonnetSide:F2}  pitch={cfg.BonnetPitch:F1}  fov={cfg.BonnetFOV:F0}");
-            }
-
-            if (_dirty && Time.unscaledTime >= _saveDueAt)
-            {
-                _dirty = false;
-                Main.SaveSettings();
-                ModLog.Info("Camera settings saved.");
-            }
+            if (changed) MarkDirty();
         }
 
         private static bool Nudge(ref float value, KeyCode increase, KeyCode decrease, float step)
