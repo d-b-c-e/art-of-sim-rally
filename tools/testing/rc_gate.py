@@ -19,6 +19,9 @@ CASES["stutter"] += " Include rare later-stage slowdowns separately from cold-st
 CASES["stutter"] += " Before driving, wait 30 seconds in the main menu and inspect Player.log for repeated EventManager construction or ghost-download errors. Drive the same stage/curve as the RC4 report, then return to the menu and repeat; collect support while paused before quitting."
 CASES["telemetry"] += " Compare corrected suspension meters/normalized ratios and local axes with the previous build; inspect dashboard/recorded values before motion output. Check pause/restart produces no acceleration spike, then complete an attended shaker/motion comparison."
 CASES["support-identity"] += " Collect while paused immediately after a short diagnostic run; inspect loaded mods, cached input values, frame counts and explicit log-window truncation."
+CASES["input-persistence"] += " For 0.2.5, check axis and separate-shifter GUID identity after USB enumeration changes; missing identities must not substitute another device. Reconnect while paused with another reader open, allow five seconds; Assign discovers new devices. Resume an unfinished assignment and confirm it cancels."
+CASES["support-identity"] += " After a diagnostic drive and normal quit/relaunch, verify previous-session counters retain their original build and timestamps, separate from current counters."
+CASES["telemetry"] += " Verify 0.2.5 connections prepare while idle; a driving destination edit keeps the old endpoint until pause. Disabling telemetry must immediately park the consumer; re-enable while paused."
 
 def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest().upper()

@@ -69,6 +69,10 @@ and retries unavailable readers while paused. If an old binding reports identica
 devices, pause and use Assign again for that row. Assign also discovers devices
 plugged in after launch. Existing unambiguous bindings upgrade automatically after
 a successful read; their calibration is preserved. Hardware validation is pending.
+For a separate shifter, pause before choosing its device. The candidate also
+retains that selection by GUID; reconnect/reselect if it reports unavailable.
+Old identical-name selections need an explicit choice. Automatic native shifter
+hotplug recovery remains unverified.
 
 Use the mod's binding panel if the game's controls screen only offers shifting
 or never detects the handbrake. You can bind just the handbrake and leave working

@@ -43,6 +43,65 @@ internal static class Program
         }
         finally { field.SetValue(null, original); }
     }
+    static void DrivingConnection(Assembly mod, Type pump, object cfg)
+    {
+        var entry = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType("GameEntryPoint")).First(t => t != null);
+        var field = entry.GetField("eventManager", Static); var original = field.GetValue(null);
+        var manager = FormatterServices.GetUninitializedObject(entry.Assembly.GetType("StageSceneManager", true));
+        var status = field.FieldType.GetField("status");
+        var main = mod.GetType("ArtOfSimRally.Mod.Main", true);
+        var settings = main.GetProperty("Settings", Static); var enabled = main.GetProperty("Enabled", Static);
+        var originalSettings = settings.GetValue(null); var originalEnabled = enabled.GetValue(null);
+        using (var listener = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0)))
+        using (var next = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0)))
+        {
+            listener.Client.ReceiveTimeout = 2000;
+            cfg.GetType().GetField("TelemetryHost").SetValue(cfg, "127.0.0.1");
+            cfg.GetType().GetField("TelemetryPort").SetValue(cfg, ((IPEndPoint)listener.Client.LocalEndPoint).Port);
+            cfg.GetType().GetField("TelemetryEnabled").SetValue(cfg, true);
+            field.SetValue(null, manager); status.SetValue(manager, Enum.Parse(status.FieldType, "UNDERWAY"));
+            try
+            {
+                settings.SetValue(null, cfg); enabled.SetValue(null, true);
+                Check(!(bool)pump.GetMethod("EnsureSender", Static).Invoke(null, new[] { cfg }), "telemetry created a socket from the driving connection path");
+                Check(pump.GetProperty("ActiveEndpoint", Static).GetValue(null) == null, "driving connection retained socket");
+                pump.GetMethod("Prepare", Static).Invoke(null, null);
+                Check(pump.GetProperty("ActiveEndpoint", Static).GetValue(null) == null, "driving Prepare connected");
+                status.SetValue(manager, Enum.Parse(status.FieldType, "PAUSED"));
+                pump.GetMethod("Prepare", Static).Invoke(null, null);
+                string active = (string)pump.GetProperty("ActiveEndpoint", Static).GetValue(null);
+                Check(active != null, "idle watchdog did not connect");
+                status.SetValue(manager, Enum.Parse(status.FieldType, "UNDERWAY"));
+                cfg.GetType().GetField("TelemetryPort").SetValue(cfg, ((IPEndPoint)next.Client.LocalEndPoint).Port);
+                Check((bool)pump.GetProperty("EndpointPending", Static).GetValue(null), "destination change not pending");
+                Check((bool)pump.GetMethod("EnsureSender", Static).Invoke(null, new[] { cfg }), "working endpoint stopped during driving edit");
+                pump.GetMethod("Prepare", Static).Invoke(null, null);
+                Check((string)pump.GetProperty("ActiveEndpoint", Static).GetValue(null) == active, "driving edit switched destination");
+                var frameType = pump.GetMethod("SendFrame", Static).GetParameters()[0].ParameterType;
+                var frame = Activator.CreateInstance(frameType); frameType.GetField("IsRaceOn").SetValue(frame, true);
+                pump.GetMethod("SendFrame", Static).Invoke(null, new[] { frame });
+                IPEndPoint peer = null;
+                Check(BitConverter.ToInt32(listener.Receive(ref peer), 0) == 1, "current endpoint did not receive live frame");
+                cfg.GetType().GetField("TelemetryEnabled").SetValue(cfg, false);
+                pump.GetMethod("StopIfDisabled", Static).Invoke(null, null);
+                for (int i = 0; i < 3; i++) Check(BitConverter.ToInt32(listener.Receive(ref peer), 0) == 0, "telemetry disable did not park during driving");
+                Check(pump.GetProperty("ActiveEndpoint", Static).GetValue(null) == null, "telemetry disable retained connection");
+                pump.GetMethod("StopIfDisabled", Static).Invoke(null, null);
+                Check(listener.Available == 0, "disabled telemetry repeatedly parked");
+                cfg.GetType().GetField("TelemetryEnabled").SetValue(cfg, true);
+                pump.GetMethod("Prepare", Static).Invoke(null, null);
+                Check(pump.GetProperty("ActiveEndpoint", Static).GetValue(null) == null, "re-enable reconnected while driving");
+                status.SetValue(manager, Enum.Parse(status.FieldType, "PAUSED"));
+                pump.GetMethod("Prepare", Static).Invoke(null, null);
+                Check(!(bool)pump.GetProperty("EndpointPending", Static).GetValue(null), "pause did not apply destination");
+            }
+            finally
+            {
+                field.SetValue(null, original); settings.SetValue(null, originalSettings); enabled.SetValue(null, originalEnabled);
+                pump.GetMethod("Shutdown", Static).Invoke(null, null);
+            }
+        }
+    }
     static int Main(string[] args)
     {
         try
@@ -56,6 +115,7 @@ internal static class Program
             CheckGameState(mod);
             var pump = mod.GetType("ArtOfSimRally.Mod.TelemetryPump", true);
             var settingsType = mod.GetType("ArtOfSimRally.Mod.Settings", true); var cfg = Activator.CreateInstance(settingsType);
+            DrivingConnection(mod, pump, cfg);
             var connect = pump.GetMethod("EnsureSender", Static);
             var park = pump.GetMethod("Park", Static); var shutdown = pump.GetMethod("Shutdown", Static);
             int errors = 0;

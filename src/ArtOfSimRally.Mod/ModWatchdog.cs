@@ -51,6 +51,7 @@ namespace ArtOfSimRally.Mod
         private void Update()
         {
             ObserveFrameHealth();
+            TelemetryPump.StopIfDisabled();
             if (!Main.Enabled)
             {
                 WheelInput.FlushLearnedRanges();
@@ -83,6 +84,7 @@ namespace ArtOfSimRally.Mod
                 // the control is first used, which is the opening seconds of a
                 // stage; saving it there could contribute to the reported KI-5 hitch.
             }
+            TelemetryPump.Prepare();
             // Retry failed writes at most once per five seconds, only while idle.
             WheelInput.FlushLearnedRanges();
             Shifter.FlushSelection();

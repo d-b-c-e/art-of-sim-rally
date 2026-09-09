@@ -107,6 +107,9 @@ limits. Signal replay does not automate full game input, rendering or wheel feel
   build/timestamps/counters. It must not relabel old data as the current drive.
 - Confirm normal force and pause/stage/focus recovery. Missing-wheel-data force
   release is tested through fault injection; do not provoke faults while driving.
+- Enable telemetry while paused. If editing a destination while driving, confirm
+  the current endpoint stays active and the new one applies after pause. Turn it
+  off and confirm the consumer parks immediately; re-enable after pausing.
 
 ## Carry-forward checks from 0.2.4
 

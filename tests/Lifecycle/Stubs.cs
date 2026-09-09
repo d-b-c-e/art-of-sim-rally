@@ -121,6 +121,8 @@ namespace ArtOfSimRally.Mod
     internal static class FfbController { public static void Reset() => Calls.Log.Add("filter-reset"); }
     internal static class TelemetryPump
     {
+        public static void Prepare() => Calls.Log.Add("telemetry-prepare");
+        public static void StopIfDisabled() => Calls.Log.Add("telemetry-stop-disabled");
         public static void Park() => Calls.Log.Add("telemetry-park");
         public static void Shutdown() => Calls.Log.Add("telemetry-close");
     }

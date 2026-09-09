@@ -1,7 +1,10 @@
 # Release readiness — 2026-09-09
 
-**Current: stable 0.2.4 is published and installed; all 16 local checks pass.** The new
-drive log has no initialization errors, connection failures or exceptions.
+**Current: stable 0.2.4 is published; 0.2.5 development candidates are installed
+locally after validation.** [Current implementation and candidate evidence](reviews/2026-09-09-overnight-025.md)
+records the USB, diagnostics, lifecycle and developer-capture work. New hardware
+and full attended checks remain pending. The earlier RC5 drive log has no
+initialization errors, connection failures or exceptions.
 See [0.2.4 release handoff](reviews/2026-09-09-release-0.2.4.md) for exact final
 artifact, automated checks, publication verification and preserved-settings install; [local deployment](LOCAL-DEPLOYMENT.md)
 records the installed identity. Full attended cases and a final-labelled drive
@@ -31,7 +34,7 @@ RC2 evidence below is historical; RC3 stopped before packaging and was supersede
 direct-input fixes. It has not been installed, driven or published. Its
 [exact artifact, results and handoff](reviews/2026-09-08-overnight.md) are separate
 from the published/installed 0.2.3 evidence below. [Overnight status](OVERNIGHT-QUEUE.md) and
-[extra drive checks](TEST-DRIVE.md#extra-checks-for-024) describe the new scope.
+[extra drive checks](TEST-DRIVE.md#carry-forward-checks-from-024) describe the new scope.
 
 **[0.2.3 is published](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3)
 and was previously installed locally; RC4 now replaces that local install.** RC6 passes

@@ -267,15 +267,17 @@ namespace ArtOfSimRally.Mod
 
                 // Live confirmation, so changing the port can be verified here
                 // instead of by alt-tabbing to whatever is meant to receive it.
-                // Changes apply immediately - no restart.
+                // Connection changes wait for idle; no restart required.
                 string active = TelemetryPump.ActiveEndpoint;
                 GUILayout.Label(active == null
-                    ? "      Not sending yet - starts when you drive."
+                    ? "      Not connected. Pause to apply the destination; check support logs if it fails."
                     : "      Sending to " + active + "   (" + TelemetryPump.PacketsSent + " packets)",
                     Wrap);
 
-                Help("Changing the host or port takes effect straight away. Useful if something " +
-                     "else already owns the port - point the game at a spare one and forward it.");
+                if (TelemetryPump.EndpointPending && GameState.IsDriving)
+                    Help("Destination change pending: pause to apply it. The current connection stays active until then.");
+                Help("Set the host and port while paused or in a menu. Connection changes apply " +
+                     "there without restarting the game. Telemetry stays off until a connection is ready.");
             }
 
             End();

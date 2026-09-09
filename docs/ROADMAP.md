@@ -1,15 +1,19 @@
 # Roadmap
 
-Status reviewed 2026-09-09 for 0.2.4 publication.
-**0.2.4 is published and installed after RC5 acceptance. The detailed attended matrix remains pending.**
+Status reviewed 2026-09-09 after the post-release overnight work.
+**0.2.4 is published; the local 0.2.5 candidate adds tested fixes and awaits a drive.**
+See [current evidence](reviews/2026-09-09-overnight-025.md) and
+[installed identity](LOCAL-DEPLOYMENT.md).
 The defect register is [KNOWN-ISSUES.md](KNOWN-ISSUES.md); the implementation review
 is [2026-09-06-rc-review.md](reviews/2026-09-06-rc-review.md).
 
-The next implementation session is ordered in [OVERNIGHT-QUEUE.md](OVERNIGHT-QUEUE.md).
-The post-0.2.4 queue prioritizes USB identity/reconnect investigations, retaining
-diagnostic summaries after exit, a focused lifecycle/performance review, and
-development capture of the signals needed for independent steering/impact effects.
-These are queued work, not additional verified bugs or completed features.
+The four post-0.2.4 [overnight items](OVERNIGHT-QUEUE.md) are implemented with
+offline coverage: USB identity/idle recovery, retained diagnostic summaries,
+reproduced lifecycle fixes, and separate development signal captures. Additional
+telemetry connection/disable work (KI-25) follows that audit. Manual hardware
+checks and the first real capture are the next priorities. Synchronous UDP send
+remains a potential future bounded-worker task, requiring measured need and
+careful park/drop/shutdown behavior; it is not a confirmed stutter diagnosis.
 [USER-FEEDBACK.md](USER-FEEDBACK.md) records the T300/TSS report, camera-key
 remapping request and the post-release GitHub audit with unsent support drafts.
 Implemented for the **0.2.4 release**: camera-tuner save retry/logging (KI-14),
@@ -26,7 +30,7 @@ offline coverage; motion/shaker and combined-camera-mod tests remain pending.
 New FFB effects and RWD damping remain a separate captured-signal/attended tuning
 cycle. No rotation override is justified by the current T300 evidence.
 
-## Now — follow up on 0.2.4 and capture real signals
+## Now — validate the 0.2.5 candidate and capture real signals
 
 Owner RC5 testing was accepted for 0.2.4; earlier 0.2.3 RC6 feedback also reported
 working cameras and controls. These are scoped results, not a complete matrix. Implemented;
@@ -77,8 +81,8 @@ periodic effect, assist or physics behavior is enabled.
 New explicit FFB picker choices persist an instance GUID. Missing GUIDs report a
 setup error and never select another wheel. Existing name/index settings remain
 readable. Reader handles are refreshed when switching FFB devices. Transactional
-sync resolves KI-9. Schema-2 captures record reset boundaries and the force library
-hash. Replay compares original and toolkit outputs with separate filter histories,
+sync resolves KI-9. Schema-3 captures add contact/suspension/world-local motion
+to schema 2's reset boundaries and force-library hash. Replay compares original and toolkit outputs with separate filter histories,
 checks device integers and reports frame timing. See [TEST-DRIVE.md](TEST-DRIVE.md).
 
 Next after a tested release: investigate RWD snapback (KI-6), then consider bounded

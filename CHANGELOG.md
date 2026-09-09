@@ -20,6 +20,9 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Prepare telemetry connections while idle instead of resolving/connecting from
+  the physics callback. Destination edits during driving wait for pause, keeping
+  the current connection active. Turning telemetry off immediately parks it.
 - Clear force/filter state when front-wheel data disappears or the native device
   becomes unavailable, including the game's published force value. Valid driving
   still uses the same shared force curve and tune.

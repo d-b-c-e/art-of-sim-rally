@@ -1,25 +1,32 @@
 # Overnight investigation and implementation queue
 
-**Latest status (2026-09-09 UTC): 0.2.4 published and installed after RC5 acceptance.**
-KI-20's manager/error flood is absent in the new drive log. See the
-[release handoff](reviews/2026-09-09-release-0.2.4.md) for current artifact status.
-Next: collect T300/TSS feedback on 0.2.4, complete the detailed hardware/camera and
-motion/shaker checks, and capture a real drive before new FFB effect tuning.
-Earlier RC2/RC4 status below is historical and superseded.
+**Latest status (2026-09-09 UTC): all four post-0.2.4 queue items implemented
+with offline coverage, plus a telemetry lifecycle follow-up.** Published stable
+remains 0.2.4; a local 0.2.5 candidate is installed. See
+[the overnight handoff](reviews/2026-09-09-overnight-025.md) and
+[deployment receipt](LOCAL-DEPLOYMENT.md). Next: candidate drive, TSS/Fanatec,
+camera/motion checks and first real signal capture. No new hardware sign-off.
+Earlier release/RC entries below are historical.
 
 ## Next overnight queue — after 0.2.4
 
-Prepared 2026-09-09 at the owner's request. These items are queued, not completed.
-The code review below identifies investigation targets and a diagnostics gap;
-it does not establish new hardware failures. Start with 1–3, then prepare item 4
-to make the next attended drive more useful.
+Prepared and executed at the owner's request. Four original work items are
+complete offline; none implies a successful game playthrough or new force tune.
 
-| Order | Work | Concrete outcome and offline acceptance |
+| Order | Work | Result / remaining acceptance |
 |---|---|---|
-| 1 | **USB device identity and reconnect resilience** — KI-13/KI-15/Fanatec follow-up | Reproduce two identically named devices, changed enumeration order, one missing device and a device connected after readers open. `WheelInput.Binding` stores name/index and `Resolve` falls back to the first matching name; strict FFB GUID selection does not cover these axis bindings. Audit reconnect/discovery behavior while another device remains open. Fix only reproduced failures, preserving existing bindings through explicit migration and preventing input from silently moving to a different device. Use fake-transport integration tests; keep actual TSS/Fanatec confirmation pending. Reuse toolkit identity/reader APIs; native defects belong upstream. |
-| 2 | **Retain useful stutter evidence after quitting** — KI-19 diagnostics | `FrameHealth` is memory-only and support currently reads that live instance. Preserve an opt-in, bounded last-session summary at an idle/shutdown boundary, after output release, with exact build identity and timestamps. Include it in support with clear current/previous-session labels. Test disabled logging, stale/corrupt files, failed writes and repeated shutdown; no per-frame disk writes or log flood. Normal-exit retention does not promise crash recovery or diagnose the T300 slowdown. |
-| 3 | **Focused lifecycle and performance review** — follow-through from KI-20 | Audit production watchdog, input, camera and telemetry paths for side-effecting lazy access, recurring enumeration/reflection, repeated exceptions/logging and synchronous work during driving. Use controlled transitions and failure injection; reproduce each actionable finding before changing code and add it to KNOWN-ISSUES. Extend meaningful coverage for menu/stage/finish/replay/unload sequences. The existing KI-20 fix is already released; do not redo the original investigation or call offline timing a game FPS benchmark. |
-| 4 | **Development capture for independent steering/impact effects** — FR-2/KI-6 | Extend the separate recorder/replay workflow to collect the missing contact, suspension and local-motion context needed to distinguish road, landing and slide-recovery events; document units, freshness, ordering and discontinuities. Add standalone event/force comparison output and validate schema compatibility, bounded buffers, corruption rejection and recorder exclusion from release packages. Existing EffectsLab gain/headroom research is complete; this step supplies the missing measurement path instead of repeating it. No hardware output, automatic probe installation or new production effect defaults. A real capture and attended comparison remain prerequisites for tuning. |
+| 1 | USB identity/reconnect | KI-21 strict GUID channel bindings, unique legacy migration, neutral missing devices and idle recovery. KI-23 extends strict selection to shifters. Combined input/shifter suite: 150 assertions. TSS/Fanatec/USB hardware checks pending. |
+| 2 | Last-session stutter diagnostics | Bounded opt-in snapshots at idle/normal exit, build/timestamps and distinct session labels; 51 support assertions including locked files, stale/corrupt data and allocation checks. Real game retention pending. |
+| 3 | Lifecycle/performance audit | Reproduced and corrected stale force on missing wheel data (KI-22), stale shifter indices (KI-23), and assignment/edit saves while driving (KI-24). 19 force-lifecycle assertions and 41 watchdog/camera lifecycle assertions. No reported-hitch causation claimed. |
+| 4 | Development signal capture | Schema-3 contact/suspension/motion observations, standalone landing/slide/force context; schema-1/2 compatibility, corruption rejection, bounded buffers/events. 42 recorder assertions, 14 actual hook assertions, 31 Python tests. No production recorder/effects or real capture. [Contract](DEVELOPMENT-CAPTURE.md). |
+| Follow-up | Telemetry connection/disable lifecycle | KI-25 reproduced socket creation during driving. Setup now runs idle after force release; driving edits wait for pause, disabling parks immediately. 74 actual game-field/loopback assertions. Live consumers pending. |
+
+**Further roadmap audit:** no new GitHub reports. Remaining force effects,
+RWD snapback and T300 rotation work needs the first real capture or reporter
+hardware A/B. Generic calibration abstractions and full Unity input playback need
+separate designs. A bounded telemetry-send worker is a future investigation:
+the current sender is synchronous, but no send stall was measured here. Preserve
+latest-frame/drop/park/shutdown semantics before adopting one.
 
 **Requires a person or reporter:** final-labelled 0.2.4 drive; full camera/input/FFB
 matrix; Nexus CameraMod screen checks; TSS/Fanatec behavior; T300 rotation A/B;

@@ -39,7 +39,8 @@ a watchdog fallback. This is code evidence, not a rendered-game test.
 
 See [the 2026-09-08 signal audit](research/2026-09-08-wheel-signals.md) for newly
 verified analog-handbrake torque propagation, PlayerVibrator landing/gamepad-rumble
-paths, suspension units and the outstanding consumer telemetry sampling defects.
+paths, suspension units and the consumer telemetry sampling defects corrected
+in 0.2.4. The corrected amplitudes/axes still need an attended comparison.
 That addendum records method-body evidence without redistributing game code.
 
 | Property | Value |

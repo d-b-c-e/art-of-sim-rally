@@ -19,9 +19,9 @@ The config is grouped by feature so this reads clearly to a user:
 
 ```
 [Steering]  DirectSteering, ZeroAxisDeadzone, BindAnyDevice, GlyphTextFallback, DisableSteerAssist
-[ForceFeedback]  Enabled, Strength, FyReference, Smoothing, Invert, PreferredDevice(+Index), DiagnosticLogging
-[Shifter]  Enabled, IsHPattern, DeviceIndex/Name, SkipNeutral, gear and shift buttons
-[WheelInput]  Enabled, Steer/Throttle/Brake/Clutch/Handbrake bindings ("device|index|axis:N|rest|far")
+[ForceFeedback]  Enabled, Strength, FyReference, Smoothing, Invert, PreferredDevice(+Index/Guid), DiagnosticLogging
+[Shifter]  Enabled, IsHPattern, DeviceIndex/Name/Guid, SkipNeutral, gear and shift buttons
+[WheelInput]  Enabled, Steer/Throttle/Brake/Clutch/Handbrake bindings ("device|index|axis:N|rest|far|guid:<instance-guid>"; legacy five fields accepted)
 [Camera]  Bonnet* and Bumper*: Enabled, Height, Forward, Side, Pitch, FOV; BonnetLean
 [CameraTuning]  remappable keyboard hotkeys (numpad defaults)
 [Telemetry]  Enabled, Host, Port
@@ -131,7 +131,7 @@ need to rebuild the archive.
    Confirm VERSION and hashes; do not label an unreleased toolkit build as a
    published toolkit version. Building this consumer locally is the normal path.
 2. Keep `Version.props` and source Info.json on the same numeric UMM version.
-   Run `tools/testing/Test-Rc.ps1 -Version 0.2.4-rc.N` with an unused RC number.
+   Run `tools/testing/Test-Rc.ps1 -Version 0.2.5-rc.N` with an unused RC number.
    It builds with warnings as errors, runs consumer checks, validates vendor
    hashes/exports and packages the identified artifact. Existing RCs are immutable.
 3. Close the game, install that zip and complete the generated attended checklist.

@@ -31,38 +31,41 @@ third-party binaries, nothing that would force the repo private.
 | `src/ArtOfSimRally.Mod/` | The whole mod. One project, one assembly. `Main.cs` is the only loader-aware file. |
 | `lib/toolkit/` | **Vendored** from dbce-wheel-mod-toolkit (pinned by `VERSION`; refresh with `tools/Sync-Toolkit.ps1`): `native/WheelFfb.dll` (shipped as `UnityForceFeedback.dll`, the name the mod P/Invokes) and `dotnet/Dbce.Wheel.Ffb.dll` / `Dbce.Wheel.Telemetry.dll`. The native source and the encoder live in that repo now. **These binaries are committed** — see the gitignore note under Findings. |
 | `lib/umm/` | UnityModManager.dll + 0Harmony.dll, extracted locally, **never committed**. |
-| `tests/` | Executable consumer regression, CameraTuning, WheelInput, GameState, lifecycle, telemetry, Signals, Support, recorder and hook suites; Python replay/evidence tests. Run through `tools/testing/Test-Rc.ps1`. |
+| `tests/` | Executable consumer regression, CameraTuning, WheelInput/Shifter, ForceLifecycle, GameState, lifecycle, telemetry, Signals, Support, recorder and hook suites; Python replay/evidence tests. Run through `tools/testing/Test-Rc.ps1`. |
 | `tools/` | `Sync-Toolkit.ps1` (toolkit pin), `package/` (release zip), `installer/` (the double-click installer), `dinput-enum/` (lists DirectInput devices without launching the game). |
 | `docs/OVERNIGHT-QUEUE.md` / `docs/USER-FEEDBACK.md` | Prioritized follow-up work, user reports and unsent support drafts. |
 | `docs/KNOWN-ISSUES.md` | **The defect register.** Open, resolved and will-not-fix, with severities. Read before diagnosing anything. |
 | `docs/TROUBLESHOOTING.md` | User-facing fixes by symptom; the Fanatec section is the most-needed page. |
+| `docs/DEVELOPMENT-CAPTURE.md` | Separate probe schema, motion/contact units, standalone analysis and interpretation limits. |
 | `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP, RELEASING |
 
 ## Status (2026-09-09) — do not overstate this
 
-Released and installed **0.2.4** (2026-09-09 UTC) following the owner's installed RC5 acceptance:
-"I think everything looks good. Let's ship another release." RC5's preserved drive
-log has one normal manager initialization and zero initialization errors,
-connection failures or exceptions. KI-20's menu polling/error flood is resolved
-on this rig; the T300 user's unrelated intermittent slowdown remains unconfirmed.
+Published stable remains **0.2.4**. Current development is **0.2.5**: strict USB
+axis/shifter identity and idle reader recovery (KI-21/KI-23), last-session
+diagnostic retention (KI-19), stale-force release (KI-22), deferred binding edits
+(KI-24), and idle telemetry connection/disable handling (KI-25). All have offline
+coverage; new candidate hardware testing remains pending. See
+`docs/reviews/2026-09-09-overnight-025.md` and `docs/LOCAL-DEPLOYMENT.md` for the
+exact validated/installed artifact, hashes and receipts. The Stream Deck Steam
+550320 button targets that installation. Toolkit **v0.12.0**, native **0.5.0**
+remain unchanged: shared wrapper, AxleForceCurve@1 and telemetry are consumed in
+production. No force tune, new wheel effects, physics or assist changes.
 
-Production source and toolkit are unchanged from RC5 (`5701ebb`): camera keys/save
-retry (FR-1/KI-14), direct-input recovery/Flip/live values (KI-15), CameraMod
-isolation (KI-18), telemetry units/local axes (KI-16), bounded support logs and
-frame aggregates (KI-19 diagnostics). Toolkit **v0.12.0**, native **0.5.0**; shared
-wrapper, AxleForceCurve@1 and telemetry are consumed in production. No force tune,
-new wheel effects, physics or assist behavior changes.
+The separate developer probe now records schema-3 motion/contact/suspension
+context, with standalone event/force analysis and schema-1/2 compatibility. It
+is not shipped or automatically installed. No real capture has been completed;
+signal freshness and runtime overhead still need an attended drive. Read
+`docs/DEVELOPMENT-CAPTURE.md` before interpreting landing/slide candidates.
 
-RC5 and final 0.2.4 pass all 16 local automated checks. Published ZIP/checksum
-were downloaded and verified; six installed payloads/native copy match and settings
-are unchanged. Tag/source `dc14fe7`; final artifact/publication evidence is
-recorded in docs/reviews/2026-09-09-release-0.2.4.md. The full attended matrix,
-final-labelled drive, motion/shaker comparison and TSS/Fanatec/combined-camera-mod
-checks remain pending. Owner acceptance does not mark those cases passed.
-Read docs/LOCAL-DEPLOYMENT.md for the current installed identity and receipt;
-the Stream Deck Steam 550320 key targets that installation. Keep it current under
-the standing deployment rules below. "Verified" means confirmed on the owner's
-MOZA R12 rig unless stated otherwise.
+Stable 0.2.4 was released after owner RC5 acceptance. Its preserved drive log
+has one normal manager initialization and zero initialization errors, connection
+failures or exceptions. KI-20's error flood is resolved on this rig; the T300
+user's unrelated slowdown remains unconfirmed. The full attended matrix,
+motion/shaker comparison and TSS/Fanatec/combined-camera-mod checks remain pending.
+Owner acceptance does not mark those cases passed. Published evidence is in
+`docs/reviews/2026-09-09-release-0.2.4.md`. "Verified" means confirmed on the
+owner's MOZA R12 rig unless stated otherwise.
 
 | Component | State |
 |---|---|
@@ -172,7 +175,7 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
   downloads before throwing; catching does not undo the work. RC4 produced
   43,806 failures and a download backlog continuing into driving. Read the existing
   private `eventManager` field via `GameState.ExistingManager`; cache metadata,
-  never a manager across scene teardown. KI-20 fixes the code; stutter retest pending.
+  never a manager across scene teardown. KI-20 fixes the code; owner RC5 retest accepted and error flood absent.
 - **`Mz` is unusable as a steering force.** `CalcAligningForce` is a 1989
   Pacejka curve that reverses sign at ~8° slip; this game's front tyres run
   12–29° in ordinary corners, so the wheel flipped from centring to pushing
@@ -251,7 +254,7 @@ unless the owner changes this preference. No Actions workflows were present when
 checked. Tag the artifact's recorded source commit and preserve its hashes;
 local publishing does not waive attended checks. See docs/RELEASING.md.
 
-Use `tools/testing/Test-Rc.ps1 -Version 0.2.4-rc.N` with a new RC number, or
+Use `tools/testing/Test-Rc.ps1 -Version 0.2.5-rc.N` with a new RC number, or
 `-Version X.Y.Z -Final` for a final-labelled artifact; neither grants runtime sign-off.
 It explicitly runs consumer arithmetic, save, camera/lifecycle and capture tests,
 package/installer checks, and creates an attended checklist. `dotnet test
@@ -262,7 +265,9 @@ Recorder/playback are **development-only**, never shipping features. Capture is
 the separately installed `tools/testing/Recorder` UMM probe; external commands
 control it and `tools/testing/Replay` works without game/Unity/wheel dependencies.
 Packaging rejects recorder types/dependencies. Use `-Corpus <index.json>` on the
-RC runner once real captures exist. Synthetic fixtures are not playthrough evidence.
+RC runner once real captures exist. Synthetic fixtures are not playthrough evidence. Schema 3 adds aligned motion/contact
+context; schemas 1/2 remain readable. No physical wheel-motion or calibrated
+impact signal is implied by an offline event candidate.
 
 The release requires the **exact packaged artifact** installed with the game
 closed and tested by a person. Automated capture replay evaluates force arithmetic

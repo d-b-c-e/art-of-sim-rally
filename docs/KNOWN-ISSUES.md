@@ -21,6 +21,25 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-25 — Telemetry connection work runs from physics; disabling can leave live output
+
+**Reproduced connection path offline; corrected in 0.2.5 candidate, live consumers
+pending.** `Emit` called `EnsureSender`, which constructed the shared sender while
+UNDERWAY, including synchronous hostname resolution for non-IP destinations.
+Actual production connection code reproduced socket creation in driving state;
+the failure is preserved in `results/overnight-025-telemetry-connection-baseline.log`.
+Static review also found the telemetry checkbox simply stopped emission: the
+watchdog did not park it until the player stopped driving.
+
+Connection setup now runs only in the idle watchdog after force release. A
+working destination remains active during a driving edit; the new host/port
+applies after pause. Disabled telemetry parks and closes on the next watchdog
+tick, including while driving; repeated ticks are quiet. The actual shared sender
+and loopback receivers verify those transitions. This does not establish a cause
+for the reported slowdown. UDP sends remain synchronous; a bounded worker is a
+possible later transport improvement, requiring delivery/lifecycle design and
+measurement. Toolkit packet encoding and physics sampling are unchanged.
+
 ### KI-24 — Binding edits can write settings during driving
 
 **Reproduced offline; corrected in 0.2.5 candidate, UI validation pending.** An

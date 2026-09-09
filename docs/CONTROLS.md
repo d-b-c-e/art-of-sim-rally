@@ -192,8 +192,9 @@ non-exclusively for reading (the force-feedback wheel is read through the
 exclusive handle already held) with axes requested in 0..65535.
 `WheelInput` binds Steer, Throttle, Brake, Clutch and Handbrake to an axis or
 button by "Assign, then move it": the value at rest and the value it moved
-to are recorded, the far end keeps extending as the control is used, steering
-maps the recorded direction to +1 and the other lock to −1, pedals map rest
+to are recorded, the far end keeps extending as the control is used. Steering
+assignment is direction-independent (lower raw values negative, higher positive;
+use Flip if the device is reversed), and pedals map rest
 to 0 and the moved direction to 1 (so pedals that idle at the top of their
 range work too). A postfix on `AxisCarController.GetInput` writes bound
 channels over the game's values after its own deadzone processing and keeps
@@ -207,6 +208,25 @@ at rest. Driven on the owner's rig 2026-09-03: steering, throttle and brake thro
 the direct read, once the steering assignment was made direction-independent
 (a left turn during Assign had made left positive). Fanatec verification is
 still outstanding — [KI-3](KNOWN-ISSUES.md#ki-3--fanatec-fixes-are-unverified-on-fanatec-hardware).
+
+### Candidate 0.2.5 identity and recovery
+
+Direct channels may come from different USB devices. A new assignment stores
+`device|index|axis:N|rest|far|guid:<instance-guid>` (or `button:N`). Legacy
+five-field bindings remain readable and migrate after a successful, unambiguous
+read. Missing strict GUIDs stay neutral; same-name ambiguity requires Assign.
+Calibration and Flip retain the identity. Malformed GUIDs never trigger fallback.
+
+Reader recovery/discovery runs at most every five seconds while idle, including
+when another reader remains open. Begin Assign while paused to refresh a newly
+plugged device. Resuming cancels an unfinished assignment. Binding edits and
+learned endpoints persist when idle, retaining failed-write retries.
+
+The separate shifter picker stores `ShifterDeviceGuid`, resolves it against a
+fresh list before opening, and upgrades a unique legacy device name. An old
+index alone is insufficient to identify a shifter. Reopen clears gear latches;
+native automatic shifter hotplug recovery is not claimed. All these changes
+have offline coverage; hardware and same-name TSS/Fanatec tests remain pending.
 
 ### Why the device presents unusually
 

@@ -27,9 +27,8 @@ namespace ArtOfSimRally.Mod
         private static bool _senderFailed;
 
         // What the live socket was actually created with. Compared against the
-        // settings each step so editing the host or port takes effect straight
-        // away - a destination you cannot change without relaunching is no use
-        // when you are working out which port is free.
+        // settings while idle. Keep a working endpoint during driving, then
+        // switch after pausing without resolving DNS in the physics callback.
         private static string _senderHost;
         private static int _senderPort;
 
@@ -48,7 +47,7 @@ namespace ArtOfSimRally.Mod
         {
             var cfg = Main.Settings;
             if (!Main.Enabled || cfg == null || !cfg.TelemetryEnabled) return;
-            if (!EnsureSender(cfg)) return;
+            if (_sender == null || _senderFailed) return;
 
             try
             {
@@ -82,6 +81,7 @@ namespace ArtOfSimRally.Mod
         // hostname/port cannot trigger connection work on every physics step.
         private static bool EnsureSender(Settings cfg)
         {
+            if (GameState.IsDriving) return _sender != null && !_senderFailed;
             bool changed = _senderPort != cfg.TelemetryPort ||
                 !string.Equals(_senderHost, cfg.TelemetryHost, StringComparison.Ordinal);
             if (_senderFailed && !changed) return false;
@@ -101,6 +101,27 @@ namespace ArtOfSimRally.Mod
             }
             catch (Exception ex) { Failed(ex); return false; }
         }
+
+        /// <summary>Prepare only after the idle watchdog releases force.</summary>
+        public static void Prepare()
+        {
+            var cfg = Main.Settings;
+            if (Main.Enabled && cfg != null && cfg.TelemetryEnabled && !GameState.IsDriving)
+                EnsureSender(cfg);
+        }
+
+        /// <summary>Disabling telemetry must park even if driving continues.</summary>
+        public static void StopIfDisabled()
+        {
+            var cfg = Main.Settings;
+            if ((!Main.Enabled || cfg == null || !cfg.TelemetryEnabled) && (_sender != null || _senderFailed))
+            {
+                Park(); Shutdown();
+            }
+        }
+
+        public static bool EndpointPending => Main.Settings != null && Main.Settings.TelemetryEnabled &&
+            (_senderPort != Main.Settings.TelemetryPort || !string.Equals(_senderHost, Main.Settings.TelemetryHost, StringComparison.Ordinal));
 
         private static void Failed(Exception ex)
         {

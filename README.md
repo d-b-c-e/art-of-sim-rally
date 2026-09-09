@@ -13,6 +13,10 @@ properly on a racing wheel.
 
 ## Install
 
+**Stable release: 0.2.4.** The [0.2.5 development candidate](docs/reviews/2026-09-09-overnight-025.md)
+adds USB identity/recovery fixes, previous-session diagnostics and lifecycle
+corrections. It passes offline tests; new hardware checks are pending.
+
 1. Install [Unity Mod Manager](https://www.nexusmods.com/site/mods/21) and point
    it at art of rally. The game is already in its supported list.
 
@@ -37,8 +41,9 @@ is loaded from there, so no extra copying is needed.
 
 ## Settings
 
-Everything is in the Ctrl+F10 panel, in collapsible sections, and adjustable
-while driving.
+Everything is in the Ctrl+F10 panel, in collapsible sections. Pause before
+assigning controls, selecting a separate shifter or changing the telemetry
+destination; the 0.2.5 candidate defers device/connection setup until idle.
 
 **Force feedback** — pick your wheel from the **Wheel** dropdown, then set
 **Strength** (0–100; 50 is the tuned default, and the right starting point). If two devices share a name, choose one
@@ -48,6 +53,11 @@ effect immediately. If the wheel pulls the wrong way, tick *Invert direction*.
 **Shifter** — tick *Use a separate shifter*, choose the device, and bind each
 gear: click **set**, then move the lever into that gate. H-pattern and sequential
 are both supported, and the bindings shown match the mode you picked.
+
+**Separate USB controls:** Wheel input (direct) can assign steering, pedals and
+handbrake from different devices. In the 0.2.5 candidate, new bindings and separate
+shifter selections retain their device GUID; a missing device stays neutral.
+Ambiguous old same-name bindings require reassignment. See [controls](docs/CONTROLS.md).
 
 **Camera** — press your change-view button to cycle onto the bonnet view, and
 once more for the bumper view. Adjust whichever is on screen with the numpad:
@@ -104,6 +114,8 @@ before a fresh game launch to use our bonnet/bumper views. Settings are preserve
 pause, then create the support file before restarting. Ordinary logs are available
 without detailed logging. 0.2.4 adds bounded log reads, loaded-mod/input details and
 frame-hitch counts; see [the instructions](docs/TROUBLESHOOTING.md#collecting-an-intermittent-slowdown-or-ffb-report).
+The 0.2.5 candidate also retains a bounded summary after a normal exit, labelled
+with the previous session's build and timestamps. It cannot recover a crash trace.
 
 **A shifter gate that also accelerates or brakes** means the game auto-bound that
 button to one of its own actions when it saw the shifter as a controller. Reset or

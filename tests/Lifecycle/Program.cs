@@ -60,10 +60,12 @@ static class Program
                 Calls.Log.IndexOf(call)<Calls.Log.IndexOf("camera-save"), call+" happened after save");
         var watchdog=new ModWatchdog(); Calls.Log.Clear(); ArtOfSimRally.Mod.Main.Enabled=true; GameState.IsDriving=true;
         typeof(ModWatchdog).GetMethod("Update",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(watchdog,null);
+        Check(!Calls.Log.Contains("telemetry-prepare") && Calls.Log.Contains("telemetry-stop-disabled"), "driving watchdog connected/did not check telemetry disable");
         Check(!Calls.Log.Contains("save") && !Calls.Log.Contains("camera-save") && !Calls.Log.Contains("diagnostic-save") && !Calls.Log.Contains("shifter-save"),"watchdog saved while driving");
         GameState.IsDriving=false;
         typeof(ModWatchdog).GetMethod("Update",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(watchdog,null);
         Check(Calls.Log.IndexOf("force:0")<Calls.Log.IndexOf("save"),"idle save preceded release");
+        Check(Calls.Log.IndexOf("telemetry-prepare")>Calls.Log.IndexOf("force:0"),"connection setup preceded force release");
         Check(Calls.Log.IndexOf("force:0")<Calls.Log.IndexOf("camera-save"),"camera save preceded release");
         Check(Calls.Log.IndexOf("force:0")<Calls.Log.IndexOf("diagnostic-save"),"diagnostics idle save preceded release");
         Calls.Log.Clear(); ArtOfSimRally.Mod.Main.Enabled=false;

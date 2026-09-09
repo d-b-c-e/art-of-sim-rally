@@ -156,6 +156,15 @@ profile, not the emitter.
 
 ## Consumer setup
 
+In the 0.2.5 candidate, enable telemetry and configure its destination while
+paused or in a menu. The idle watchdog opens the connection after releasing
+force. If edited during driving, the working destination remains active until
+pause applies the change; the panel shows the actual endpoint and pending state.
+Turning telemetry off parks/closes the socket on the next watchdog tick even if
+driving continues. Packet encoding and sampling are unchanged. UDP delivery and
+synchronous send duration are still outside the mod's guarantees; KI-25 covers
+connection placement, not a measured explanation for game stutter.
+
 SimHub: add a game profile using **Forza Horizon 5** / Forza Data Out and point
 it at UDP 8000. Any consumer that accepts the 324-byte Horizon packet works
 unchanged.
