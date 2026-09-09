@@ -217,6 +217,13 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
 
 ## Testing
 
+**Release builds run locally** (owner preference, 2026-09-08). Run the local RC
+or final gate, then upload the exact validated ZIP and checksum using `gh release`
+when publication is authorized. Do not add or dispatch GitHub Actions builds
+unless the owner changes this preference. No Actions workflows were present when
+checked. Tag the artifact's recorded source commit and preserve its hashes;
+local publishing does not waive attended checks. See docs/RELEASING.md.
+
 Use `tools/testing/Test-Rc.ps1 -Version 0.2.4-rc.N` with a new RC number, or
 `-Version X.Y.Z -Final` for a final-labelled artifact; neither grants runtime sign-off.
 It explicitly runs consumer arithmetic, save, camera/lifecycle and capture tests,

@@ -36,6 +36,7 @@
 - Handoff: docs/reviews/2026-09-08-overnight.md. Stable install payloads/settings/native copy rechecked; probe DLL and Info absent (historical cache only).
 
 ## Decisions Made
+- Owner's GitHub Actions minutes are exhausted: build/test/package locally and upload exact artifacts with gh release. No workflows found through the GitHub API; none needed disabling. Recorded procedure in docs/RELEASING.md and working notes. RC4 was already built locally; no rebuild/publication or runtime sign-off occurred in this documentation update.
 - Preserve published v0.2.3 and installed Stream Deck Steam 550320 target.
 - New fixes are a separate candidate; no unattended game drive/hardware-force output.
 - Reuse pinned toolkit v0.12.0; production AxleForceCurve@1/FFB tune unchanged.

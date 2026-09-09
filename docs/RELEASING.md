@@ -23,7 +23,7 @@ The config is grouped by feature so this reads clearly to a user:
 [Shifter]  Enabled, IsHPattern, DeviceIndex/Name, SkipNeutral, gear and shift buttons
 [WheelInput]  Enabled, Steer/Throttle/Brake/Clutch/Handbrake bindings ("device|index|axis:N|rest|far")
 [Camera]  Bonnet* and Bumper*: Enabled, Height, Forward, Side, Pitch, FOV; BonnetLean
-[CameraTuning]  numpad hotkeys
+[CameraTuning]  remappable keyboard hotkeys (numpad defaults)
 [Telemetry]  Enabled, Host, Port
 [Experiment]  UseDirectInputBackend (Settings.xml only; see CONTROLS.md)
 ```
@@ -112,10 +112,18 @@ the complete candidate; do not delete a correct plugin copy merely for its path.
 
 ## Cutting a release
 
+Build, test and package releases **locally**, then upload the exact validated
+archive and its SHA-256 file directly with the GitHub CLI. This is the owner's
+release-build preference from 2026-09-08; do not add or dispatch GitHub Actions
+builds unless the owner changes it. The repository had no Actions workflows when
+checked on that date. GitHub hosts the source and release assets; it does not
+need to rebuild the archive.
+
 1. Vendor released toolkit v0.12.0 using the transactional Sync-Toolkit.ps1.
-   Confirm VERSION and hashes; never label a local build as a release.
+   Confirm VERSION and hashes; do not label an unreleased toolkit build as a
+   published toolkit version. Building this consumer locally is the normal path.
 2. Keep `Version.props` and source Info.json on the same numeric UMM version.
-   Run `tools/testing/Test-Rc.ps1 -Version 0.2.3-rc.N` with an unused RC number.
+   Run `tools/testing/Test-Rc.ps1 -Version 0.2.4-rc.N` with an unused RC number.
    It builds with warnings as errors, runs consumer checks, validates vendor
    hashes/exports and packages the identified artifact. Existing RCs are immutable.
 3. Close the game, install that zip and complete the generated attended checklist.
@@ -126,6 +134,21 @@ the complete candidate; do not delete a correct plugin copy merely for its path.
    Commit the source, prepare the final-labelled artifact from a clean tree, and
    validate that exact artifact before tagging or publishing. Rebuilding changes
    its identity and invalidates the earlier artifact's sign-off.
+6. When publication is authorized, create and push a tag at the **source commit
+   recorded in the artifact's identity**, even if later documentation commits
+   exist. Use `gh release create` with that tag, the exact ZIP and `.zip.sha256`,
+   `--verify-tag` and `--notes-file` pointing to the reviewed release notes.
+   For a candidate, include `--prerelease --latest=false` to preserve the stable
+   release. No workflow dispatch or remote rebuild is involved.
+7. Download the published ZIP and checksum with `gh release download` into a
+   separate local folder and compare their SHA-256 against the automated report.
+   Keep the report and attended checklist tied to the same archive. Never
+   overwrite a published candidate to insert fixes; use a new version instead.
+
+The existing 0.2.4-rc.4 ZIP was already built and tested locally; its
+[exact identity and reports](reviews/2026-09-08-feedback-review.md) remain valid.
+Changing the upload procedure does not require rebuilding it or imply that its
+pending attended checks have passed.
 
 `tools/package/package.ps1 -Version X.Y.Z` remains the packaging entry point for
 a final clean-tree build; it does not itself authorize publication or claim game

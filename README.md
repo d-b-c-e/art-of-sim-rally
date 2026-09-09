@@ -182,8 +182,12 @@ under `lib/toolkit` (`tools\Sync-Toolkit.ps1` refreshes the pin).
 
 ```
 dotnet build ArtOfSimRally.sln -c Release
-tools\testing\Test-Rc.ps1 -Version 0.2.4-rc.1
+tools\testing\Test-Rc.ps1 -Version 0.2.4-rc.5
 ```
+
+Use an unused RC number. Releases are built, tested and packaged locally; the
+validated ZIP and checksum are uploaded directly to GitHub Releases. No GitHub
+Actions build is required. See [the release procedure](docs/RELEASING.md).
 
 Release **0.2.3** adopts the shared toolkit force/device code and improves camera
 handback, settings persistence, diagnostics and telemetry recovery. Automated
