@@ -1,6 +1,6 @@
 # Overnight investigation and implementation queue
 
-**Latest status (2026-09-09 UTC): RC5 accepted; 0.2.4 release authorized.**
+**Latest status (2026-09-09 UTC): 0.2.4 published and installed after RC5 acceptance.**
 KI-20's manager/error flood is absent in the new drive log. See the
 [release handoff](reviews/2026-09-09-release-0.2.4.md) for current artifact status.
 Next: collect T300/TSS feedback on 0.2.4, complete the detailed hardware/camera and

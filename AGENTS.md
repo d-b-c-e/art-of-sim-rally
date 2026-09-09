@@ -40,7 +40,7 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-09) — do not overstate this
 
-Preparing **0.2.4** for publication following the owner's installed RC5 acceptance:
+Released and installed **0.2.4** (2026-09-09 UTC) following the owner's installed RC5 acceptance:
 "I think everything looks good. Let's ship another release." RC5's preserved drive
 log has one normal manager initialization and zero initialization errors,
 connection failures or exceptions. KI-20's menu polling/error flood is resolved
@@ -53,7 +53,9 @@ frame aggregates (KI-19 diagnostics). Toolkit **v0.12.0**, native **0.5.0**; sha
 wrapper, AxleForceCurve@1 and telemetry are consumed in production. No force tune,
 new wheel effects, physics or assist behavior changes.
 
-RC5 passes all 16 local automated checks. Final artifact/publication evidence is
+RC5 and final 0.2.4 pass all 16 local automated checks. Published ZIP/checksum
+were downloaded and verified; six installed payloads/native copy match and settings
+are unchanged. Tag/source `dc14fe7`; final artifact/publication evidence is
 recorded in docs/reviews/2026-09-09-release-0.2.4.md. The full attended matrix,
 final-labelled drive, motion/shaker comparison and TSS/Fanatec/combined-camera-mod
 checks remain pending. Owner acceptance does not mark those cases passed.

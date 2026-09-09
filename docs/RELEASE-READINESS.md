@@ -1,9 +1,9 @@
 # Release readiness — 2026-09-09
 
-**Current: owner accepted installed RC5 and authorized stable 0.2.4.** The new
+**Current: stable 0.2.4 is published and installed; all 16 local checks pass.** The new
 drive log has no initialization errors, connection failures or exceptions.
 See [0.2.4 release handoff](reviews/2026-09-09-release-0.2.4.md) for exact final
-artifact, automated checks and publication status; [local deployment](LOCAL-DEPLOYMENT.md)
+artifact, automated checks, publication verification and preserved-settings install; [local deployment](LOCAL-DEPLOYMENT.md)
 records the installed identity. Full attended cases and a final-labelled drive
 remain pending. The entries below are historical snapshots, superseded by that handoff.
 

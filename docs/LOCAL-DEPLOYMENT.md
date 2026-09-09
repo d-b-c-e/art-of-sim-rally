@@ -6,21 +6,22 @@ automated gate, deploy it for testing without asking again. This is part of
 finishing the build, not an optional follow-up. Public release publication and
 attended sign-off remain separate.
 
-## Installed candidate
+## Installed release
 
-- **0.2.4-rc.5**, installed 2026-09-09 02:47:18 UTC with the game closed.
-- Identity: `0.2.4-rc.5+5701ebb69adcd17fe4a4122806b77b88594155a8.clean`.
-- UMM displays the numeric mod version **0.2.4** for this candidate. The RC suffix
-  is in build.json and support build identity; the UMM list alone cannot distinguish RCs.
-- ZIP SHA-256: `00451924A77E2BF6E8E0CEDBF3D2EE14868B5491F7536B524CF060A8399D2F63`.
-- [Install receipt and backup location](../results/rc5-install-8be3a84a9e254c9eb1b2d1e68490aeef/install-receipt.json).
-- Six mod payloads and the second native plugin copy match the package; current
-  Settings.xml was preserved byte-for-byte. Previous RC4 install/settings backed up.
-- Existing Steam 550320 Stream Deck launcher opens this installation. Developer
+- **0.2.4 stable**, installed 2026-09-09 03:09:23 UTC with the game closed, from
+  the downloaded [GitHub release](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.4).
+- Identity: `0.2.4+dc14fe70002205e59c8b462c8c8636b72132abdd.clean`.
+- UMM displays **0.2.4**; build.json/support now show the final identity without an RC suffix.
+- ZIP SHA-256: `08AA70055C4957DA8C96EAB2078BA0F52211E51B7249C38A0B409BBC6AD50942`.
+- [Install receipt and RC5 backup location](../results/release-0.2.4-install-3b9ec98a27bf415b807d7974ff3484c3/install-receipt.json).
+- All six mod payloads plus the second native plugin copy match the published
+  package manifest; Settings.xml preserved byte-for-byte. RC5 install/settings
+  backed up before replacement. Published asset digests independently verified.
+- Existing Steam 550320 Stream Deck button launches this installation; developer
   recorder remains absent. No game was launched as part of deployment.
-- [Automated results and attended checklist](reviews/2026-09-09-rc4-stutter.md#exact-successor-candidate).
-  All 16 automated checks pass; all seven attended cases remain pending. RC4's
-  failed stutter evidence is historical and is not transferred to RC5.
+- [Final release evidence](reviews/2026-09-09-release-0.2.4.md): all 16 local
+  automated checks pass. Owner accepted RC5, which has the same production source
+  and toolkit; detailed attended cases and final-labelled drive remain pending.
 
 ## Deployment rules
 

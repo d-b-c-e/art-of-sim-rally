@@ -1,7 +1,7 @@
 # Roadmap
 
 Status reviewed 2026-09-09 for 0.2.4 publication.
-**Owner accepted installed RC5 and requested release. The detailed attended matrix remains pending.**
+**0.2.4 is published and installed after RC5 acceptance. The detailed attended matrix remains pending.**
 The defect register is [KNOWN-ISSUES.md](KNOWN-ISSUES.md); the implementation review
 is [2026-09-06-rc-review.md](reviews/2026-09-06-rc-review.md).
 
