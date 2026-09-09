@@ -112,6 +112,12 @@ the complete candidate; do not delete a correct plugin copy merely for its path.
 
 ## Cutting a release
 
+The owner has standing authorization to keep the local test installation current.
+After an artifact passes the automated gate, deploy it with the game closed and
+preserve settings/backups; no new permission request is needed. See
+[LOCAL-DEPLOYMENT.md](LOCAL-DEPLOYMENT.md). Public publication and attended
+sign-off still follow the steps below.
+
 Build, test and package releases **locally**, then upload the exact validated
 archive and its SHA-256 file directly with the GitHub CLI. This is the owner's
 release-build preference from 2026-09-08; do not add or dispatch GitHub Actions

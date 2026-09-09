@@ -48,7 +48,7 @@ telemetry sampling (KI-16) and bool-return send failure handling. Signal/UDP sui
 1,230 assertions, support 25, lifecycle 36, transport 36; full candidate evidence
 lives in docs/reviews/2026-09-08-feedback-review.md. No new wheel effects/assist
 behavior or hardware result. The previous RC2 evidence is historical.
-Read docs/RELEASE-READINESS.md for artifact status, docs/OVERNIGHT-QUEUE.md for next work, and docs/USER-FEEDBACK.md for support drafts. RC4 is installed behind the Stream Deck Steam 550320 key at the owner's request (2026-09-09 02:17 UTC). Installation hashes matched, settings were preserved, the previous 0.2.3 install is backed up, and the developer probe remains removed. RC4's stutter case is failed; other detailed cases remain pending. It is not published.
+Read docs/RELEASE-READINESS.md for artifact status, docs/OVERNIGHT-QUEUE.md for next work, and docs/USER-FEEDBACK.md for support drafts. **RC5 is installed** behind the Stream Deck Steam 550320 key (2026-09-09 02:47 UTC); payload hashes match and settings are preserved. See docs/LOCAL-DEPLOYMENT.md for the current receipt and standing deployment rules. RC4's stutter failure is historical; RC5 awaits attended testing and is not published.
 Offline tests pass. Owner RC6 feedback (2026-09-08 UTC): no stutter, camera worked great, no control issues so far. A game log confirms mod/probe loading and force evaluation. The complete attended matrix and final-labelled drive remain pending. "Verified" means confirmed on the owner's
 MOZA R12 rig unless stated otherwise.
 
@@ -222,6 +222,13 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
   shows Rewired's view, the ffb.log section shows DirectInput's. Compare them.
 
 ## Testing
+
+**Keep the installed copy current without asking again** (standing owner request,
+2026-09-09 UTC). After each new artifact passes all local automated gates, deploy
+the exact package if the game is closed, preserving settings and a backup. If the
+game is running, defer instead of closing it. Follow docs/LOCAL-DEPLOYMENT.md;
+an hourly heartbeat catches eligible builds waiting to deploy. This authorization
+does not grant public publication or attended sign-off.
 
 **Release builds run locally** (owner preference, 2026-09-08). Run the local RC
 or final gate, then upload the exact validated ZIP and checksum using `gh release`

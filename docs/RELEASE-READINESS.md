@@ -5,7 +5,8 @@ feedback was good, but its stutter case is failed. [Log investigation and KI-20
 fix](reviews/2026-09-09-rc4-stutter.md) found lazy-manager polling with a large
 ghost-download backlog. **RC5 passes all 16 automated checks locally**; its exact
 archive and new checklist are linked in that review. An attended comparison is
-required. RC4 remains installed; RC5 has not been installed or published.
+required. **RC5 is now installed** with settings preserved and hashes verified;
+it has not been driven or published. [Local deployment receipt and rules](LOCAL-DEPLOYMENT.md).
 
 **0.2.4-rc.4 passes all 16 automated checks.** The
 [feedback follow-up and exact artifact](reviews/2026-09-08-feedback-review.md)

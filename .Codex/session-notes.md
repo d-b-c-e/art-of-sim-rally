@@ -5,9 +5,11 @@
 - **Branch:** codex/overnight-improvements
 
 ## What Was Done
+- Standing owner request: continually keep local deployment current. RC5 installed 2026-09-09 02:47:18 UTC from exact tested ZIP, six payloads/native plugin verified, settings unchanged, RC4 backed up. Receipt: results/rc5-install-8be3a84a9e254c9eb1b2d1e68490aeef/install-receipt.json. Stream Deck now launches RC5; no game launched, all RC5 attended cases pending.
+- Added docs/LOCAL-DEPLOYMENT.md and mirrored standing instructions: automatically deploy each passing local artifact while game is closed, without asking again. Active hourly heartbeat keep-art-of-sim-rally-installed-build-current catches waiting builds; quiet if unchanged/game running, no automatic rebuilds or publication.
 - RC4 owner drive good overall but strong stutter about one minute in, near crowd/curve. Game exited before logs inspected; snapshots in results/stutter-review-20260909-022600. Player.log 38.6 MB: 43,806 menu constructor failures, 4,981 ghost exceptions, 23,468 connection failures; backlog continued while driving. No crowd-specific diagnosis.
-- KI-20: GameEntryPoint.EventManager is a lazy factory. Replaced all production getter reads with passive private-field access; no manager cached across stage changes. 40 predicate regressions pass after baseline reproduced 4,000 getter/request side effects; actual game-field/transport tests 59, input 90, lifecycle 36 pass. RC4 remains installed.
-- Current candidate: dist/ArtOfSimRally-0.2.4-rc.5.zip, identity 0.2.4-rc.5+5701ebb69adcd17fe4a4122806b77b88594155a8.clean, SHA-256 00451924A77E2BF6E8E0CEDBF3D2EE14868B5491F7536B524CF060A8399D2F63. Full local gate passed all 16 checks: results/rc-0.2.4-rc.5-ba11af5f533e4aceafa33aabf6fe7f98/automated.json. All RC5 manual cases pending; no install or publication. Later docs do not rebuild this artifact.
+- KI-20: GameEntryPoint.EventManager is a lazy factory. Replaced all production getter reads with passive private-field access; no manager cached across stage changes. 40 predicate regressions pass after baseline reproduced 4,000 getter/request side effects; actual game-field/transport tests 59, input 90, lifecycle 36 pass. RC5 deployment is recorded above.
+- Current candidate: dist/ArtOfSimRally-0.2.4-rc.5.zip, identity 0.2.4-rc.5+5701ebb69adcd17fe4a4122806b77b88594155a8.clean, SHA-256 00451924A77E2BF6E8E0CEDBF3D2EE14868B5491F7536B524CF060A8399D2F63. Full local gate passed all 16 checks: results/rc-0.2.4-rc.5-ba11af5f533e4aceafa33aabf6fe7f98/automated.json. Installed, all RC5 manual cases pending, no publication. UMM displays numeric 0.2.4; build.json/support identify rc.5. Later docs do not rebuild this artifact.
 - RC4 manual checklist now records owner/rig and failed stutter evidence; other six cases pending. Full report: docs/reviews/2026-09-09-rc4-stutter.md.
 - Follow-up user feedback authorized further roadmap implementation while away and a short unsent reply.
 - Added CameraMod isolation (KI-18), bounded support logs/frame aggregates/live input + mod inventory (KI-19 diagnostics), and corrected legacy assist UI/help (KI-17; behavior unchanged).
@@ -16,7 +18,7 @@
 - Support tests: 25, with bounded real files and 100,000 allocation-free counter updates. Lifecycle/CameraMod tests: 36.
 - Short reply: docs/replies/2026-09-08-t300-tss.md. New review: docs/reviews/2026-09-08-feedback-review.md.
 - RC3 stopped before packaging: direct Unity ECalls in watchdog Update broke the offline Harmony probe hook. A non-inlined runtime helper fixes attachment; the actual 14-assertion hook test and full RC4 pass without skipped/weakened gates.
-- Installed candidate: dist/ArtOfSimRally-0.2.4-rc.4.zip; identity 0.2.4-rc.4+38c1bff31ff1ca20696c15a8b7de9298ec04dbf3.clean.
+- Previously installed candidate: dist/ArtOfSimRally-0.2.4-rc.4.zip; identity 0.2.4-rc.4+38c1bff31ff1ca20696c15a8b7de9298ec04dbf3.clean.
 - ZIP SHA-256 C5284CDF7F0B2991F8E013246857A414CD15FADCCE583AD54F923251B8F47887 independently rechecked.
 - All 16 RC4 automated checks passed: results/rc-0.2.4-rc.4-744b3572e72e4404a229e5d10fbec92e/automated.json. Subsequent owner drive failed stutter; six other manual cases pending. No real corpus or publication of RC4.
 - RC4 installed at owner's request 2026-09-09 02:17:23 UTC with game closed. Exact archive installer used; six payloads and second native plugin copy verified, Settings.xml preserved. Previous 0.2.3 install/settings backed up. Receipt: results/rc4-install-7bf2d9692b304b58bbe124f80d43cc4b/install-receipt.json. Stream Deck now launches RC4. Developer probe DLL/Info absent, cache only. Later documentation commits do not rebuild RC4.
@@ -40,6 +42,7 @@
 - Handoff: docs/reviews/2026-09-08-overnight.md. Stable install payloads/settings/native copy rechecked; probe DLL and Info absent (historical cache only).
 
 ## Decisions Made
+- Deploy future locally validated artifacts automatically with backups/settings preservation; defer while the game runs. Do not confuse local test deployment with publication or attended sign-off.
 - Owner's GitHub Actions minutes are exhausted: build/test/package locally and upload exact artifacts with gh release. No workflows found through the GitHub API; none needed disabling. Recorded procedure in docs/RELEASING.md and working notes. RC4 was already built locally; no rebuild/publication or runtime sign-off occurred in this documentation update.
 - Preserve published v0.2.3; owner subsequently requested local RC4 installation behind the same Stream Deck Steam 550320 target.
 - New fixes are a separate candidate; no unattended game drive/hardware-force output.
@@ -47,7 +50,7 @@
 - Effect work stays managed research; no speculative T300 rotation override/upstream release.
 
 ## Open Items
-- [ ] Install RC5 and retest menu wait, same stage/curve, return to menu; collect support before quitting. KI-20 code fix is offline-verified, crowd-side hitch cause is not proven.
+- [ ] RC5 is installed: retest menu wait, same stage/curve, return to menu; collect support before quitting. KI-20 code fix is offline-verified, crowd-side hitch cause is not proven.
 - [x] Run full candidate gate from clean committed source; record artifact and report.
 - [ ] Attended UMM remapping/camera saves, input Flip/reconnect and final artifact checks.
 - [ ] First real capture; TSS/Fanatec/PS5-specific verification.
@@ -60,6 +63,6 @@
 3. Use docs/research/2026-09-08-wheel-signals.md for KI-16 corrections and hardware follow-up.
 
 ## Context for Next Session
-Published stable is 0.2.3; installed build is now 0.2.4-rc.4 for owner testing,
+Published stable is 0.2.3; installed build is now 0.2.4-rc.5 for owner testing,
 settings preserved, previous install backed up, developer probe removed.
 Offline probes use doubles/synthetic signals; no new camera/hardware validation claimed.

@@ -3,7 +3,7 @@
 **Newest priority (2026-09-09 UTC): KI-20.** The owner drove installed RC4 and
 reported a strong stutter despite good overall results. [Log review and fix](reviews/2026-09-09-rc4-stutter.md)
 identify accidental manager construction and ghost-download flooding. RC5 passes
-all 16 local automated checks; installation and an attended comparison remain.
+all 16 local automated checks and is installed; an attended comparison remains.
 
 Prepared 2026-09-08 UTC after [0.2.3 publication](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3).
 Executed on `codex/overnight-improvements` at the owner's request. The unattended
@@ -11,7 +11,8 @@ implementation and research items below are complete; **0.2.4-rc.2 passes all 16
 automated checks** and awaits an attended drive. [Exact artifact and handoff](reviews/2026-09-08-overnight.md).
 Published 0.2.3 is unchanged. The later owner-requested RC4 install replaces it
 locally behind the same Stream Deck target; see the follow-up review below.
-No scheduled automation is needed for this completed work session.
+The owner later requested continual local deployment; an hourly heartbeat now
+checks for validated builds waiting to install. See [LOCAL-DEPLOYMENT.md](LOCAL-DEPLOYMENT.md).
 
 Read [USER-FEEDBACK.md](USER-FEEDBACK.md), [KNOWN-ISSUES.md](KNOWN-ISSUES.md) and
 [RELEASE-READINESS.md](RELEASE-READINESS.md). The full attended matrix is still

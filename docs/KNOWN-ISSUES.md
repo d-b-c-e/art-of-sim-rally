@@ -42,7 +42,7 @@ exercise the actual game's private field and stage/ownership transitions without
 calling Unity constructors. No game factory or leaderboard behavior is patched.
 
 This is a strong stutter suspect, not a proven attribution of the crowd-side hitch.
-RC4 remains installed; its stutter case is failed, other detailed cases pending.
+RC4's stutter case is failed. RC5 is now installed for retesting; its attended cases remain pending.
 See [the log review](reviews/2026-09-09-rc4-stutter.md) for exact counts and limits.
 
 ### KI-19 — Rare frame-rate drops during longer T300 sessions
