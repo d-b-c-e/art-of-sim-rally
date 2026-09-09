@@ -176,7 +176,7 @@ namespace ArtOfSimRally.Mod
             sb.AppendLine("other CameraMod loaded: " + Main.OtherCameraModLoaded);
             try
             {
-                var car = GameEntryPoint.EventManager?.playerManager?.carcontroller;
+                var car = GameState.ExistingManager?.playerManager?.carcontroller;
                 if (car != null)
                     sb.AppendLine("live car steering limiter=" + car.steerAssistance + "; correction factor=" + car.steerCorrectionFactor);
             }

@@ -21,12 +21,39 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-20 — State polling constructs game managers and floods ghost downloads
+
+**Major; source-confirmed, corrected after RC4; attended retest pending.** Owner
+RC4 testing was good overall but had a strong stutter around a curve near a crowd,
+roughly a minute into one stage. The session's Player.log contains 43,806 failed
+EventManager initializations in MainMenu, 4,981 uncaught ghost-callback exceptions
+and 23,468 connection failures. Download callbacks continued during force traces.
+
+Our `GameState` predicates called `GameEntryPoint.EventManager`, a lazy factory.
+When no instance exists in a menu, construction fails after queuing a ghost
+download; catching the exception does not undo the request. The next frame tries
+again. The same getter is in 0.2.3; RC4's diagnostics added another state read.
+
+Read the verified private `eventManager` field instead, caching only its metadata,
+not the stage instance. Input and support helpers use the same passive read;
+missing-manager input remains untouched. A regression first reproduced 4,000
+lazy getter calls/requests from 1,000 polls, then zero after the fix. Tests also
+exercise the actual game's private field and stage/ownership transitions without
+calling Unity constructors. No game factory or leaderboard behavior is patched.
+
+This is a strong stutter suspect, not a proven attribution of the crowd-side hitch.
+RC4 remains installed; its stutter case is failed, other detailed cases pending.
+See [the log review](reviews/2026-09-09-rc4-stutter.md) for exact counts and limits.
+
 ### KI-19 — Rare frame-rate drops during longer T300 sessions
 
 **User report; cause unconfirmed.** The follow-up describes occasional slowdowns
 without a repeatable pattern, unlike KI-5's first 10–15 seconds. Exact mod build,
 driver, logging state, location and camera-mod version are unknown. Do not merge
 the reports or claim that camera saves, telemetry or another mod caused this one.
+
+The owner's later RC4 drive exposed KI-20. That is a candidate explanation to
+investigate, not proof of the same cause on the T300 user's system.
 
 0.2.4 adds opt-in aggregate frame-hitch counters (foreground driving only), bounded
 recent log reads, recent native errors, loaded-mod versions and cached input values

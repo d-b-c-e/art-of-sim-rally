@@ -16,6 +16,7 @@ CASES = {
 }
 CASES["camera"] += " In a separate launch with Nexus CameraMod loaded, verify its chase views/editor and the mounted-view compatibility notice; our mounts should resume in a fresh launch without it."
 CASES["stutter"] += " Include rare later-stage slowdowns separately from cold-start hitches; compare detailed logging off/on if needed and retain the candidate's aggregate frame-health report."
+CASES["stutter"] += " Before driving, wait 30 seconds in the main menu and inspect Player.log for repeated EventManager construction or ghost-download errors. Drive the same stage/curve as the RC4 report, then return to the menu and repeat; collect support while paused before quitting."
 CASES["telemetry"] += " Compare corrected suspension meters/normalized ratios and local axes with the previous build; inspect dashboard/recorded values before motion output. Check pause/restart produces no acceleration spike, then complete an attended shaker/motion comparison."
 CASES["support-identity"] += " Collect while paused immediately after a short diagnostic run; inspect loaded mods, cached input values, frame counts and explicit log-window truncation."
 

@@ -5,6 +5,9 @@
 - **Branch:** codex/overnight-improvements
 
 ## What Was Done
+- RC4 owner drive good overall but strong stutter about one minute in, near crowd/curve. Game exited before logs inspected; snapshots in results/stutter-review-20260909-022600. Player.log 38.6 MB: 43,806 menu constructor failures, 4,981 ghost exceptions, 23,468 connection failures; backlog continued while driving. No crowd-specific diagnosis.
+- KI-20: GameEntryPoint.EventManager is a lazy factory. Replaced all production getter reads with passive private-field access; no manager cached across stage changes. 40 predicate regressions pass after baseline reproduced 4,000 getter/request side effects; actual game-field/transport tests 59, input 90, lifecycle 36 pass. New candidate needed; RC4 remains installed.
+- RC4 manual checklist now records owner/rig and failed stutter evidence; other six cases pending. Full report: docs/reviews/2026-09-09-rc4-stutter.md.
 - Follow-up user feedback authorized further roadmap implementation while away and a short unsent reply.
 - Added CameraMod isolation (KI-18), bounded support logs/frame aggregates/live input + mod inventory (KI-19 diagnostics), and corrected legacy assist UI/help (KI-17; behavior unchanged).
 - Corrected telemetry suspension/local-motion sampling and reset acceleration history (KI-16); 1,230 actual sampling/encoded-UDP assertions.

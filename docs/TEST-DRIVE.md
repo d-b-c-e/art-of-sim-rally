@@ -5,9 +5,10 @@ developer mod observes game signals; a standalone command replays them without
 the game or wheel. Record a representative drive once, then reuse that case on
 subsequent builds. Allow about 20–30 minutes for attended release checks.
 
-The installed Stream Deck target currently uses published 0.2.3. The overnight
-0.2.4 candidate is separate; install it explicitly with the game closed before
-testing its camera-key and direct-input changes. Keep the 0.2.3 ZIP/settings backup.
+The installed Stream Deck target currently uses 0.2.4-rc.4. Its owner drive was
+good overall but included a strong stutter; [log review](reviews/2026-09-09-rc4-stutter.md)
+identified KI-20, corrected in successor source. Install the exact successor with
+the game closed before retesting. Keep the RC4 and 0.2.3 ZIP/settings backups.
 
 1. **Prepare the candidate.** Close art of rally, retain the previous ZIP and
    Settings.xml, and install the exact ZIP identified by the successful

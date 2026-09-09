@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace ArtOfSimRally.Mod
 {
     /// <summary>
@@ -28,11 +30,27 @@ namespace ArtOfSimRally.Mod
     /// </remarks>
     internal static class GameState
     {
+        // GameEntryPoint.EventManager is a lazy factory, not a passive getter.
+        // In menus its failed constructor can queue ghost downloads before
+        // throwing, so catching that exception still creates work every frame.
+        // Read the game's existing instance without constructing or retaining it.
+        private static readonly FieldInfo ManagerField = typeof(GameEntryPoint)
+            .GetField("eventManager", BindingFlags.Static | BindingFlags.NonPublic);
+
+        internal static EventManager ExistingManager
+        {
+            get
+            {
+                try { return ManagerField?.GetValue(null) as EventManager; }
+                catch { return null; }
+            }
+        }
+
         public static bool IsRestarting
         {
             get
             {
-                try { return GameEntryPoint.EventManager != null && GameEntryPoint.EventManager.IsRestartingStage(); }
+                try { return ExistingManager?.IsRestartingStage() ?? false; }
                 catch { return true; }
             }
         }
@@ -51,7 +69,7 @@ namespace ArtOfSimRally.Mod
             {
                 try
                 {
-                    var manager = GameEntryPoint.EventManager;
+                    var manager = ExistingManager;
                     if (manager == null) return false;
                     return manager.status == EventStatusEnums.EventStatus.UNDERWAY;
                 }
@@ -81,7 +99,7 @@ namespace ArtOfSimRally.Mod
             {
                 try
                 {
-                    var manager = GameEntryPoint.EventManager;
+                    var manager = ExistingManager;
                     if (manager == null) return false;
                     return manager.status == EventStatusEnums.EventStatus.UNDERWAY
                         || manager.status == EventStatusEnums.EventStatus.WAITING_TO_BEGIN;
@@ -107,7 +125,7 @@ namespace ArtOfSimRally.Mod
             {
                 try
                 {
-                    var manager = GameEntryPoint.EventManager;
+                    var manager = ExistingManager;
                     if (manager == null) return false;
                     switch (manager.status)
                     {

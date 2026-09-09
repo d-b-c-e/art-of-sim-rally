@@ -58,10 +58,13 @@ try {
     $result = Run 'lifecycle' 'dotnet' @('run','--project','tests/Lifecycle/Lifecycle.csproj','-c','Release')
     $lifecycle = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($lifecycle.status -eq 'passed' -and $lifecycle.assertions -gt 0) 'Lifecycle runner ran no assertions'
+    $result = Run 'game-state' 'dotnet' @('run','--project','tests/GameState/GameState.csproj','-c','Release')
+    $gameState = $result | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($gameState.status -eq 'passed' -and $gameState.assertions -gt 0) 'Game-state runner ran no assertions'
     $result = Run 'camera-tuning' 'dotnet' @('run','--project','tests/CameraTuning/CameraTuning.csproj','-c','Release')
     $cameraTuning = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($cameraTuning.status -eq 'passed' -and $cameraTuning.assertions -gt 0) 'Camera tuning runner ran no assertions'
-    Checkpoint 'lifecycle' ($lifecycle.assertions+$cameraTuning.assertions)
+    Checkpoint 'lifecycle' ($lifecycle.assertions+$cameraTuning.assertions+$gameState.assertions)
     $null = Run 'recorder-build' 'dotnet' @('build','tools/testing/Recorder/Recorder.csproj','-c','Release','--nologo','-warnaserror')
     $result = Run 'recorder-tests' 'dotnet' @('run','--project','tests/Recorder/Recorder.csproj','-c','Release','--',(Join-Path $run 'synthetic'),'src/ArtOfSimRally.Mod/bin/Release/ArtOfSimRally.Mod.dll','D:/Program Files (x86)/Steam/steamapps/common/artofrally')
     $recorder = $result | Select-Object -Last 1 | ConvertFrom-Json

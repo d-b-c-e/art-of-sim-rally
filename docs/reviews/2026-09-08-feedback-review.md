@@ -1,5 +1,9 @@
 # T300/TSS follow-up implementation — 2026-09-08
 
+Later [RC4 owner drive and stutter investigation](2026-09-09-rc4-stutter.md)
+records good overall feedback with a strong hitch. The stutter case is failed;
+the other detailed cases remain pending. KI-20 is fixed in successor source.
+
 The owner authorized implementing related roadmap work while away and requested
 a [short reply](../replies/2026-09-08-t300-tss.md). Work continues on
 `codex/overnight-improvements`. Stable 0.2.3 remains published; the owner requested
@@ -56,15 +60,17 @@ or SimHub motion amplitudes. Use [TEST-DRIVE.md](../TEST-DRIVE.md).
 - [Automated report](../../results/rc-0.2.4-rc.4-744b3572e72e4404a229e5d10fbec92e/automated.json):
   passed 2026-09-08 20:11:12 UTC, clean source, synthetic evidence only, no recorded corpus.
 - [Attended checklist](../../results/rc-0.2.4-rc.4-744b3572e72e4404a229e5d10fbec92e/manual.json):
-  all seven cases pending. The release gate correctly rejects it with
-  `NOT READY: Tester/rig not recorded`; no prior smoke results were copied in.
+  stutter failed after the owner's drive; six other cases pending. Initially the
+  gate rejected the blank tester/rig; the subsequent report records the owner,
+  rig and failed-stutter evidence without copying prior smoke passes.
 - Installed 2026-09-09 02:17:23 UTC at the owner's request, with the game closed,
   using this exact archive's installer. All six mod payloads and the second native
   plugin copy match its manifest. Settings.xml is unchanged byte-for-byte;
   the previous 0.2.3 install and settings are backed up.
   [Install receipt and backup location](../../results/rc4-install-7bf2d9692b304b58bbe124f80d43cc4b/install-receipt.json).
 - The existing Steam 550320 Stream Deck launcher now opens the RC4 installation.
-  No game was launched or driven during installation; RC4 is not published.
+  No game was launched during installation; the owner drove it afterward as
+  recorded above. RC4 is not published.
   The developer probe remains absent (only its historical cache file remains).
 
 These archive/report links are generated local artifacts outside Git. Later

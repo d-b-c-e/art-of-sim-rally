@@ -11,7 +11,9 @@ remapping request and the post-release GitHub audit with unsent support drafts.
 Implemented for the **0.2.4 candidate**: camera-tuner save retry/logging (KI-14),
 keyboard remapping (FR-1), and analog-handbrake regression coverage (KI-13) with
 cache/Flip/assignment fixes (KI-15). Camera and input harnesses pass offline;
-the new candidate has not been driven or deployed. Rotation and effect-signal
+RC4 was installed and driven; overall feedback was good with a strong stutter.
+[KI-20 investigation](reviews/2026-09-09-rc4-stutter.md) corrected a lazy-manager
+polling defect in successor source; full attended checks remain pending. Rotation and effect-signal
 investigations are documented in [the signal audit](research/2026-09-08-wheel-signals.md).
 The [follow-up implementation](reviews/2026-09-08-feedback-review.md) adds
 CameraMod isolation, bounded support logs/frame-hitch counts, clearer assist help,

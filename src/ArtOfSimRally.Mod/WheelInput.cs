@@ -402,7 +402,8 @@ namespace ArtOfSimRally.Mod
             {
                 // The game hands the car to its own driver here and zeroes input;
                 // leave that alone.
-                if (GameEntryPoint.EventManager.status == EventStatusEnums.EventStatus.FINISHING_STAGE_ANIMATION) return;
+                var manager = GameState.ExistingManager;
+                if (manager == null || manager.status == EventStatusEnums.EventStatus.FINISHING_STAGE_ANIMATION) return;
             }
             catch { return; }
 

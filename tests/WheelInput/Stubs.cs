@@ -45,7 +45,11 @@ public static class SettingsManager
 namespace ArtOfSimRally.Mod
 {
     internal static class Time { public static float realtimeSinceStartup = 100; }
-    internal static class GameState { public static bool IsDriving = true; }
+    internal static class GameState
+    {
+        public static bool IsDriving = true;
+        public static EventManager ExistingManager => GameEntryPoint.EventManager;
+    }
     internal static class Main
     {
         public static Settings Settings = new();

@@ -19,6 +19,11 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Read existing game state without invoking the game's lazy manager factory.
+  Menu polling could repeatedly construct failing managers and queue ghost
+  downloads that continued during driving. The RC4 log exposed this defect;
+  offline regression checks pass, but stutter improvement needs another drive.
+
 - Avoid competing with Nexus CameraMod for camera slots: when it is loaded, its
   chase views keep control and our mounted views/tuning are suspended with an
   explanation in the panel. Saved mount settings are preserved.

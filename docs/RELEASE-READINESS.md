@@ -1,12 +1,18 @@
 # Release readiness — 2026-09-08
 
+**RC4 attended update (2026-09-09 UTC): strong stutter reported.** Overall drive
+feedback was good, but its stutter case is failed. [Log investigation and KI-20
+fix](reviews/2026-09-09-rc4-stutter.md) found lazy-manager polling with a large
+ghost-download backlog. Successor source passes targeted tests; a new candidate
+and attended comparison are required. RC4 remains installed.
+
 **0.2.4-rc.4 passes all 16 automated checks.** The
 [feedback follow-up and exact artifact](reviews/2026-09-08-feedback-review.md)
 include CameraMod compatibility isolation, diagnostics, telemetry sampling and
-send-failure handling after RC2. All seven attended cases remain pending,
+send-failure handling after RC2. The stutter case is failed; six cases remain pending,
 especially motion/shaker response. RC4 is now installed locally at the owner's
 request (2026-09-09 02:17 UTC), with payload hashes verified and settings preserved.
-The existing Stream Deck button launches it. It has not been driven or published.
+The existing Stream Deck button launches it. It was driven but is not published.
 [Install receipt](../results/rc4-install-7bf2d9692b304b58bbe124f80d43cc4b/install-receipt.json).
 RC2 evidence below is historical; RC3 stopped before packaging and was superseded.
 

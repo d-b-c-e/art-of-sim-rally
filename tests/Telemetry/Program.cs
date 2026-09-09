@@ -4,12 +4,45 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Runtime.Serialization;
 
 internal static class Program
 {
     const BindingFlags Static = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
     static int assertions;
     static void Check(bool ok, string message) { assertions++; if (!ok) throw new Exception(message); }
+    static void CheckGameState(Assembly mod)
+    {
+        var state = mod.GetType("ArtOfSimRally.Mod.GameState", true);
+        var entry = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.GetType("GameEntryPoint")).FirstOrDefault(t => t != null);
+        Check(entry != null, "GameEntryPoint was not resolved from the actual game assembly");
+        var field = entry.GetField("eventManager", Static);
+        Check(field != null && field.IsPrivate, "Actual backing field contract changed");
+        var original = field.GetValue(null);
+        Func<string, bool> flag = name => (bool)state.GetProperty(name, Static).GetValue(null);
+        try
+        {
+            field.SetValue(null, null);
+            Check(state.GetProperty("ExistingManager", Static).GetValue(null) == null, "Absent manager was created");
+            Check(!flag("IsDriving") && !flag("IsEngineLive") && !flag("IsPlayerView") && !flag("IsRestarting"), "Absent game state not parked");
+            // Exercise the production field reader against the actual game's
+            // private field, without running a Unity manager constructor.
+            var manager = FormatterServices.GetUninitializedObject(entry.Assembly.GetType("StageSceneManager", true));
+            var statusField = field.FieldType.GetField("status");
+            field.SetValue(null, manager);
+            foreach (string status in new[] { "UNDERWAY", "WAITING_TO_BEGIN", "PAUSED", "FINISHING_STAGE_ANIMATION", "FINISHED", "REPLAY" })
+            {
+                statusField.SetValue(manager, Enum.Parse(statusField.FieldType, status));
+                bool driving = status == "UNDERWAY", engine = driving || status == "WAITING_TO_BEGIN";
+                Check(flag("IsDriving") == driving, "Actual driving state mismatch: " + status);
+                Check(flag("IsEngineLive") == engine, "Actual engine state mismatch: " + status);
+                Check(flag("IsPlayerView") == (engine || status == "PAUSED"), "Actual camera state mismatch: " + status);
+            }
+            field.SetValue(null, null);
+            Check(!flag("IsDriving") && !flag("IsEngineLive") && !flag("IsPlayerView"), "Actual manager retained after teardown");
+        }
+        finally { field.SetValue(null, original); }
+    }
     static int Main(string[] args)
     {
         try
@@ -18,6 +51,9 @@ internal static class Program
             var paths = new[] { Path.Combine(root, "src/ArtOfSimRally.Mod/bin/Release"), Path.Combine(root, "lib/umm"), Path.Combine(args[1], "artofrally_Data/Managed") };
             AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => paths.Select(p => Path.Combine(p, new AssemblyName(e.Name).Name + ".dll")).Where(File.Exists).Select(Assembly.LoadFrom).FirstOrDefault();
             var mod = Assembly.LoadFrom(Path.Combine(paths[0], "ArtOfSimRally.Mod.dll"));
+            // Force dependency resolution before looking up the real private field.
+            mod.GetType("ArtOfSimRally.Mod.GameState", true).GetProperty("ExistingManager", Static).GetValue(null);
+            CheckGameState(mod);
             var pump = mod.GetType("ArtOfSimRally.Mod.TelemetryPump", true);
             var settingsType = mod.GetType("ArtOfSimRally.Mod.Settings", true); var cfg = Activator.CreateInstance(settingsType);
             var connect = pump.GetMethod("EnsureSender", Static);
@@ -69,7 +105,7 @@ internal static class Program
                 shutdown.Invoke(null, null); shutdown.Invoke(null, null);
                 Check(pump.GetProperty("ActiveEndpoint", Static).GetValue(null) == null, "duplicate shutdown failed");
             }
-            Console.WriteLine("{\"status\":\"passed\",\"assertions\":" + assertions + ",\"scope\":\"production telemetry recovery and loopback UDP; no Unity physics or SimHub\"}"); return 0;
+            Console.WriteLine("{\"status\":\"passed\",\"assertions\":" + assertions + ",\"scope\":\"production game-state field access, telemetry recovery and loopback UDP; no Unity physics or SimHub\"}"); return 0;
         }
         catch (Exception ex) { Console.Error.WriteLine(ex); return 1; }
     }

@@ -1,5 +1,10 @@
 # Overnight investigation and implementation queue
 
+**Newest priority (2026-09-09 UTC): KI-20.** The owner drove installed RC4 and
+reported a strong stutter despite good overall results. [Log review and fix](reviews/2026-09-09-rc4-stutter.md)
+identify accidental manager construction and ghost-download flooding; successor
+candidate validation and an attended comparison come before publication.
+
 Prepared 2026-09-08 UTC after [0.2.3 publication](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3).
 Executed on `codex/overnight-improvements` at the owner's request. The unattended
 implementation and research items below are complete; **0.2.4-rc.2 passes all 16

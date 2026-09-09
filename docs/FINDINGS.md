@@ -8,6 +8,16 @@ Nothing in this document is inferred from forum posts. Where something is
 Re-deriving these costs an hour of assembly spelunking, so treat this file as
 the source of truth and don't repeat the work.
 
+## Lazy manager factory addendum — 2026-09-09 UTC
+
+[RC4 log review](reviews/2026-09-09-rc4-stutter.md) verifies that
+`GameEntryPoint.EventManager` can construct managers from menus. Its constructor's
+catch starts a ghost replay request; subsequent derived-constructor failure leaves
+the singleton null. Repeated mod reads and ghost callbacks can amplify the work.
+Read the private `eventManager` field without invoking the getter; cache only the
+field metadata. Actual game-field and side-effect regression tests cover this.
+The owner's drive had a strong hitch near a crowd; the causal timing is unproven.
+
 ## Camera lifecycle addendum — 2026-09-06
 
 Later [feedback review](reviews/2026-09-08-feedback-review.md) records the
