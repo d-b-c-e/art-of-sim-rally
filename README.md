@@ -182,7 +182,7 @@ under `lib/toolkit` (`tools\Sync-Toolkit.ps1` refreshes the pin).
 
 ```
 dotnet build ArtOfSimRally.sln -c Release
-tools\testing\Test-Rc.ps1 -Version 0.2.4-rc.5
+tools\testing\Test-Rc.ps1 -Version 0.2.4-rc.6
 ```
 
 Use an unused RC number. Releases are built, tested and packaged locally; the

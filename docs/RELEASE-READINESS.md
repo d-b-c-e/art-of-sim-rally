@@ -3,8 +3,9 @@
 **RC4 attended update (2026-09-09 UTC): strong stutter reported.** Overall drive
 feedback was good, but its stutter case is failed. [Log investigation and KI-20
 fix](reviews/2026-09-09-rc4-stutter.md) found lazy-manager polling with a large
-ghost-download backlog. Successor source passes targeted tests; a new candidate
-and attended comparison are required. RC4 remains installed.
+ghost-download backlog. **RC5 passes all 16 automated checks locally**; its exact
+archive and new checklist are linked in that review. An attended comparison is
+required. RC4 remains installed; RC5 has not been installed or published.
 
 **0.2.4-rc.4 passes all 16 automated checks.** The
 [feedback follow-up and exact artifact](reviews/2026-09-08-feedback-review.md)

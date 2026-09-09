@@ -6,7 +6,8 @@
 
 ## What Was Done
 - RC4 owner drive good overall but strong stutter about one minute in, near crowd/curve. Game exited before logs inspected; snapshots in results/stutter-review-20260909-022600. Player.log 38.6 MB: 43,806 menu constructor failures, 4,981 ghost exceptions, 23,468 connection failures; backlog continued while driving. No crowd-specific diagnosis.
-- KI-20: GameEntryPoint.EventManager is a lazy factory. Replaced all production getter reads with passive private-field access; no manager cached across stage changes. 40 predicate regressions pass after baseline reproduced 4,000 getter/request side effects; actual game-field/transport tests 59, input 90, lifecycle 36 pass. New candidate needed; RC4 remains installed.
+- KI-20: GameEntryPoint.EventManager is a lazy factory. Replaced all production getter reads with passive private-field access; no manager cached across stage changes. 40 predicate regressions pass after baseline reproduced 4,000 getter/request side effects; actual game-field/transport tests 59, input 90, lifecycle 36 pass. RC4 remains installed.
+- Current candidate: dist/ArtOfSimRally-0.2.4-rc.5.zip, identity 0.2.4-rc.5+5701ebb69adcd17fe4a4122806b77b88594155a8.clean, SHA-256 00451924A77E2BF6E8E0CEDBF3D2EE14868B5491F7536B524CF060A8399D2F63. Full local gate passed all 16 checks: results/rc-0.2.4-rc.5-ba11af5f533e4aceafa33aabf6fe7f98/automated.json. All RC5 manual cases pending; no install or publication. Later docs do not rebuild this artifact.
 - RC4 manual checklist now records owner/rig and failed stutter evidence; other six cases pending. Full report: docs/reviews/2026-09-09-rc4-stutter.md.
 - Follow-up user feedback authorized further roadmap implementation while away and a short unsent reply.
 - Added CameraMod isolation (KI-18), bounded support logs/frame aggregates/live input + mod inventory (KI-19 diagnostics), and corrected legacy assist UI/help (KI-17; behavior unchanged).
@@ -15,9 +16,9 @@
 - Support tests: 25, with bounded real files and 100,000 allocation-free counter updates. Lifecycle/CameraMod tests: 36.
 - Short reply: docs/replies/2026-09-08-t300-tss.md. New review: docs/reviews/2026-09-08-feedback-review.md.
 - RC3 stopped before packaging: direct Unity ECalls in watchdog Update broke the offline Harmony probe hook. A non-inlined runtime helper fixes attachment; the actual 14-assertion hook test and full RC4 pass without skipped/weakened gates.
-- Current candidate: dist/ArtOfSimRally-0.2.4-rc.4.zip; identity 0.2.4-rc.4+38c1bff31ff1ca20696c15a8b7de9298ec04dbf3.clean.
+- Installed candidate: dist/ArtOfSimRally-0.2.4-rc.4.zip; identity 0.2.4-rc.4+38c1bff31ff1ca20696c15a8b7de9298ec04dbf3.clean.
 - ZIP SHA-256 C5284CDF7F0B2991F8E013246857A414CD15FADCCE583AD54F923251B8F47887 independently rechecked.
-- All 16 automated checks passed: results/rc-0.2.4-rc.4-744b3572e72e4404a229e5d10fbec92e/automated.json. All seven manual cases pending; check correctly rejects missing tester/rig. No real corpus, drive or publication of RC4.
+- All 16 RC4 automated checks passed: results/rc-0.2.4-rc.4-744b3572e72e4404a229e5d10fbec92e/automated.json. Subsequent owner drive failed stutter; six other manual cases pending. No real corpus or publication of RC4.
 - RC4 installed at owner's request 2026-09-09 02:17:23 UTC with game closed. Exact archive installer used; six payloads and second native plugin copy verified, Settings.xml preserved. Previous 0.2.3 install/settings backed up. Receipt: results/rc4-install-7bf2d9692b304b58bbe124f80d43cc4b/install-receipt.json. Stream Deck now launches RC4. Developer probe DLL/Info absent, cache only. Later documentation commits do not rebuild RC4.
 - Original overnight work/RC2 details below remain historical.
 - Executed the unattended scope of docs/OVERNIGHT-QUEUE.md after 0.2.3 publication.
@@ -46,6 +47,7 @@
 - Effect work stays managed research; no speculative T300 rotation override/upstream release.
 
 ## Open Items
+- [ ] Install RC5 and retest menu wait, same stage/curve, return to menu; collect support before quitting. KI-20 code fix is offline-verified, crowd-side hitch cause is not proven.
 - [x] Run full candidate gate from clean committed source; record artifact and report.
 - [ ] Attended UMM remapping/camera saves, input Flip/reconnect and final artifact checks.
 - [ ] First real capture; TSS/Fanatec/PS5-specific verification.
@@ -53,7 +55,7 @@
 - [ ] KI-12 T300 A/B; FR-2 effects/KI-6 snapback await signal capture/tuning.
 
 ## Next Steps
-1. Read the feedback follow-up review for the newest candidate and exact evidence; RC2 is historical.
+1. Read docs/reviews/2026-09-09-rc4-stutter.md for RC5 and the failed RC4 stutter evidence; earlier artifacts are historical.
 2. Follow docs/TEST-DRIVE.md extra 0.2.4 checks with the owner. Install the exact candidate first, with the game closed.
 3. Use docs/research/2026-09-08-wheel-signals.md for KI-16 corrections and hardware follow-up.
 
