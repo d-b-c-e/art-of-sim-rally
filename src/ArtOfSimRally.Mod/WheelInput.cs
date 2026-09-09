@@ -55,6 +55,7 @@ namespace ArtOfSimRally.Mod
         {
             public int Slot, Index;
             public string Name;
+            public Guid? InstanceGuid;
             public int[] Axes = new int[AxisCount];
             public byte[] Buttons = new byte[ButtonCount];
             public int[] BaseAxes = new int[AxisCount];
@@ -63,6 +64,7 @@ namespace ArtOfSimRally.Mod
         }
 
         private static readonly List<Device> _devices = new List<Device>();
+        private static WheelFfbNative.DeviceInfo[] _catalog = new WheelFfbNative.DeviceInfo[0];
         private static readonly Dictionary<Channel, Binding> _bindings = new Dictionary<Channel, Binding>();
         private static readonly Dictionary<Channel, float> _values = new Dictionary<Channel, float>();
         private static bool _open;
@@ -88,7 +90,13 @@ namespace ArtOfSimRally.Mod
         public static bool Enabled => Main.Enabled && Main.Settings != null && Main.Settings.WheelInputEnabled;
         public static bool IsBound(Channel c) => _bindings.ContainsKey(c);
         public static float Value(Channel c) => _values.TryGetValue(c, out float v) ? v : 0f;
-        public static string Describe(Channel c) => _bindings.TryGetValue(c, out var b) ? b.Describe() : "not assigned";
+        public static string Describe(Channel c)
+        {
+            if (!_bindings.TryGetValue(c, out var b)) return "not assigned";
+            if (_open && !b.InstanceGuid.HasValue && NameCount(b.Device) > 1)
+                return b.Describe() + " (identical devices: use Assign again)";
+            return b.Describe() + (_open && Resolve(b) == null ? " (device unavailable)" : "");
+        }
 
         /// <summary>Loads bindings from settings. Call at load and after settings change.</summary>
         public static void LoadBindings()
@@ -135,14 +143,17 @@ namespace ArtOfSimRally.Mod
         public static void Open()
         {
             if (_open) return;
+            if (GameState.IsDriving) { Status = "Pause before opening wheel input devices."; return; }
             try
             {
                 Close();
-                foreach (var device in WheelFfbNative.ListAllDevices())
+                _catalog = WheelFfbNative.ListAllDevices();
+                foreach (var device in _catalog)
                 {
                     int slot = WheelFfbNative.OpenRead(device.Index);
                     if (slot < 0) { ModLog.Warning("Wheel input: could not open " + device.Name); continue; }
-                    _devices.Add(new Device { Slot = slot, Index = device.Index, Name = device.Name });
+                    _devices.Add(new Device { Slot = slot, Index = device.Index, Name = device.Name,
+                        InstanceGuid = device.InstanceGuid == Guid.Empty ? null : device.InstanceGuid });
                 }
                 _open = _devices.Count > 0;
                 _firstReadLogged = false;
@@ -150,12 +161,13 @@ namespace ArtOfSimRally.Mod
                 foreach (var d in _devices) { if (names.Length > 0) names.Append(", "); names.Append(d.Name); }
                 ModLog.Info("Wheel input: opened " + _devices.Count + " controller(s): " + names);
                 if (!_open) Status = "No controllers found to read.";
+                _nextOpenRetry = Time.realtimeSinceStartup + 5f;
             }
             catch (Exception ex)
             {
                 ModLog.Error("Wheel input: open failed: " + ex.Message);
                 Status = "Could not open controllers: " + ex.Message;
-                _open = false;
+                Close();
             }
         }
 
@@ -163,6 +175,7 @@ namespace ArtOfSimRally.Mod
         {
             try { if (_devices.Count > 0 || _open) WheelFfbNative.CloseRead(); } catch { }
             _devices.Clear();
+            _catalog = new WheelFfbNative.DeviceInfo[0];
             _values.Clear();
             _open = false;
             _assigning = null;
@@ -175,11 +188,15 @@ namespace ArtOfSimRally.Mod
             if (cfg == null) return;
             if (!cfg.WheelInputEnabled || !Main.Enabled)
             {
-                if (_open) Close();
+                if (_open || _devices.Count > 0) Close();
                 return;
             }
+            bool mayDiscover = !GameState.IsDriving && !_assigning.HasValue;
+            if (_open && mayDiscover && Time.realtimeSinceStartup >= _nextOpenRetry && NeedsRefresh())
+                Close();
             if (!_open)
             {
+                if (!mayDiscover) return;
                 if (Time.realtimeSinceStartup < _nextOpenRetry) return;
                 _nextOpenRetry = Time.realtimeSinceStartup + 5f;
                 Open();
@@ -213,6 +230,13 @@ namespace ArtOfSimRally.Mod
                 if (!_bindings.TryGetValue(c, out var b)) { _values.Remove(c); continue; }
                 var d = Resolve(b);
                 if (d == null || !d.Ok) { _values[c] = 0f; continue; }
+                // Pin an unambiguous legacy binding after a successful read.
+                // Persist through the existing idle save path, never in driving IO.
+                if (!b.InstanceGuid.HasValue && d.InstanceGuid.HasValue)
+                {
+                    b.InstanceGuid = d.InstanceGuid;
+                    extended = true;
+                }
                 if (b.IsButton)
                 {
                     _values[c] = b.Element < ButtonCount && d.Buttons[b.Element] != 0 ? 1f : 0f;
@@ -272,21 +296,38 @@ namespace ArtOfSimRally.Mod
 
         private static Device Resolve(Binding b)
         {
-            Device byName = null;
+            if (!b.InstanceGuid.HasValue && NameCount(b.Device) != 1) return null;
             foreach (var d in _devices)
             {
-                if (d.Name != b.Device) continue;
-                if (d.Index == b.DeviceIndex) return d;
-                if (byName == null) byName = d;
+                if (b.InstanceGuid.HasValue ? d.InstanceGuid == b.InstanceGuid : d.Name == b.Device) return d;
             }
-            return byName;
+            return null;
+        }
+
+        private static int NameCount(string name)
+        {
+            int count = 0;
+            // Include attached devices whose reader failed to open: failure must
+            // not turn an ambiguous name into a seemingly unique binding.
+            foreach (var d in _catalog) if (d.Name == name) count++;
+            return count;
+        }
+
+        private static bool NeedsRefresh()
+        {
+            foreach (var d in _devices) if (!d.Ok) return true;
+            foreach (var b in _bindings.Values)
+                if (Resolve(b) == null && (b.InstanceGuid.HasValue || NameCount(b.Device) == 0)) return true;
+            return false;
         }
 
         // --- assignment ---------------------------------------------------------
 
         public static void BeginAssign(Channel c)
         {
-            if (!_open) Open();
+            if (GameState.IsDriving) { Status = "Pause before assigning a wheel input."; return; }
+            // Explicit assignment discovers newly attached unbound devices too.
+            Close(); Open();
             if (!_open) return;
             foreach (var d in _devices)
             {
@@ -362,13 +403,13 @@ namespace ArtOfSimRally.Mod
                     // steered inverted (owner's rig, 2026-09-03). Pedals keep the moved
                     // direction: rest -> pressed is unambiguous.
                     int far = c == Channel.Steer ? d.BaseAxes[i] + Math.Abs(delta) : d.Axes[i];
-                    Bind(cfg, c, new Binding { Device = d.Name, DeviceIndex = d.Index, IsButton = false, Element = i, Rest = d.BaseAxes[i], Far = far });
+                    Bind(cfg, c, new Binding { Device = d.Name, DeviceIndex = d.Index, InstanceGuid = d.InstanceGuid, IsButton = false, Element = i, Rest = d.BaseAxes[i], Far = far });
                     return;
                 }
                 for (int i = 0; i < ButtonCount; i++)
                 {
                     if (d.Buttons[i] == 0 || d.BaseButtons[i] != 0) continue;
-                    Bind(cfg, c, new Binding { Device = d.Name, DeviceIndex = d.Index, IsButton = true, Element = i, Rest = 0, Far = 1 });
+                    Bind(cfg, c, new Binding { Device = d.Name, DeviceIndex = d.Index, InstanceGuid = d.InstanceGuid, IsButton = true, Element = i, Rest = 0, Far = 1 });
                     return;
                 }
             }

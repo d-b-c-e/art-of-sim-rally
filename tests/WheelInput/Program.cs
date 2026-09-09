@@ -27,10 +27,12 @@ static class Program
     static void Setup(string binding)
     {
         WheelInput.Close(); Device.ReadOk = true; Device.ThrowRead = false; Device.FailOpen = false;
+        Device.Devices = new[] { new Device.DeviceInfo() };
         Array.Clear(Device.Axes); Array.Clear(Device.Buttons);
         Host.Settings = new Settings { WheelInputEnabled = true, HandbrakeBinding = binding };
         Host.Enabled = true; Clock.realtimeSinceStartup += 20;
         GameEntryPoint.EventManager = new EventManager();
+        GameState.IsDriving=false;
         WheelInput.LoadBindings(); WheelInput.Open();
     }
     static void Travel(int rest, int far)
@@ -116,15 +118,84 @@ static class Program
         Device.Axes[2] = 40000; WheelInput.Update();
         Check(Host.Settings.HandbrakeBinding == "TSS fixture|0|axis:2|65535|40000", "recovered baseline did not bind real movement");
     }
+    static readonly Guid LeverA = Guid.Parse("df1786e0-bf89-4194-a8c9-a1bddbfb2c90");
+    static readonly Guid LeverB = Guid.Parse("ad643763-846c-48cc-b03e-b5c9688f9b60");
+    static Device.DeviceInfo Lever(int index, Guid id, int raw, string name = "TSS fixture")
+    {
+        var axes = new int[8]; axes[2] = raw;
+        return new Device.DeviceInfo { Index=index, Name=name, InstanceGuid=id, StateAxes=axes };
+    }
+    static void Devices(params Device.DeviceInfo[] devices)
+    {
+        WheelInput.Close(); Device.Devices=devices; GameState.IsDriving=false;
+        Clock.realtimeSinceStartup+=20; WheelInput.Open(); WheelInput.Update();
+    }
+    static void DeviceIdentity()
+    {
+        Setup("TSS fixture|0|axis:2|0|65535");
+        Devices(Lever(0,LeverB,65535),Lever(1,LeverA,16384));
+        BoundOnlyHandbrake(0); // Legacy index cannot distinguish identical devices after reordering.
+        Setup("TSS fixture|0|axis:2|0|65535|guid:"+LeverA);
+        Devices(Lever(0,LeverB,65535),Lever(1,LeverA,16384));
+        BoundOnlyHandbrake(16384f/65535); // Index 0 now belongs to another identical lever.
+        Devices(Lever(0,LeverB,65535)); BoundOnlyHandbrake(0);
+        Devices(Lever(3,LeverA,32768,"renamed lever")); BoundOnlyHandbrake(32768f/65535);
+        WheelInput.Flip(WheelInput.Channel.Handbrake); WheelInput.LoadBindings();
+        Check(Host.Settings.HandbrakeBinding.EndsWith("|guid:"+LeverA),"Flip/reload lost GUID");
+        using (var stream = File.OpenRead(Host.Path)) Host.Settings = (Settings)new XmlSerializer(typeof(Settings)).Deserialize(stream);
+        WheelInput.LoadBindings(); WheelInput.Update(); BoundOnlyHandbrake(32767f/65535);
+        Setup("TSS fixture|0|axis:2|0|65535");
+        Devices(Lever(0,LeverA,65535),Lever(1,LeverB,65535)); BoundOnlyHandbrake(0);
+        Check(WheelInput.Describe(WheelInput.Channel.Handbrake).Contains("Assign"),"ambiguous legacy binding not explained");
+        Device.Devices[1].CannotOpen=true; Devices(Device.Devices); BoundOnlyHandbrake(0);
+        Setup("TSS fixture|0|axis:2|0|65535"); int saves=Host.Saves; Devices(Lever(4,LeverA,32768));
+        BoundOnlyHandbrake(32768f/65535);
+        Check(Host.Settings.HandbrakeBinding.EndsWith("|guid:"+LeverA),"unique legacy binding not pinned");
+        Check(Host.Saves==saves,"legacy migration wrote settings during input update");
+        Clock.realtimeSinceStartup+=6; WheelInput.FlushLearnedRanges();
+        Check(Host.Saves==saves+1,"legacy migration not persisted while idle");
+        Devices(Lever(4,LeverB,65535)); BoundOnlyHandbrake(0);
+        foreach (string invalid in new[] {"|guid:bad", "|guid:"+Guid.Empty, "|guid:"+LeverA+"|extra", "|unknown:"+LeverA})
+            Check(WheelInput.Binding.Parse("TSS fixture|0|axis:2|0|65535"+invalid)==null,"invalid identity silently became a legacy binding");
+        Setup(""); Devices(Lever(0,LeverA,0),Lever(1,LeverB,0));
+        WheelInput.BeginAssign(WheelInput.Channel.Handbrake); Device.Devices[1].StateAxes[2]=32000;
+        WheelInput.Update();
+        Check(Host.Settings.HandbrakeBinding.EndsWith("|guid:"+LeverB),"assignment did not identify moved lever");
+        GameState.IsDriving=true;
+    }
+    static void DeviceRecovery()
+    {
+        Setup("TSS fixture|1|axis:2|0|65535|guid:"+LeverB);
+        var wheel=Lever(0,LeverA,0,"wheel"); Devices(wheel); BoundOnlyHandbrake(0);
+        var lever=Lever(1,LeverB,32768); Device.Devices=new[] {wheel,lever};
+        int enums=Device.Enumerations; GameState.IsDriving=true; Clock.realtimeSinceStartup+=10;
+        for(int i=0;i<100;i++) WheelInput.Update();
+        Check(Device.Enumerations==enums,"device discovery occurred while driving"); BoundOnlyHandbrake(0);
+        GameState.IsDriving=false; WheelInput.Update(); BoundOnlyHandbrake(32768f/65535);
+        lever.Connected=false; WheelInput.Update(); BoundOnlyHandbrake(0);
+        enums=Device.Enumerations;
+        for(int i=0;i<100;i++) WheelInput.Update();
+        Check(Device.Enumerations==enums,"failed device caused an enumeration loop");
+        var returned=Lever(7,LeverB,16384); Device.Devices=new[] {wheel,returned};
+        Clock.realtimeSinceStartup+=6; WheelInput.Update(); BoundOnlyHandbrake(16384f/65535);
+        // Unbound newly attached devices are discovered on explicit Assign.
+        Setup(""); Devices(wheel); Device.Devices=new[] {wheel,Lever(2,LeverB,0)};
+        WheelInput.BeginAssign(WheelInput.Channel.Handbrake); Device.Devices[1].StateAxes[2]=20000;
+        WheelInput.Update(); Check(Host.Settings.HandbrakeBinding.EndsWith("|guid:"+LeverB),"Assign missed late USB device");
+        GameState.IsDriving=true; WheelInput.BeginAssign(WheelInput.Channel.Brake);
+        Check(!WheelInput.Assigning.HasValue,"assignment refreshed readers during driving");
+    }
     static int Main(string[] args)
     {
         try
         {
             var directory = Path.GetFullPath(Path.Combine("results", "wheel-input-" + Guid.NewGuid().ToString("N")));
             Directory.CreateDirectory(directory); Host.Path = Path.Combine(directory, "Settings.xml");
-            if (args.Contains("--flip-only")) FlipPersistence();
+            if (args.Contains("--identity-only")) DeviceIdentity();
+            else if (args.Contains("--reconnect-only")) DeviceRecovery();
+            else if (args.Contains("--flip-only")) FlipPersistence();
             else if (args.Contains("--assign-only")) AssignmentReadFailure();
-            else { Travel(0, 65535); Travel(65535, 0); RangesAndAssignment(); Lifecycle(); FlipPersistence(); AssignmentReadFailure(); }
+            else { Travel(0, 65535); Travel(65535, 0); RangesAndAssignment(); Lifecycle(); FlipPersistence(); AssignmentReadFailure(); DeviceIdentity(); DeviceRecovery(); }
             Console.WriteLine(JsonSerializer.Serialize(new { status = "passed", assertions })); return 0;
         }
         catch (Exception ex) { Console.Error.WriteLine(ex); return 1; }

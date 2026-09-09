@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup>
     <!-- UMM expects a numeric version; the complete RC identity lives in the assembly. -->
-    <ModVersion>0.2.4</ModVersion>
-    <ReleaseLabel Condition="'$(ReleaseLabel)' == ''">0.2.4-dev</ReleaseLabel>
+    <ModVersion>0.2.5</ModVersion>
+    <ReleaseLabel Condition="'$(ReleaseLabel)' == ''">0.2.5-dev</ReleaseLabel>
     <BuildSourceState Condition="'$(BuildSourceState)' == ''">unpackaged</BuildSourceState>
     <AssemblyVersion>$(ModVersion).0</AssemblyVersion>
     <FileVersion>$(ModVersion).0</FileVersion>

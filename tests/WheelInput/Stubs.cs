@@ -4,23 +4,33 @@ namespace Dbce.Wheel.Ffb
 {
     public static class WheelFfbNative
     {
-        public sealed class DeviceInfo { public string Name = "TSS fixture"; public int Index = 0; }
+        public sealed class DeviceInfo
+        {
+            public string Name = "TSS fixture"; public int Index = 0; public Guid? InstanceGuid;
+            public int[] StateAxes; public bool Connected = true, CannotOpen;
+        }
         public static DeviceInfo[] Devices = { new DeviceInfo() };
         public static readonly int[] Axes = new int[8];
         public static readonly byte[] Buttons = new byte[128];
         public static bool ReadOk = true, ThrowRead = false, FailOpen = false;
-        public static int Reads;
-        public static DeviceInfo[] ListAllDevices() => Devices;
-        public static int OpenRead(int index) => FailOpen ? -1 : index;
+        public static int Reads, Enumerations, Closes;
+        private static readonly Dictionary<int, DeviceInfo> slots = new();
+        public static DeviceInfo[] ListAllDevices() { Enumerations++; return Devices; }
+        public static int OpenRead(int index)
+        {
+            var device = Devices.Single(d => d.Index == index);
+            if (FailOpen || device.CannotOpen) return -1;
+            int slot = slots.Count; slots.Add(slot, device); return slot;
+        }
         public static bool Read(int slot, int[] axes, byte[] buttons)
         {
             Reads++;
             if (ThrowRead) throw new IOException("fixture read failure");
-            if (!ReadOk) return false;
-            Array.Copy(Axes, axes, Axes.Length); Array.Copy(Buttons, buttons, Buttons.Length);
+            if (!ReadOk || !slots.TryGetValue(slot, out var device) || !device.Connected) return false;
+            Array.Copy(device.StateAxes ?? Axes, axes, Axes.Length); Array.Copy(Buttons, buttons, Buttons.Length);
             return true;
         }
-        public static void CloseRead() { }
+        public static void CloseRead() { Closes++; slots.Clear(); }
     }
 }
 namespace HarmonyLib

@@ -21,6 +21,24 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-21 — Direct-input identity fallback and missing-reader rediscovery
+
+**Input correctness; reproduced offline in 0.2.4, corrected in 0.2.5 candidate;
+hardware validation pending.** Legacy channel bindings stored a name and index.
+`Resolve` trusted the index or selected the first same-name controller, so
+identical devices could supply the wrong axis after USB order changed. A missing
+handbrake was not rediscovered while another reader remained open.
+
+Fake-transport integration reproductions fail on the release source. New
+assignments append a strict instance GUID from the existing toolkit API; a missing
+GUID never falls back to another device. Unique legacy names upgrade after a
+successful read using deferred persistence. Multiple attached same-name devices,
+including failed opens, require explicit reassignment. Rediscovery occurs only
+while idle, at most once per five seconds, or on explicit Assign while paused.
+Physical unplug/reconnect and two-TSS/Fanatec confirmation remain pending. No
+native change or force tuning is involved; the separate shifter picker is not
+covered by this axis-binding fix.
+
 ### KI-19 — Rare frame-rate drops during longer T300 sessions
 
 **User report; cause unconfirmed.** The follow-up describes occasional slowdowns

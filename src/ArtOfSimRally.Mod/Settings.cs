@@ -41,7 +41,7 @@ namespace ArtOfSimRally.Mod
         // ---- Direct wheel input (bypasses the game's input library) ---------
         /// <summary>Read steering and pedals straight from the device. See WheelInput.cs.</summary>
         public bool WheelInputEnabled = false;
-        /// <summary>"device|index|axis:N|rest|far" per channel; empty = not bound.</summary>
+        /// <summary>"device|index|axis:N|rest|far[|guid:instance]" per channel; empty = not bound.</summary>
         public string SteerBinding = "";
         public string ThrottleBinding = "";
         public string BrakeBinding = "";

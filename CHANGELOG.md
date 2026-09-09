@@ -7,6 +7,16 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Direct axis/button assignments now retain the device's instance GUID across
+  USB enumeration changes. Unique legacy bindings upgrade after a successful
+  read; ambiguous identical-device bindings ask for reassignment instead of
+  silently selecting another controller. Missing devices supply neutral input.
+- Retry missing/failed direct-input readers while idle at a bounded rate. Assign
+  refreshes devices to discover a newly plugged handbrake; reader discovery and
+  assignment wait for pause rather than interrupting active driving.
+
 ## [0.2.4] - 2026-09-09
 
 ### Added

@@ -59,6 +59,12 @@ device and are read the same way: Assign, press the pedal.
 
 ## Separate handbrake (TSS or other USB device)
 
+The 0.2.5 candidate identifies newly assigned axes/buttons by device instance GUID
+and retries unavailable readers while paused. If an old binding reports identical
+devices, pause and use Assign again for that row. Assign also discovers devices
+plugged in after launch. Existing unambiguous bindings upgrade automatically after
+a successful read; their calibration is preserved. Hardware validation is pending.
+
 Use the mod's binding panel if the game's controls screen only offers shifting
 or never detects the handbrake. You can bind just the handbrake and leave working
 steering/pedal channels on the game's input path.
