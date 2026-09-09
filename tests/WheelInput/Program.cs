@@ -185,17 +185,42 @@ static class Program
         GameState.IsDriving=true; WheelInput.BeginAssign(WheelInput.Channel.Brake);
         Check(!WheelInput.Assigning.HasValue,"assignment refreshed readers during driving");
     }
+    static void AssignmentResume()
+    {
+        Setup(""); WheelInput.BeginAssign(WheelInput.Channel.Handbrake);
+        int saves=Host.Saves; GameState.IsDriving=true; Device.Axes[2]=40000; WheelInput.Update();
+        Check(!WheelInput.IsBound(WheelInput.Channel.Handbrake) && !WheelInput.Assigning.HasValue && Host.Saves==saves,
+            "resuming from pause completed assignment and wrote settings during driving");
+    }
+    static void BindingSaves()
+    {
+        Setup("TSS fixture|0|axis:2|0|65535"); Host.SaveSettings();
+        int saves=Host.Saves; GameState.IsDriving=true;
+        WheelInput.Flip(WheelInput.Channel.Handbrake); WheelInput.Clear(WheelInput.Channel.Handbrake);
+        Check(Host.Saves==saves,"Flip/Clear wrote settings during driving");
+        GameState.IsDriving=false; Clock.realtimeSinceStartup+=6; WheelInput.FlushLearnedRanges();
+        Check(Host.Saves==saves+1 && !File.ReadAllText(Host.Path).Contains("TSS fixture"),"latest binding edit not saved while idle");
+        Setup("TSS fixture|0|axis:2|0|65535"); Host.SaveSettings();
+        string before=File.ReadAllText(Host.Path);
+        using(File.Open(Host.Path,FileMode.Open,FileAccess.ReadWrite,FileShare.None))
+            WheelInput.Flip(WheelInput.Channel.Handbrake);
+        Check(File.ReadAllText(Host.Path)==before,"failed binding save damaged previous settings");
+        Clock.realtimeSinceStartup+=6; WheelInput.FlushLearnedRanges();
+        Check(File.ReadAllText(Host.Path).Contains("|65535|0"),"failed binding edit did not retry");
+    }
     static int Main(string[] args)
     {
         try
         {
             var directory = Path.GetFullPath(Path.Combine("results", "wheel-input-" + Guid.NewGuid().ToString("N")));
             Directory.CreateDirectory(directory); Host.Path = Path.Combine(directory, "Settings.xml");
-            if (args.Contains("--identity-only")) DeviceIdentity();
+            if (args.Contains("--resume-assignment-only")) AssignmentResume();
+            else if (args.Contains("--shifter-only")) assertions+=ShifterIdentityTests.Run();
+            else if (args.Contains("--identity-only")) DeviceIdentity();
             else if (args.Contains("--reconnect-only")) DeviceRecovery();
             else if (args.Contains("--flip-only")) FlipPersistence();
             else if (args.Contains("--assign-only")) AssignmentReadFailure();
-            else { Travel(0, 65535); Travel(65535, 0); RangesAndAssignment(); Lifecycle(); FlipPersistence(); AssignmentReadFailure(); DeviceIdentity(); DeviceRecovery(); }
+            else { Travel(0, 65535); Travel(65535, 0); RangesAndAssignment(); Lifecycle(); FlipPersistence(); AssignmentReadFailure(); DeviceIdentity(); DeviceRecovery(); AssignmentResume(); BindingSaves(); assertions+=ShifterIdentityTests.Run(); }
             Console.WriteLine(JsonSerializer.Serialize(new { status = "passed", assertions })); return 0;
         }
         catch (Exception ex) { Console.Error.WriteLine(ex); return 1; }

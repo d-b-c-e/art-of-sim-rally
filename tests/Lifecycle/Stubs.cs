@@ -124,5 +124,9 @@ namespace ArtOfSimRally.Mod
         public static void Park() => Calls.Log.Add("telemetry-park");
         public static void Shutdown() => Calls.Log.Add("telemetry-close");
     }
-    internal static class Shifter { public static void Close() => Calls.Log.Add("shifter-close"); }
+    internal static class Shifter
+    {
+        public static void Close() => Calls.Log.Add("shifter-close");
+        public static void FlushSelection(bool shutdown=false) => Calls.Log.Add("shifter-save");
+    }
 }

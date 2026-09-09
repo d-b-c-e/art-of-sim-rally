@@ -222,7 +222,11 @@ namespace ArtOfSimRally.Mod
                 ModLog.Info(sb.ToString());
             }
 
-            if (_assigning.HasValue) StepAssign(cfg);
+            if (_assigning.HasValue)
+            {
+                if (GameState.IsDriving) CancelAssign();
+                else StepAssign(cfg);
+            }
 
             bool extended = false;
             foreach (var c in Channels)
@@ -357,7 +361,7 @@ namespace ArtOfSimRally.Mod
             if (c == Channel.Steer) b.Far = b.Rest - (b.Far - b.Rest);
             else { int rest = b.Rest; b.Rest = b.Far; b.Far = rest; }
             var cfg = Main.Settings;
-            if (cfg != null) { Store(cfg, c, b.ToString()); Main.SaveSettings(); }
+            if (cfg != null) { Store(cfg, c, b.ToString()); SaveBindings(); }
             Status = c + " flipped.";
             ModLog.Info("Wheel input: " + c + " flipped to " + b);
         }
@@ -367,7 +371,7 @@ namespace ArtOfSimRally.Mod
             _bindings.Remove(c);
             _values.Remove(c);
             var cfg = Main.Settings;
-            if (cfg != null) { Store(cfg, c, ""); Main.SaveSettings(); }
+            if (cfg != null) { Store(cfg, c, ""); SaveBindings(); }
             Status = c + " cleared.";
         }
 
@@ -420,9 +424,15 @@ namespace ArtOfSimRally.Mod
             _bindings[c] = b;
             _assigning = null;
             Store(cfg, c, b.ToString());
-            Main.SaveSettings();
+            SaveBindings();
             Status = c + " = " + b.Describe() + ". Use it fully once to calibrate the range.";
             ModLog.Info("Wheel input: " + c + " bound to " + b);
+        }
+
+        private static void SaveBindings()
+        {
+            RangeSave.MarkDirty();
+            FlushLearnedRanges();
         }
     }
 

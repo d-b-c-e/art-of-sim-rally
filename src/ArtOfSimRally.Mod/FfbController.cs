@@ -63,28 +63,24 @@ namespace ArtOfSimRally.Mod
         {
             var cfg = Main.Settings;
             if (!Main.Enabled || cfg == null || !cfg.ForceFeedbackEnabled) return;
-            if (!FfbNative.Ready) return;
+            if (!FfbNative.Ready) { Reset(); __instance.forceFeedback = 0f; return; }
 
             // FixedUpdate keeps running through the end-of-stage cutscene while
             // the game steers the car itself. Without this the wheel is dragged
             // to full lock and held there after crossing the line.
             if (!GameState.IsDriving)
             {
-                if (_smoothed != 0f)
-                {
-                    _smoothed = 0f;
-                    FfbNative.SetForce(0);
-                }
+                ReleaseSample(__instance);
                 return;
             }
 
             var axles = __instance.axles;
-            if (axles == null) return;
+            if (axles == null) { ReleaseSample(__instance); return; }
 
             // Steering force comes from the steered axle only. Rear-wheel Mz is
             // real but does not reach the steering column.
             var front = axles.frontAxle;
-            if (front?.leftWheel == null || front.rightWheel == null) return;
+            if (front?.leftWheel == null || front.rightWheel == null) { ReleaseSample(__instance); return; }
 
             // Steering torque is the lateral force on the steered axle acting
             // through a pneumatic trail - NOT the game's Mz. Mz is a 1989
@@ -99,7 +95,7 @@ namespace ArtOfSimRally.Mod
             float fy = lw.Fy + rw.Fy;
             if (float.IsNaN(fy) || float.IsInfinity(fy))
             {
-                Reset(); FfbNative.SetForce(0); return;
+                ReleaseSample(__instance); return;
             }
 
             float absSlip = 0.5f * (Mathf.Abs(lw.slipAngle) + Mathf.Abs(rw.slipAngle));
@@ -121,7 +117,7 @@ namespace ArtOfSimRally.Mod
             // conversion, where NaN could become a full-scale negative force.
             if (float.IsNaN(_smoothed) || float.IsInfinity(_smoothed))
             {
-                Reset(); FfbNative.SetForce(0); return;
+                ReleaseSample(__instance); return;
             }
 
             // Publish in the game's own units so anything reading this field -
@@ -142,6 +138,13 @@ namespace ArtOfSimRally.Mod
         // sign relation between Mz and Fy - which depends on each car's tyre
         // coefficients - can be read off a real drive instead of assumed.
         private static float _nextTrace;
+        private static void ReleaseSample(CarDynamics car)
+        {
+            bool hadForce = _smoothed != 0f || car.forceFeedback != 0f;
+            Reset(); car.forceFeedback = 0f;
+            if (hadForce) FfbNative.SetForce(0);
+        }
+
         private static void Trace(Wheel l, Wheel r, float speedKmh)
         {
             if (Time.unscaledTime < _nextTrace) return;
@@ -179,6 +182,7 @@ namespace ArtOfSimRally.Mod
         {
             _smoothed = 0f;
             _peakMz = 0f;
+            _peakSpeedKmh = 0f;
         }
     }
 }

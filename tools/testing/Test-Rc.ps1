@@ -64,7 +64,10 @@ try {
     $result = Run 'camera-tuning' 'dotnet' @('run','--project','tests/CameraTuning/CameraTuning.csproj','-c','Release')
     $cameraTuning = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($cameraTuning.status -eq 'passed' -and $cameraTuning.assertions -gt 0) 'Camera tuning runner ran no assertions'
-    Checkpoint 'lifecycle' ($lifecycle.assertions+$cameraTuning.assertions+$gameState.assertions)
+    $result = Run 'force-lifecycle' 'dotnet' @('run','--project','tests/ForceLifecycle/ForceLifecycle.csproj','-c','Release')
+    $forceLifecycle = $result | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($forceLifecycle.status -eq 'passed' -and $forceLifecycle.assertions -gt 0) 'Force lifecycle runner ran no assertions'
+    Checkpoint 'lifecycle' ($lifecycle.assertions+$cameraTuning.assertions+$gameState.assertions+$forceLifecycle.assertions)
     $null = Run 'recorder-build' 'dotnet' @('build','tools/testing/Recorder/Recorder.csproj','-c','Release','--nologo','-warnaserror')
     $result = Run 'recorder-tests' 'dotnet' @('run','--project','tests/Recorder/Recorder.csproj','-c','Release','--',(Join-Path $run 'synthetic'),'src/ArtOfSimRally.Mod/bin/Release/ArtOfSimRally.Mod.dll','D:/Program Files (x86)/Steam/steamapps/common/artofrally')
     $recorder = $result | Select-Object -Last 1 | ConvertFrom-Json

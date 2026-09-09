@@ -53,13 +53,14 @@ static class Program
         Calls.Log.Clear(); ModWatchdog.Shutdown();
         int disk=Calls.Log.IndexOf("save");
         Check(Calls.Log.IndexOf("native-input-close")<Calls.Log.IndexOf("diagnostic-save"),"diagnostics saved before outputs released");
+        Check(Calls.Log.IndexOf("native-input-close")<Calls.Log.IndexOf("shifter-save"),"shifter selection saved before outputs released");
         Check(Calls.Log[0]=="force:0", "shutdown did not zero force first");
         foreach(string call in new[] {"filter-reset","native-close","telemetry-park","telemetry-close","shifter-close","input-close","native-input-close"})
             Check(Calls.Log.IndexOf(call)>=0 && Calls.Log.IndexOf(call)<disk &&
                 Calls.Log.IndexOf(call)<Calls.Log.IndexOf("camera-save"), call+" happened after save");
         var watchdog=new ModWatchdog(); Calls.Log.Clear(); ArtOfSimRally.Mod.Main.Enabled=true; GameState.IsDriving=true;
         typeof(ModWatchdog).GetMethod("Update",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(watchdog,null);
-        Check(!Calls.Log.Contains("save") && !Calls.Log.Contains("camera-save") && !Calls.Log.Contains("diagnostic-save"),"watchdog saved while driving");
+        Check(!Calls.Log.Contains("save") && !Calls.Log.Contains("camera-save") && !Calls.Log.Contains("diagnostic-save") && !Calls.Log.Contains("shifter-save"),"watchdog saved while driving");
         GameState.IsDriving=false;
         typeof(ModWatchdog).GetMethod("Update",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(watchdog,null);
         Check(Calls.Log.IndexOf("force:0")<Calls.Log.IndexOf("save"),"idle save preceded release");

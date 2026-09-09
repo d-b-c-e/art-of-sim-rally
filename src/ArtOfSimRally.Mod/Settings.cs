@@ -152,6 +152,7 @@ namespace ArtOfSimRally.Mod
         // Chosen in the panel's device list rather than typed.
         public int ShifterDeviceIndex = -1;
         public string ShifterDeviceName = "";
+        public string ShifterDeviceGuid = "";
 
         // Button index per gate; -1 means unbound. Stored flat rather than as an
         // array because UnityModManager's XML settings round-trip simple fields

@@ -54,6 +54,7 @@ namespace ArtOfSimRally.Mod
             if (!Main.Enabled)
             {
                 WheelInput.FlushLearnedRanges();
+                Shifter.FlushSelection();
                 CameraTuner.Flush();
                 FrameHealthPersistence.Flush();
                 return;
@@ -84,6 +85,7 @@ namespace ArtOfSimRally.Mod
             }
             // Retry failed writes at most once per five seconds, only while idle.
             WheelInput.FlushLearnedRanges();
+            Shifter.FlushSelection();
             CameraTuner.Flush();
             FrameHealthPersistence.Flush();
         }
@@ -127,6 +129,7 @@ namespace ArtOfSimRally.Mod
             FfbNative.ReleaseInputs();
             // No file writes until force and telemetry outputs are released.
             try { WheelInput.FlushLearnedRanges(shutdown: true); } catch { }
+            try { Shifter.FlushSelection(shutdown: true); } catch { }
             try { CameraTuner.Flush(shutdown: true); } catch { }
             try { FrameHealthPersistence.Flush(shutdown: true); } catch { }
         }

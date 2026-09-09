@@ -5,6 +5,7 @@
     <GameDir Condition="'$(GameDir)' == ''">D:\Program Files (x86)\Steam\steamapps\common\artofrally</GameDir>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../src/ArtOfSimRally.Mod/Shifter.cs" Link="Shifter.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/WheelInput.cs" Link="WheelInput.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/WheelInput.Binding.cs" Link="WheelInput.Binding.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/DeferredSave.cs" Link="DeferredSave.cs" />

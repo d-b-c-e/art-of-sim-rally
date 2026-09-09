@@ -8,12 +8,18 @@ namespace Dbce.Wheel.Ffb
         {
             public string Name = "TSS fixture"; public int Index = 0; public Guid? InstanceGuid;
             public int[] StateAxes; public bool Connected = true, CannotOpen;
+            public string Label => Name;
         }
         public static DeviceInfo[] Devices = { new DeviceInfo() };
         public static readonly int[] Axes = new int[8];
         public static readonly byte[] Buttons = new byte[128];
         public static bool ReadOk = true, ThrowRead = false, FailOpen = false;
         public static int Reads, Enumerations, Closes;
+        public static int LastAuxIndex=-1;
+        public static DeviceInfo Aux;
+        public static bool OpenAux(int index) { Aux=Devices.SingleOrDefault(d=>d.Index==index); LastAuxIndex=index; return Aux!=null && !Aux.CannotOpen; }
+        public static void CloseAux() { Aux=null; }
+        public static int ReadAux(byte[] buttons) { if(Aux==null || !Aux.Connected) return 0; Array.Copy(Buttons,buttons,Buttons.Length); return Buttons.Length; }
         private static readonly Dictionary<int, DeviceInfo> slots = new();
         public static DeviceInfo[] ListAllDevices() { Enumerations++; return Devices; }
         public static int OpenRead(int index)
@@ -45,6 +51,11 @@ public class AxisCarController
 {
     public float SteeringOutOfAlignmentEffect = 0;
     public static float ProcessDeadzoneForInput(float value, float deadzone) => value;
+}
+public class Drivetrain
+{
+    public int gear=2; public float[] gearRatios=new float[7]; public int Shifts;
+    public void Shift(int selected,bool force) { gear=selected; Shifts++; }
 }
 public static class SettingsManager
 {

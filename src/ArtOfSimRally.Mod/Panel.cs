@@ -74,6 +74,11 @@ namespace ArtOfSimRally.Mod
 
         public static void DrawShifterBinding(Settings cfg)
         {
+            if (GameState.IsDriving)
+            {
+                GUILayout.Label("      Pause to change shifter devices or bindings.", Wrap);
+                return;
+            }
             if (!_allListed) { _allDevices = Shifter.ListDevices(); _allLabels = Shifter.ListDeviceLabels(_allDevices); _allListed = true; }
 
             cfg.ShifterIsHPattern = GUILayout.Toggle(cfg.ShifterIsHPattern,
@@ -85,6 +90,7 @@ namespace ArtOfSimRally.Mod
             {
                 cfg.ShifterDeviceIndex = picked;
                 cfg.ShifterDeviceName = _allDevices[picked];
+                cfg.ShifterDeviceGuid = Shifter.DeviceGuid(picked);
                 Shifter.Open(picked);
                 Main.SaveSettings();
             }
@@ -99,7 +105,7 @@ namespace ArtOfSimRally.Mod
             {
                 if (GUILayout.Button("Connect", GUILayout.Width(140)))
                     Shifter.Open(cfg.ShifterDeviceIndex);
-                GUILayout.Label("      Not connected.", Wrap);
+                GUILayout.Label("      " + (string.IsNullOrEmpty(Shifter.Status) ? "Not connected." : Shifter.Status), Wrap);
                 return;
             }
 

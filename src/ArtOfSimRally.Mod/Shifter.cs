@@ -1,5 +1,6 @@
 using System;
 using Dbce.Wheel.Ffb;
+using UnityEngine;
 
 namespace ArtOfSimRally.Mod
 {
@@ -46,6 +47,8 @@ namespace ArtOfSimRally.Mod
         private static int  _lastApplied = int.MinValue;
         private static bool _lastUp;
         private static bool _lastDown;
+        private static readonly DeferredSave SelectionSave = new DeferredSave();
+        public static string Status { get; private set; } = "";
 
         /// <summary>True while a shifter device is open and being read.</summary>
         public static bool IsOpen => _open;
@@ -63,20 +66,52 @@ namespace ArtOfSimRally.Mod
         public static string[] ListDeviceLabels(string[] names)
             => Array.ConvertAll(_devices, d => d.Label);
 
+        public static string DeviceGuid(int position) => position >= 0 && position < _devices.Length
+            ? _devices[position].InstanceGuid?.ToString("D") ?? "" : "";
+
         /// <summary>Opens the chosen device for reading. Safe to call repeatedly.</summary>
         public static bool Open(int index)
         {
+            if (GameState.IsDriving) { Status = "Pause before connecting a shifter."; return false; }
             if (index < 0) { Close(); return false; }
+            Close();
             try
             {
-                _open = WheelFfbNative.OpenAux(index);
-                if (!_open) ModLog.Warning("Could not open shifter device " + index);
+                var cfg = Main.Settings;
+                if (cfg == null) return false;
+                Guid? guid = null;
+                if (!string.IsNullOrEmpty(cfg.ShifterDeviceGuid))
+                {
+                    if (!Guid.TryParse(cfg.ShifterDeviceGuid, out var parsed) || parsed == Guid.Empty)
+                    { Status = "Invalid saved shifter identity; choose the device again."; return false; }
+                    guid = parsed;
+                }
+                // The native all-device table can change independently of the
+                // panel's cached labels. Resolve identity against a fresh table.
+                var attached = WheelFfbNative.ListAllDevices();
+                int matches = 0; WheelFfbNative.DeviceInfo selected = default(WheelFfbNative.DeviceInfo);
+                foreach (var device in attached)
+                {
+                    bool match = guid.HasValue ? device.InstanceGuid == guid :
+                        !string.IsNullOrEmpty(cfg.ShifterDeviceName) && device.Name == cfg.ShifterDeviceName;
+                    if (match) { matches++; selected = device; }
+                }
+                if (matches != 1)
+                { Status = matches == 0 ? "Saved shifter unavailable; reconnect it or choose the device again." : "Identical shifters: choose the device again."; return false; }
+                _open = WheelFfbNative.OpenAux(selected.Index);
+                Status = _open ? "" : "Could not open shifter " + selected.Name;
+                if (!_open) ModLog.Warning(Status);
+                if (_open && !guid.HasValue && selected.InstanceGuid.HasValue && selected.InstanceGuid != Guid.Empty)
+                {
+                    cfg.ShifterDeviceGuid = selected.InstanceGuid.Value.ToString("D");
+                    SelectionSave.MarkDirty();
+                }
                 return _open;
             }
             catch (Exception ex)
             {
                 ModLog.Error("Shifter open failed: " + ex.Message);
-                _open = false;
+                Close(); Status = "Shifter connection failed.";
                 return false;
             }
         }
@@ -84,10 +119,17 @@ namespace ArtOfSimRally.Mod
         /// <summary>Stops reading and releases the device.</summary>
         public static void Close()
         {
+            Reset();
+            PressedButton = -1;
             if (!_open) return;
             try { WheelFfbNative.CloseAux(); } catch { }
             _open = false;
             PressedButton = -1;
+        }
+
+        public static void FlushSelection(bool shutdown = false)
+        {
+            SelectionSave.Flush(Time.realtimeSinceStartup, !shutdown && GameState.IsDriving, shutdown, Main.SaveSettings);
         }
 
         /// <summary>

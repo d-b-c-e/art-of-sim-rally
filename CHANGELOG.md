@@ -16,6 +16,15 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Clear force/filter state when front-wheel data disappears or the native device
+  becomes unavailable, including the game's published force value. Valid driving
+  still uses the same shared force curve and tune.
+- Resolve separate shifter selections by GUID against a fresh device list;
+  unique legacy names upgrade, ambiguous/missing identities require reselection.
+  Reopening clears the prior gear latch. Shifter setup waits for pause.
+- Cancel unfinished direct-input assignment when driving resumes. Flip, Clear
+  and assignment saves use idle persistence and retain failed-write retries.
+
 - Direct axis/button assignments now retain the device's instance GUID across
   USB enumeration changes. Unique legacy bindings upgrade after a successful
   read; ambiguous identical-device bindings ask for reassignment instead of

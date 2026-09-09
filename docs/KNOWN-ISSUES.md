@@ -21,6 +21,40 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-24 — Binding edits can write settings during driving
+
+**Reproduced offline; corrected in 0.2.5 candidate, UI validation pending.** An
+assignment started while paused could complete after resuming and synchronously
+save Settings.xml. Flip/Clear also saved immediately even if the panel was open
+over active driving. Assignment now cancels on resume; edits use the existing
+idle/deferred-save path. Real locked-file tests retain the previous XML and retry
+the latest edit. No evidence links this specific interaction to a reported hitch.
+
+### KI-23 — Separate shifter picker trusts a stale device index
+
+**Reproduced offline; corrected in 0.2.5 candidate, hardware validation pending.**
+`Shifter.Open` ignored the stored name and opened the saved index. Restart or
+another controller-list refresh could make it open another USB device. The
+panel also cached labels while the shared native table could be refreshed.
+
+Explicit selections now store a GUID from the picker snapshot, then resolve that
+identity against a fresh table before opening. Unique legacy names upgrade via
+idle persistence; missing, malformed or ambiguous identities do not fall back to
+an index. Shifter setup is pause-only. Close/reopen clears the old gear latch;
+stage changes already reset it in ShifterPatch. Automatic native hotplug recovery
+and TSS/Fanatec confirmation are not claimed.
+
+### KI-22 — Missing front-wheel data leaves the last force active
+
+**Reproduced offline; corrected in 0.2.5 candidate, hardware validation pending.**
+With game state still UNDERWAY, missing axles/front/left/right wheel made
+`FfbController.DriveWheel` return before zeroing a prior force. The watchdog also
+considered the game driving, so it did not release that output. Missing/invalid
+samples now clear filter state and the published game force, and release output.
+Loss of native readiness clears history before recovery. The valid force formula
+and tune are unchanged. 19 consumer callback tests use real shared arithmetic
+and a fake output sink; no physical force was sent or runtime occurrence claimed.
+
 ### KI-21 — Direct-input identity fallback and missing-reader rediscovery
 
 **Input correctness; reproduced offline in 0.2.4, corrected in 0.2.5 candidate;
@@ -37,7 +71,7 @@ including failed opens, require explicit reassignment. Rediscovery occurs only
 while idle, at most once per five seconds, or on explicit Assign while paused.
 Physical unplug/reconnect and two-TSS/Fanatec confirmation remain pending. No
 native change or force tuning is involved; the separate shifter picker is not
-covered by this axis-binding fix.
+covered by this axis-binding fix; its later audit/fix is tracked separately in KI-23.
 
 ### KI-19 — Rare frame-rate drops during longer T300 sessions
 
