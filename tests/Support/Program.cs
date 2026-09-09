@@ -70,7 +70,7 @@ static class Program
         try
         {
             string root=Path.GetFullPath(Path.Combine("results","support-"+Guid.NewGuid().ToString("N")));
-            Directory.CreateDirectory(root); Logs(root); Timing();
+            Directory.CreateDirectory(root); Logs(root); Timing(); assertions+=FrameHealthRetentionTests.Run(root);
             Console.WriteLine(JsonSerializer.Serialize(new{status="passed",assertions,scope="bounded real log files; zero-allocation frame aggregates"})); return 0;
         }
         catch(Exception ex) { Console.Error.WriteLine(ex); return 1; }

@@ -12,8 +12,15 @@ namespace ArtOfSimRally.Mod
         internal long EarlyHitches { get; private set; }
         internal long LaterHitches { get; private set; }
         internal double MaximumMs { get; private set; }
+        internal long Revision { get; private set; }
         private bool _enabled, _previousDriving;
         private double _last, _segmentStart, _started, _lastHitch = -1;
+
+        internal void Reset()
+        {
+            Frames=EarlyHitches=LaterHitches=0; MaximumMs=0; _lastHitch=-1;
+            _enabled=_previousDriving=false; Revision++;
+        }
 
         internal void Observe(bool enabled, bool driving, double now)
         {
@@ -22,6 +29,7 @@ namespace ArtOfSimRally.Mod
             if (!_enabled)
             {
                 Frames=EarlyHitches=LaterHitches=0; MaximumMs=0;
+                Revision++;
                 _started=now; _lastHitch=-1; _previousDriving=false; _enabled=true;
             }
             if (driving)
@@ -31,6 +39,7 @@ namespace ArtOfSimRally.Mod
                 {
                     double milliseconds=(now-_last)*1000;
                     Frames++;
+                    Revision++;
                     if (milliseconds>MaximumMs) MaximumMs=milliseconds;
                     if (milliseconds>=100)
                     {

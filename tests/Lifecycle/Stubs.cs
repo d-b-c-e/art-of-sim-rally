@@ -99,6 +99,10 @@ namespace ArtOfSimRally.Mod
         public static void Flush(bool shutdown=false) => Calls.Log.Add("camera-save");
     }
     internal static class InputBackend { public static void Tick() { } }
+    internal static class FrameHealthPersistence
+    {
+        public static void Flush(bool shutdown=false) => Calls.Log.Add("diagnostic-save");
+    }
     internal static class WheelInput
     {
         public enum Channel { Steer, Throttle, Brake, Clutch, Handbrake }

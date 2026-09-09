@@ -57,6 +57,13 @@ off/on if needed. Collect immediately after a short reproduction while paused.
 Support creation now refuses to do synchronous disk work while driving. These are
 diagnostic improvements, not a verified slowdown fix.
 
+The 0.2.5 candidate also retains an opt-in summary at idle/normal-exit boundaries
+under `%LOCALAPPDATA%/ArtOfSimRally/last-session-frame-health.xml`. The next mod
+session includes it as previous-session evidence, with build and UTC timestamps.
+It is capped at 8 KiB and rejects corrupt, future-dated or over-30-day-old data.
+Failed atomic replacement preserves the old file; idle retry is bounded. No
+per-frame disk work, timeline or guaranteed crash recovery is added.
+
 ### KI-18 — Nexus Camera Mod and mounted cameras compete for rotation slots
 
 **Source-confirmed compatibility defect; guarded in 0.2.4, screen test pending.**

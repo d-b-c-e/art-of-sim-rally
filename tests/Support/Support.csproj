@@ -3,5 +3,6 @@
   <ItemGroup>
     <Compile Include="../../src/ArtOfSimRally.Mod/SupportLogs.cs" Link="SupportLogs.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/FrameHealth.cs" Link="FrameHealth.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/FrameHealthStore.cs" Link="FrameHealthStore.cs" />
   </ItemGroup>
 </Project>

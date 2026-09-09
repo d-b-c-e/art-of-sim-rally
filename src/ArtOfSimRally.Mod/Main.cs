@@ -61,6 +61,7 @@ namespace ArtOfSimRally.Mod
             // DirectInput switch left the keyboard dead turns that setting off.
             InputBackend.OnLoad();
             WheelInput.LoadBindings();
+            FrameHealthPersistence.Initialize();
 
             modEntry.OnGUI       = OnGUI;
             modEntry.OnSaveGUI   = OnSaveGUI;

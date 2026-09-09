@@ -6,7 +6,14 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed release
+## Installed candidate — 0.2.5 work
+
+**0.2.5-rc.1** is installed after passing all 16 local checks, with settings and
+the Steam 550320 launch target preserved. [Current candidate evidence and receipt](reviews/2026-09-09-overnight-025.md).
+The earlier 0.2.4 installation below is backed up. No candidate hardware result
+or public publication is implied.
+
+## Previous stable installation
 
 - **0.2.4 stable**, installed 2026-09-09 03:09:23 UTC with the game closed, from
   the downloaded [GitHub release](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.4).

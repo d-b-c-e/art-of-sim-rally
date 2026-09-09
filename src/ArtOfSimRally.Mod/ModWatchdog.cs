@@ -55,6 +55,7 @@ namespace ArtOfSimRally.Mod
             {
                 WheelInput.FlushLearnedRanges();
                 CameraTuner.Flush();
+                FrameHealthPersistence.Flush();
                 return;
             }
             InputBackend.Tick();
@@ -84,6 +85,7 @@ namespace ArtOfSimRally.Mod
             // Retry failed writes at most once per five seconds, only while idle.
             WheelInput.FlushLearnedRanges();
             CameraTuner.Flush();
+            FrameHealthPersistence.Flush();
         }
 
         private void LateUpdate() => BonnetCamera.ReleaseIfInactive();
@@ -126,6 +128,7 @@ namespace ArtOfSimRally.Mod
             // No file writes until force and telemetry outputs are released.
             try { WheelInput.FlushLearnedRanges(shutdown: true); } catch { }
             try { CameraTuner.Flush(shutdown: true); } catch { }
+            try { FrameHealthPersistence.Flush(shutdown: true); } catch { }
         }
     }
 }

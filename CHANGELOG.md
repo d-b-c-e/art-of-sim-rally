@@ -7,6 +7,13 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Retain an opt-in, bounded frame-health summary at idle and normal exit, after
+  output release. Support files include the previous session's build, timestamps
+  and counters; stale/corrupt snapshots are rejected. This does not capture crash
+  traces or identify the cause of a hitch.
+
 ### Fixed
 
 - Direct axis/button assignments now retain the device's instance GUID across

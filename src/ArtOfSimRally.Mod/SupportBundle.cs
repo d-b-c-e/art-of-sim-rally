@@ -58,6 +58,7 @@ namespace ArtOfSimRally.Mod
                 WriteSettings(sb);
                 Main.WriteLoadedMods(sb);
                 FrameHealth.Current.Append(sb);
+                FrameHealthPersistence.AppendPrevious(sb);
                 WriteRuntimeInputs(sb);
                 WriteControllers(sb);
                 WriteBindings(sb);

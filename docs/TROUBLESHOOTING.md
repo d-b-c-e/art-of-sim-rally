@@ -14,6 +14,11 @@ Turn detailed logging off afterward. Include build, driver/firmware, car/stage,
 approximate event time and other active mods. Log tails cannot recover an entire
 earlier drive or show why an FPS drop occurred.
 
+The 0.2.5 candidate retains a small diagnostic summary at idle/normal exit and
+includes it in the next support file as **previous session** evidence. Its build
+and timestamp may differ from the current session. A crash can lose measurements
+since the last idle save; collecting immediately after the hitch is still best.
+
 Version 0.2.4 adds aggregate foreground-driving frame intervals, including
 100 ms+ counts early/later in each driving segment. A segment also restarts after
 pause/focus return; it is not a stage identifier. These counters write no files
