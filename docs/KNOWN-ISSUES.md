@@ -57,7 +57,9 @@ another controller-list refresh could make it open another USB device. The
 panel also cached labels while the shared native table could be refreshed.
 
 Explicit selections now store a GUID from the picker snapshot, then resolve that
-identity against a fresh table before opening. Unique legacy names upgrade via
+identity against a fresh table before opening. The displayed selection also
+resolves that identity in the cached picker snapshot, not the old USB index.
+Unique legacy names upgrade via
 idle persistence; missing, malformed or ambiguous identities do not fall back to
 an index. Shifter setup is pause-only. Close/reopen clears the old gear latch;
 stage changes already reset it in ShifterPatch. Automatic native hotplug recovery

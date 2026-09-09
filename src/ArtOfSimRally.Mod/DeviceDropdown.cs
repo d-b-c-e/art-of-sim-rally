@@ -15,10 +15,9 @@ namespace ArtOfSimRally.Mod
     /// controls below it.
     /// </para>
     /// <para>
-    /// Selection is returned by index, and the caller stores the name too. Device
-    /// order can change between launches when hardware is plugged in or removed,
-    /// so the name is what identifies the choice later; the index only breaks ties
-    /// between devices reporting the same name, which Fanatec rigs do.
+    /// Selection is returned as a row in the caller's cached snapshot. Callers
+    /// persist the corresponding GUID and resolve it back to a display row;
+    /// neither a row nor a native enumeration index is a persistent identity.
     /// </para>
     /// </remarks>
     internal static class DeviceDropdown

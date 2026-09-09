@@ -85,7 +85,7 @@ namespace ArtOfSimRally.Mod
                 "  H-pattern (off = sequential)");
 
             int picked = DeviceDropdown.Draw(
-                "shifter", "Shifter", _allLabels, cfg.ShifterDeviceIndex, "No controllers found.");
+                "shifter", "Shifter", _allLabels, Shifter.SelectedPosition(cfg), "No controllers found.");
             if (picked >= 0)
             {
                 cfg.ShifterDeviceIndex = picked;

@@ -69,6 +69,28 @@ namespace ArtOfSimRally.Mod
         public static string DeviceGuid(int position) => position >= 0 && position < _devices.Length
             ? _devices[position].InstanceGuid?.ToString("D") ?? "" : "";
 
+        /// <summary>The selected row in the panel's snapshot, never a native index.</summary>
+        public static int SelectedPosition(Settings cfg)
+        {
+            if (cfg == null || cfg.ShifterDeviceIndex < 0) return -1;
+            Guid? guid = null;
+            if (!string.IsNullOrEmpty(cfg.ShifterDeviceGuid))
+            {
+                if (!Guid.TryParse(cfg.ShifterDeviceGuid, out var parsed) || parsed == Guid.Empty) return -1;
+                guid = parsed;
+            }
+            int found = -1;
+            for (int i = 0; i < _devices.Length; i++)
+            {
+                bool matches = guid.HasValue ? _devices[i].InstanceGuid == guid :
+                    !string.IsNullOrEmpty(cfg.ShifterDeviceName) && _devices[i].Name == cfg.ShifterDeviceName;
+                if (!matches) continue;
+                if (found >= 0) return -1;
+                found = i;
+            }
+            return found;
+        }
+
         /// <summary>Opens the chosen device for reading. Safe to call repeatedly.</summary>
         public static bool Open(int index)
         {
