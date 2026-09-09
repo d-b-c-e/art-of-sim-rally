@@ -113,8 +113,10 @@ the complete candidate; do not delete a correct plugin copy merely for its path.
 ## Cutting a release
 
 The owner has standing authorization to keep the local test installation current.
-After an artifact passes the automated gate, deploy it with the game closed and
-preserve settings/backups; no new permission request is needed. See
+As a checklist item when finishing a feature or bug fix, deploy its artifact after
+the automated gate passes, with the game closed and settings/backups preserved;
+no new permission request is needed. If the game is open, record a pending deploy
+for the next active work session. Do not schedule periodic deployment checks. See
 [LOCAL-DEPLOYMENT.md](LOCAL-DEPLOYMENT.md). Public publication and attended
 sign-off still follow the steps below.
 

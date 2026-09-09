@@ -236,11 +236,13 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
 ## Testing
 
 **Keep the installed copy current without asking again** (standing owner request,
-2026-09-09 UTC). After each new artifact passes all local automated gates, deploy
-the exact package if the game is closed, preserving settings and a backup. If the
-game is running, defer instead of closing it. Follow docs/LOCAL-DEPLOYMENT.md;
-an hourly heartbeat catches eligible builds waiting to deploy. This authorization
-does not grant public publication or attended sign-off.
+2026-09-09 UTC). Local deployment is a checklist item when finishing a feature or
+bug fix. After its artifact passes all local automated gates, deploy the exact
+package if the game is closed, preserving settings and a backup. If the game is
+running, record deployment as pending and resume at the next active work session;
+never close it or schedule polling. Follow docs/LOCAL-DEPLOYMENT.md. Scheduled
+deployment checks are disabled at the owner's request. This authorization does
+not grant public publication or attended sign-off.
 
 **Release builds run locally** (owner preference, 2026-09-08). Run the local RC
 or final gate, then upload the exact validated ZIP and checksum using `gh release`

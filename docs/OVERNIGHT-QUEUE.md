@@ -7,14 +7,48 @@ Next: collect T300/TSS feedback on 0.2.4, complete the detailed hardware/camera 
 motion/shaker checks, and capture a real drive before new FFB effect tuning.
 Earlier RC2/RC4 status below is historical and superseded.
 
+## Next overnight queue — after 0.2.4
+
+Prepared 2026-09-09 at the owner's request. These items are queued, not completed.
+The code review below identifies investigation targets and a diagnostics gap;
+it does not establish new hardware failures. Start with 1–3, then prepare item 4
+to make the next attended drive more useful.
+
+| Order | Work | Concrete outcome and offline acceptance |
+|---|---|---|
+| 1 | **USB device identity and reconnect resilience** — KI-13/KI-15/Fanatec follow-up | Reproduce two identically named devices, changed enumeration order, one missing device and a device connected after readers open. `WheelInput.Binding` stores name/index and `Resolve` falls back to the first matching name; strict FFB GUID selection does not cover these axis bindings. Audit reconnect/discovery behavior while another device remains open. Fix only reproduced failures, preserving existing bindings through explicit migration and preventing input from silently moving to a different device. Use fake-transport integration tests; keep actual TSS/Fanatec confirmation pending. Reuse toolkit identity/reader APIs; native defects belong upstream. |
+| 2 | **Retain useful stutter evidence after quitting** — KI-19 diagnostics | `FrameHealth` is memory-only and support currently reads that live instance. Preserve an opt-in, bounded last-session summary at an idle/shutdown boundary, after output release, with exact build identity and timestamps. Include it in support with clear current/previous-session labels. Test disabled logging, stale/corrupt files, failed writes and repeated shutdown; no per-frame disk writes or log flood. Normal-exit retention does not promise crash recovery or diagnose the T300 slowdown. |
+| 3 | **Focused lifecycle and performance review** — follow-through from KI-20 | Audit production watchdog, input, camera and telemetry paths for side-effecting lazy access, recurring enumeration/reflection, repeated exceptions/logging and synchronous work during driving. Use controlled transitions and failure injection; reproduce each actionable finding before changing code and add it to KNOWN-ISSUES. Extend meaningful coverage for menu/stage/finish/replay/unload sequences. The existing KI-20 fix is already released; do not redo the original investigation or call offline timing a game FPS benchmark. |
+| 4 | **Development capture for independent steering/impact effects** — FR-2/KI-6 | Extend the separate recorder/replay workflow to collect the missing contact, suspension and local-motion context needed to distinguish road, landing and slide-recovery events; document units, freshness, ordering and discontinuities. Add standalone event/force comparison output and validate schema compatibility, bounded buffers, corruption rejection and recorder exclusion from release packages. Existing EffectsLab gain/headroom research is complete; this step supplies the missing measurement path instead of repeating it. No hardware output, automatic probe installation or new production effect defaults. A real capture and attended comparison remain prerequisites for tuning. |
+
+**Requires a person or reporter:** final-labelled 0.2.4 drive; full camera/input/FFB
+matrix; Nexus CameraMod screen checks; TSS/Fanatec behavior; T300 rotation A/B;
+motion/shaker comparison; first real capture. These can be prepared overnight but
+must not be marked passed from offline work. Do not change physics, assists or
+physical wheel rotation based on an unconfirmed report.
+
+**GitHub refresh:** still one open issue (#1), one existing issue comment, zero PR
+review comments and zero commit comments. No new actionable report found; no
+messages sent. Use the existing 0.2.4 support draft when the owner wants to reply.
+
+Finish each coherent feature/fix with its relevant tests and documentation, then
+run the full local gate for a new immutable candidate (next line: `0.2.5-rc.N`).
+Deploy the validated package to the local install as a completion checklist item,
+preserving settings and backups. If the game is open, record deployment pending
+for the next active session. Scheduled deployment checks are disabled; public
+publication remains a separate authorization. Documentation/tooling-only work
+that leaves the shipping payload unchanged needs no replacement game install.
+
+## Previous overnight work — historical
+
 Prepared 2026-09-08 UTC after [0.2.3 publication](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3).
 Executed on `codex/overnight-improvements` at the owner's request. The unattended
 implementation and research items below are complete; **0.2.4-rc.2 passes all 16
 automated checks** and awaits an attended drive. [Exact artifact and handoff](reviews/2026-09-08-overnight.md).
 Published 0.2.3 is unchanged. The later owner-requested RC4 install replaces it
 locally behind the same Stream Deck target; see the follow-up review below.
-The owner later requested continual local deployment; an hourly heartbeat now
-checks for validated builds waiting to install. See [LOCAL-DEPLOYMENT.md](LOCAL-DEPLOYMENT.md).
+The owner requested local deployment when finishing each feature/fix; scheduled
+checks are now disabled. See [LOCAL-DEPLOYMENT.md](LOCAL-DEPLOYMENT.md).
 
 Read [USER-FEEDBACK.md](USER-FEEDBACK.md), [KNOWN-ISSUES.md](KNOWN-ISSUES.md) and
 [RELEASE-READINESS.md](RELEASE-READINESS.md). The full attended matrix is still

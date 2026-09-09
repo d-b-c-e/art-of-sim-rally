@@ -6,6 +6,10 @@ The defect register is [KNOWN-ISSUES.md](KNOWN-ISSUES.md); the implementation re
 is [2026-09-06-rc-review.md](reviews/2026-09-06-rc-review.md).
 
 The next implementation session is ordered in [OVERNIGHT-QUEUE.md](OVERNIGHT-QUEUE.md).
+The post-0.2.4 queue prioritizes USB identity/reconnect investigations, retaining
+diagnostic summaries after exit, a focused lifecycle/performance review, and
+development capture of the signals needed for independent steering/impact effects.
+These are queued work, not additional verified bugs or completed features.
 [USER-FEEDBACK.md](USER-FEEDBACK.md) records the T300/TSS report, camera-key
 remapping request and the post-release GitHub audit with unsent support drafts.
 Implemented for the **0.2.4 release**: camera-tuner save retry/logging (KI-14),

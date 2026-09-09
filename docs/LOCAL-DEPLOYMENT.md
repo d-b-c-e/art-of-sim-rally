@@ -1,10 +1,10 @@
 # Local deployment
 
 The owner gave standing authorization on 2026-09-09 UTC to keep the installed
-copy current. After a new candidate or final artifact passes the complete local
-automated gate, deploy it for testing without asking again. This is part of
-finishing the build, not an optional follow-up. Public release publication and
-attended sign-off remain separate.
+copy current. Local deployment is a required checklist item when finishing a
+feature or bug fix. After its candidate or final artifact passes the complete
+local automated gate, deploy it for testing without asking again. Public release
+publication and attended sign-off remain separate.
 
 ## Installed release
 
@@ -43,11 +43,16 @@ attended sign-off remain separate.
    tuning, controls, Stream Deck action and optional developer-probe state. Do not
    launch a game or mark attended checks passed as part of deployment.
 
-## Follow-up when a build is waiting
+## Feature completion checklist
 
-An hourly heartbeat attached to this task checks for eligible artifacts that were
-not installed immediately, including builds deferred while the game was running.
-Automation ID: `keep-art-of-sim-rally-installed-build-current`. It stays quiet when
-unchanged or waiting for the game to close, and reports completed updates or actual
-failures. It does not build new versions just because the schedule fired.
-The local computer and app need to be running for this check.
+- [ ] Build and validate the completed feature/fix in an immutable local artifact.
+- [ ] Deploy that exact artifact with the game closed, backing up the previous
+  install and preserving settings.
+- [ ] Verify all payloads, native plugin copy, identity and unchanged settings;
+  save the receipt and report the installed version in the handoff.
+
+If the game is running, leave deployment pending and pick it up at the next active
+work session. Do not close the game or set up periodic checks. The owner stopped
+scheduled polling on 2026-09-09 UTC; automation
+`keep-art-of-sim-rally-installed-build-current` is paused. An unchanged build or
+documentation-only work needs no rebuild or redeployment.

@@ -16,12 +16,14 @@
 - KI-20 error flood resolved on owner's rig. KI-19 T300 intermittent slowdown remains unknown; no universal stutter claim.
 - Updated release notes, guides, issue register, roadmap and unsent T300/TSS reply: docs/replies/2026-09-08-t300-tss.md.
 - Post-publication GitHub review: only issue #1 and its existing PS5-unplug comment, no new reports or messages sent.
+- Owner replaced scheduled deployment checks with a feature/fix completion checklist; automation verified PAUSED.
+- Prepared next overnight queue in docs/OVERNIGHT-QUEUE.md: USB identity/reconnect, last-session diagnostics, lifecycle/performance audit, then development signal captures. Work is queued, not implemented.
 
 ## Decisions Made
 - Build/test/package locally; GitHub minutes exhausted. Exact assets uploaded directly, zero Actions workflows.
 - Owner's overall RC5 acceptance authorized release; full matrix/final-labelled drive still pending.
 - Production source/Version.props/toolkit match RC5 source 5701ebb. Toolkit v0.12.0/native 0.5.0/AxleForceCurve@1 unchanged.
-- Keep local deployment current automatically, game closed, backup/settings preserved; never close game to update.
+- Deploy validated artifacts when finishing each feature/fix, game closed, backup/settings preserved. Owner stopped scheduled polling; automation is paused.
 
 ## Open Items
 - [ ] Complete detailed camera/input/FFB/telemetry matrix and final-labelled drive.
@@ -32,8 +34,9 @@
 1. Read docs/reviews/2026-09-09-release-0.2.4.md and docs/LOCAL-DEPLOYMENT.md for exact published/installed evidence.
 2. Give owner the draft reply to collect feedback on 0.2.4; do not post externally without authorization.
 3. Use docs/TEST-DRIVE.md for remaining checks and docs/OVERNIGHT-QUEUE.md for follow-up.
+4. Start the new overnight queue with reproducible input failures and post-exit diagnostic retention; don't repeat completed EffectsLab research or claim hardware validation.
 
 ## Context for Next Session
 Final 0.2.4 is published and installed with settings preserved. RC5 was driven and accepted;
-the exact final-labelled package has not been driven. Hourly heartbeat
-keep-art-of-sim-rally-installed-build-current is active, quiet when unchanged/game open.
+the exact final-labelled package has not been driven. Deployment is now a feature/fix
+completion checklist item; keep-art-of-sim-rally-installed-build-current is paused.
