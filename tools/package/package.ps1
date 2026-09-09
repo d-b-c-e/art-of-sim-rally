@@ -170,11 +170,11 @@ KNOWN LIMITS
   should apply to any wheel Rewired does not recognise, which is likely most
   modern direct-drive bases, but that is reasoning rather than testing.
 
-* Owner testing of 0.2.3-rc.6 reported working cameras, no stutter and no control
-  issues so far. That result applies to the earlier artifact. The new 0.2.4
-  camera-key and direct-input changes have automated coverage; attended camera,
-  control and hardware checks remain pending. See the release readiness notes
-  in the source repository for results tied to each exact artifact.
+* Owner testing of 0.2.4-rc.5 was accepted for release. Its log has no manager
+  initialization errors, connection failures or exceptions after the state-polling
+  fix. This package uses the same production code and toolkit, with final release
+  identity and updated documentation. The complete attended scenario matrix and
+  a final-labelled drive remain pending. See the source release-readiness notes.
 
 * This is a bonnet camera, not a cockpit camera. art of rally's cars have no
   modelled interiors, so there is nothing to sit inside of.

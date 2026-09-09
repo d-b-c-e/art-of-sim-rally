@@ -1,9 +1,11 @@
 # Overnight investigation and implementation queue
 
-**Newest priority (2026-09-09 UTC): KI-20.** The owner drove installed RC4 and
-reported a strong stutter despite good overall results. [Log review and fix](reviews/2026-09-09-rc4-stutter.md)
-identify accidental manager construction and ghost-download flooding. RC5 passes
-all 16 local automated checks and is installed; an attended comparison remains.
+**Latest status (2026-09-09 UTC): RC5 accepted; 0.2.4 release authorized.**
+KI-20's manager/error flood is absent in the new drive log. See the
+[release handoff](reviews/2026-09-09-release-0.2.4.md) for current artifact status.
+Next: collect T300/TSS feedback on 0.2.4, complete the detailed hardware/camera and
+motion/shaker checks, and capture a real drive before new FFB effect tuning.
+Earlier RC2/RC4 status below is historical and superseded.
 
 Prepared 2026-09-08 UTC after [0.2.3 publication](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3).
 Executed on `codex/overnight-improvements` at the owner's request. The unattended

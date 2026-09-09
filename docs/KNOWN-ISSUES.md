@@ -21,30 +21,6 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
-### KI-20 — State polling constructs game managers and floods ghost downloads
-
-**Major; source-confirmed, corrected after RC4; attended retest pending.** Owner
-RC4 testing was good overall but had a strong stutter around a curve near a crowd,
-roughly a minute into one stage. The session's Player.log contains 43,806 failed
-EventManager initializations in MainMenu, 4,981 uncaught ghost-callback exceptions
-and 23,468 connection failures. Download callbacks continued during force traces.
-
-Our `GameState` predicates called `GameEntryPoint.EventManager`, a lazy factory.
-When no instance exists in a menu, construction fails after queuing a ghost
-download; catching the exception does not undo the request. The next frame tries
-again. The same getter is in 0.2.3; RC4's diagnostics added another state read.
-
-Read the verified private `eventManager` field instead, caching only its metadata,
-not the stage instance. Input and support helpers use the same passive read;
-missing-manager input remains untouched. A regression first reproduced 4,000
-lazy getter calls/requests from 1,000 polls, then zero after the fix. Tests also
-exercise the actual game's private field and stage/ownership transitions without
-calling Unity constructors. No game factory or leaderboard behavior is patched.
-
-This is a strong stutter suspect, not a proven attribution of the crowd-side hitch.
-RC4's stutter case is failed. RC5 is now installed for retesting; its attended cases remain pending.
-See [the log review](reviews/2026-09-09-rc4-stutter.md) for exact counts and limits.
-
 ### KI-19 — Rare frame-rate drops during longer T300 sessions
 
 **User report; cause unconfirmed.** The follow-up describes occasional slowdowns
@@ -72,7 +48,7 @@ first, and both tuners share numpad keys. Reproduced slot displacement with the
 actual consumer camera code and the other mod's documented list assumptions.
 This does not establish that it caused issue #1 or the new FPS report.
 
-When UMM has loaded `CameraMod`, the new candidate leaves its rotation alone and
+When UMM has loaded `CameraMod`, 0.2.4 leaves its rotation alone and
 suspends our mounted views/tuning. Settings remain intact and the panel explains
 the choice. To use our mounts, disable that mod before a fresh game launch. Tests
 cover both initialization orders and normal mounts without it. This is supported
@@ -105,12 +81,12 @@ and inverse car rotation for velocity, world-differentiated acceleration and
 angular velocity. Acceleration history resets at park/restart/spawn, bad samples,
 clock gaps/rollback and teleports. 1,230 assertions include all headings and actual
 encoded UDP with distinct wheel corners. This changes motion/shaker input units
-and axes; compare on the rig before release. Encoder layout and wheel FFB are
+and axes; an attended rig comparison remains pending for 0.2.4. Encoder layout and wheel FFB are
 unchanged. The static signal audit remains the historical baseline evidence.
 
 ### KI-15 — Direct-input cache, Flip and assignment recovery defects
 
-**Input correctness; reproduced offline in 0.2.3, fixed in next-version source.**
+**Input correctness; reproduced offline in 0.2.3, fixed in 0.2.4; detailed attended checks pending.**
 Closing readers left cached values active, so a failed reopen could keep applying
 the previous pedal value. Flip reflected pedal calibration around rest, making a
 normal 0..65535 handbrake unusable, and flipped steering could serialize an endpoint
@@ -125,7 +101,7 @@ disable behavior. Actual TSS input and in-game recovery remain untested.
 
 ### KI-14 — Camera tuner loses failed-save retry and logs each adjustment frame
 
-**Persistence/supportability; reproduced in 0.2.3, fixed in next-version source.**
+**Persistence/supportability; reproduced in 0.2.3, fixed in 0.2.4; detailed attended checks pending.**
 `CameraTuner.Update` clears `_dirty` before `Main.SaveSettings()`, ignores its
 failure result and logs success unconditionally. Its timer only runs while a
 mounted view is active, so switching away before the timer expires can leave the
@@ -138,7 +114,7 @@ retry. The fix uses the persistent watchdog to save while idle and retain failur
 with five-second retry backoff. Held adjustments produce no per-frame log.
 Production tuner/writer tests cover locked-file recovery, latest edits, debounce,
 driving/disable and shutdown; lifecycle tests check output release before writes.
-Attended persistence remains pending. No fix is in the published 0.2.3 archive.
+Attended persistence remains pending. The fix ships in 0.2.4; 0.2.3 is unchanged.
 
 ### KI-13 — TSS handbrake assignment is not discoverable through stock controls
 
@@ -383,6 +359,35 @@ failed socket. Production-code loopback tests cover recovery, three parked packe
 destination switching and repeat shutdown. SimHub remains an attended gate.
 
 ## Resolved
+
+### KI-20 — State polling constructs game managers and floods ghost downloads
+
+**Major; fixed in 0.2.4, RC5 owner retest accepted 2026-09-09 UTC.** Owner
+RC4 testing was good overall but had a strong stutter around a curve near a crowd,
+roughly a minute into one stage. The session's Player.log contains 43,806 failed
+EventManager initializations in MainMenu, 4,981 uncaught ghost-callback exceptions
+and 23,468 connection failures. Download callbacks continued during force traces.
+
+Our `GameState` predicates called `GameEntryPoint.EventManager`, a lazy factory.
+When no instance exists in a menu, construction fails after queuing a ghost
+download; catching the exception does not undo the request. The next frame tries
+again. The same getter is in 0.2.3; RC4's diagnostics added another state read.
+
+Read the verified private `eventManager` field instead, caching only its metadata,
+not the stage instance. Input and support helpers use the same passive read;
+missing-manager input remains untouched. A regression first reproduced 4,000
+lazy getter calls/requests from 1,000 polls, then zero after the fix. Tests also
+exercise the actual game's private field and stage/ownership transitions without
+calling Unity constructors. No game factory or leaderboard behavior is patched.
+
+This is a strong stutter suspect, not a proven attribution of the crowd-side hitch.
+RC4's stutter case remains failed historical evidence. The owner's RC5 drive was
+accepted for release; its 197,466-byte Unity log has one normal initialization and
+zero constructor errors, connection failures or exceptions. This resolves the
+observed error flood, without assigning every crowd-side or T300 hitch this cause.
+The full attended matrix remains incomplete.
+See [the log review](reviews/2026-09-09-rc4-stutter.md) for exact counts and limits.
+
 
 Kept because each one cost real time to find, and because a regression in any of
 them would otherwise look like a new mystery.

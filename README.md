@@ -63,10 +63,10 @@ once more for the bumper view. Adjust whichever is on screen with the numpad:
 
 Changes save automatically.
 
-**0.2.4 candidate:** the Camera panel adds keyboard remapping, cancel/clear and
+**Camera keys:** the Camera panel offers keyboard remapping, cancel/clear and
 restore-defaults for all tuning actions. Edits save when paused or otherwise idle,
 including after leaving a mounted view. See [camera controls](docs/CAMERA.md).
-These additions have offline coverage and still need an attended UI check.
+Owner RC5 testing was accepted for release; the full scenario matrix remains open.
 
 **Telemetry** — off by default. Turn it on and point SimHub at a **Forza
 Horizon 5** profile on UDP port **8000**. Host and port can be changed while the
@@ -96,7 +96,7 @@ behaves, and is off by default. It is a legacy car-spawn boolean override, not a
 temporary replacement of the game's numeric assist setting; unticking does not
 restore the current car. Leave it off and use the game's own assist controls.
 
-**Using Nexus Camera Mod:** the 0.2.4 candidate leaves its chase-camera rotation
+**Using Nexus Camera Mod:** version 0.2.4 leaves its chase-camera rotation
 alone and suspends our mounted views/tuning when that mod is loaded. Disable it
 before a fresh game launch to use our bonnet/bumper views. Settings are preserved.
 
@@ -189,11 +189,11 @@ Use an unused RC number. Releases are built, tested and packaged locally; the
 validated ZIP and checksum are uploaded directly to GitHub Releases. No GitHub
 Actions build is required. See [the release procedure](docs/RELEASING.md).
 
-Release **0.2.3** adopts the shared toolkit force/device code and improves camera
-handback, settings persistence, diagnostics and telemetry recovery. Automated
-checks pass. Owner RC6 testing reported no stutter, good cameras and no control
-issues so far. The full attended checklist and hardware-specific reports remain
-open. See the [release notes](docs/releases/0.2.3.md) and
+Release **0.2.4** fixes menu state polling that could queue excessive ghost
+downloads, adds camera-key remapping and improves direct input, telemetry and
+support diagnostics. Owner RC5 testing was accepted for release, and its log has
+no initialization/connection error flood. The full attended checklist and
+hardware-specific reports remain open. See the [release notes](docs/releases/0.2.4.md) and
 [testing guide](docs/PRE-RELEASE-TESTING.md).
 
 Next work and outstanding user reports are tracked in the

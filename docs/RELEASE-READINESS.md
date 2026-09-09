@@ -1,4 +1,13 @@
-# Release readiness — 2026-09-08
+# Release readiness — 2026-09-09
+
+**Current: owner accepted installed RC5 and authorized stable 0.2.4.** The new
+drive log has no initialization errors, connection failures or exceptions.
+See [0.2.4 release handoff](reviews/2026-09-09-release-0.2.4.md) for exact final
+artifact, automated checks and publication status; [local deployment](LOCAL-DEPLOYMENT.md)
+records the installed identity. Full attended cases and a final-labelled drive
+remain pending. The entries below are historical snapshots, superseded by that handoff.
+
+## Historical release and candidate evidence
 
 **RC4 attended update (2026-09-09 UTC): strong stutter reported.** Overall drive
 feedback was good, but its stutter case is failed. [Log investigation and KI-20

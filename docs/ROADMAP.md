@@ -1,19 +1,19 @@
 # Roadmap
 
-Status reviewed 2026-09-08 for the 0.2.3 release.
-**Maintenance release: 0.2.3. The full attended checklist remains pending.**
+Status reviewed 2026-09-09 for 0.2.4 publication.
+**Owner accepted installed RC5 and requested release. The detailed attended matrix remains pending.**
 The defect register is [KNOWN-ISSUES.md](KNOWN-ISSUES.md); the implementation review
 is [2026-09-06-rc-review.md](reviews/2026-09-06-rc-review.md).
 
 The next implementation session is ordered in [OVERNIGHT-QUEUE.md](OVERNIGHT-QUEUE.md).
 [USER-FEEDBACK.md](USER-FEEDBACK.md) records the T300/TSS report, camera-key
 remapping request and the post-release GitHub audit with unsent support drafts.
-Implemented for the **0.2.4 candidate**: camera-tuner save retry/logging (KI-14),
+Implemented for the **0.2.4 release**: camera-tuner save retry/logging (KI-14),
 keyboard remapping (FR-1), and analog-handbrake regression coverage (KI-13) with
 cache/Flip/assignment fixes (KI-15). Camera and input harnesses pass offline;
 RC4 was installed and driven; overall feedback was good with a strong stutter.
 [KI-20 investigation](reviews/2026-09-09-rc4-stutter.md) corrected a lazy-manager
-polling defect in successor source; full attended checks remain pending. Rotation and effect-signal
+polling defect in RC5. Its owner retest was accepted and the error flood was absent; full attended checks remain pending. Rotation and effect-signal
 investigations are documented in [the signal audit](research/2026-09-08-wheel-signals.md).
 The [follow-up implementation](reviews/2026-09-08-feedback-review.md) adds
 CameraMod isolation, bounded support logs/frame-hitch counts, clearer assist help,
@@ -22,10 +22,10 @@ offline coverage; motion/shaker and combined-camera-mod tests remain pending.
 New FFB effects and RWD damping remain a separate captured-signal/attended tuning
 cycle. No rotation override is justified by the current T300 evidence.
 
-## Now — finish 0.2.3 attended validation
+## Now — follow up on 0.2.4 and capture real signals
 
-Owner RC6 testing reported no stutter, working cameras and no control issues so
-far. This is a scoped smoke result, not a completed scenario matrix. Implemented;
+Owner RC5 testing was accepted for 0.2.4; earlier 0.2.3 RC6 feedback also reported
+working cameras and controls. These are scoped results, not a complete matrix. Implemented;
 still requiring the complete attended checks:
 
 - Camera child-transform restoration, including explicit replay/cinematic

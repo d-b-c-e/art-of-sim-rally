@@ -83,12 +83,12 @@ are verified on the owner's rig.
 
 ## Keys without a numpad
 
-The **0.2.4 candidate** implements in-panel keyboard remapping for all 11 actions:
+The **0.2.4 release** implements in-panel keyboard remapping for all 11 actions:
 Ctrl+F10 → Camera → Enable camera tuning keys → Rebind. It supports cancel, clear,
 duplicate feedback and Restore numpad defaults, including with only bumper enabled.
 Close the panel and release held keys before tuning. Modifier chords do not
 activate single-key bindings. The panel and key delivery still need attended
-validation; this feature is not in published 0.2.3.
+validation; this feature ships in 0.2.4.
 
 In 0.2.4, hotkey edits save once idle (for example paused), at least a second
 after the last edit. The watchdog retains failed saves and retries even after

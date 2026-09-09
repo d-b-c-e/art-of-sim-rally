@@ -38,18 +38,28 @@ third-party binaries, nothing that would force the repo private.
 | `docs/TROUBLESHOOTING.md` | User-facing fixes by symptom; the Fanatec section is the most-needed page. |
 | `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP, RELEASING |
 
-## Status (2026-09-08) — do not overstate this
+## Status (2026-09-09) — do not overstate this
 
-Release: **0.2.3** (2026-09-08). Toolkit pin: **v0.12.0**, native component **0.5.0**. Production uses the shared
-managed wrapper, AxleForceCurve@1 and telemetry. The attended checklist remains incomplete. Current branch prepares 0.2.4: camera keys/save recovery and direct-input cache/Flip/assignment fixes (KI-14/KI-15). Camera suite 182 assertions; input suite 90. RC4 was driven: good overall, but strong stutter. KI-20 fixes lazy-manager polling after RC4; 40 state assertions and actual-game field tests pass. See docs/reviews/2026-09-09-rc4-stutter.md.
-Follow-up source adds CameraMod isolation (KI-18), bounded support logs and opt-in
-frame aggregates (KI-19 diagnostics), clearer legacy assist help (KI-17), corrected
-telemetry sampling (KI-16) and bool-return send failure handling. Signal/UDP suite
-1,230 assertions, support 25, lifecycle 36, transport 36; full candidate evidence
-lives in docs/reviews/2026-09-08-feedback-review.md. No new wheel effects/assist
-behavior or hardware result. The previous RC2 evidence is historical.
-Read docs/RELEASE-READINESS.md for artifact status, docs/OVERNIGHT-QUEUE.md for next work, and docs/USER-FEEDBACK.md for support drafts. **RC5 is installed** behind the Stream Deck Steam 550320 key (2026-09-09 02:47 UTC); payload hashes match and settings are preserved. See docs/LOCAL-DEPLOYMENT.md for the current receipt and standing deployment rules. RC4's stutter failure is historical; RC5 awaits attended testing and is not published.
-Offline tests pass. Owner RC6 feedback (2026-09-08 UTC): no stutter, camera worked great, no control issues so far. A game log confirms mod/probe loading and force evaluation. The complete attended matrix and final-labelled drive remain pending. "Verified" means confirmed on the owner's
+Preparing **0.2.4** for publication following the owner's installed RC5 acceptance:
+"I think everything looks good. Let's ship another release." RC5's preserved drive
+log has one normal manager initialization and zero initialization errors,
+connection failures or exceptions. KI-20's menu polling/error flood is resolved
+on this rig; the T300 user's unrelated intermittent slowdown remains unconfirmed.
+
+Production source and toolkit are unchanged from RC5 (`5701ebb`): camera keys/save
+retry (FR-1/KI-14), direct-input recovery/Flip/live values (KI-15), CameraMod
+isolation (KI-18), telemetry units/local axes (KI-16), bounded support logs and
+frame aggregates (KI-19 diagnostics). Toolkit **v0.12.0**, native **0.5.0**; shared
+wrapper, AxleForceCurve@1 and telemetry are consumed in production. No force tune,
+new wheel effects, physics or assist behavior changes.
+
+RC5 passes all 16 local automated checks. Final artifact/publication evidence is
+recorded in docs/reviews/2026-09-09-release-0.2.4.md. The full attended matrix,
+final-labelled drive, motion/shaker comparison and TSS/Fanatec/combined-camera-mod
+checks remain pending. Owner acceptance does not mark those cases passed.
+Read docs/LOCAL-DEPLOYMENT.md for the current installed identity and receipt;
+the Stream Deck Steam 550320 key targets that installation. Keep it current under
+the standing deployment rules below. "Verified" means confirmed on the owner's
 MOZA R12 rig unless stated otherwise.
 
 | Component | State |

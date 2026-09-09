@@ -14,7 +14,7 @@ Turn detailed logging off afterward. Include build, driver/firmware, car/stage,
 approximate event time and other active mods. Log tails cannot recover an entire
 earlier drive or show why an FPS drop occurred.
 
-The 0.2.4 candidate adds aggregate foreground-driving frame intervals, including
+Version 0.2.4 adds aggregate foreground-driving frame intervals, including
 100 ms+ counts early/later in each driving segment. A segment also restarts after
 pause/focus return; it is not a stage identifier. These counters write no files
 per frame and are separate from the developer recorder. Existing force traces
@@ -63,8 +63,8 @@ Use the mod's binding panel if the game's controls screen only offers shifting
 or never detects the handbrake. You can bind just the handbrake and leave working
 steering/pedal channels on the game's input path.
 
-The 0.2.4 candidate adds live values and fixes Flip/reopen/assignment failures
-(KI-15). On published 0.2.3, prefer assigning from a released lever and using full
+Version 0.2.4 adds live values and fixes Flip/reopen/assignment failures
+(KI-15). If still using 0.2.3, prefer assigning from a released lever and using full
 travel; pedal Flip has a known defect. Live numeric values below are a 0.2.4 addition.
 
 1. Put the TSS in handbrake mode. Open Ctrl+F10 → **Wheel input (direct)** and
@@ -109,7 +109,7 @@ car/game session after removing a retained legacy override. Do not infer a numer
 
 ## Using Nexus Camera Mod for chase views
 
-The 0.2.4 candidate detects loaded `CameraMod` and suspends our mounted views and
+Version 0.2.4 detects loaded `CameraMod` and suspends our mounted views and
 tuning keys, preserving its camera rotation and your saved mount settings. The
 other mod assumes ownership of slots 8/9 and shares several numpad keys; running
 both editors together can address the wrong camera. Disable CameraMod before a
@@ -124,7 +124,7 @@ it. If you still see it, the support file's force-feedback section will show
 
 ## No force feedback at all
 
-- In 0.2.3 candidate support files, compare **build**, **mod sha256**, **mapped
+- In 0.2.3 and later support files, compare **build**, **mod sha256**, **mapped
   file** and **file sha256** with the candidate manifest. `preload requested` is
   only the path requested, not proof of which module was bound. Inspection does
   not load the plugin; `(not loaded)` may simply mean FFB/input is disabled.
@@ -162,7 +162,7 @@ the real wheel explicitly in the *Wheel* dropdown.
 
 ## The camera moves about at the end of a stage
 
-The 0.2.3 candidate restores the stock camera when the game enters a replay or
+Version 0.2.3 and later restore the stock camera when the game enters a replay or
 results cinematic. The code fix still needs visual confirmation. Note which
 mounted/stock view you used beforehand and attach a support file and short video.
 For reversed stock views, also inspect the ChangeCamera binding and record whether
@@ -172,7 +172,7 @@ the camera handback defect.
 
 ## Telemetry stays off after a connection error
 
-Check the host and UDP port in the mod panel. In the 0.2.3 candidate, correcting
+Check the host and UDP port in the mod panel. In 0.2.3 and later, correcting
 the destination retries the connection; turning telemetry off and back on also
 clears the failed state. An unchanged failing destination stays quiet instead of
 repeating connection work every physics step. If it still fails, retain the error

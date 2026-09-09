@@ -7,6 +7,8 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-09-09
+
 ### Added
 
 - Opt-in frame-hitch counts, loaded-mod versions and latest direct-input values
@@ -15,14 +17,15 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Rebind all 11 camera tuning keys in the settings panel, with clear, cancel,
   duplicate-key feedback and restore-defaults. Existing XML/numpad mappings are
   preserved. Bumper-only setups can configure keys; editing the panel suppresses
-  camera hotkeys until held input is released. In-game UI validation pending.
+  camera hotkeys until held input is released.
 
 ### Fixed
 
 - Read existing game state without invoking the game's lazy manager factory.
   Menu polling could repeatedly construct failing managers and queue ghost
   downloads that continued during driving. The RC4 log exposed this defect;
-  offline regression checks pass, but stutter improvement needs another drive.
+  regression checks pass and the owner's RC5 retest has no initialization,
+  connection or exception flood. Other users' intermittent slowdowns remain open.
 
 - Avoid competing with Nexus CameraMod for camera slots: when it is loaded, its
   chase views keep control and our mounted views/tuning are suspended with an
