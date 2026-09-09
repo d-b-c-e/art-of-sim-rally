@@ -5,11 +5,10 @@ developer mod observes game signals; a standalone command replays them without
 the game or wheel. Record a representative drive once, then reuse that case on
 subsequent builds. Allow about 20–30 minutes for attended release checks.
 
-The installed Stream Deck target uses **0.2.4 stable**, downloaded and verified
-from the published release. Owner RC5 testing was accepted; the final uses the
-same production source and toolkit. [The RC5 log review](reviews/2026-09-09-rc4-stutter.md)
-shows KI-20's error flood absent. The detailed scenario matrix and final-labelled
-drive remain pending. [Deployment receipt and backups](LOCAL-DEPLOYMENT.md).
+The installed Stream Deck target uses the **0.2.5 candidate** recorded in
+[LOCAL-DEPLOYMENT.md](LOCAL-DEPLOYMENT.md), with settings/backups preserved.
+Published stable remains 0.2.4. Candidate changes pass offline checks; the new
+drive and detailed scenario matrix remain pending.
 
 1. **Prepare the candidate.** Close art of rally, retain the previous ZIP and
    Settings.xml, and install the exact ZIP identified by the successful
@@ -48,7 +47,7 @@ drive remain pending. [Deployment receipt and backups](LOCAL-DEPLOYMENT.md).
 
    The reply identifies a folder under
    `%LOCALAPPDATA%/ArtOfSimRally/dev-captures`. Keep its `manifest.xml`,
-   `frames.csv` and `forces.csv` together. After a save error, keep the game open,
+   `frames.csv`, `forces.csv` and `signals.csv` together. After a save error, keep the game open,
    remain paused and retry Stop; the probe retains its buffers.
 5. **Replay and preserve the case**, outside the game:
 
@@ -62,6 +61,10 @@ drive remain pending. [Deployment receipt and backups](LOCAL-DEPLOYMENT.md).
    Case names cannot overwrite existing evidence. Frame timing and native-call
    acceptance/rejection counts are reported when available; matching arithmetic
    does not establish physical torque delivery.
+   Schema 3 also reports contact/motion context and candidate landing/slide
+   events. See [DEVELOPMENT-CAPTURE.md](DEVELOPMENT-CAPTURE.md) for units,
+   reset/freshness limits and interpretation. Capture an ordinary jump and
+   controlled slide with approximate event times; no effect tuning is required.
 6. **Remove the probe and check the shipped setup.** Close the game, then run:
 
    ```powershell
@@ -87,7 +90,25 @@ Fill in the exact candidate's `manual.json` with tester/rig, outcomes, notes and
 hashed evidence. See [PRE-RELEASE-TESTING.md](PRE-RELEASE-TESTING.md) for gates and
 limits. Signal replay does not automate full game input, rendering or wheel feel.
 
-## Extra checks for 0.2.4
+## New checks for 0.2.5
+
+- While paused, assign steering/pedals and the separate handbrake/shifter. Restart
+  with USB enumeration reordered if practical; identities must remain tied to
+  the selected devices. An ambiguous legacy name should request reassignment.
+  A missing saved device must stay neutral and not substitute another controller.
+- Reconnect a missing reader while paused, including with another reader already
+  working. Allow five seconds for recovery. Begin Assign to discover a newly
+  added device. Actual Fanatec/TSS confirmation is still required.
+- Begin Assign while paused, then resume without binding: assignment must cancel.
+  Confirm calibration/Flip survive pause, normal quit and relaunch. A shifter
+  reopen should not preserve a stale gear latch.
+- With detailed logging enabled, drive, pause, quit normally and relaunch. The
+  support file should distinguish current counters from the previous session's
+  build/timestamps/counters. It must not relabel old data as the current drive.
+- Confirm normal force and pause/stage/focus recovery. Missing-wheel-data force
+  release is tested through fault injection; do not provoke faults while driving.
+
+## Carry-forward checks from 0.2.4
 
 - Open Camera in Ctrl+F10; rebind Up/Down and Reset to unused keyboard keys.
   Test Escape/cancel, duplicate rejection, Clear and Restore numpad defaults.

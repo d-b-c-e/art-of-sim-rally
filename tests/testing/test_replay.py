@@ -59,6 +59,13 @@ class ReplayTests(unittest.TestCase):
         self.assertEqual(result["deviceMismatches"], 0)
         self.assertTrue(result["stateful"])
 
+    def test_legacy_schema_one_stays_available_without_motion(self):
+        self.receipt.set("schema", "1")
+        self.forces = [row.rsplit(",", 1)[0] for row in self.forces]; self.write()
+        result = self.run_replay()["detail"]
+        self.assertFalse(result["stateful"])
+        self.assertFalse(result["signals"]["available"])
+
     def test_missing_frame_rejected(self):
         self.frames[2] = self.frames[2].replace("101,", "102,", 1); self.write()
         self.assertIn("missing/nonmonotonic frames", self.run_replay(expected=1))

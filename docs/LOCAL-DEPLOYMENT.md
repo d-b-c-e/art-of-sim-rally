@@ -8,7 +8,7 @@ publication and attended sign-off remain separate.
 
 ## Installed candidate — 0.2.5 work
 
-**0.2.5-rc.2** is installed after passing all 16 local checks, with settings and
+**0.2.5-rc.3** is installed after passing all 16 local checks, with settings and
 the Steam 550320 launch target preserved. [Current candidate evidence and receipt](reviews/2026-09-09-overnight-025.md).
 The earlier 0.2.4 installation below is backed up. No candidate hardware result
 or public publication is implied.

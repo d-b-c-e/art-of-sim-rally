@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
-<PropertyGroup><TargetFramework>net48</TargetFramework><LangVersion>latest</LangVersion><AssemblyName>ArtOfSimRally.DevRecorder</AssemblyName><Version>0.2.3</Version><TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+<PropertyGroup><TargetFramework>net48</TargetFramework><LangVersion>latest</LangVersion><AssemblyName>ArtOfSimRally.DevRecorder</AssemblyName><Version>0.2.5</Version><TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 <GameDir Condition="'$(GameDir)' == ''">D:\Program Files (x86)\Steam\steamapps\common\artofrally</GameDir><ManagedDir>$(GameDir)\artofrally_Data\Managed</ManagedDir></PropertyGroup>
 <ItemGroup>
 <Compile Include="../Common/ArtifactHash.cs" Link="ArtifactHash.cs" />
 <Compile Include="../../../src/ArtOfSimRally.Mod/NativeDiagnostics.cs" Link="NativeDiagnostics.cs" />
 <Reference Include="Assembly-CSharp"><HintPath>$(ManagedDir)/Assembly-CSharp.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="UnityEngine.CoreModule"><HintPath>$(ManagedDir)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="UnityEngine.PhysicsModule"><HintPath>$(ManagedDir)/UnityEngine.PhysicsModule.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="UnityEngine"><HintPath>$(ManagedDir)/UnityEngine.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="UnityModManager"><HintPath>../../../lib/umm/UnityModManager.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="0Harmony"><HintPath>../../../lib/umm/0Harmony.dll</HintPath><Private>false</Private></Reference>

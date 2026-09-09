@@ -14,6 +14,14 @@ namespace ArtOfSimRally.Testing
     {
         public float Time, Fy, Slip, Ideal, Speed, Reference, Gain, Smoothing, Previous, Output;
         public int Invert, Device, Epoch;
+        public MotionSample Motion;
+    }
+    internal struct MotionSample
+    {
+        public int Valid, ContactMask;
+        public float PhysicsTime, Px, Py, Pz, Vx, Vy, Vz, Qx, Qy, Qz, Qw, LocalVx, LocalVy, LocalVz;
+        public float CompressionFL, CompressionFR, CompressionRL, CompressionRR;
+        public float TravelFL, TravelFR, TravelRL, TravelRR;
     }
 
     // This assembly is a developer probe, never a dependency of the shipped mod.
@@ -39,7 +47,7 @@ namespace ArtOfSimRally.Testing
             if (Pending || driving) { Status = "Pause before starting; finish any pending capture first."; return false; }
             directory = Path.Combine(Path.GetFullPath(root), DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N"));
             metadata = new XElement(identity);
-            metadata.SetAttributeValue("schema", 2);
+            metadata.SetAttributeValue("schema", 3);
             metadata.SetAttributeValue("startedUtc", DateTime.UtcNow.ToString("O"));
             frames = new CaptureBuffer<FrameSample>(frameCapacity);
             forces = new CaptureBuffer<ForceSample>(forceCapacity);
@@ -75,6 +83,7 @@ namespace ArtOfSimRally.Testing
                 Directory.CreateDirectory(directory);
                 var framePath = Path.Combine(directory, "frames.csv");
                 var forcePath = Path.Combine(directory, "forces.csv");
+                var signalPath = Path.Combine(directory, "signals.csv");
                 using (var writer = new StreamWriter(framePath))
                 {
                     writer.WriteLine("frame,time_s,delta_s,driving,direct_input,steer,throttle,brake,clutch,handbrake");
@@ -93,11 +102,24 @@ namespace ArtOfSimRally.Testing
                         writer.WriteLine(string.Join(",", F(f.Time), F(f.Fy), F(f.Slip), F(f.Ideal), F(f.Speed), F(f.Reference), F(f.Gain), f.Invert, F(f.Smoothing), F(f.Previous), F(f.Output), f.Device, f.Epoch));
                     }
                 }
+                using (var writer = new StreamWriter(signalPath))
+                {
+                    writer.WriteLine("force_row,time_s,epoch,valid,physics_time_s,contact_mask,px_m,py_m,pz_m,vx_mps,vy_mps,vz_mps,qx,qy,qz,qw,local_vx_mps,local_vy_mps,local_vz_mps,compression_fl_m,compression_fr_m,compression_rl_m,compression_rr_m,travel_fl_m,travel_fr_m,travel_rl_m,travel_rr_m");
+                    for (int i = 0; i < forces.Count; i++)
+                    {
+                        var f = forces.Items[i]; var s = f.Motion;
+                        writer.WriteLine(string.Join(",", i, F(f.Time), f.Epoch, s.Valid, F(s.PhysicsTime), s.ContactMask,
+                            F(s.Px), F(s.Py), F(s.Pz), F(s.Vx), F(s.Vy), F(s.Vz), F(s.Qx), F(s.Qy), F(s.Qz), F(s.Qw),
+                            F(s.LocalVx), F(s.LocalVy), F(s.LocalVz), F(s.CompressionFL), F(s.CompressionFR), F(s.CompressionRL), F(s.CompressionRR),
+                            F(s.TravelFL), F(s.TravelFR), F(s.TravelRL), F(s.TravelRR)));
+                    }
+                }
                 var receipt = new XElement(metadata);
                 receipt.SetAttributeValue("complete", !frames.Truncated && !forces.Truncated && failure == null);
                 receipt.SetAttributeValue("endedUtc", DateTime.UtcNow.ToString("O"));
                 receipt.Add(new XElement("frames", new XAttribute("count", frames.Count), ArtifactHash.FileHash(framePath)),
                     new XElement("forces", new XAttribute("count", forces.Count), ArtifactHash.FileHash(forcePath)),
+                    new XElement("signals", new XAttribute("count", forces.Count), ArtifactHash.FileHash(signalPath)),
                     new XElement("delivery", new XAttribute("attempts", deliveryAttempts), new XAttribute("rejected", deliveryFailures)),
                     new XElement("error", failure ?? ""));
                 new XDocument(receipt).Save(Path.Combine(directory, "manifest.xml"));

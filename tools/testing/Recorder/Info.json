@@ -2,7 +2,7 @@
   "Id": "ArtOfSimRally.DevRecorder",
   "DisplayName": "art of sim rally - developer capture probe",
   "Author": "d-b-c-e",
-  "Version": "0.2.3",
+  "Version": "0.2.5",
   "ManagerVersion": "0.27.0",
   "AssemblyName": "ArtOfSimRally.DevRecorder.dll",
   "EntryMethod": "ArtOfSimRally.Testing.RecorderMain.Load",

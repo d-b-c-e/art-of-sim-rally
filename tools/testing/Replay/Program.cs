@@ -18,7 +18,7 @@ static class Program
     {
         var manifest = XDocument.Load(Path.Combine(directory, "manifest.xml")).Root!;
         int schema = (int?)manifest.Attribute("schema") ?? 0;
-        Check(schema == 1 || schema == 2, "unknown capture schema");
+        Check(schema >= 1 && schema <= 3, "unknown capture schema");
         Check((string?)manifest.Attribute("complete") == "true", "truncated/incomplete capture");
         Check(!string.IsNullOrWhiteSpace((string?)manifest.Element("modSha256")), "missing build identity");
         var frames = File.ReadAllLines(Path.Combine(directory, "frames.csv"));
@@ -31,17 +31,18 @@ static class Program
             Check(count > 0 && count == (int?)element.Attribute("count"), kind + " count mismatch/empty");
         }
         Check(frames[0] == "frame,time_s,delta_s,driving,direct_input,steer,throttle,brake,clutch,handbrake", "frame schema mismatch");
-        Check(forces[0] == "time_s,fy_n,slip_deg,ideal_deg,speed_kmh,reference_n,gain,invert,smoothing,previous,output,device" + (schema == 2 ? ",epoch" : ""), "force schema mismatch");
+        Check(forces[0] == "time_s,fy_n,slip_deg,ideal_deg,speed_kmh,reference_n,gain,invert,smoothing,previous,output,device" + (schema >= 2 ? ",epoch" : ""), "force schema mismatch");
         float time = -1, baselineState = 0, toolkitState = 0, maxFloatDelta = 0;
+        var forceRows = new List<float[]>();
         int epoch = -1, resets = 0;
         foreach (string line in forces.Skip(1))
         {
             var p = line.Split(',').Select(F).ToArray();
-            Check(p.Length == (schema == 2 ? 13 : 12) && p.All(float.IsFinite), "invalid force row");
+            Check(p.Length == (schema >= 2 ? 13 : 12) && p.All(float.IsFinite), "invalid force row");
             Check(p[0] >= 0 && p[0] >= time && (p[7] == 0 || p[7] == 1), "invalid force time/inversion"); time = p[0];
             Check(Math.Abs(p[9]) <= 1 && Math.Abs(p[10]) <= 1, "force history/output outside normalized range");
             if (schema == 1 || epoch < 0) { baselineState = toolkitState = p[9]; }
-            if (schema == 2)
+            if (schema >= 2)
             {
                 Check(p[12] >= 0 && p[12] == (int)p[12] && p[12] >= epoch, "invalid reset epoch");
                 if (epoch >= 0 && p[12] != epoch) { baselineState = toolkitState = 0; resets++; }
@@ -55,6 +56,7 @@ static class Program
             Same(toolkitState, p[10], "offline force replay");
             Check((int)(toolkitState * 10000) == (int)(baselineState * 10000), "adoption changed device magnitude");
             Check((int)(toolkitState * 10000) == p[11], "offline device magnitude mismatch");
+            forceRows.Add(p);
         }
         var timings = new List<float>(); var first15 = new List<float>(); var later = new List<float>();
         int previousFrame = -1; float previousTime = -1, segmentStart = -1; bool wasDriving = false;
@@ -88,7 +90,8 @@ static class Program
             maxFloatDelta,
             deviceMismatches = 0,
             resetBoundaries = resets,
-            stateful = schema == 2,
+            stateful = schema >= 2,
+            signals = schema == 3 ? SignalAnalysis.Read(directory, manifest, forceRows) : new { available = false, reason = "legacy capture has no motion/contact observations" },
             forceRows = forces.Length - 1,
             drivingFrames = timings.Count,
             p95FrameMs = timings[(int)((timings.Count - 1) * .95)],
@@ -149,7 +152,7 @@ static class Program
             Check(ArtifactHash.FileHash(Path.Combine(path, "manifest.xml")) == item.GetProperty("manifestSha256").GetString(), "Corpus receipt changed: " + id);
             var receipt = XDocument.Load(Path.Combine(path, "manifest.xml")).Root!;
             Check((string?)receipt.Attribute("origin") == "game", "Corpus case is not a recorded game session: " + id);
-            Check((int?)receipt.Attribute("schema") == 2, "Corpus requires continuous schema-2 recordings: " + id);
+            Check((int?)receipt.Attribute("schema") is 2 or 3, "Corpus requires continuous schema-2/3 recordings: " + id);
             reports.Add(new { id, result = Replay(path) });
         }
         return new { cases = reports, caseCount = reports.Count };

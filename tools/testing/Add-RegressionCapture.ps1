@@ -6,7 +6,7 @@ if ($Name -notmatch '^[a-z0-9][a-z0-9-]{0,79}$') { throw 'Use a short lowercase 
 $Capture=[IO.Path]::GetFullPath($Capture); $Corpus=[IO.Path]::GetFullPath($Corpus)
 $receiptPath=Join-Path $Capture 'manifest.xml'
 $receipt=[xml](Get-Content -LiteralPath $receiptPath -Raw)
-if ($receipt.capture.origin -ne 'game' -or $receipt.capture.schema -ne '2') { throw 'Only a recorded schema-2 game capture can enter the regression corpus.' }
+if ($receipt.capture.origin -ne 'game' -or $receipt.capture.schema -notin @('2','3')) { throw 'Only a recorded schema-2/3 game capture can enter the regression corpus.' }
 $receiptHash=(Get-FileHash -LiteralPath $receiptPath).Hash
 & dotnet run --project (Join-Path $PSScriptRoot 'Replay/Replay.csproj') -c Release -- --replay $Capture
 if ($LASTEXITCODE -ne 0) { throw 'Capture failed replay; keep it as diagnostic evidence, not an approved regression case.' }
@@ -20,7 +20,9 @@ if ($index.schema -ne 1 -or @($index.cases | Where-Object id -eq $Name).Count) {
 $destination=Join-Path $Corpus "cases/$Name"
 if (Test-Path -LiteralPath $destination) { throw 'Case directory already exists; evidence is never overwritten.' }
 New-Item -ItemType Directory -Path $destination | Out-Null
-foreach ($file in @('frames.csv','forces.csv','manifest.xml')) { Copy-Item -LiteralPath (Join-Path $Capture $file) -Destination $destination }
+$captureFiles=@('frames.csv','forces.csv','manifest.xml')
+if ($receipt.capture.schema -eq '3') { $captureFiles += 'signals.csv' }
+foreach ($file in $captureFiles) { Copy-Item -LiteralPath (Join-Path $Capture $file) -Destination $destination }
 if ((Get-FileHash -LiteralPath (Join-Path $destination 'manifest.xml')).Hash -ne $receiptHash) { throw 'Capture changed while copying; no case was added to the index.' }
 # Recheck the copied bytes, not only the source that was valid before copying.
 & dotnet run --no-build --project (Join-Path $PSScriptRoot 'Replay/Replay.csproj') -c Release -- --replay $destination

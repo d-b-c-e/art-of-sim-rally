@@ -9,6 +9,10 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Separate developer captures now include contact, suspension and world/local
+  motion alongside force. Offline analysis reports landing/slide candidates and
+  road context, with legacy capture compatibility and corruption checks. This
+  tooling is not installed or shipped with the release mod.
 - Retain an opt-in, bounded frame-health summary at idle and normal exit, after
   output release. Support files include the previous session's build, timestamps
   and counters; stale/corrupt snapshots are rejected. This does not capture crash

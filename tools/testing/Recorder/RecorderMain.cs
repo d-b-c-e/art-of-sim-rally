@@ -16,6 +16,8 @@ namespace ArtOfSimRally.Testing
         private static ControlServer server;
         private static bool observing, sent;
         private static int device;
+        private static CarDynamics motionCar;
+        private static Rigidbody motionBody;
         private const string PatchId = "ArtOfSimRally.DevRecorder";
         private struct Step { public bool Valid; public ForceSample Sample; }
 
@@ -87,11 +89,36 @@ namespace ArtOfSimRally.Testing
                     Gain = tune.Gain,
                     Smoothing = tune.Smoothing,
                     Invert = tune.Invert ? 1 : 0,
-                    Previous = subject.Smoothed()
+                    Previous = subject.Smoothed(),
+                    Motion = ReadMotion(__0)
                 };
                 __state = new Step { Valid = true, Sample = sample }; observing = true;
             }
             catch (Exception ex) { Session.AbortSampling(ex.Message); }
+        }
+        // Observe at the same CarDynamics postfix boundary as steering force.
+        // Unity's ordering of other components still needs a real capture.
+        private static MotionSample ReadMotion(CarDynamics car)
+        {
+            if (motionCar != car)
+            {
+                motionCar = car; motionBody = car.GetComponent<Rigidbody>();
+            }
+            var front = car.axles?.frontAxle; var rear = car.axles?.rearAxle;
+            if (motionBody == null || front?.leftWheel == null || front.rightWheel == null ||
+                rear?.leftWheel == null || rear.rightWheel == null) return default;
+            var fl = front.leftWheel; var fr = front.rightWheel; var rl = rear.leftWheel; var rr = rear.rightWheel;
+            var position = motionBody.position; var velocity = motionBody.velocity; var rotation = motionBody.rotation;
+            var local = Quaternion.Inverse(rotation) * velocity;
+            return new MotionSample
+            {
+                Valid = 1, PhysicsTime = Time.fixedTime,
+                ContactMask = (fl.onGroundDown ? 1 : 0) | (fr.onGroundDown ? 2 : 0) | (rl.onGroundDown ? 4 : 0) | (rr.onGroundDown ? 8 : 0),
+                Px = position.x, Py = position.y, Pz = position.z, Vx = velocity.x, Vy = velocity.y, Vz = velocity.z,
+                Qx = rotation.x, Qy = rotation.y, Qz = rotation.z, Qw = rotation.w, LocalVx = local.x, LocalVy = local.y, LocalVz = local.z,
+                CompressionFL = fl.compression, CompressionFR = fr.compression, CompressionRL = rl.compression, CompressionRR = rr.compression,
+                TravelFL = fl.suspensionTravel, TravelFR = fr.suspensionTravel, TravelRL = rl.suspensionTravel, TravelRR = rr.suspensionTravel
+            };
         }
         private static void AfterForce(Step __state)
         {
@@ -114,6 +141,6 @@ namespace ArtOfSimRally.Testing
             catch (Exception ex) { Session.AbortSampling(ex.Message); }
         }
         // Runs after the shipping watchdog has released all force/input resources.
-        private static void Shutdown() { if (Session.Pending) Session.Stop(false); }
+        private static void Shutdown() { if (Session.Pending) Session.Stop(false); motionCar = null; motionBody = null; }
     }
 }
