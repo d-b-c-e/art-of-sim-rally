@@ -4,7 +4,10 @@
 [feedback follow-up and exact artifact](reviews/2026-09-08-feedback-review.md)
 include CameraMod compatibility isolation, diagnostics, telemetry sampling and
 send-failure handling after RC2. All seven attended cases remain pending,
-especially motion/shaker response. It has not been installed, driven or published.
+especially motion/shaker response. RC4 is now installed locally at the owner's
+request (2026-09-09 02:17 UTC), with payload hashes verified and settings preserved.
+The existing Stream Deck button launches it. It has not been driven or published.
+[Install receipt](../results/rc4-install-7bf2d9692b304b58bbe124f80d43cc4b/install-receipt.json).
 RC2 evidence below is historical; RC3 stopped before packaging and was superseded.
 
 **0.2.4-rc.2 passes all 16 automated checks** with camera key/persistence and
@@ -14,7 +17,7 @@ from the published/installed 0.2.3 evidence below. [Overnight status](OVERNIGHT-
 [extra drive checks](TEST-DRIVE.md#extra-checks-for-024) describe the new scope.
 
 **[0.2.3 is published](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3)
-and installed locally.** RC6 passes
+and was previously installed locally; RC4 now replaces that local install.** RC6 passes
 all 16 automated gates and was driven after local installation. Owner feedback:
 "no stutter, camera worked great, and no issues with the controls so far."
 The full attended matrix remains pending. Publication is a scoped release decision,

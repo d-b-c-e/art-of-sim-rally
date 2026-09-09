@@ -41,14 +41,14 @@ third-party binaries, nothing that would force the repo private.
 ## Status (2026-09-08) — do not overstate this
 
 Release: **0.2.3** (2026-09-08). Toolkit pin: **v0.12.0**, native component **0.5.0**. Production uses the shared
-managed wrapper, AxleForceCurve@1 and telemetry. The attended checklist remains pending. Current branch prepares 0.2.4: camera keys/save recovery and direct-input cache/Flip/assignment fixes (KI-14/KI-15). Camera suite 182 assertions; input suite 90; no game validation or deployment of the new candidate.
+managed wrapper, AxleForceCurve@1 and telemetry. The attended checklist remains pending. Current branch prepares 0.2.4: camera keys/save recovery and direct-input cache/Flip/assignment fixes (KI-14/KI-15). Camera suite 182 assertions; input suite 90; RC4 installed for testing, no game validation yet.
 Follow-up source adds CameraMod isolation (KI-18), bounded support logs and opt-in
 frame aggregates (KI-19 diagnostics), clearer legacy assist help (KI-17), corrected
 telemetry sampling (KI-16) and bool-return send failure handling. Signal/UDP suite
 1,230 assertions, support 25, lifecycle 36, transport 36; full candidate evidence
 lives in docs/reviews/2026-09-08-feedback-review.md. No new wheel effects/assist
-behavior, deployment or hardware result. The previous RC2 evidence is historical.
-Read docs/RELEASE-READINESS.md for the final artifact, docs/OVERNIGHT-QUEUE.md for next work, and docs/USER-FEEDBACK.md for support drafts. The final ZIP is installed behind the Stream Deck Steam 550320 key, with settings preserved and the developer probe removed.
+behavior or hardware result. The previous RC2 evidence is historical.
+Read docs/RELEASE-READINESS.md for artifact status, docs/OVERNIGHT-QUEUE.md for next work, and docs/USER-FEEDBACK.md for support drafts. RC4 is installed behind the Stream Deck Steam 550320 key at the owner's request (2026-09-09 02:17 UTC). All payload hashes match, settings are preserved, the previous 0.2.3 install is backed up, and the developer probe remains removed. RC4 has not been launched, driven or published.
 Offline tests pass. Owner RC6 feedback (2026-09-08 UTC): no stutter, camera worked great, no control issues so far. A game log confirms mod/probe loading and force evaluation. The complete attended matrix and final-labelled drive remain pending. "Verified" means confirmed on the owner's
 MOZA R12 rig unless stated otherwise.
 

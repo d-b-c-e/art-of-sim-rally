@@ -4,8 +4,9 @@ Prepared 2026-09-08 UTC after [0.2.3 publication](https://github.com/d-b-c-e/art
 Executed on `codex/overnight-improvements` at the owner's request. The unattended
 implementation and research items below are complete; **0.2.4-rc.2 passes all 16
 automated checks** and awaits an attended drive. [Exact artifact and handoff](reviews/2026-09-08-overnight.md).
-Published 0.2.3 and its installed Stream Deck target are
-unchanged. No scheduled automation is needed for this completed work session.
+Published 0.2.3 is unchanged. The later owner-requested RC4 install replaces it
+locally behind the same Stream Deck target; see the follow-up review below.
+No scheduled automation is needed for this completed work session.
 
 Read [USER-FEEDBACK.md](USER-FEEDBACK.md), [KNOWN-ISSUES.md](KNOWN-ISSUES.md) and
 [RELEASE-READINESS.md](RELEASE-READINESS.md). The full attended matrix is still
@@ -120,7 +121,8 @@ GitHub audit found only #1 and its existing PS5-unplug comment. Drafts are ready
 in USER-FEEDBACK.md; no messages were sent or issue state changed. A future session
 can refresh the read-only audit, but should not post drafts without authorization.
 
-The final release is installed behind the existing Stream Deck Steam 550320 key.
+RC4 is now installed behind the existing Stream Deck Steam 550320 key at the
+owner's request; the previous stable install was backed up.
 The developer probe was removed for the shipping setup. Install it separately
 only for the capture portion of [TEST-DRIVE.md](TEST-DRIVE.md), pause before
 Start/Stop, then remove it again for final runtime checks. Preserve each completed

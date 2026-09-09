@@ -14,8 +14,8 @@
 - RC3 stopped before packaging: direct Unity ECalls in watchdog Update broke the offline Harmony probe hook. A non-inlined runtime helper fixes attachment; the actual 14-assertion hook test and full RC4 pass without skipped/weakened gates.
 - Current candidate: dist/ArtOfSimRally-0.2.4-rc.4.zip; identity 0.2.4-rc.4+38c1bff31ff1ca20696c15a8b7de9298ec04dbf3.clean.
 - ZIP SHA-256 C5284CDF7F0B2991F8E013246857A414CD15FADCCE583AD54F923251B8F47887 independently rechecked.
-- All 16 automated checks passed: results/rc-0.2.4-rc.4-744b3572e72e4404a229e5d10fbec92e/automated.json. All seven manual cases pending; check correctly rejects missing tester/rig. No real corpus, installation, drive or publication of RC4.
-- Stable 0.2.3's six payload hashes and Settings.xml still match final-install receipt. Stream Deck remains on that installation. Later documentation commits do not rebuild RC4.
+- All 16 automated checks passed: results/rc-0.2.4-rc.4-744b3572e72e4404a229e5d10fbec92e/automated.json. All seven manual cases pending; check correctly rejects missing tester/rig. No real corpus, drive or publication of RC4.
+- RC4 installed at owner's request 2026-09-09 02:17:23 UTC with game closed. Exact archive installer used; six payloads and second native plugin copy verified, Settings.xml preserved. Previous 0.2.3 install/settings backed up. Receipt: results/rc4-install-7bf2d9692b304b58bbe124f80d43cc4b/install-receipt.json. Stream Deck now launches RC4. Developer probe DLL/Info absent, cache only. Later documentation commits do not rebuild RC4.
 - Original overnight work/RC2 details below remain historical.
 - Executed the unattended scope of docs/OVERNIGHT-QUEUE.md after 0.2.3 publication.
 - Reproduced KI-14 with a locked file; camera save retries now survive failure/view changes; removed per-frame tuning logs.
@@ -37,7 +37,7 @@
 
 ## Decisions Made
 - Owner's GitHub Actions minutes are exhausted: build/test/package locally and upload exact artifacts with gh release. No workflows found through the GitHub API; none needed disabling. Recorded procedure in docs/RELEASING.md and working notes. RC4 was already built locally; no rebuild/publication or runtime sign-off occurred in this documentation update.
-- Preserve published v0.2.3 and installed Stream Deck Steam 550320 target.
+- Preserve published v0.2.3; owner subsequently requested local RC4 installation behind the same Stream Deck Steam 550320 target.
 - New fixes are a separate candidate; no unattended game drive/hardware-force output.
 - Reuse pinned toolkit v0.12.0; production AxleForceCurve@1/FFB tune unchanged.
 - Effect work stays managed research; no speculative T300 rotation override/upstream release.
@@ -55,5 +55,6 @@
 3. Use docs/research/2026-09-08-wheel-signals.md for KI-16 corrections and hardware follow-up.
 
 ## Context for Next Session
-Published 0.2.3 remains installed, settings preserved, developer probe removed.
+Published stable is 0.2.3; installed build is now 0.2.4-rc.4 for owner testing,
+settings preserved, previous install backed up, developer probe removed.
 Offline probes use doubles/synthetic signals; no new camera/hardware validation claimed.

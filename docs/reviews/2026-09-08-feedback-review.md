@@ -2,8 +2,9 @@
 
 The owner authorized implementing related roadmap work while away and requested
 a [short reply](../replies/2026-09-08-t300-tss.md). Work continues on
-`codex/overnight-improvements`. Stable 0.2.3 and its Stream Deck install remain
-intact. **0.2.4-rc.4 passes all 16 automated checks**; attended tests remain pending.
+`codex/overnight-improvements`. Stable 0.2.3 remains published; the owner requested
+local installation of RC4 on 2026-09-08 (2026-09-09 UTC).
+**0.2.4-rc.4 passes all 16 automated checks**; attended tests remain pending.
 The previous RC2 and failed RC3 run remain immutable historical evidence.
 
 ## Findings and changes
@@ -57,13 +58,18 @@ or SimHub motion amplitudes. Use [TEST-DRIVE.md](../TEST-DRIVE.md).
 - [Attended checklist](../../results/rc-0.2.4-rc.4-744b3572e72e4404a229e5d10fbec92e/manual.json):
   all seven cases pending. The release gate correctly rejects it with
   `NOT READY: Tester/rig not recorded`; no prior smoke results were copied in.
-- Not installed, driven or published. Stable 0.2.3's six installed payload hashes
-  and Settings.xml still match its final-install receipt. The existing Steam
-  550320 Stream Deck launcher still targets that installation.
+- Installed 2026-09-09 02:17:23 UTC at the owner's request, with the game closed,
+  using this exact archive's installer. All six mod payloads and the second native
+  plugin copy match its manifest. Settings.xml is unchanged byte-for-byte;
+  the previous 0.2.3 install and settings are backed up.
+  [Install receipt and backup location](../../results/rc4-install-7bf2d9692b304b58bbe124f80d43cc4b/install-receipt.json).
+- The existing Steam 550320 Stream Deck launcher now opens the RC4 installation.
+  No game was launched or driven during installation; RC4 is not published.
+  The developer probe remains absent (only its historical cache file remains).
 
 These archive/report links are generated local artifacts outside Git. Later
-documentation commits do not rebuild or change RC4. Install this exact archive
-with the game closed before recording attended evidence. Prioritize combined
+documentation commits do not rebuild or change RC4. This exact archive is now
+installed for attended evidence. Prioritize combined
 CameraMod views, corrected telemetry with SimHub/shaker/motion, input Flip/reopen,
 camera-key persistence and a paused support bundle after a diagnostic drive.
 
