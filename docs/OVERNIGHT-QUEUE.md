@@ -8,14 +8,14 @@ remains 0.2.4; a local 0.2.5 candidate is installed. See
 camera/motion checks and first real signal capture. No new hardware sign-off.
 Earlier release/RC entries below are historical.
 
-## Next overnight queue — after 0.2.4
+## Completed overnight queue — after 0.2.4
 
 Prepared and executed at the owner's request. Four original work items are
 complete offline; none implies a successful game playthrough or new force tune.
 
 | Order | Work | Result / remaining acceptance |
 |---|---|---|
-| 1 | USB identity/reconnect | KI-21 strict GUID channel bindings, unique legacy migration, neutral missing devices and idle recovery. KI-23 extends strict selection to shifters. Combined input/shifter suite: 150 assertions. TSS/Fanatec/USB hardware checks pending. |
+| 1 | USB identity/reconnect | KI-21 strict GUID channel bindings, unique legacy migration, neutral missing devices and idle recovery. KI-23 extends strict selection/display to shifters. Combined input/shifter suite: 157 assertions. TSS/Fanatec/USB hardware checks pending. |
 | 2 | Last-session stutter diagnostics | Bounded opt-in snapshots at idle/normal exit, build/timestamps and distinct session labels; 51 support assertions including locked files, stale/corrupt data and allocation checks. Real game retention pending. |
 | 3 | Lifecycle/performance audit | Reproduced and corrected stale force on missing wheel data (KI-22), stale shifter indices (KI-23), and assignment/edit saves while driving (KI-24). 19 force-lifecycle assertions and 41 watchdog/camera lifecycle assertions. No reported-hitch causation claimed. |
 | 4 | Development signal capture | Schema-3 contact/suspension/motion observations, standalone landing/slide/force context; schema-1/2 compatibility, corruption rejection, bounded buffers/events. 42 recorder assertions, 14 actual hook assertions, 31 Python tests. No production recorder/effects or real capture. [Contract](DEVELOPMENT-CAPTURE.md). |
@@ -28,7 +28,7 @@ separate designs. A bounded telemetry-send worker is a future investigation:
 the current sender is synchronous, but no send stall was measured here. Preserve
 latest-frame/drop/park/shutdown semantics before adopting one.
 
-**Requires a person or reporter:** final-labelled 0.2.4 drive; full camera/input/FFB
+**Requires a person or reporter:** the installed 0.2.5-rc.5 drive; full camera/input/FFB
 matrix; Nexus CameraMod screen checks; TSS/Fanatec behavior; T300 rotation A/B;
 motion/shaker comparison; first real capture. These can be prepared overnight but
 must not be marked passed from offline work. Do not change physics, assists or

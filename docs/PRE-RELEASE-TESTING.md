@@ -18,9 +18,9 @@ Framework 4.8, Python 3, installed game/UMM build references, and the Visual Stu
 x64 `dumpbin` path in the script. Close the game for installer guards.
 
 ```powershell
-./tools/testing/Test-Rc.ps1 -Version 0.2.5-rc.5
+./tools/testing/Test-Rc.ps1 -Version 0.2.5-rc.6
 # Once real cases exist, include them on every candidate:
-./tools/testing/Test-Rc.ps1 -Version 0.2.5-rc.6 -Corpus './results/regression-corpus/index.json'
+./tools/testing/Test-Rc.ps1 -Version 0.2.5-rc.7 -Corpus './results/regression-corpus/index.json'
 # Validate the exact final-labelled artifact with the same offline suite:
 ./tools/testing/Test-Rc.ps1 -Version 0.2.5 -Final
 ```

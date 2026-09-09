@@ -8,10 +8,18 @@ publication and attended sign-off remain separate.
 
 ## Installed candidate — 0.2.5 work
 
-**0.2.5-rc.3** is installed after passing all 16 local checks, with settings and
+**0.2.5-rc.5** is installed after passing all 16 local checks, with settings and
 the Steam 550320 launch target preserved. [Current candidate evidence and receipt](reviews/2026-09-09-overnight-025.md).
 The earlier 0.2.4 installation below is backed up. No candidate hardware result
 or public publication is implied.
+
+- UMM displays **0.2.5**; support/build.json identify
+  `0.2.5-rc.5+43e0b4a2978121e712d20c8f170567b587554bdf.clean`.
+- [RC5 install receipt and RC3 backup](../results/overnight-025-install-156deb45275a414bba20b5ee1f2135a5/install-receipt.json).
+- Six mod payloads and the native plugin copy match the exact package; settings
+  are unchanged. Game stayed closed, developer probe absent, Stream Deck preserved.
+- RC4 passed offline but was superseded before installation by the shifter
+  selection-display correction in RC5. Published stable remains 0.2.4.
 
 ## Previous stable installation
 
