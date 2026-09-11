@@ -1,21 +1,38 @@
 # Session Notes
 <!-- Overwritten each session; previous handoffs remain in git history. -->
 
-## Active attended session — 2026-09-10 local / 2026-09-11 UTC
+## Attended session stopped — 2026-09-10 local / 2026-09-11 UTC
 
-- Owner is driving RC5 with developer probe 0.2.5.1; START succeeded. Latest
-  observed STATUS: Recording, 2515 frames / 607 forces, incomplete=False.
-- **Capture not yet saved.** Owner was asked to pause and say done. Query STATUS
-  first, then STOP only while idle/paused. Do not replace probe or close the game.
+- Latest owner follow-up: retry had no FFB, Alt+F4 hung, and first-run gauges
+  stayed at finish-line speed through stage end/quit. RC5 manual ffb-lifecycle
+  and telemetry now **failed**, all other cases pending. See KI-28/29/30.
+- FFB startup failed before recorder load (0x80040205, re-acquire 0x80070578).
+  No intentional disable/tune change; no automatic init retry exists. SimHub
+  recognised race end at 21:12:50.865 but consumer gauge clearing remains unproven.
+  Alt+F4 save/reader closure appears in logs; hang cause still unknown.
+- Prioritized investigation queue updated. No production fixes for these three
+  reports implemented yet. Inspect source/lifecycle and exact installed SimHub
+  consumer, then reproduce before changing force/packet behavior.
+- **Nothing recording; game closed.** Owner abandoned the retry and requested
+  stop. Its automatic Unity shutdown save has 2169 frames / zero force rows;
+  hashes verified, marked abandoned, excluded from corpus and release acceptance.
+- First drive included good jumps but was lost on normal menu Quit. Retained logs:
+  12206 measured driving intervals, max 33.95 ms, no 100ms+ hitches; 11731 native
+  force calls. No retained motion/contact capture to analyse landings.
 - Fixed KI-26: Unity Mono's unsupported WindowsIdentity.User and asynchronous
   pipe handling prevented IPC, hidden by background retries. Win32 SID lookup
   preserves current-user ACL; blocking pipe and synchronous startup now work in Unity.
-- Owner quit for replacement; RC5/settings preserved, old probe backed up. Probe
-  DLL hash D0D16AAF93C202A63289E30977148805556BAF753B427D420DBFAAFAD57E55B3.
-- Probe build passed; actual net48 tests 16 assertions and recorder tests 47 pass.
+- KI-27: ExitGame.Exit kills its own process, bypassing Unity quit callbacks.
+  Probe 0.2.5.2 prefixes it, releases/saves first, cancels quit on pending/failed
+  save. Explicit menu Start/Stop and ordinary Unity shutdown saving verified;
+  the distinct menu-kill interception still needs an attended test.
+- RC5/settings preserved; old probe backed up. Installed probe 0.2.5.2 DLL hash
+  CD47CCF20A5007FA9C73658A2BEF9CA977F771A15FA48BCD4A4B82A492138754.
+- Probe build passed; actual net48 tests 17 assertions and recorder tests 58 pass.
 - Details/evidence: docs/reviews/2026-09-10-attended-rc5.md. No attended cases marked
-  passed yet. Keep recording result, save/replay, then remove probe when closed for
-  comparison. The older overnight handoff below predates this explicit capture request.
+  passed yet. Next drive: pause/Start, drive, pause/Stop, verify files, then quit.
+  Probe remains installed; do not relaunch automatically after the owner's stop.
+  The older overnight handoff below predates these explicit capture requests.
 
 - **Date:** 2026-09-09 UTC
 - **Branch:** codex/overnight-0.2.5

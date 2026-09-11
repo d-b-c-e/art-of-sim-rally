@@ -41,6 +41,10 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-09) — do not overstate this
 
+**Attended update 2026-09-10:** installed RC5 failed FFB startup (KI-28) and
+telemetry gauge clearing (KI-29); Alt+F4 hang with probe remains unexplained
+(KI-30). The exact manual gate records failures. Resolve/retest before release.
+
 Published stable remains **0.2.4**. Current development is **0.2.5**: strict USB
 axis/shifter identity and idle reader recovery (KI-21/KI-23), last-session
 diagnostic retention (KI-19), stale-force release (KI-22), deferred binding edits
@@ -54,8 +58,13 @@ production. No force tune, new wheel effects, physics or assist changes.
 
 The separate developer probe now records schema-3 motion/contact/suspension
 context, with standalone event/force analysis and schema-1/2 compatibility. It
-is not shipped or automatically installed. No real capture has been completed;
-signal freshness and runtime overhead still need an attended drive. Read
+is not shipped or automatically installed. The owner's 2026-09-10 jump drive
+confirmed live observation, but the game's normal Quit killed the process before
+saving (KI-27); no usable drive capture was retained. Separate probe 0.2.5.2 is
+installed; explicit menu-only saving and an ordinary Unity shutdown save are
+verified. The second run was abandoned with zero force rows, excluded from the
+corpus. Nothing is recording. Pause/Stop and verify files before quitting. Signal freshness and runtime
+overhead still need a saved drive. Read
 `docs/DEVELOPMENT-CAPTURE.md` before interpreting landing/slide candidates.
 
 Stable 0.2.4 was released after owner RC5 acceptance. Its preserved drive log
@@ -170,6 +179,12 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
 
 ## Findings that must not be re-derived
 
+- **The game's normal Quit forcibly kills the process.** `ExitGame.Exit` calls
+  `Process.GetCurrentProcess().Kill()` in build 17584229. Unity quit callbacks
+  cannot be assumed to run. Probe 0.2.5.2 intercepts this menu action before the
+  kill; its automatic quit-save path still needs an attended check. For captures,
+  pause, STOP and verify saved files before permitting quit (KI-27). Never call
+  the game's Exit method in an in-process test; it kills the test host too.
 - **`GameEntryPoint.EventManager` is a lazy factory.** Do not call it from mod
   state polling, input or support. Failed menu construction queues ghost replay
   downloads before throwing; catching does not undo the work. RC4 produced

@@ -14,8 +14,11 @@ force row with the same zero-based index, realtime timestamp and reset epoch.
 Sampling uses fixed-capacity value buffers: 250,000 frame observations and 90,000
 force/motion observations by default. Overflow marks the saved capture incomplete.
 Start allocates memory; Stop writes files only after pausing (or after output
-release on normal exit). Capture exceptions stop sampling and preserve incomplete
-buffers for an explicit save/retry. A crash can lose unsaved buffers.
+release on shutdown). Capture exceptions stop sampling and preserve incomplete
+buffers for an explicit save/retry. The game's menu Quit kills its own process,
+bypassing Unity callbacks; probe 0.2.5.2 intercepts that path to release/save first,
+with attended quit-save validation pending. Pause, Stop and verify saved files
+before quitting. A crash/forced termination can lose unsaved buffers.
 
 | Fields | Meaning |
 |---|---|

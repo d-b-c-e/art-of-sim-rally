@@ -94,6 +94,25 @@ static class Program
             Check(client.GetAwaiter().GetResult() == (command == "INVALID" ? "ERROR unknown command" : "OK " + command), "pipe command/reply mismatch");
         }
     }
+    static void Quit(string root)
+    {
+        var session = new CaptureSession();
+        Check(session.BeforeProcessExit(() => throw new Exception("idle exit ran shutdown")), "idle quit blocked");
+        session.Start(false, Identity(), root, 8, 8); Samples(session);
+        Check(!session.BeforeProcessExit(() => { }), "quit allowed without a successful save");
+        Check(session.Pending && session.Active && !Directory.Exists(root), "missing save lost buffers");
+        Check(!session.BeforeProcessExit(() => throw new IOException("release failed")), "quit allowed after failed output release");
+        Check(session.Pending && !Directory.Exists(root), "failed release wrote or lost capture");
+        bool released = false;
+        Check(session.BeforeProcessExit(() => { released = true; session.Stop(false); }), "saved capture blocked quit");
+        Check(released && !session.Pending && File.Exists(Path.Combine(session.SavedDirectory, "manifest.xml")), "quit lost saved capture");
+        string blocker = Path.Combine(root, "blocked"); File.WriteAllText(blocker, "keep");
+        session.Start(false, Identity(), blocker, 8, 8); Samples(session);
+        Check(!session.BeforeProcessExit(() => session.Stop(false)) && session.Pending, "quit discarded failed write");
+        File.Move(blocker, blocker + ".old");
+        Check(session.BeforeProcessExit(() => session.Stop(false)), "quit retry failed");
+        Check(File.ReadAllText(blocker + ".old") == "keep", "quit retry damaged existing file");
+    }
     static void Contract(string modPath, string gameDir)
     {
         var root = Path.GetDirectoryName(Path.GetFullPath(modPath));
@@ -113,6 +132,7 @@ static class Program
         Check(access.Drive.GetParameters().Single().ParameterType.Name == "CarDynamics", "physics signature changed");
         Check(access.Send.ReturnType == typeof(bool) && access.Send.GetParameters().Single().ParameterType == typeof(int), "native observation signature changed");
         Check(!access.Update.IsStatic && access.Shutdown.IsStatic && access.Reset.IsStatic, "lifecycle signatures changed");
+        Check(!access.Exit.IsStatic && access.Exit.DeclaringType.Name == "ExitGame" && access.Exit.ReturnType == typeof(void), "menu exit signature changed");
         Check(access.Smoothed() == 0, "unexpected filter initialization");
         var main = mod.GetType("ArtOfSimRally.Mod.Main", true);
         var cfg = Activator.CreateInstance(mod.GetType("ArtOfSimRally.Mod.Settings", true));
@@ -127,7 +147,7 @@ static class Program
         {
             string root = Path.GetFullPath(args[0]);
             Check(!Directory.Exists(root), "use a fresh test evidence directory");
-            string capture = Capture(root); Pipe();
+            string capture = Capture(root); Pipe(); Quit(Path.Combine(root, "quit-cases"));
             if (args.Length == 3) Contract(args[1], args[2]);
             Console.WriteLine(JsonSerializer.Serialize(new { status = "passed", assertions, syntheticCapture = capture })); return 0;
         }

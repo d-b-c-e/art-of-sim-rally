@@ -11,7 +11,9 @@ publication and attended sign-off remain separate.
 **0.2.5-rc.5** is installed after passing all 16 local checks, with settings and
 the Steam 550320 launch target preserved. [Current candidate evidence and receipt](reviews/2026-09-09-overnight-025.md).
 The earlier 0.2.4 installation below is backed up. No candidate hardware result
-or public publication is implied.
+or public publication was implied by deployment. The subsequent owner drive
+reported FFB startup and telemetry gauge failures (KI-28/KI-29); RC5's attended
+gate now fails those cases. Do not publish this candidate.
 
 - UMM displays **0.2.5**; support/build.json identify
   `0.2.5-rc.5+43e0b4a2978121e712d20c8f170567b587554bdf.clean`.
@@ -23,8 +25,9 @@ or public publication is implied.
   selection-display correction in RC5. Published stable remains 0.2.4.
 
 For the owner's attended drive on 2026-09-10 local time, the separate developer
-probe **0.2.5.1** was installed and recording started successfully after correcting
-KI-26. RC5 and its settings were preserved during probe replacement. The probe
+probe **0.2.5.2** is installed after correcting KI-26 and adding the KI-27 menu-quit
+save hook. Explicit menu-only saving and CSV hashes passed in Unity; the automatic
+quit-save path still needs a drive. RC5/settings were preserved during replacement. The probe
 is currently present; remove it with the game closed before the comparison drive
 without instrumentation. [Capture setup and receipts](reviews/2026-09-10-attended-rc5.md).
 

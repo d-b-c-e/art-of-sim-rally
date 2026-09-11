@@ -20,6 +20,10 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Developer probe: fix Unity Mono control-pipe startup and intercept the game's
+  process-killing Quit action to release outputs/save pending captures first.
+  These changes are separate from the shipped mod; automatic quit-save runtime
+  validation remains pending.
 - Prepare telemetry connections while idle instead of resolving/connecting from
   the physics callback. Destination edits during driving wait for pause, keeping
   the current connection active. Turning telemetry off immediately parks it.

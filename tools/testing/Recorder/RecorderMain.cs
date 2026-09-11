@@ -14,6 +14,7 @@ namespace ArtOfSimRally.Testing
         private static SubjectAccess subject;
         private static Harmony patches;
         private static ControlServer server;
+        private static Action<string> log;
         private static bool observing, sent;
         private static int device;
         private static CarDynamics motionCar;
@@ -25,6 +26,7 @@ namespace ArtOfSimRally.Testing
         {
             try
             {
+                log = entry.Logger.Log;
                 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 Attach(assemblies.Single(a => a.GetName().Name == "ArtOfSimRally.Mod"),
                     assemblies.Single(a => a.GetName().Name == "Dbce.Wheel.Ffb"));
@@ -49,6 +51,7 @@ namespace ArtOfSimRally.Testing
             patches.Patch(subject.Reset, postfix: Hook(nameof(Reset)));
             patches.Patch(subject.Update, postfix: Hook(nameof(Frame)));
             patches.Patch(subject.Shutdown, postfix: Hook(nameof(Shutdown)));
+            patches.Patch(subject.Exit, prefix: Hook(nameof(BeforeGameExit)));
         }
         private static HarmonyMethod Hook(string name) => new HarmonyMethod(typeof(RecorderMain), name);
         private static string Command(string command)
@@ -141,6 +144,16 @@ namespace ArtOfSimRally.Testing
             catch (Exception ex) { Session.AbortSampling(ex.Message); }
         }
         // Runs after the shipping watchdog has released all force/input resources.
-        private static void Shutdown() { if (Session.Pending) Session.Stop(false); motionCar = null; motionBody = null; }
+        private static void Shutdown()
+        {
+            if (Session.Pending) { Session.Stop(false); log?.Invoke(Session.Status); }
+            motionCar = null; motionBody = null;
+        }
+        private static bool BeforeGameExit()
+        {
+            bool allow = Session.BeforeProcessExit(() => subject.Shutdown.Invoke(null, new object[] { false }));
+            if (!allow) log?.Invoke(Session.Status);
+            return allow;
+        }
     }
 }

@@ -194,7 +194,7 @@ under `lib/toolkit` (`tools\Sync-Toolkit.ps1` refreshes the pin).
 
 ```
 dotnet build ArtOfSimRally.sln -c Release
-tools\testing\Test-Rc.ps1 -Version 0.2.4-rc.6
+tools\testing\Test-Rc.ps1 -Version 0.2.5-rc.6
 ```
 
 Use an unused RC number. Releases are built, tested and packaged locally; the
@@ -213,7 +213,9 @@ Next work and outstanding user reports are tracked in the
 
 Recording is development-only: a separately installed probe captures signals,
 and an external runner replays saved cases without the game or wheel. The release
-mod has no recorder or playback feature.
+mod has no recorder or playback feature. Finish capture with the game paused:
+send Stop, verify the saved files, then quit. The game's normal Quit kills its
+process and bypasses Unity shutdown callbacks; see [the test drive guide](docs/TEST-DRIVE.md).
 
 Toolkit pin: **v0.12.0** (recorded in `lib/toolkit/VERSION`). The mod
 consumes its native driver, managed device wrapper, versioned axle-force pipeline

@@ -8,6 +8,16 @@ Nothing in this document is inferred from forum posts. Where something is
 Re-deriving these costs an hour of assembly spelunking, so treat this file as
 the source of truth and don't repeat the work.
 
+## Menu quit addendum — 2026-09-10 local time
+
+In game build 17584229, `ExitGame.Exit` calls
+`Process.GetCurrentProcess().Kill()` outside the editor. The ordinary Quit
+button therefore bypasses Unity shutdown callbacks. A recording held only in
+memory is lost even when the player quits normally; this occurred during the
+owner's RC5 jump drive. Probe 0.2.5.2 intercepts that entry point to release
+outputs/save first; explicit Stop and on-disk verification remain the recommended
+capture procedure. See KI-27 and the [attended report](reviews/2026-09-10-attended-rc5.md).
+
 ## Lazy manager factory addendum — 2026-09-09 UTC
 
 [RC4 log review](reviews/2026-09-09-rc4-stutter.md) verifies that

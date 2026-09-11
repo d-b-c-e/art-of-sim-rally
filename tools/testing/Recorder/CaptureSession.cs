@@ -61,6 +61,21 @@ namespace ArtOfSimRally.Testing
         // Keep the incomplete buffers for an explicit save after pausing.
         public void AbortSampling(string reason) { failure = reason; Active = false; Status = "Capture interrupted: " + reason; }
         public void Delivery(bool accepted) { if (Active) { deliveryAttempts++; if (!accepted) deliveryFailures++; } }
+        // The game's menu Exit method kills its own process, bypassing Unity
+        // quit callbacks. The caller performs normal output shutdown; its probe
+        // postfix saves. Never allow the kill if buffers are still pending.
+        public bool BeforeProcessExit(Action shutdown)
+        {
+            if (!Pending) return true;
+            try
+            {
+                shutdown();
+                if (!Pending) return true;
+                Status = "Quit cancelled; capture is still pending. " + Status;
+            }
+            catch (Exception ex) { Status = "Quit cancelled; capture shutdown failed: " + ex.Message; }
+            return false;
+        }
         public void Force(ForceSample sample)
         {
             if (!Active) return;

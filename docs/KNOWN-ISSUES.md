@@ -21,6 +21,79 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-30 — Alt+F4 hangs with the developer probe installed
+
+**Owner report on RC5 + probe 0.2.5.2; cause unconfirmed.** The retry had no FFB
+(KI-28); the owner used Alt+F4 and reported a hang. The log reaches Unity quit
+callbacks, saves a 2,169-frame/zero-force capture, and closes native input readers.
+The process was gone by the subsequent stop attempt. This does not rule out a
+temporary hang or identify what eventually ended it. No matching Windows crash/
+hang report was found in the checked event window.
+
+Keep separate from KI-27's process-kill menu action. Investigate probe pipe/thread
+shutdown and save duration, then compare the same Alt+F4 path without the probe.
+The blocking Mono control pipe is a hypothesis, not an established cause. Do not
+dismiss it as harmless or call ordinary shutdown verified end-to-end.
+
+### KI-29 — Gauges retain finish-line speed after stage end and exit
+
+**Owner report on RC5; consumer-visible failure, cause unconfirmed.** During the
+first jump drive, gauges stayed at the speed recorded at the finish line and
+remained there after quitting. SimHub logged Game disconnected at 21:12:50.865,
+matching the mod's final zero-force/idle diagnostic time; the UDP reader timed out
+later. Thus SimHub saw a race-state change, but the report says display values did
+not reset.
+
+Production `TelemetryPump.Park` sends three zeroed race-off packets, and inactive
+physics frames are zeroed. Existing loopback checks establish packet delivery/
+race state, not display clearing. Inspect the installed Forza consumer's handling
+of race-off data and gauge bindings; reproduce the transition with a receiver/
+display check before changing the packet sequence. ExitGame's forced-kill path
+also bypasses normal mod shutdown without a pending probe capture. Do not mask
+this with a force tune or claim an upstream encoder defect without evidence.
+
+### KI-28 — Startup FFB acquisition failure stays unavailable for the session
+
+**Confirmed on owner's RC5 retry, before probe load.** Player.log reports
+`FFB initialise/start failed (0x80040205)`. Native logs show effect creation
+succeeded, effect start lost exclusive acquisition, and reacquisition failed with
+`0x80070578` (invalid window handle), then the wrapper shut down. There is no
+automatic startup retry in the mod. Direct input still opened all four readers;
+the owner had steering input but no FFB. The capture consequently has zero force
+rows. FFB remained enabled, strength 50, smoothing 0.2; nothing intentionally
+turned it off.
+
+The supplied foreground window was outside the game process, so native code
+selected an own-process window. The failure suggests startup window/focus timing;
+which window became invalid still needs confirmation. Investigate deferring
+initial acquisition until the game has a valid focused window, plus bounded idle
+recovery for transient acquisition errors. Release nonexclusive wheel readers
+before retrying; preserve strict device identity. Current explicit retry is the
+FFB Enabled off/on control or wheel reselection while paused; hardware recovery
+from this particular failure has not been tested. Native window/lifecycle changes,
+if needed, belong upstream. FFB lifecycle is marked failed in RC5's attended gate.
+
+### KI-27 — Normal menu Quit bypasses developer capture saving
+
+**Reproduced on the owner's RC5 drive; corrected in probe 0.2.5.2, attended
+quit-save check pending.** The owner used the normal Quit option after a drive
+with jumps. Recording counters had advanced, but no capture directory was written.
+The game's `ExitGame.Exit` calls `Process.GetCurrentProcess().Kill()`, bypassing
+Unity's OnApplicationQuit/OnDestroy and the probe's shutdown postfix. No crash
+or user misuse is required. The unsaved motion/contact buffers were lost.
+
+The developer probe now prefixes that menu action: if a capture is pending, it
+calls the mod's normal output shutdown, whose probe postfix writes the capture.
+The kill is allowed only once the buffers are saved; a release/save failure
+cancels that quit and logs the retained-capture status for an explicit Stop retry.
+No capture means the menu action is unchanged. The release mod is unchanged.
+Tests cover no-op exit, failed release/write, missing save, successful retry and
+actual Harmony attachment to ExitGame.Exit. The new probe loads in Unity and
+explicit START/STOP produced a menu-only capture with verified hashes. An abandoned
+retry saved through Unity quit callbacks (zero force rows), but the separate
+process-kill menu hook is still untested. Until confirmed, pause, issue STOP, verify
+the saved manifest/CSVs, then quit. [Drive evidence](reviews/2026-09-10-attended-rc5.md).
+
 ### KI-25 — Telemetry connection work runs from physics; disabling can leave live output
 
 **Reproduced connection path offline; corrected in 0.2.5 candidate, live consumers
@@ -455,8 +528,8 @@ thread, and opens the first pipe before reporting ready. Startup failures reach
 the existing load error/unpatch path. CLR checks cover SID equivalence, failed
 startup and external commands. After the owner quit normally, the fixed probe
 loaded in Unity and STATUS/START succeeded; both frame and force counts increased
-without an incomplete flag. Saving/replay and probe overhead still need the
-attended capture to finish. No shipping mod or toolkit change was required.
+without an incomplete flag. That run then exposed KI-27 on menu quit; no detailed
+drive capture was saved. No shipping mod or toolkit change was required.
 See [the capture session](reviews/2026-09-10-attended-rc5.md).
 
 ### KI-20 — State polling constructs game managers and floods ghost downloads

@@ -41,10 +41,66 @@ a controlled slide; pedals/handbrake/shifting; stock/bonnet/bumper cameras,
 finish/replay; pause and alt-tab force release/recovery. The owner was asked to
 pause and report completion before STOP writes the capture.
 
-Recording is active as of this handoff. Query STATUS before further commands;
-use the current game PID, not a cached one. Once the owner finishes, save while
-paused, validate/replay the capture, correlate event times and preserve suitable
-evidence in the regression corpus. Record actual user results in RC5's attended
-checklist without filling untested cases. Remove the probe with the game closed
-for a comparison drive. Signal freshness, landing usefulness, physical force feel
-and instrumentation overhead remain unassessed until then.
+The owner reported a couple of good jumps and used the normal Quit option.
+No drive capture was saved. The game's `ExitGame.Exit` path forcibly kills its
+process, bypassing the shutdown observer (KI-27); the first run has no Unity quit
+callbacks in its log. Preserve this as a failed capture, not successful replay.
+
+Retained evidence from that run:
+
+- Stage `Norway_Stage_4_Reverse_Dry_80s`, car `Car_M1` from Player.log.
+- 12,206 foreground-driving intervals in the retained diagnostic summary;
+  maximum 33.95 ms, zero 100 ms+ intervals. Loading/pause/focus transitions excluded.
+- 11,731 native force commands and 1,017 sampled FFB trace lines. These contain
+  steering forces, not the lost contact/suspension/motion stream. They cannot
+  identify or measure the jump landings reliably.
+- [First-drive summary](../../results/attended-rc5-bcbd05cd936c4291be58c6e22a3721e0/drive-summary.json).
+
+## Quit-save correction and abandoned retry
+
+Probe **0.2.5.2** intercepts `ExitGame.Exit` when a capture is pending, invokes
+normal output shutdown and permits the process kill only after the save succeeds.
+A release/save failure retains the buffers and cancels that quit for a Stop retry.
+Build passed, with 58 recorder assertions and 17 actual net48 hook assertions.
+This is a developer-tool change; shipping RC5 and all settings were preserved.
+
+- [Install receipt](../../results/attended-rc5-bcbd05cd936c4291be58c6e22a3721e0/quit-fix-install.json),
+  probe SHA-256 `CD47CCF20A5007FA9C73658A2BEF9CA977F771A15FA48BCD4A4B82A492138754`.
+- Explicit Start/Stop saved a menu-only preflight, all CSV hashes verified:
+  [save preflight](../../results/attended-rc5-bcbd05cd936c4291be58c6e22a3721e0/save-preflight.json).
+- The owner abandoned the retry and requested recorder stop. The game exited
+  during the status request; this time its log shows Unity quit callbacks and a
+  successful probe save. The capture has 2,169 frames and **zero force rows**;
+  all CSV hashes match. It is excluded from regression and acceptance evidence:
+  [abandoned-run receipt](../../results/attended-rc5-bcbd05cd936c4291be58c6e22a3721e0/second-run-abandoned.json).
+
+**Nothing is recording; the game is closed.** The probe remains installed.
+Explicit save and ordinary Unity shutdown saving have now run, but this does not
+verify the distinct process-kill menu hook. No usable jump capture or corpus case
+was retained. Next attended attempt: Start while paused, drive, pause and leave
+the game open, Stop, verify files, then quit. Signal freshness, landing analysis,
+physical feel and instrumentation overhead remain pending; no release cases were
+marked passed based on these attempts.
+
+## Owner follow-up: RC5 has attended failures
+
+The owner clarified that the retry was abandoned because **FFB was absent**, and
+Alt+F4 then hung. The original run also left gauges stuck at finish-line speed at
+stage end and after quitting. These are KI-28, KI-30 and KI-29 respectively.
+
+The retry's Player.log reports FFB acquisition failure before the probe loads;
+native logging confirms failed exclusive acquisition and an invalid window on
+reacquire. All four direct-input readers opened, while FFB stayed unavailable.
+Settings still enable FFB at strength 50/smoothing 0.2. No deliberate force change
+was made. This explains the zero force rows; it is not just an unsuitable drive.
+
+SimHub's retained log registers the original race ending at 21:12:50.865 local,
+while the owner reports gauges did not clear. No packet/display correlation was
+captured, so the exact zeroing defect remains open. The Alt+F4 log has a successful
+save and native reader closure, but those do not disprove the reported hang.
+
+RC5's exact `manual.json` now marks **ffb-lifecycle** and **telemetry** failed,
+with hashed evidence. Other cases remain pending, including the full stutter
+matrix. The abandoned capture stays out of the corpus, retained only as defect
+evidence. [Owner follow-up](../../results/attended-rc5-bcbd05cd936c4291be58c6e22a3721e0/owner-followup.json).
+No production fix for KI-28/29 or established diagnosis for KI-30 has shipped.

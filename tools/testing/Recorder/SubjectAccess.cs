@@ -19,7 +19,7 @@ namespace ArtOfSimRally.Testing
     {
         private const BindingFlags Flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
         public readonly Assembly Mod;
-        public readonly MethodInfo Drive, Reset, Update, Shutdown, Send;
+        public readonly MethodInfo Drive, Reset, Update, Shutdown, Send, Exit;
         public readonly Func<bool> Enabled, Driving, ForceEnabled, Ready, Direct;
         public readonly Func<float> Smoothed;
         public readonly Func<Tune> ReadTune;
@@ -39,6 +39,10 @@ namespace ArtOfSimRally.Testing
             Drive = Method(controller, "DriveWheel"); Reset = Method(controller, "Reset");
             Update = watchdog.GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic) ?? throw new MissingMethodException("ModWatchdog.Update");
             Shutdown = Method(watchdog, "Shutdown"); Send = Method(native, "SetForce");
+            // ExitGame is in Assembly-CSharp, which the force callback references.
+            var game = Drive.GetParameters()[0].ParameterType.Assembly;
+            Exit = game.GetType("ExitGame", true).GetMethod("Exit", BindingFlags.Instance | BindingFlags.Public)
+                ?? throw new MissingMethodException("ExitGame.Exit");
             Enabled = Getter<bool>(main, "Enabled"); Driving = Getter<bool>(state, "IsDriving");
             Ready = Getter<bool>(native, "Ready"); Direct = Getter<bool>(input, "Enabled");
             Smoothed = Expression.Lambda<Func<float>>(Expression.Field(null, controller.GetField("_smoothed", Flags))).Compile();

@@ -22,7 +22,7 @@ drive and detailed scenario matrix remain pending.
 
    This adds only `Mods/ArtOfSimRally.DevRecorder`; it does not replace the release
    mod or its toolkit DLLs. Launch the game normally. UMM's log should say
-   `Developer capture probe ready`. Use probe **0.2.5.1 or newer**: 0.2.5's
+   `Developer capture probe ready`. Use probe **0.2.5.2 or newer**: 0.2.5's
    control pipe fails under Unity's Mono despite that log message (KI-26).
    Confirm STATUS responds before starting. FFB must be enabled and connected for a force
    regression capture.
@@ -37,6 +37,9 @@ drive and detailed scenario matrix remain pending.
    braking, clutch, handbrake and shifter. Watch the first 15 seconds for stutter.
    Samples stay in memory; no CSV is written while driving. Status reports frame
    and force counts so a missing observation hook is visible.
+
+   On first use, verify a small menu-only Start/Stop produces a manifest and CSVs,
+   then Start again for the actual drive. That preflight is not driving evidence.
 4. **Exercise transitions.** Cycle stock views, bonnet and bumper, then stock
    views again. Finish the stage and watch a replay. Check pause/resume,
    alt-tab/return and mod disable/re-enable. Restart the same stage, then try a
@@ -51,6 +54,10 @@ drive and detailed scenario matrix remain pending.
    `%LOCALAPPDATA%/ArtOfSimRally/dev-captures`. Keep its `manifest.xml`,
    `frames.csv`, `forces.csv` and `signals.csv` together. After a save error, keep the game open,
    remain paused and retry Stop; the probe retains its buffers.
+   **Wait for the Saved reply and verify the files before quitting.** The game's
+   normal Quit forcibly kills its process instead of running Unity quit callbacks.
+   Probe 0.2.5.2 adds a save-before-kill hook, but its attended quit-save check is
+   pending. Task Manager/crashes can still lose unsaved memory.
 5. **Replay and preserve the case**, outside the game:
 
    ```powershell

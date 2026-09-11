@@ -1,5 +1,27 @@
 # Overnight investigation and implementation queue
 
+## Next RC blockers — owner follow-up 2026-09-10
+
+1. KI-28: FFB failed at startup before probe load; invalid-window/exclusive
+   acquisition failure remained unavailable. Validate focused game window and
+   bounded idle retry, preserving strict identity and releasing input readers.
+2. KI-29: finish/exit gauges stayed at speed despite SimHub recognising race end.
+   Reproduce consumer zeroing and capture the final UDP sequence before changing it.
+3. KI-30: investigate Alt+F4 hang with probe, especially IPC thread teardown;
+   compare probe absent/present. Successful save does not establish clean exit.
+4. Retest KI-27's distinct menu-kill save hook, then collect usable jump signals.
+
+RC5's FFB and telemetry attended cases are failed. These items take priority over
+new effects. Nothing is recording; no automatic game relaunch or publication.
+
+**2026-09-10 attended update:** RC5's first jump drive retained performance and
+FFB logs (12,206 measured driving intervals; maximum 34 ms; zero 100 ms+ hitches),
+but normal menu Quit killed the unsaved capture (KI-27). Probe 0.2.5.2 adds a
+pre-quit save hook after the KI-26 Mono IPC fix. Explicit saving works in Unity;
+the second attempt was abandoned (zero force rows) and excluded from the corpus.
+Nothing is recording. A usable saved capture is still needed before tuning impacts.
+[Current attended session](reviews/2026-09-10-attended-rc5.md).
+
 **Latest status (2026-09-09 UTC): all four post-0.2.4 queue items implemented
 with offline coverage, plus a telemetry lifecycle follow-up.** Published stable
 remains 0.2.4; a local 0.2.5 candidate is installed. See

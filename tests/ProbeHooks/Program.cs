@@ -46,6 +46,8 @@ internal static class Program
             // Drive/Frame callbacks use Unity ECalls; only Unity can execute
             // those. CLR verifies their patch installation, not their runtime.
             var patches = recorder.GetField("patches", Static).GetValue(null);
+            var patched = ((System.Collections.IEnumerable)patches.GetType().GetMethod("GetPatchedMethods").Invoke(patches, null)).Cast<MethodBase>();
+            Check(patched.Any(method => method.DeclaringType.Name == "ExitGame" && method.Name == "Exit"), "menu process-kill exit is not intercepted");
             patches.GetType().GetMethod("UnpatchAll").Invoke(patches, new object[] { "ArtOfSimRally.DevRecorder" });
             mod.GetType("ArtOfSimRally.Mod.FfbController").GetMethod("Reset", Static).Invoke(null, null);
             Check((int)sessionType.GetField("epoch", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session) == 1, "unload left probe hook installed");
