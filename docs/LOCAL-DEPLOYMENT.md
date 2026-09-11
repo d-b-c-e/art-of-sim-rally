@@ -17,9 +17,16 @@ or public publication is implied.
   `0.2.5-rc.5+43e0b4a2978121e712d20c8f170567b587554bdf.clean`.
 - [RC5 install receipt and RC3 backup](../results/overnight-025-install-156deb45275a414bba20b5ee1f2135a5/install-receipt.json).
 - Six mod payloads and the native plugin copy match the exact package; settings
-  are unchanged. Game stayed closed, developer probe absent, Stream Deck preserved.
+  were unchanged at deployment. Game stayed closed, developer probe was absent,
+  Stream Deck preserved.
 - RC4 passed offline but was superseded before installation by the shifter
   selection-display correction in RC5. Published stable remains 0.2.4.
+
+For the owner's attended drive on 2026-09-10 local time, the separate developer
+probe **0.2.5.1** was installed and recording started successfully after correcting
+KI-26. RC5 and its settings were preserved during probe replacement. The probe
+is currently present; remove it with the game closed before the comparison drive
+without instrumentation. [Capture setup and receipts](reviews/2026-09-10-attended-rc5.md).
 
 ## Previous stable installation
 

@@ -50,6 +50,15 @@ internal static class Program
             mod.GetType("ArtOfSimRally.Mod.FfbController").GetMethod("Reset", Static).Invoke(null, null);
             Check((int)sessionType.GetField("epoch", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session) == 1, "unload left probe hook installed");
             var controlType = probe.GetType("ArtOfSimRally.Testing.ControlServer", true);
+            // Unity's WindowsIdentity.User is unimplemented. Compare the Win32
+            // replacement against the working CLR API without exposing the SID.
+            var sid = probe.GetType("ArtOfSimRally.Testing.CurrentUserSid", true).GetMethod("Read", Static).Invoke(null, null);
+            using (var identity = System.Security.Principal.WindowsIdentity.GetCurrent())
+                Check(sid.Equals(identity.User), "pipe ACL does not identify the current Windows user");
+            bool startupFailed = false;
+            try { using (var invalid = (IDisposable)Activator.CreateInstance(controlType, new object[] { "" })) { } }
+            catch (TargetInvocationException ex) when (ex.InnerException is ArgumentException) { startupFailed = true; }
+            Check(startupFailed, "invalid pipe startup was concealed by background retries");
             using (var control = (IDisposable)Activator.CreateInstance(controlType, new object[] { "ArtOfSimRally.DevRecorder." + System.Diagnostics.Process.GetCurrentProcess().Id }))
             {
                 foreach (string command in new[] { "Start", "Status", "Stop" })

@@ -1,6 +1,22 @@
 # Session Notes
 <!-- Overwritten each session; previous handoffs remain in git history. -->
 
+## Active attended session — 2026-09-10 local / 2026-09-11 UTC
+
+- Owner is driving RC5 with developer probe 0.2.5.1; START succeeded. Latest
+  observed STATUS: Recording, 2515 frames / 607 forces, incomplete=False.
+- **Capture not yet saved.** Owner was asked to pause and say done. Query STATUS
+  first, then STOP only while idle/paused. Do not replace probe or close the game.
+- Fixed KI-26: Unity Mono's unsupported WindowsIdentity.User and asynchronous
+  pipe handling prevented IPC, hidden by background retries. Win32 SID lookup
+  preserves current-user ACL; blocking pipe and synchronous startup now work in Unity.
+- Owner quit for replacement; RC5/settings preserved, old probe backed up. Probe
+  DLL hash D0D16AAF93C202A63289E30977148805556BAF753B427D420DBFAAFAD57E55B3.
+- Probe build passed; actual net48 tests 16 assertions and recorder tests 47 pass.
+- Details/evidence: docs/reviews/2026-09-10-attended-rc5.md. No attended cases marked
+  passed yet. Keep recording result, save/replay, then remove probe when closed for
+  comparison. The older overnight handoff below predates this explicit capture request.
+
 - **Date:** 2026-09-09 UTC
 - **Branch:** codex/overnight-0.2.5
 

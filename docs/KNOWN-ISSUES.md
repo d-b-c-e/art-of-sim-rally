@@ -440,6 +440,25 @@ destination switching and repeat shutdown. SimHub remains an attended gate.
 
 ## Resolved
 
+### KI-26 — Developer recorder reports ready but its control pipe never opens
+
+**Reproduced in Unity; corrected in developer probe 0.2.5.1.** The first
+attended RC5 capture attempt on 2026-09-10 local time timed out on STATUS.
+Unity 2019's Mono implements `WindowsIdentity.User` by throwing
+`NotImplementedException`; a background catch/retry concealed the startup failure.
+Its asynchronous pipe implementation also sets nonblocking pipe mode while the
+probe uses synchronous connection waits.
+
+The probe now obtains the same current-user SID from the Windows process token,
+retains the user-restricted pipe ACL, uses a blocking pipe on its dedicated
+thread, and opens the first pipe before reporting ready. Startup failures reach
+the existing load error/unpatch path. CLR checks cover SID equivalence, failed
+startup and external commands. After the owner quit normally, the fixed probe
+loaded in Unity and STATUS/START succeeded; both frame and force counts increased
+without an incomplete flag. Saving/replay and probe overhead still need the
+attended capture to finish. No shipping mod or toolkit change was required.
+See [the capture session](reviews/2026-09-10-attended-rc5.md).
+
 ### KI-20 — State polling constructs game managers and floods ghost downloads
 
 **Major; fixed in 0.2.4, RC5 owner retest accepted 2026-09-09 UTC.** Owner

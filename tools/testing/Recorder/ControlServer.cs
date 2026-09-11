@@ -23,14 +23,20 @@ namespace ArtOfSimRally.Testing
         private NamedPipeServerStream current;
         public ControlServer(string pipeName)
         {
-            name = pipeName; thread = new Thread(Listen) { IsBackground = true, Name = "AOSR developer capture control" }; thread.Start();
+            name = pipeName;
+            // Fail at load, before reporting ready. A background retry must not
+            // conceal an unsupported runtime/security API indefinitely.
+            current = Open();
+            thread = new Thread(Listen) { IsBackground = true, Name = "AOSR developer capture control" }; thread.Start();
         }
         private NamedPipeServerStream Open()
         {
 #if NETFRAMEWORK
             var security = new PipeSecurity();
-            security.AddAccessRule(new PipeAccessRule(WindowsIdentity.GetCurrent().User, PipeAccessRights.FullControl, AccessControlType.Allow));
-            return new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous, 4096, 4096, security);
+            security.AddAccessRule(new PipeAccessRule(CurrentUserSid.Read(), PipeAccessRights.FullControl, AccessControlType.Allow));
+            // Unity's Mono maps Asynchronous to PIPE_NOWAIT then waits without
+            // an OVERLAPPED structure. This dedicated thread uses blocking IO.
+            return new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.None, 4096, 4096, security);
 #else
             return new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
 #endif
@@ -41,7 +47,7 @@ namespace ArtOfSimRally.Testing
             {
                 try
                 {
-                    using (var pipe = Open())
+                    using (var pipe = current ?? Open())
                     {
                         current = pipe;
                         if (stopping) return;

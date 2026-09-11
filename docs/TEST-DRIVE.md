@@ -22,7 +22,9 @@ drive and detailed scenario matrix remain pending.
 
    This adds only `Mods/ArtOfSimRally.DevRecorder`; it does not replace the release
    mod or its toolkit DLLs. Launch the game normally. UMM's log should say
-   `Developer capture probe ready`. FFB must be enabled and connected for a force
+   `Developer capture probe ready`. Use probe **0.2.5.1 or newer**: 0.2.5's
+   control pipe fails under Unity's Mono despite that log message (KI-26).
+   Confirm STATUS responds before starting. FFB must be enabled and connected for a force
    regression capture.
 3. **Start recording from PowerShell**, with the game paused or at a menu:
 
