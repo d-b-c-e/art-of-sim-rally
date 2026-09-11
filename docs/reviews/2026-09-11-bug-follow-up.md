@@ -4,6 +4,14 @@ Stable remains 0.2.4. RC5 failed the attended FFB-startup and gauge-stop cases;
 its manual result is preserved. This work prepares a replacement candidate,
 not release acceptance. No game was driven or force sent to hardware here.
 
+**RC6 is now validated and installed.** All 16 local gates passed, including
+the real capture corpus. Source `8ea54775efa42fe60b367760c72bb0f9668a1c9a` was
+clean; package SHA-256
+`A0A99CFA2678142D09C1F63F391D5127706B171C98FC7FF9F84B2B39FD39A4E4`.
+Six mod payloads, the native plugin copy and probe 0.2.5.3 were verified;
+settings are byte-identical, prior install backed up, game stayed closed.
+[Deployment record](../LOCAL-DEPLOYMENT.md). RC6 attended cases remain pending.
+
 ## Implemented fixes
 
 - **KI-28, startup FFB:** remove acquisition from UMM load. The idle watchdog
@@ -70,7 +78,9 @@ values/local units. The original template and receipt are backed up under
 `results/bug-investigation-20260911/gauge-backup/`; no vendor dashboard or art is
 committed. Sixteen cases pass using the installed NCalc engine on CLR, including
 stopped/null/retained values and live speed/RPM. Reload the dashboard in SimHub
-before testing. Physical clearing remains pending. The repair helper takes
+before testing. SimHub was subsequently closed normally and restarted; its log
+confirms both round displays reloaded the dashboard at 03:35 UTC. Physical
+finish-line clearing remains pending. The repair helper takes
 explicit screen IDs and refuses unexpected formats or repeated modification.
 
 Production park-packet tests now check every data byte is zero except timestamp

@@ -6,7 +6,8 @@ KI-28 focused-window idle recovery and production menu-Quit output release are
 implemented. Probe 0.2.5.3 fixes an isolated-Mono shutdown hang (KI-30). KI-31 is
 reconciled with actual Mono; the first unchanged real drive now passes the corpus
 gate. Local DSS speed/RPM bindings have an explicit stopped-game zero fallback;
-dashboard reload and physical retest remain pending. The real landing study
+SimHub reloaded both displays; physical retest remains pending. RC6 and probe
+0.2.5.3 are installed after all 16 local gates including the real corpus. The landing study
 finds a 5 ms pulse peak undersampled at roughly 60 Hz; no new effect is shipped.
 See [the complete handoff](reviews/2026-09-11-bug-follow-up.md).
 

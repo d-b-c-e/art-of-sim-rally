@@ -24,30 +24,9 @@ Severity is about the effect on driving, not on how annoying it looks:
 **2026-09-11 update:** KI-28 has focused-window/idle acquisition recovery; the
 shipping mod now releases outputs before menu Quit. Probe 0.2.5.3 corrects a
 shutdown hang reproduced with actual Mono (KI-30). KI-29's two local DSS gauge
-screens now have stopped-game zero bindings, awaiting dashboard reload/physical
-retest. RC5's failed attended receipt remains unchanged. See
+screens now have stopped-game zero bindings and SimHub has reloaded both
+displays; physical retest is pending. RC5's failed receipt remains unchanged. See
 [current fixes and evidence](reviews/2026-09-11-bug-follow-up.md).
-
-### KI-31 — First saved Unity capture fails exact offline integer replay
-
-**Resolved in development tooling, 2026-09-11; original observation below.**
-The isolated actual-Mono runner matches all 8,974 commands. Replay now checks
-recorded-float conversion exactly with an explicit runtime contract, preserves
-the original arithmetic tolerance, and still rejects one-unit command edits.
-The unchanged capture is promoted to `results/regression-corpus/index.json`.
-
-**Original RC5 finding:**
-Strict .NET 8 replay expects 4,124 at force row 5,892, but the observed native
-command is 4,123. It is the only integer mismatch among 8,974 rows. All capture
-hashes/counts and motion alignment checks pass; force delivery rejected no calls.
-Frozen legacy and toolkit arithmetic agree exactly offline, with at most
-1.1920929e-7 float difference from the recording.
-
-The recorded float 0.4123999774456024 multiplied by 10,000 at double precision
-truncates to 4,123; rounding the product to single precision first yields 4,124.
-Double-product conversion of recorded outputs matches every observed integer.
-Actual Mono now confirms this conversion contract. No tolerance was relaxed or
-force tune changed. [Original evidence and landing analysis](reviews/2026-09-10-first-jump-capture.md).
 
 ### KI-30 — Alt+F4 hangs with the developer probe installed
 
@@ -543,6 +522,28 @@ failed socket. Production-code loopback tests cover recovery, three parked packe
 destination switching and repeat shutdown. SimHub remains an attended gate.
 
 ## Resolved
+
+### KI-31 — First saved Unity capture fails exact offline integer replay
+
+**Resolved in development tooling, 2026-09-11; original observation below.**
+The isolated actual-Mono runner matches all 8,974 commands. Replay now checks
+recorded-float conversion exactly with an explicit runtime contract, preserves
+the original arithmetic tolerance, and still rejects one-unit command edits.
+The unchanged capture is promoted to `results/regression-corpus/index.json`.
+
+**Original RC5 finding:**
+Strict .NET 8 replay expects 4,124 at force row 5,892, but the observed native
+command is 4,123. It is the only integer mismatch among 8,974 rows. All capture
+hashes/counts and motion alignment checks pass; force delivery rejected no calls.
+Frozen legacy and toolkit arithmetic agree exactly offline, with at most
+1.1920929e-7 float difference from the recording.
+
+The recorded float 0.4123999774456024 multiplied by 10,000 at double precision
+truncates to 4,123; rounding the product to single precision first yields 4,124.
+Double-product conversion of recorded outputs matches every observed integer.
+Actual Mono now confirms this conversion contract. No tolerance was relaxed or
+force tune changed. [Original evidence and landing analysis](reviews/2026-09-10-first-jump-capture.md).
+
 
 ### KI-26 — Developer recorder reports ready but its control pipe never opens
 

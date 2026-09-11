@@ -8,7 +8,27 @@ publication and attended sign-off remain separate.
 
 ## Installed candidate — 0.2.5 work
 
-**0.2.5-rc.5** is installed after passing all 16 local checks, with settings and
+**0.2.5-rc.6** is installed as of 2026-09-11 03:34 UTC, from the exact package
+that passed all 16 local gates **including one real recorded drive**.
+
+- Identity: `0.2.5-rc.6+8ea54775efa42fe60b367760c72bb0f9668a1c9a.clean`.
+- ZIP SHA-256: `A0A99CFA2678142D09C1F63F391D5127706B171C98FC7FF9F84B2B39FD39A4E4`.
+- [Gate](../results/rc-0.2.5-rc.6-3166e9988c98438dbf669170f92253c7/automated.json),
+  [installation receipt and RC5 backup](../results/bug-investigation-20260911/install-rc6/receipt.json).
+- All six installed payloads and the second native plugin copy match the package;
+  settings were preserved byte-for-byte. The Steam/Stream Deck game directory
+  remains the same. Game stayed closed; no public release or attended pass.
+- Optional developer probe **0.2.5.3** is installed, hash
+  `F911A673F992963C99E5A10D048C9F849D82A8582BBC87EF9B9D64E815778D49`.
+  It remains separate from the release ZIP; previous probe backed up.
+- Local DSS speed/RPM dashboard bindings were backed up and repaired. SimHub
+  exited normally and restarted on 03:35 UTC; logs confirm both round displays
+  reloaded their dashboard. Physical end-of-race clearing remains untested.
+- [Fixes, signal study and remaining tests](reviews/2026-09-11-bug-follow-up.md).
+
+## Previous candidate — RC5
+
+**0.2.5-rc.5** was installed after passing all 16 local checks, with settings and
 the Steam 550320 launch target preserved. [Current candidate evidence and receipt](reviews/2026-09-09-overnight-025.md).
 The earlier 0.2.4 installation below is backed up. No candidate hardware result
 or public publication was implied by deployment. The subsequent owner drive
@@ -28,7 +48,7 @@ For the owner's attended drive on 2026-09-10 local time, the separate developer
 probe **0.2.5.2** is installed after correcting KI-26 and adding the KI-27 menu-quit
 save hook. Explicit menu-only saving and CSV hashes passed in Unity; the automatic
 quit-save path still needs a drive. RC5/settings were preserved during replacement. The probe
-is currently present; remove it with the game closed before the comparison drive
+was present; remove the current probe with the game closed before the comparison drive
 without instrumentation. [Capture setup and receipts](reviews/2026-09-10-attended-rc5.md).
 
 ## Previous stable installation

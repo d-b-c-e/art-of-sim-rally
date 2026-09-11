@@ -49,7 +49,9 @@ Follow-up fixes: focused owned-window FFB acquisition with five idle retries,
 production cleanup before process-killing menu Quit, and probe 0.2.5.3 control
 thread cancellation. The old probe reproduces a Mono cleanup hang in isolation;
 corrected listening/reading/queued-command shutdown passes. Local DSS round-gauge
-idle bindings were repaired; SimHub reload and physical retest are pending.
+idle bindings were repaired and SimHub reloaded both displays; physical retest
+is pending. RC6 (`8ea54775...clean`) and separate probe 0.2.5.3 are installed after
+all 16 local gates, including the real drive corpus. Stable is still 0.2.4.
 See `docs/reviews/2026-09-11-bug-follow-up.md` and the deployment receipt.
 
 Published stable remains **0.2.4**. Current development is **0.2.5**: strict USB
