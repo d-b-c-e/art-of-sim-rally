@@ -1,6 +1,31 @@
 # Session Notes
 <!-- Overwritten each session; previous handoffs remain in git history. -->
 
+## Retry saved and analysed — 2026-09-10 local / 2026-09-11 UTC
+
+- **Recording stopped; game closed.** Explicit STOP saved 11,706 frame rows and
+  8,974 force/motion rows; all CSV hashes verified and independent copy preserved.
+  Mod RC5/probe 0.2.5.2 unchanged. FFB initialized this launch; no force rejections.
+- Original capture: C:/Users/antho/AppData/Local/ArtOfSimRally/dev-captures/
+  20260911-024022-59d5395fc08e4f2cb2012b4f4c729800.
+- Evidence: results/attended-rc5-retry-2b067b8ccde040cd87f6274d4b0ea19b/;
+  copy in capture-diagnostic-only, preservation.json, diagnostic-audit.json,
+  landing-detail.json, landing-signals.png/SVG and analysis scripts.
+- Norway_Stage_5_Reverse_Dry_80s / Car_M1. Owner said one jump; one detected:
+  70.5s into drive, 1.083s airborne, rear-right first contact, FFB zero then
+  front contact/67.53% command at next 16.7ms sample. Strong vertical/compression
+  response; not a calibrated impulse. 8973 driving frames, p95 18.72ms, max27.12ms,
+  no100ms+ intervals. Full hardware matrix/overhead still pending.
+- KI-31 blocks strict replay/corpus: one integer mismatch at row5892, expected4124
+  observed4123; max recorded/replayed float delta1.1920929e-7; frozen legacy and
+  toolkit agree exactly offline. Double-product truncation of recorded float
+  matches every observed integer, single-product rounds up once. Preserve evidence,
+  confirm Mono conversion contract before changing replay; no tolerance widened.
+- Read docs/reviews/2026-09-10-first-jump-capture.md. A different stage is optional;
+  told owner this trace suffices for initial analysis. No new effect/tune shipped.
+- Prior RC5 FFB/telemetry failed attended cases and Alt+F4 hang remain open.
+  Do not mark them cleared by a good capture. Earlier notes describe prior attempts.
+
 ## Attended session stopped — 2026-09-10 local / 2026-09-11 UTC
 
 - Latest owner follow-up: retry had no FFB, Alt+F4 hung, and first-run gauges

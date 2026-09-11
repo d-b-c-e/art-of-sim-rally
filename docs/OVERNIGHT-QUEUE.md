@@ -9,7 +9,12 @@
    Reproduce consumer zeroing and capture the final UDP sequence before changing it.
 3. KI-30: investigate Alt+F4 hang with probe, especially IPC thread teardown;
    compare probe absent/present. Successful save does not establish clean exit.
-4. Retest KI-27's distinct menu-kill save hook, then collect usable jump signals.
+4. Reconcile KI-31's one-unit Mono/offline integer conversion mismatch without
+   weakening evidence checks, then promote the first saved drive to the corpus.
+   One jump now has clear contact/compression/motion evidence; see
+   [the analysis](reviews/2026-09-10-first-jump-capture.md). Prototype impact
+   envelopes offline before considering new hardware effects. KI-27's distinct
+   menu-kill save hook still needs its own attended test.
 
 RC5's FFB and telemetry attended cases are failed. These items take priority over
 new effects. Nothing is recording; no automatic game relaunch or publication.
@@ -19,7 +24,8 @@ FFB logs (12,206 measured driving intervals; maximum 34 ms; zero 100 ms+ hitches
 but normal menu Quit killed the unsaved capture (KI-27). Probe 0.2.5.2 adds a
 pre-quit save hook after the KI-26 Mono IPC fix. Explicit saving works in Unity;
 the second attempt was abandoned (zero force rows) and excluded from the corpus.
-Nothing is recording. A usable saved capture is still needed before tuning impacts.
+Nothing is recording. A later retry now has a verified saved capture with one
+landing; it is diagnostic-only pending KI-31's replay reconciliation.
 [Current attended session](reviews/2026-09-10-attended-rc5.md).
 
 **Latest status (2026-09-09 UTC): all four post-0.2.4 queue items implemented

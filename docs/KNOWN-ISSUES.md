@@ -21,6 +21,23 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-31 — First saved Unity capture fails exact offline integer replay
+
+**Reproduced with RC5's first saved jump drive; tooling reconciliation pending.**
+Strict .NET 8 replay expects 4,124 at force row 5,892, but the observed native
+command is 4,123. It is the only integer mismatch among 8,974 rows. All capture
+hashes/counts and motion alignment checks pass; force delivery rejected no calls.
+Frozen legacy and toolkit arithmetic agree exactly offline, with at most
+1.1920929e-7 float difference from the recording.
+
+The recorded float 0.4123999774456024 multiplied by 10,000 at double precision
+truncates to 4,123; rounding the product to single precision first yields 4,124.
+Double-product conversion of recorded outputs matches every observed integer.
+This points to Mono/offline intermediate precision, but the runtime contract
+needs a focused regression before changing replay. No tolerance was relaxed or
+force tune changed. Capture remains diagnostic-only, excluded from the approved
+corpus. [Full evidence and landing analysis](reviews/2026-09-10-first-jump-capture.md).
+
 ### KI-30 — Alt+F4 hangs with the developer probe installed
 
 **Owner report on RC5 + probe 0.2.5.2; cause unconfirmed.** The retry had no FFB

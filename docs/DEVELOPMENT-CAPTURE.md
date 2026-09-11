@@ -5,6 +5,12 @@ The removable developer probe now writes schema 3. Install and control it using
 installed by the release package. The replay executable runs without Unity, the
 game or a wheel, and never emits hardware force.
 
+**First saved drive, 2026-09-10:** [one owner-reported jump matches one detected
+landing](reviews/2026-09-10-first-jump-capture.md). All 8,974 motion rows are
+available/aligned with no detected discontinuities. An integer replay mismatch
+(KI-31) keeps the capture out of the approved corpus; it is preserved for signal
+research and conversion reconciliation. No new effect or retune has shipped.
+
 ## Recorded contract
 
 Keep `manifest.xml`, `frames.csv`, `forces.csv` and `signals.csv` together.
@@ -34,7 +40,9 @@ before quitting. A crash/forced termination can lose unsaved buffers.
 The probe reads at the boundary where the mod's `CarDynamics.FixedUpdate`
 postfix consumes steering force. It reads every value anew; it does not reuse
 previous measurements when a component is missing. Unity's ordering of other
-components' wheel/Rigidbody updates has **not been measured in a real capture**.
+components' wheel/Rigidbody updates is not fully established. The first real
+trace has coherent advancing physics times and a rear-contact/front-contact
+transition one sample apart; that does not prove every component's update order.
 Contact is a raycast boolean, not a collision impulse. Compression can exceed
 nominal travel; the research file preserves it instead of clipping the evidence.
 Frame input channels are the mod's direct-input values, not physical wheel

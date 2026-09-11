@@ -63,8 +63,12 @@ confirmed live observation, but the game's normal Quit killed the process before
 saving (KI-27); no usable drive capture was retained. Separate probe 0.2.5.2 is
 installed; explicit menu-only saving and an ordinary Unity shutdown save are
 verified. The second run was abandoned with zero force rows, excluded from the
-corpus. Nothing is recording. Pause/Stop and verify files before quitting. Signal freshness and runtime
-overhead still need a saved drive. Read
+corpus. The 21:40 retry was saved explicitly and hash-verified: 8,974 aligned
+motion/force rows, one landing matching the owner's note, no delivery rejections.
+Strict integer replay differs by one unit at one row (KI-31), so the preserved
+capture remains diagnostic-only. Nothing is recording; the game is closed.
+See docs/reviews/2026-09-10-first-jump-capture.md. Pause/Stop and verify files before
+quitting. Broader signal-ordering and probe-overhead comparisons remain pending. Read
 `docs/DEVELOPMENT-CAPTURE.md` before interpreting landing/slide candidates.
 
 Stable 0.2.4 was released after owner RC5 acceptance. Its preserved drive log

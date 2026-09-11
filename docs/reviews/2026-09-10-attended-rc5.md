@@ -1,5 +1,12 @@
 # Attended RC5 capture — 2026-09-10 local time
 
+**Latest state:** the 21:40 retry was saved explicitly, checksums verified and
+copied. It contains 8,974 aligned force/motion rows and one landing matching the
+owner's note. A one-unit integer replay mismatch prevents corpus promotion;
+the signal trace is useful diagnostic evidence. [Full jump analysis and plot](2026-09-10-first-jump-capture.md).
+Nothing is recording; the game is closed. Earlier stopped/abandoned descriptions
+below refer to previous attempts. RC5's FFB/telemetry failures remain open.
+
 The owner requested a short wheel test and a recorded session. Shipping candidate
 remains `0.2.5-rc.5+43e0b4a2978121e712d20c8f170567b587554bdf.clean`, with
 the existing tune and toolkit. No release or attended pass is implied by setup.
