@@ -48,6 +48,15 @@ internal static class Program
             var patches = recorder.GetField("patches", Static).GetValue(null);
             var patched = ((System.Collections.IEnumerable)patches.GetType().GetMethod("GetPatchedMethods").Invoke(patches, null)).Cast<MethodBase>();
             Check(patched.Any(method => method.DeclaringType.Name == "ExitGame" && method.Name == "Exit"), "menu process-kill exit is not intercepted");
+            // Verify the shipping hook also attaches with the optional probe,
+            // without invoking the game's real process-kill method.
+            var shipping = Activator.CreateInstance(patches.GetType(), new object[] { "AOSR.ShippingExitTest" });
+            var processor = shipping.GetType().GetMethod("CreateClassProcessor").Invoke(shipping,
+                new object[] { mod.GetType("ArtOfSimRally.Mod.GameExit", true) });
+            processor.GetType().GetMethod("Patch").Invoke(processor, null);
+            var shippingMethods = ((System.Collections.IEnumerable)shipping.GetType().GetMethod("GetPatchedMethods").Invoke(shipping, null)).Cast<MethodBase>();
+            Check(shippingMethods.Any(method => method.DeclaringType.Name == "ExitGame" && method.Name == "Exit"), "shipping output shutdown missing from menu Quit");
+            shipping.GetType().GetMethod("UnpatchAll").Invoke(shipping, new object[] { "AOSR.ShippingExitTest" });
             patches.GetType().GetMethod("UnpatchAll").Invoke(patches, new object[] { "ArtOfSimRally.DevRecorder" });
             mod.GetType("ArtOfSimRally.Mod.FfbController").GetMethod("Reset", Static).Invoke(null, null);
             Check((int)sessionType.GetField("epoch", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(session) == 1, "unload left probe hook installed");

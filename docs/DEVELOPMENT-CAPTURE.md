@@ -7,9 +7,22 @@ game or a wheel, and never emits hardware force.
 
 **First saved drive, 2026-09-10:** [one owner-reported jump matches one detected
 landing](reviews/2026-09-10-first-jump-capture.md). All 8,974 motion rows are
-available/aligned with no detected discontinuities. An integer replay mismatch
-(KI-31) keeps the capture out of the approved corpus; it is preserved for signal
-research and conversion reconciliation. No new effect or retune has shipped.
+available/aligned with no detected discontinuities. KI-31's one-unit conversion
+difference is now reproduced with actual Mono and reconciled in strict replay;
+the unchanged recording is in `results/regression-corpus/index.json`. No new
+effect or retune has shipped. [Runtime evidence](reviews/2026-09-11-bug-follow-up.md).
+
+Probe 0.2.5.3 records `forceQuantization`: `truncate-f64-product@1` for the
+observed Mono expression, `truncate-f32-product@1` for single-rounded products.
+Replay checks the native integer exactly against the recorded output using this
+contract; offline force arithmetic keeps its existing 1e-6 tolerance. Before/after
+toolkit integer output remains exact on the offline runtime. Unknown contracts
+fail; schema-1/2/3 remain readable, with an explicit legacy rule for the verified
+Windows Unity 2019.4.38f1 runtime. `runtimeRoundingDifferences` is reported separately.
+
+`Test-Rc.ps1` now runs isolated actual-Mono precision/IPC teardown tests through
+`Run-UnityMono.py`. Its child process has a 30-second deadline, so a native wait
+regression cannot stall the release gate forever. This does not emulate Unity.
 
 ## Recorded contract
 

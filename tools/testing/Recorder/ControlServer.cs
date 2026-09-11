@@ -5,6 +5,7 @@ using System.IO.Pipes;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace ArtOfSimRally.Testing
 {
@@ -20,6 +21,14 @@ namespace ArtOfSimRally.Testing
         private readonly string name;
         private readonly Thread thread;
         private volatile bool stopping;
+        private readonly ManualResetEvent stopped = new ManualResetEvent(false);
+        private readonly object workerLock = new object();
+        private IntPtr workerHandle;
+        [DllImport("kernel32")] private static extern uint GetCurrentThreadId();
+        [DllImport("kernel32")] private static extern IntPtr OpenThread(uint access, bool inherit, uint id);
+        [DllImport("kernel32")] private static extern bool CancelSynchronousIo(IntPtr threadHandle);
+        [DllImport("kernel32")] private static extern bool CloseHandle(IntPtr handle);
+        internal bool IsAlive => thread.IsAlive;
         private NamedPipeServerStream current;
         public ControlServer(string pipeName)
         {
@@ -38,11 +47,17 @@ namespace ArtOfSimRally.Testing
             // an OVERLAPPED structure. This dedicated thread uses blocking IO.
             return new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.None, 4096, 4096, security);
 #else
-            return new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
+            return new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly);
 #endif
         }
         private void Listen()
         {
+            // The Mono pipe implementation uses synchronous native IO. Closing
+            // its stream on the main thread need not interrupt that native wait.
+            // Keep a thread handle so shutdown can cancel the blocked operation.
+            lock (workerLock) workerHandle = OpenThread(1, false, GetCurrentThreadId());
+            try
+            {
             while (!stopping)
             {
                 try
@@ -58,13 +73,25 @@ namespace ArtOfSimRally.Testing
                             string command = reader.ReadLine();
                             if (command != "START" && command != "STOP" && command != "STATUS") { writer.WriteLine("ERROR unknown command"); continue; }
                             var request = new Request { Command = command }; queue.Enqueue(request);
-                            if (request.Done.Wait(5000)) writer.WriteLine(request.Reply);
+                            int completed = WaitHandle.WaitAny(new[] { stopped, request.Done.WaitHandle }, 5000);
+                            if (completed == 0) { request.Cancelled = true; return; }
+                            if (completed == 1) writer.WriteLine(request.Reply);
                             else { request.Cancelled = true; writer.WriteLine("ERROR game did not respond; query STATUS before retrying"); }
                         }
                     }
                 }
                 catch (Exception) { if (!stopping) Thread.Sleep(100); }
                 finally { current = null; }
+            }
+            }
+            finally
+            {
+                current?.Dispose(); current = null;
+                lock (workerLock)
+                {
+                    if (workerHandle != IntPtr.Zero) CloseHandle(workerHandle);
+                    workerHandle = IntPtr.Zero;
+                }
             }
         }
         // Called on the game's main thread; pipe IO waits on the background
@@ -82,8 +109,15 @@ namespace ArtOfSimRally.Testing
         public void Dispose()
         {
             stopping = true;
-            try { current?.Dispose(); } catch { }
-            thread.Join(200);
+            stopped.Set();
+            // Repeated cancellation covers the race between checking 'stopping'
+            // and entering native IO. The worker alone disposes the pipe.
+            for (int i = 0; i < 20 && thread.IsAlive; i++)
+            {
+                lock (workerLock)
+                    if (workerHandle != IntPtr.Zero) CancelSynchronousIo(workerHandle);
+                thread.Join(10);
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-<PropertyGroup><TargetFramework>net48</TargetFramework><LangVersion>latest</LangVersion><AssemblyName>ArtOfSimRally.DevRecorder</AssemblyName><Version>0.2.5.2</Version><TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+<PropertyGroup><TargetFramework>net48</TargetFramework><LangVersion>latest</LangVersion><AssemblyName>ArtOfSimRally.DevRecorder</AssemblyName><Version>0.2.5.3</Version><TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 <GameDir Condition="'$(GameDir)' == ''">D:\Program Files (x86)\Steam\steamapps\common\artofrally</GameDir><ManagedDir>$(GameDir)\artofrally_Data\Managed</ManagedDir></PropertyGroup>
 <ItemGroup>
 <Compile Include="../Common/ArtifactHash.cs" Link="ArtifactHash.cs" />

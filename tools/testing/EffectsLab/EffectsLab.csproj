@@ -4,7 +4,8 @@
     <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <ItemGroup>
+<ItemGroup>
+<ProjectReference Include="../Replay/Replay.csproj" ReferenceOutputAssembly="false" />
     <Reference Include="Dbce.Wheel.Ffb"><HintPath>../../../lib/toolkit/dotnet/Dbce.Wheel.Ffb.dll</HintPath></Reference>
     <Reference Include="Dbce.Wheel.Telemetry"><HintPath>../../../lib/toolkit/dotnet/Dbce.Wheel.Telemetry.dll</HintPath></Reference>
   </ItemGroup>

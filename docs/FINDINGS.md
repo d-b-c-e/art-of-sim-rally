@@ -10,6 +10,12 @@ the source of truth and don't repeat the work.
 
 ## Menu quit addendum — 2026-09-10 local time
 
+**2026-09-11 follow-up:** production now intercepts menu Quit too, so output
+release does not depend on a pending developer recording. Actual isolated Unity
+Mono reproduced the old probe's blocked pipe/cleanup hang and the one-unit
+float-to-int capture mismatch. Fixed teardown and explicit replay conversion
+contracts pass. See [the evidence](reviews/2026-09-11-bug-follow-up.md).
+
 In game build 17584229, `ExitGame.Exit` calls
 `Process.GetCurrentProcess().Kill()` outside the editor. The ordinary Quit
 button therefore bypasses Unity shutdown callbacks. A recording held only in

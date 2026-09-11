@@ -9,6 +9,9 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Actual Unity Mono compatibility tests in the local RC gate, recorded-drive
+  regression corpus and landing-envelope studies without hardware output.
+
 - Separate developer captures now include contact, suspension and world/local
   motion alongside force. Offline analysis reports landing/slide candidates and
   road context, with legacy capture compatibility and corruption checks. This
@@ -19,6 +22,14 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   traces or identify the cause of a hitch.
 
 ### Fixed
+
+- Defer FFB startup until an owned, focused game window is stable; retry failed
+  acquisition at most five times while idle, preserving wheel/shifter identity.
+- Release force/input and park telemetry before the game's process-killing
+  menu Quit, including without the developer probe.
+- Developer probe: cancel blocking control-pipe IO and close the worker on
+  shutdown; preserve failed saves for retry. Replay now verifies Mono's exact
+  float-to-native conversion without changing steering arithmetic or tolerances.
 
 - Developer probe: fix Unity Mono control-pipe startup and intercept the game's
   process-killing Quit action to release outputs/save pending captures first.

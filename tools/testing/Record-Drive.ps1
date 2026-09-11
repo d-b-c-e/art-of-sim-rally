@@ -17,6 +17,7 @@ try {
     $writer.WriteLine($Command.ToUpperInvariant())
     $reply = $reader.ReadLineAsync()
     if (-not $reply.Wait(7000)) { throw 'No reply from probe. Query Status before retrying; the command may have completed.' }
+    if ($null -eq $reply.Result) { throw 'Probe disconnected without a reply (the game may have exited). Check the saved captures before retrying.' }
     if (-not $reply.Result.StartsWith('OK ')) { throw $reply.Result }
     Write-Output $reply.Result.Substring(3)
 }

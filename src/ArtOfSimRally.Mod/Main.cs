@@ -34,6 +34,7 @@ namespace ArtOfSimRally.Mod
 
         private static Harmony _harmony;
         private static UnityModManager.ModEntry _modEntry;
+        private static readonly FfbReconnect ForceReconnect = new FfbReconnect();
 
         /// <summary>Referenced by <c>EntryMethod</c> in Info.json.</summary>
         public static bool Load(UnityModManager.ModEntry modEntry)
@@ -71,9 +72,10 @@ namespace ArtOfSimRally.Mod
 
             FfbNative.Load(modEntry.Path);
             if (Settings.ForceFeedbackEnabled)
-                // modEntry.Path IS the mod folder; do not take its parent.
-                FfbNative.Initialise(modEntry.Path,
-                                     Settings.PreferredDevice, Settings.PreferredDeviceIndex, Settings.PreferredDeviceGuid);
+            {
+                ForceReconnect.Request();
+                FfbNative.Waiting();
+            }
 
             try
             {
@@ -110,6 +112,7 @@ namespace ArtOfSimRally.Mod
         private static bool OnToggle(UnityModManager.ModEntry modEntry, bool value)
         {
             Enabled = value;
+            if (value && Settings.ForceFeedbackEnabled && !FfbNative.Ready) ForceReconnect.Request();
             if (!value)
             {
                 CameraKeys.Cancel();
@@ -146,14 +149,38 @@ namespace ArtOfSimRally.Mod
         public static bool ReopenForceFeedback()
         {
             if (_modEntry == null || Settings == null || !Settings.ForceFeedbackEnabled) return false;
+            ForceReconnect.Request();
+            FfbNative.Waiting();
+            return false; // The idle watchdog performs the actual acquisition.
+        }
+
+        internal static void RecoverForceFeedback()
+        {
+            if (!ForceReconnect.Pending || _modEntry == null || Settings == null) return;
+            if (!ForceReconnect.TryBegin(Time.realtimeSinceStartup,
+                Enabled && Settings.ForceFeedbackEnabled, GameState.IsDriving,
+                WheelInput.Assigning.HasValue, FfbNative.FocusedGameWindow())) return;
             // Reader slots may share the old FFB handle. Reopen them after the
             // device switch, and release nonexclusive readers before acquiring FFB.
             WheelInput.Close();
-            bool ready = FfbNative.Reinitialise(_modEntry.Path,
-                Settings.PreferredDevice, Settings.PreferredDeviceIndex, Settings.PreferredDeviceGuid);
-            if (Enabled && Settings.WheelInputEnabled) WheelInput.Open();
-            return ready;
+            Shifter.Close();
+            try
+            {
+                ForceReconnect.Complete(FfbNative.Reinitialise(_modEntry.Path,
+                    Settings.PreferredDevice, Settings.PreferredDeviceIndex, Settings.PreferredDeviceGuid));
+                if (!FfbNative.Ready && !ForceReconnect.Pending)
+                    ModLog.Warning("FFB recovery exhausted. Pause and select the wheel again to retry.");
+            }
+            catch (Exception ex) { ModLog.Warning("FFB recovery failed: " + ex.Message); }
+            finally
+            {
+                if (Enabled && Settings.WheelInputEnabled) WheelInput.Open();
+                if (Enabled && Settings.ShifterEnabled && Settings.ShifterDeviceIndex >= 0)
+                    Shifter.Open(Settings.ShifterDeviceIndex);
+            }
         }
+
+        internal static void CancelForceRecovery() => ForceReconnect.Cancel();
 
         /// <summary>Persists settings changed outside the panel, e.g. by the camera hotkeys.</summary>
         public static bool SaveSettings()

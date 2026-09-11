@@ -21,9 +21,22 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+**2026-09-11 update:** KI-28 has focused-window/idle acquisition recovery; the
+shipping mod now releases outputs before menu Quit. Probe 0.2.5.3 corrects a
+shutdown hang reproduced with actual Mono (KI-30). KI-29's two local DSS gauge
+screens now have stopped-game zero bindings, awaiting dashboard reload/physical
+retest. RC5's failed attended receipt remains unchanged. See
+[current fixes and evidence](reviews/2026-09-11-bug-follow-up.md).
+
 ### KI-31 — First saved Unity capture fails exact offline integer replay
 
-**Reproduced with RC5's first saved jump drive; tooling reconciliation pending.**
+**Resolved in development tooling, 2026-09-11; original observation below.**
+The isolated actual-Mono runner matches all 8,974 commands. Replay now checks
+recorded-float conversion exactly with an explicit runtime contract, preserves
+the original arithmetic tolerance, and still rejects one-unit command edits.
+The unchanged capture is promoted to `results/regression-corpus/index.json`.
+
+**Original RC5 finding:**
 Strict .NET 8 replay expects 4,124 at force row 5,892, but the observed native
 command is 4,123. It is the only integer mismatch among 8,974 rows. All capture
 hashes/counts and motion alignment checks pass; force delivery rejected no calls.
@@ -33,10 +46,8 @@ Frozen legacy and toolkit arithmetic agree exactly offline, with at most
 The recorded float 0.4123999774456024 multiplied by 10,000 at double precision
 truncates to 4,123; rounding the product to single precision first yields 4,124.
 Double-product conversion of recorded outputs matches every observed integer.
-This points to Mono/offline intermediate precision, but the runtime contract
-needs a focused regression before changing replay. No tolerance was relaxed or
-force tune changed. Capture remains diagnostic-only, excluded from the approved
-corpus. [Full evidence and landing analysis](reviews/2026-09-10-first-jump-capture.md).
+Actual Mono now confirms this conversion contract. No tolerance was relaxed or
+force tune changed. [Original evidence and landing analysis](reviews/2026-09-10-first-jump-capture.md).
 
 ### KI-30 — Alt+F4 hangs with the developer probe installed
 
@@ -49,8 +60,10 @@ hang report was found in the checked event window.
 
 Keep separate from KI-27's process-kill menu action. Investigate probe pipe/thread
 shutdown and save duration, then compare the same Alt+F4 path without the probe.
-The blocking Mono control pipe is a hypothesis, not an established cause. Do not
-dismiss it as harmless or call ordinary shutdown verified end-to-end.
+The old control pipe now reproduces a cleanup hang under isolated Unity Mono;
+the corrected cancellation/teardown passes listening, reading and queued-command
+cases. This establishes a hang mechanism, not the sole cause of the owner's
+specific run. Do not call ordinary game shutdown verified end-to-end.
 
 ### KI-29 — Gauges retain finish-line speed after stage end and exit
 
@@ -82,10 +95,10 @@ turned it off.
 
 The supplied foreground window was outside the game process, so native code
 selected an own-process window. The failure suggests startup window/focus timing;
-which window became invalid still needs confirmation. Investigate deferring
-initial acquisition until the game has a valid focused window, plus bounded idle
-recovery for transient acquisition errors. Release nonexclusive wheel readers
-before retrying; preserve strict device identity. Current explicit retry is the
+which window became invalid still needs confirmation. Development now defers
+initial acquisition until a valid owned foreground window is stable, with five
+idle attempts at five-second intervals. Wheel/shifter readers close before
+acquisition and reopen using saved identity. Current explicit retry is the
 FFB Enabled off/on control or wheel reselection while paused; hardware recovery
 from this particular failure has not been tested. Native window/lifecycle changes,
 if needed, belong upstream. FFB lifecycle is marked failed in RC5's attended gate.
@@ -103,7 +116,8 @@ The developer probe now prefixes that menu action: if a capture is pending, it
 calls the mod's normal output shutdown, whose probe postfix writes the capture.
 The kill is allowed only once the buffers are saved; a release/save failure
 cancels that quit and logs the retained-capture status for an explicit Stop retry.
-No capture means the menu action is unchanged. The release mod is unchanged.
+The development shipping mod also releases outputs on this menu action, with
+or without a capture; the probe remains responsible only for saving/cancellation.
 Tests cover no-op exit, failed release/write, missing save, successful retry and
 actual Harmony attachment to ExitGame.Exit. The new probe loads in Unity and
 explicit START/STOP produced a menu-only capture with verified hashes. An abandoned

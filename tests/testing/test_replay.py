@@ -25,6 +25,7 @@ class ReplayTests(unittest.TestCase):
                        "2,0,8,8.5,40,11500,0.3,0,0.5,0,0,0,0"]
         self.receipt = ET.Element("capture", schema="2", complete="true", origin="synthetic")
         ET.SubElement(self.receipt, "modSha256").text = "protocol-fixture"
+        ET.SubElement(self.receipt, "forceQuantization").text = "truncate-f32-product@1"
         self.write()
 
     def write(self):
@@ -88,7 +89,31 @@ class ReplayTests(unittest.TestCase):
 
     def test_wrong_device_force_rejected(self):
         cells = self.forces[1].split(","); cells[11] = "1"; self.forces[1] = ",".join(cells); self.write()
-        self.assertIn("device magnitude mismatch", self.run_replay(expected=1))
+        self.assertIn("output/device conversion mismatch", self.run_replay(expected=1))
+
+    def test_exact_conversion_at_mono_boundary(self):
+        # A constant .41239998 force is reachable using this reference/gain.
+        self.forces = [self.forces[0],
+                       "1,0.41239998,0,1,40,1,1,0,0,0,0.41239998,4123,0",
+                       "2,0.41239998,0,1,40,1,1,0,0,0.41239998,0.41239998,4123,0"]
+        self.receipt.find("forceQuantization").text = "truncate-f64-product@1"
+        self.write()
+        self.assertEqual(self.run_replay()["detail"]["runtimeRoundingDifferences"], 2)
+        # Even a one-unit command edit fails; no +/-1 tolerance was introduced.
+        self.forces[1] = self.forces[1].replace(",4123,", ",4124,"); self.write()
+        self.assertIn("output/device conversion mismatch", self.run_replay(expected=1))
+
+    def test_fractional_device_rejected(self):
+        cells = self.forces[1].split(","); cells[11] = "0.5"; self.forces[1] = ",".join(cells); self.write()
+        self.assertIn("invalid native magnitude", self.run_replay(expected=1))
+
+    def test_unknown_runtime_rejected(self):
+        self.receipt.find("forceQuantization").text = "guess"; self.write()
+        self.assertIn("Unknown force delivery contract", self.run_replay(expected=1))
+
+    def test_unknown_legacy_runtime_rejected(self):
+        self.receipt.remove(self.receipt.find("forceQuantization")); self.receipt.set("origin", "game"); self.write()
+        self.assertIn("needs a verified force delivery contract", self.run_replay(expected=1))
 
     def test_invalid_epoch_rejected(self):
         cells = self.forces[1].split(","); cells[12] = "-1"; self.forces[1] = ",".join(cells); self.write()

@@ -138,6 +138,10 @@ internal static class Program
                     IPEndPoint peer = null; byte[] packet = listener.Receive(ref peer);
                     Check(packet.Length == 324 && packet[323] == (byte)'R', "loopback packet format/sentinel mismatch");
                     Check(BitConverter.ToInt32(packet, 0) == 0, "park did not clear IsRaceOn");
+                    Check(BitConverter.ToSingle(packet, 256) == 0, "park retained finish speed");
+                    // All data fields except the timestamp and sentinel must be
+                    // zero. This verifies sender behavior, not a gauge's UI.
+                    Check(packet.Take(4).Concat(packet.Skip(8).Take(315)).All(b => b == 0), "park retained live telemetry channels");
                 }
                 Check((long)pump.GetProperty("PacketsSent", Static).GetValue(null) == 3, "park did not send three packets");
                 Check((bool)connect.Invoke(null, new[] { cfg }) && (long)pump.GetProperty("PacketsSent", Static).GetValue(null) == 3, "unchanged target recreated socket");

@@ -84,6 +84,7 @@ namespace ArtOfSimRally.Mod
                 // the control is first used, which is the opening seconds of a
                 // stage; saving it there could contribute to the reported KI-5 hitch.
             }
+            Main.RecoverForceFeedback();
             TelemetryPump.Prepare();
             // Retry failed writes at most once per five seconds, only while idle.
             WheelInput.FlushLearnedRanges();
@@ -117,6 +118,7 @@ namespace ArtOfSimRally.Mod
         /// <summary>Zeroes the wheel, parks telemetry, and releases both.</summary>
         public static void Shutdown(bool unloading = false)
         {
+            Main.CancelForceRecovery();
             // Order matters: park telemetry while the socket is still open, and
             // zero the wheel before releasing the device, or the last non-zero
             // force can remain latched in the driver.

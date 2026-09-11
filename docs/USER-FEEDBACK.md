@@ -1,5 +1,16 @@
 # User feedback and support follow-up
 
+## GitHub audit — 2026-09-11 UTC
+
+One open issue, [#1](https://github.com/d-b-c-e/art-of-sim-rally/issues/1), with
+the reporter's existing PS5-unplug workaround comment. No new issue reports or
+PRs, and no maintainer acknowledgment. Read-only audit; nothing posted or closed.
+
+**Unsent draft:** Thanks for the follow-up—good to hear unplugging the PS5 pad
+resolved it. I'm keeping this open while we narrow down the controller/camera
+interaction. If it happens again on 0.2.4, please attach a fresh support file and
+mention whether the PS5 pad and Nexus camera mod were active.
+
 Recorded 2026-09-08 UTC after publishing 0.2.3. Reports describe their own builds
 and setups; they are not all tests of 0.2.3. Implementation work is ordered in
 [OVERNIGHT-QUEUE.md](OVERNIGHT-QUEUE.md); defects remain in

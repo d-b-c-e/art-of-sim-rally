@@ -75,6 +75,21 @@ static class Program
     }
     static void Pipe()
     {
+        foreach (string state in new[] { "listening", "reading", "queued" })
+        {
+            using var blocked = new ControlServer("AOSR-stop-" + Guid.NewGuid().ToString("N"));
+            string blockedName = (string)typeof(ControlServer).GetField("name", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.GetValue(blocked)!;
+            using var connection = new NamedPipeClientStream(".", blockedName, PipeDirection.InOut);
+            if (state != "listening")
+            {
+                connection.Connect(2000);
+                if (state == "queued") { var bytes = System.Text.Encoding.UTF8.GetBytes("START\n"); connection.Write(bytes); connection.Flush(); }
+            }
+            Thread.Sleep(50);
+            var elapsed = System.Diagnostics.Stopwatch.StartNew(); blocked.Dispose();
+            Check(!blocked.IsAlive && elapsed.ElapsedMilliseconds < 1000, "pipe shutdown hung while " + state);
+            blocked.Pump(_ => throw new Exception("cancelled shutdown command executed"));
+        }
         string name = "AOSR-test-" + Guid.NewGuid().ToString("N");
         using var server = new ControlServer(name);
         foreach (string command in new[] { "START", "STATUS", "STOP", "INVALID" })

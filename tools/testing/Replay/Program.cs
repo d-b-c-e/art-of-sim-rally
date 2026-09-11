@@ -21,6 +21,15 @@ static class Program
         Check(schema >= 1 && schema <= 3, "unknown capture schema");
         Check((string?)manifest.Attribute("complete") == "true", "truncated/incomplete capture");
         Check(!string.IsNullOrWhiteSpace((string?)manifest.Element("modSha256")), "missing build identity");
+        string? deliveryContract = (string?)manifest.Element("forceQuantization");
+        if (deliveryContract == null)
+        {
+            // This legacy Windows Unity capture was reproduced with its actual
+            // Mono DLL in the isolated RuntimeCompatibility runner.
+            if ((string?)manifest.Attribute("origin") == "synthetic") deliveryContract = ForceDelivery.SingleProduct;
+            else if ((string?)manifest.Element("unity") == "2019.4.38f1") deliveryContract = ForceDelivery.ExtendedProduct;
+            else throw new Exception("Legacy game capture needs a verified force delivery contract");
+        }
         var frames = File.ReadAllLines(Path.Combine(directory, "frames.csv"));
         var forces = File.ReadAllLines(Path.Combine(directory, "forces.csv"));
         foreach (string kind in new[] { "frames", "forces" })
@@ -34,7 +43,7 @@ static class Program
         Check(forces[0] == "time_s,fy_n,slip_deg,ideal_deg,speed_kmh,reference_n,gain,invert,smoothing,previous,output,device" + (schema >= 2 ? ",epoch" : ""), "force schema mismatch");
         float time = -1, baselineState = 0, toolkitState = 0, maxFloatDelta = 0;
         var forceRows = new List<float[]>();
-        int epoch = -1, resets = 0;
+        int epoch = -1, resets = 0, runtimeRoundingDifferences = 0;
         foreach (string line in forces.Skip(1))
         {
             var p = line.Split(',').Select(F).ToArray();
@@ -55,7 +64,9 @@ static class Program
             Same(toolkitState, baselineState, "before/after force comparison");
             Same(toolkitState, p[10], "offline force replay");
             Check((int)(toolkitState * 10000) == (int)(baselineState * 10000), "adoption changed device magnitude");
-            Check((int)(toolkitState * 10000) == p[11], "offline device magnitude mismatch");
+            Check(p[11] == (int)p[11] && Math.Abs(p[11]) <= 10000, "invalid native magnitude");
+            Check(ForceDelivery.Quantise(p[10], deliveryContract) == p[11], "recorded output/device conversion mismatch");
+            if ((int)(toolkitState * 10000) != p[11]) runtimeRoundingDifferences++;
             forceRows.Add(p);
         }
         var timings = new List<float>(); var first15 = new List<float>(); var later = new List<float>();
@@ -89,6 +100,8 @@ static class Program
             captureBuild = (string?)manifest.Element("build"),
             maxFloatDelta,
             deviceMismatches = 0,
+            deliveryContract,
+            runtimeRoundingDifferences,
             resetBoundaries = resets,
             stateful = schema >= 2,
             signals = schema == 3 ? SignalAnalysis.Read(directory, manifest, forceRows) : new { available = false, reason = "legacy capture has no motion/contact observations" },

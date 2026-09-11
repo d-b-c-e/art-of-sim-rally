@@ -90,7 +90,12 @@ namespace ArtOfSimRally.Mod
         public bool Invert=false, DiagnosticLogging=false;
     }
     internal static class Calls { public static List<string> Log = new List<string>(); }
-    internal static class Main { public static Settings Settings = new Settings(); public static bool Enabled=true, OtherCameraModLoaded=false; }
+    internal static class Main
+    {
+        public static Settings Settings = new Settings(); public static bool Enabled=true, OtherCameraModLoaded=false;
+        public static void RecoverForceFeedback() => Calls.Log.Add("force-recover");
+        public static void CancelForceRecovery() { }
+    }
     internal static class GameState { public static bool IsDriving=false, IsPlayerView=true; }
     internal static class ModLog { public static void Info(string value) { } }
     internal static class CameraTuner

@@ -147,6 +147,7 @@ namespace ArtOfSimRally.Testing
         private static void Shutdown()
         {
             if (Session.Pending) { Session.Stop(false); log?.Invoke(Session.Status); }
+            if (!Session.Pending) { server?.Dispose(); server = null; }
             motionCar = null; motionBody = null;
         }
         private static bool BeforeGameExit()

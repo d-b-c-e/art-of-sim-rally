@@ -11,6 +11,17 @@ namespace ArtOfSimRally.Mod
     {
         private const string FileName = "UnityForceFeedback.dll";
         [DllImport("user32")] private static extern IntPtr GetForegroundWindow();
+        [DllImport("user32")] private static extern uint GetWindowThreadProcessId(IntPtr window, out uint process);
+        [DllImport("user32")] private static extern bool IsWindow(IntPtr window);
+        [DllImport("kernel32")] private static extern uint GetCurrentProcessId();
+        internal static IntPtr FocusedGameWindow()
+        {
+            IntPtr window = GetForegroundWindow();
+            if (window == IntPtr.Zero || !IsWindow(window)) return IntPtr.Zero;
+            GetWindowThreadProcessId(window, out uint process);
+            return process == GetCurrentProcessId() ? window : IntPtr.Zero;
+        }
+        internal static void Waiting() => Status = "Waiting for a focused game window while paused or in menus.";
         public const int ForceMax = 10000;
         public static bool Ready => WheelFfbNative.Ready;
         public static string RequestedPath { get; private set; } = "(no preload requested)";
@@ -37,6 +48,8 @@ namespace ArtOfSimRally.Mod
                                       int preferredIndex = -1, string preferredGuid = "")
         {
             if (Ready) return true;
+            IntPtr window = FocusedGameWindow();
+            if (window == IntPtr.Zero) { Waiting(); return false; }
             if (!Load(modDir)) return false;
             Guid? identity = null;
             if (!string.IsNullOrEmpty(preferredGuid))
@@ -50,7 +63,7 @@ namespace ArtOfSimRally.Mod
                 identity = parsed;
             }
             bool ready = WheelFfbNative.Initialise(preferredDevice ?? "", preferredIndex,
-                unchecked((int)GetForegroundWindow().ToInt64()), identity);
+                unchecked((int)window.ToInt64()), identity);
             Status = ready ? "Connected" : WheelFfbNative.LastError;
             if (ready)
             {

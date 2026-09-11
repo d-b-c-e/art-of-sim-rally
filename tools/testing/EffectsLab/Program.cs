@@ -24,6 +24,7 @@ static class Program
     {
         try
         {
+            if (args.Length == 3 && args[0] == "--capture") return CapturedLanding.Run(args[1], args[2]);
             string directory = Path.GetFullPath(args.Length == 1 ? args[0] : Path.Combine("results", "effects-study-" + Guid.NewGuid().ToString("N")));
             if (Directory.Exists(directory)) throw new IOException("Use a new output directory; preserve previous evidence.");
             Directory.CreateDirectory(directory);

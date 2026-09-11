@@ -83,11 +83,18 @@ namespace ArtOfSimRally.Testing
                 new XElement("recorderSha256", ArtifactHash.FileHash(typeof(SubjectAccess).Assembly.Location)),
                 new XElement("forceLibrarySha256", ArtifactHash.FileHash(forceAssembly.Location)),
                 new XElement("game", game), new XElement("unity", unity),
+                new XElement("forceQuantization", Quantization()),
                 new XElement("native", ArtOfSimRally.Mod.NativeDiagnostics.Describe("UnityForceFeedback.dll")));
             var value = settings(); var fields = new XElement("settings");
             foreach (var field in value.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
                 fields.Add(new XElement("field", new XAttribute("name", field.Name), Convert.ToString(field.GetValue(value), CultureInfo.InvariantCulture)));
             result.Add(fields); return result;
+        }
+        // Parse at runtime to avoid constant folding the boundary observation.
+        internal static string Quantization()
+        {
+            float boundary = float.Parse("0.41239998", CultureInfo.InvariantCulture);
+            return (int)(boundary * 10000) == 4123 ? "truncate-f64-product@1" : "truncate-f32-product@1";
         }
     }
 }

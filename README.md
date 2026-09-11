@@ -15,7 +15,8 @@ properly on a racing wheel.
 
 **Stable release: 0.2.4.** The [0.2.5 development candidate](docs/reviews/2026-09-09-overnight-025.md)
 adds USB identity/recovery fixes, previous-session diagnostics and lifecycle
-corrections. It passes offline tests; new hardware checks are pending.
+corrections. [Attended follow-up fixes](docs/reviews/2026-09-11-bug-follow-up.md)
+address startup FFB and exit cleanup; hardware retests are pending.
 
 1. Install [Unity Mod Manager](https://www.nexusmods.com/site/mods/21) and point
    it at art of rally. The game is already in its supported list.
@@ -48,7 +49,8 @@ destination; the 0.2.5 candidate defers device/connection setup until idle.
 **Force feedback** — pick your wheel from the **Wheel** dropdown, then set
 **Strength** (0–100; 50 is the tuned default, and the right starting point). If two devices share a name, choose one
 and turn the wheel — if nothing happens, choose the other. Switching wheels takes
-effect immediately. If the wheel pulls the wrong way, tick *Invert direction*.
+effect immediately in stable 0.2.4; development 0.2.5 waits for a focused game
+window while idle. If the wheel pulls the wrong way, tick *Invert direction*.
 
 **Shifter** — tick *Use a separate shifter*, choose the device, and bind each
 gear: click **set**, then move the lever into that gate. H-pattern and sequential

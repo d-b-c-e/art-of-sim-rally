@@ -39,11 +39,18 @@ third-party binaries, nothing that would force the repo private.
 | `docs/DEVELOPMENT-CAPTURE.md` | Separate probe schema, motion/contact units, standalone analysis and interpretation limits. |
 | `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP, RELEASING |
 
-## Status (2026-09-09) — do not overstate this
+## Status (2026-09-11) — do not overstate this
 
 **Attended update 2026-09-10:** installed RC5 failed FFB startup (KI-28) and
 telemetry gauge clearing (KI-29); Alt+F4 hang with probe remains unexplained
 (KI-30). The exact manual gate records failures. Resolve/retest before release.
+
+Follow-up fixes: focused owned-window FFB acquisition with five idle retries,
+production cleanup before process-killing menu Quit, and probe 0.2.5.3 control
+thread cancellation. The old probe reproduces a Mono cleanup hang in isolation;
+corrected listening/reading/queued-command shutdown passes. Local DSS round-gauge
+idle bindings were repaired; SimHub reload and physical retest are pending.
+See `docs/reviews/2026-09-11-bug-follow-up.md` and the deployment receipt.
 
 Published stable remains **0.2.4**. Current development is **0.2.5**: strict USB
 axis/shifter identity and idle reader recovery (KI-21/KI-23), last-session
@@ -65,8 +72,11 @@ installed; explicit menu-only saving and an ordinary Unity shutdown save are
 verified. The second run was abandoned with zero force rows, excluded from the
 corpus. The 21:40 retry was saved explicitly and hash-verified: 8,974 aligned
 motion/force rows, one landing matching the owner's note, no delivery rejections.
-Strict integer replay differs by one unit at one row (KI-31), so the preserved
-capture remains diagnostic-only. Nothing is recording; the game is closed.
+KI-31's one-unit difference is reproduced by actual Mono's intermediate numeric
+precision. Runtime-aware replay now passes without changing any capture bytes;
+`results/regression-corpus/index.json` is the first real regression corpus.
+New captures include a force-conversion contract; exact delivery checks remain.
+Nothing is recording; the game is closed.
 See docs/reviews/2026-09-10-first-jump-capture.md. Pause/Stop and verify files before
 quitting. Broader signal-ordering and probe-overhead comparisons remain pending. Read
 `docs/DEVELOPMENT-CAPTURE.md` before interpreting landing/slide candidates.
