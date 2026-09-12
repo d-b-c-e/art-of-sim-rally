@@ -1,5 +1,48 @@
 # User feedback and support follow-up
 
+## T300/TSS setup questions — received 2026-09-12
+
+The user enjoys the new version and acknowledges the stutter work; exact build
+and an explicit stutter retest result were not supplied. The separate USB TSS
+appears as "no profile" in the game's device view and can bind shifter button 2,
+but the user still tries to bind the handbrake through stock controls (KI-13).
+They ask for the support-log workflow, larger explanatory text and an explanation
+of Smoothing 0.20. Font scaling is a confirmed consumer UI defect (KI-32).
+
+Code review confirms only assigned direct-input channels override the car's
+inputs; both diagnostic checkboxes edit the same setting. The pinned toolkit's
+filter retains the smoothing fraction of the prior force. Shifter button
+assignment does not prove or disprove analog-axis availability on this TSS.
+No new hardware result or message sent is implied.
+
+**Unsent reply draft (font correction is not in published 0.2.4):**
+
+Thanks for the feedback! Here's how those work:
+
+1. **TSS handbrake:** pause, open Ctrl+F10 → **Wheel input (direct)** and enable
+   **Read the wheel directly**. With the lever released, click **Assign** beside
+   **Handbrake**, then pull it through its full travel, keeping other controls
+   still. Leave steering/pedal rows unassigned if those already work. This reads
+   the separate USB device directly, so you don't need to assign it in the game's
+   controls. "No profile" doesn't prevent this. Check that Handbrake moves
+   gradually from 0 released to 1 pulled; use **Flip** if reversed. If the lever
+   also shifts gears, clear its shift bindings or disable **Use a separate
+   shifter**. If it won't assign or only shows 0/1, send a support file and the
+   readings at rest, half pull and full pull so we can check its axis reporting.
+2. **Logs:** yes, that's the order. Enable **Log detail for support** in either
+   section (they're the same switch), reproduce briefly, pause, then choose
+   **Devices and troubleshooting → Create support file on Desktop** before
+   restarting. Send that generated text file, then turn detailed logging off.
+   Normal errors are still collected when detailed logging is off.
+3. **Small text:** you found a bug: the explanations had a fixed font size.
+   I've corrected it in the next candidate so it follows Mod Manager's scale;
+   the fix isn't in the public download yet.
+4. **Smoothing:** it softens rapid changes in wheel force. At 0.20, each update
+   blends 20% of the previous force with 80% of the new one. Higher values reduce
+   rattle/notchiness but soften bumps and make feedback less immediate. Zero is
+   unfiltered. It affects FFB, not steering input; use Strength to lighten the
+   wheel overall.
+
 ## GitHub audit — 2026-09-11 UTC
 
 One open issue, [#1](https://github.com/d-b-c-e/art-of-sim-rally/issues/1), with

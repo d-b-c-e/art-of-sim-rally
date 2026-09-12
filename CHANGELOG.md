@@ -23,6 +23,10 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Settings explanations and section headings inherit Mod Manager's current font
+  scale. Clarify separate USB handbrake assignment, the shared support-log switch
+  and the force-smoothing tradeoff.
+
 - Defer FFB startup until an owned, focused game window is stable; retry failed
   acquisition at most five times while idle, preserving wheel/shifter identity.
 - Release force/input and park telemetry before the game's process-killing

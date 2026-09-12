@@ -33,12 +33,19 @@ namespace ArtOfSimRally.Mod
         private static bool _openTrouble;
 
         private static GUIStyle _wrap;
-        private static GUIStyle Wrap => _wrap ?? (_wrap = new GUIStyle(GUI.skin.label) { wordWrap = true });
+        private static GUIStyle _help;
+        private static GUIStyle Wrap => _wrap;
 
         public static void Draw()
         {
             var cfg = Main.Settings;
             if (cfg == null) return;
+
+            // UMM can replace its font when the user changes scale. Inherit the
+            // current skin each draw instead of pinning a pixel size or old font.
+            _wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
+            _help = new GUIStyle(_wrap);
+            _help.normal.textColor = new Color(0.65f, 0.65f, 0.65f);
 
             var keyEvent = Event.current;
             if (keyEvent.type == EventType.KeyDown && CameraKeys.HandleKey(cfg, keyEvent.keyCode,
@@ -107,7 +114,8 @@ namespace ArtOfSimRally.Mod
                 Panel.DrawWheelPicker();
 
                 cfg.Smoothing = Slider(cfg.Smoothing, 0f, 0.95f, "Smoothing",
-                    "0 is raw and detailed but noisy over rough surfaces.", "F2");
+                    "Softens rapid force changes: 0 is unfiltered; higher values reduce rattle but soften " +
+                    "bumps and delay the response. 0.20 is the default. This filters wheel force, not steering input.", "F2");
 
                 cfg.Invert = Toggle(cfg.Invert, "Invert direction",
                     "Turn on if the wheel pulls the wrong way.");
@@ -147,10 +155,9 @@ namespace ArtOfSimRally.Mod
 
             bool was = cfg.WheelInputEnabled;
             cfg.WheelInputEnabled = Toggle(cfg.WheelInputEnabled, "Read the wheel directly",
-                "For wheels the game's controls screen never responds to - Fanatec bases show up as " +
-                "two identical 'FANATEC Wheel' entries the game's input library cannot read. Steering " +
-                "and pedals are read straight from the device and fed to the car, bypassing that " +
-                "library. Menus still use the keyboard or a pad. Press Assign, then move the control.");
+                "Reads controls directly, including a handbrake on a separate USB device. Only assigned rows " +
+                "replace the game's bindings; leave working controls unassigned. Pause, release the control, " +
+                "press Assign on its row, then move it. Menus still use the keyboard or a pad.");
             if (was && !cfg.WheelInputEnabled) WheelInput.CancelAssign();
             if (!cfg.WheelInputEnabled) { End(); return; }
 
@@ -289,7 +296,8 @@ namespace ArtOfSimRally.Mod
 
             cfg.DiagnosticLogging = Toggle(cfg.DiagnosticLogging, "Log detail for support",
                 "For an intermittent problem: enable, reproduce briefly, pause, then create the file below before restarting. " +
-                "Turn off afterward. A support file also works with this off; it cannot recover earlier detailed traces.");
+                "This is the same switch as in Force feedback. Turn off afterward. A support file also works with this off; " +
+                "it cannot recover earlier detailed traces.");
 
             Panel.DrawInputStatus();
 
@@ -322,7 +330,6 @@ namespace ArtOfSimRally.Mod
             var header = new GUIStyle(GUI.skin.label)
             {
                 fontStyle = FontStyle.Bold,
-                fontSize = 14,
                 alignment = TextAnchor.MiddleLeft,
                 padding = new RectOffset(4, 4, 4, 4)
             };
@@ -377,9 +384,7 @@ namespace ArtOfSimRally.Mod
         // - so anything longer than a few words runs off the panel.
         private static void Help(string text)
         {
-            var style = new GUIStyle(GUI.skin.label) { wordWrap = true, fontSize = 11 };
-            style.normal.textColor = new Color(0.65f, 0.65f, 0.65f);
-            GUILayout.Label("      " + text, style);
+            GUILayout.Label("      " + text, _help);
         }
     }
 }

@@ -14,6 +14,10 @@ Turn detailed logging off afterward. Include build, driver/firmware, car/stage,
 approximate event time and other active mods. Log tails cannot recover an entire
 earlier drive or show why an FPS drop occurred.
 
+The **Log detail for support** checkboxes in **Force feedback** and **Devices
+and troubleshooting** control the same setting; either is sufficient. Attach
+the generated `art-of-sim-rally-support-*.txt` file from your Desktop.
+
 The 0.2.5 candidate retains a small diagnostic summary at idle/normal exit and
 includes it in the next support file as **previous session** evidence. Its build
 and timestamp may differ from the current session. A crash can lose measurements
@@ -82,7 +86,7 @@ Version 0.2.4 adds live values and fixes Flip/reopen/assignment failures
 (KI-15). If still using 0.2.3, prefer assigning from a released lever and using full
 travel; pedal Flip has a known defect. Live numeric values below are a 0.2.4 addition.
 
-1. Put the TSS in handbrake mode. Open Ctrl+F10 → **Wheel input (direct)** and
+1. Pause with the TSS in handbrake mode. Open Ctrl+F10 → **Wheel input (direct)** and
    enable **Read the wheel directly**.
 2. Release the lever, click **Assign** beside **Handbrake**, then pull it. Avoid
    moving other controls during assignment.
@@ -96,6 +100,10 @@ Actual TSS travel and braking response still await hardware confirmation. If it
 does not bind or shows only 0/1, create a support file and record the device mode,
 binding and displayed values at rest, partial pull and full pull.
 
+"No profile" describes the game's controller recognition, not whether direct
+input can read the TSS. The Shifter section binds buttons, so seeing "button 2"
+there alone does not establish whether the device also exposes an analog axis.
+
 ## The wheel steers the wrong way with direct input
 
 Press **Flip** on the Steer row (Ctrl+F10 → Wheel input (direct)). From 0.2.2
@@ -108,10 +116,22 @@ Use *Force feedback → Strength* to adjust force level; 50 is the default.
 Force fades in between 3 and 12 km/h. Smoothing controls how quickly force
 changes reach the wheel; keep it consistent when comparing builds.
 
+At the default **0.20**, each force update blends 20% of the previous output with
+80% of the new force. Zero is unfiltered. Higher values soften fast changes and
+rattle, but also soften bumps and add response delay. Smoothing filters wheel
+force, not steering input; it does not reduce a sustained force like Strength does.
+
 The current mod sends a constant steering-force signal. Lowering Strength lowers
 the detail in that signal too; independent road/landing/crash effects are not yet
 shipped. Telemetry sends data to external dashboards/shakers/motion apps and does
 not add vibration or alter the wheel force pipeline.
+
+## Settings explanations stay small when increasing Mod Manager scale
+
+Stable 0.2.4 fixes explanatory text at 11 pixels, regardless of UMM's scale.
+The 0.2.5 candidate removes that override and uses the current UMM font for
+explanations, headings and wrapped status text. No separate mod font option is
+needed. Visual testing at normal/enlarged scale is still pending (KI-32).
 
 ## Steering assist: does the mod temporarily replace the game's value?
 

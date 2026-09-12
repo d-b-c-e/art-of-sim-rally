@@ -21,6 +21,20 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-32 — Settings explanations ignore Mod Manager font scaling
+
+**Cosmetic; reported 2026-09-12, confirmed in source.** The T300/TSS user can
+enlarge ordinary settings text through UMM, but explanations stay small.
+`SettingsPanel.Help` forces an 11-pixel font; section headers also force 14 pixels.
+The wrapped status style is cached beyond UMM's font replacement.
+
+The 0.2.5 candidate now inherits the current label style for help and headers,
+and refreshes the wrapped/help styles each draw. Local UMM inspection confirms
+its scale setting replaces `GUI.skin.font`; no extra multiplier is needed.
+Visual confirmation at normal and enlarged scale remains pending. Stable 0.2.4
+still has the defect. Handbrake, logging and smoothing help is also clearer;
+input behavior, force arithmetic and saved settings are unchanged.
+
 **2026-09-11 update:** KI-28 has focused-window/idle acquisition recovery; the
 shipping mod now releases outputs before menu Quit. Probe 0.2.5.3 corrects a
 shutdown hang reproduced with actual Mono (KI-30). KI-29's two local DSS gauge
