@@ -39,7 +39,14 @@ third-party binaries, nothing that would force the repo private.
 | `docs/DEVELOPMENT-CAPTURE.md` | Separate probe schema, motion/contact units, standalone analysis and interpretation limits. |
 | `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP, RELEASING |
 
-## Status (2026-09-11) — do not overstate this
+## Status (2026-09-12) — do not overstate this
+
+RC7 (`8dfa61c5...clean`) is installed after all 16 local gates, including the
+real drive corpus. It corrects fixed-size settings help/headings (KI-32) and
+clarifies separate USB handbrake setup, logging and smoothing. Visual scale
+verification is pending. Settings and optional probe 0.2.5.3 were preserved;
+game stayed closed. Stable remains 0.2.4. Exact evidence is in
+`docs/LOCAL-DEPLOYMENT.md`; the latest unsent support draft is in USER-FEEDBACK.
 
 **Attended update 2026-09-10:** installed RC5 failed FFB startup (KI-28) and
 telemetry gauge clearing (KI-29); Alt+F4 hang with probe remains unexplained
@@ -50,7 +57,7 @@ production cleanup before process-killing menu Quit, and probe 0.2.5.3 control
 thread cancellation. The old probe reproduces a Mono cleanup hang in isolation;
 corrected listening/reading/queued-command shutdown passes. Local DSS round-gauge
 idle bindings were repaired and SimHub reloaded both displays; physical retest
-is pending. RC6 (`8ea54775...clean`) and separate probe 0.2.5.3 are installed after
+is pending. RC6 (`8ea54775...clean`) and separate probe 0.2.5.3 were installed after
 all 16 local gates, including the real drive corpus. Stable is still 0.2.4.
 See `docs/reviews/2026-09-11-bug-follow-up.md` and the deployment receipt.
 
@@ -69,8 +76,8 @@ The separate developer probe now records schema-3 motion/contact/suspension
 context, with standalone event/force analysis and schema-1/2 compatibility. It
 is not shipped or automatically installed. The owner's 2026-09-10 jump drive
 confirmed live observation, but the game's normal Quit killed the process before
-saving (KI-27); no usable drive capture was retained. Separate probe 0.2.5.2 is
-installed; explicit menu-only saving and an ordinary Unity shutdown save are
+saving (KI-27); no usable drive capture was retained. Separate probe 0.2.5.2
+introduced the quit guard; explicit menu-only saving and an ordinary Unity shutdown save are
 verified. The second run was abandoned with zero force rows, excluded from the
 corpus. The 21:40 retry was saved explicitly and hash-verified: 8,974 aligned
 motion/force rows, one landing matching the owner's note, no delivery rejections.

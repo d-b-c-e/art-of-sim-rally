@@ -1,5 +1,13 @@
 # Overnight investigation and implementation queue
 
+## Support follow-through — 2026-09-12
+
+T300/TSS setup questions have a code-checked unsent reply in USER-FEEDBACK.
+KI-32's font scaling defect is corrected in locally installed RC7, with clearer
+handbrake/logging/smoothing help. All 16 local gates including the drive corpus
+pass; normal/enlarged UMM font display needs a visual check. Existing launch/FFB,
+gauge clearing and quit checks below remain pending. Stable remains 0.2.4.
+
 ## Follow-through — 2026-09-11 UTC
 
 KI-28 focused-window idle recovery and production menu-Quit output release are

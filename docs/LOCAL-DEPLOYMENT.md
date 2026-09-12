@@ -8,6 +8,21 @@ publication and attended sign-off remain separate.
 
 ## Installed candidate — 0.2.5 work
 
+**0.2.5-rc.7** is installed as of 2026-09-12 16:44 UTC. It adds the KI-32 font
+scaling correction and clearer handbrake/logging/smoothing help to RC6.
+
+- Identity: `0.2.5-rc.7+8dfa61c5fb2212273059ec3714421c9e4fc7debe.clean`.
+- ZIP SHA-256: `948D410F34102C7739ECD5148E81EA8EEDE3A29250BEF7C16BFDAE5F9343E0F2`.
+- [All 16 gates passed, including the real drive corpus](../results/rc-0.2.5-rc.7-cf98987b0c984f4eb37175090bafa10f/automated.json).
+- [Installation receipt and RC6 backup](../results/support-questions-rc7-install-38dee4a087ec466c92ca750c9b2b800b/receipt.json).
+- Six mod payloads and the native plugin copy match the exact validated package.
+  Settings and the separate 0.2.5.3 probe were preserved byte-for-byte. The game
+  stayed closed; the Steam/Stream Deck installation target is unchanged.
+- Font scaling still needs an in-game visual check; all prior hardware gates
+  remain pending. No public release or support reply was sent. Stable is 0.2.4.
+
+## Previous candidate — RC6
+
 **0.2.5-rc.6** is installed as of 2026-09-11 03:34 UTC, from the exact package
 that passed all 16 local gates **including one real recorded drive**.
 

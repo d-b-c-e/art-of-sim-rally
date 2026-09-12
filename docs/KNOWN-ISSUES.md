@@ -35,6 +35,9 @@ Visual confirmation at normal and enlarged scale remains pending. Stable 0.2.4
 still has the defect. Handbrake, logging and smoothing help is also clearer;
 input behavior, force arithmetic and saved settings are unchanged.
 
+RC7 is installed after all 16 local gates including the recorded drive corpus;
+[exact package and receipt](LOCAL-DEPLOYMENT.md). Those checks do not render the UI.
+
 **2026-09-11 update:** KI-28 has focused-window/idle acquisition recovery; the
 shipping mod now releases outputs before menu Quit. Probe 0.2.5.3 corrects a
 shutdown hang reproduced with actual Mono (KI-30). KI-29's two local DSS gauge
