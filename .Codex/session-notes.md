@@ -1,6 +1,42 @@
 # Session Notes
 <!-- Overwritten each session; previous handoffs remain in git history. -->
 
+## Landing candidate installed — 2026-09-12 23:54 UTC
+
+- Owner requested landing-effect implementation/testing and asked about remaining
+  roadmap. They are available to test today. No attended result has arrived yet.
+- RC8 is installed from clean source `b9598f5cb6b0a48965b37f4f8d27f350fd59be49`.
+  All 16 local gates pass, including strict steering replay of the original drive
+  and 9,044 landing assertions. Exactly one landing at row 4230 matches the owner.
+  ZIP SHA-256: `90F3F0BD942FD6F446702BAF185842196090B54882D821AE737AE1046CDAFADB`.
+- Gate: results/rc-0.2.5-rc.8-669ae7f5aae140ca9e793fd9ad0b1781/automated.json.
+  Receipt/RC7 backup: results/landing-rc8-install-a1e5dbdfefd9432d98ebeea43f31b65d/receipt.json.
+  All payloads match; Settings.xml and separate probe 0.2.5.3 are unchanged.
+  Stream Deck Steam550320 still launches this installation. Game closed;
+  nothing recording, no nonzero wheel force applied by this work.
+- Landing vibration defaults OFF, independent strength 5 (cap 20), 25 Hz sine for
+  120 ms. Finite native duration, idle-only setup, focus/pause/quit release,
+  jitter/teleport/restart/stall rejection and counters are implemented/tested.
+  Old captures check steering only; periodic delivery is explicitly unobserved.
+- Toolkit task prepared isolated clean commit
+  `dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9` in
+  E:/Source/dbce-wheel-mod-toolkit-bursts, branch codex/finite-periodic-bursts.
+  Vendored pin is local+that commit.clean, managed 0.13.0/native 0.6.0. Upstream
+  local gates and physical R12 zero-output ABI smoke pass on x86/x64. No toolkit
+  publication/push occurred. Final mod packaging rejects local pins (verified);
+  official toolkit release/repin is needed before public mod publication.
+- Next: owner A/B same jump off/on at strength 5, diagnostic logging on, support
+  export while paused. Assess a single brief cue, no false triggers or steering
+  changes; check FFB startup/recovery, gauges at finish/quit, font scaling and
+  exit with/without probe. Full RC8 manual.json remains pending.
+- Remaining roadmap: RWD snapback/slip study; road/crash effects; TSS/Fanatec and
+  T300 setup; PS5/Nexus camera compatibility; measured hitch investigation;
+  Nexus distribution and richer developer captures. See docs/ROADMAP.md and
+  docs/LANDING-EFFECTS.md. Stable remains 0.2.4; no public support reply sent.
+- This entry supersedes historical installed versions/defect status below.
+  KI-31 is resolved by the verified Mono conversion contract, not widened replay
+  tolerance. The known drive is now in results/regression-corpus/index.json.
+
 ## Retry saved and analysed — 2026-09-10 local / 2026-09-11 UTC
 
 - **Recording stopped; game closed.** Explicit STOP saved 11,706 frame rows and

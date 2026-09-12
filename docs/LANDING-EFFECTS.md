@@ -46,6 +46,11 @@ after recovery; toggle the effect while paused to retry setup.
 
 ## Evidence and limits
 
+- Installed RC8 is the exact clean-source package from commit
+  `b9598f5cb6b0a48965b37f4f8d27f350fd59be49`. All 16 local gates passed, including
+  the preserved drive corpus and 9,044 landing assertions. See the
+  [gate and deployment receipt](LOCAL-DEPLOYMENT.md). No attended case is passed
+  by this result; the original drive predates the new effect.
 - Production detector, delivery policy and game adapter execute against fake
   device/game boundaries: 30/60/120 Hz transitions, jitter, partial wheel lift,
   spawn in flight, rollovers, resets, missing data, focus, effect-disable and
@@ -69,7 +74,8 @@ record each landing's air time, descent, magnitude and driver acceptance.
 ## Attended comparison
 
 1. Start with the installed candidate, usual steering tune and **Landing vibration
-   off**. Drive a familiar stage with a jump and note steering/landing feel.
+   off**. Enable **Log detail for support** for this short comparison. Drive a
+   familiar stage with a jump and note steering/landing feel.
 2. Pause. Enable **Force feedback → Landing vibration (experimental)**, leave
    **Landing strength at 5**, and wait for Ready. Repeat the same stage/jump.
 3. Confirm one short vibration at touchdown, with ordinary steering unchanged

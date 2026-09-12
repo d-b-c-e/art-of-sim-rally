@@ -41,7 +41,7 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-12) — do not overstate this
 
-Landing vibration is implemented for a new development candidate: opt-in,
+Landing vibration is implemented and installed in RC8: opt-in,
 independent 5% strength default (20% cap), three-cycle 25 Hz/120 ms native sine.
 Game detector rejects jitter/reset cases and matches the one real landing.
 Toolkit local pin `dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9.clean` is a validated
@@ -50,11 +50,13 @@ The native API now has finite bursts and all-effect focus/watchdog stopping.
 Publish/officially repin the toolkit before a public mod release; final packaging
 rejects local toolkit pins. See `docs/LANDING-EFFECTS.md`. Nonzero feel is pending.
 
-RC7 (`8dfa61c5...clean`) is installed after all 16 local gates, including the
-real drive corpus. It corrects fixed-size settings help/headings (KI-32) and
-clarifies separate USB handbrake setup, logging and smoothing. Visual scale
-verification is pending. Settings and optional probe 0.2.5.3 were preserved;
-game stayed closed. Stable remains 0.2.4. Exact evidence is in
+RC8 (`b9598f5c...clean`) is installed after all 16 local gates, including the
+real drive corpus and 9,044 landing assertions (one recorded event at row 4230).
+It includes RC7's fixed-size settings help/headings correction (KI-32) and
+clearer separate USB handbrake, logging and smoothing help. Landing feel and
+visual scale verification are pending. Settings and optional probe 0.2.5.3 were
+preserved; landing defaults off/strength 5. Game stayed closed. Stable remains
+0.2.4. Exact evidence is in
 `docs/LOCAL-DEPLOYMENT.md`; the latest unsent support draft is in USER-FEEDBACK.
 
 **Attended update 2026-09-10:** installed RC5 failed FFB startup (KI-28) and

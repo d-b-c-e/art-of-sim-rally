@@ -41,9 +41,9 @@ reproduced lifecycle fixes, and separate development signal captures. Additional
 telemetry connection/disable work (KI-25) follows that audit. Manual hardware
 checks remain required. The first real jump capture now passes runtime-aware
 replay and is preserved in the regression corpus. FFB startup/exit and probe
-shutdown fixes are ready for a replacement candidate; local gauge idle bindings
-need reload/retest. Landing envelopes need sampling-rate evaluation before new
-effects. See [the follow-up](reviews/2026-09-11-bug-follow-up.md). Synchronous UDP send
+shutdown fixes are installed in RC8; local gauge idle bindings were reloaded and
+need a physical retest. Landing detection passes 30/60/120 Hz cases; the finite
+vibration now needs wheel assessment. See [the follow-up](reviews/2026-09-11-bug-follow-up.md). Synchronous UDP send
 remains a potential future bounded-worker task, requiring measured need and
 careful park/drop/shutdown behavior; it is not a confirmed stutter diagnosis.
 [USER-FEEDBACK.md](USER-FEEDBACK.md) records the T300/TSS report, camera-key

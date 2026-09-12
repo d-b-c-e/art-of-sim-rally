@@ -8,7 +8,27 @@ publication and attended sign-off remain separate.
 
 ## Installed candidate — 0.2.5 work
 
-**0.2.5-rc.7** is installed as of 2026-09-12 16:44 UTC. It adds the KI-32 font
+**0.2.5-rc.8** is installed as of 2026-09-12 23:54 UTC. It adds opt-in landing
+vibration with independent strength to RC7. The existing settings were preserved;
+landing vibration defaults to off, with strength 5 when enabled.
+
+- Identity: `0.2.5-rc.8+b9598f5cb6b0a48965b37f4f8d27f350fd59be49.clean`.
+- ZIP SHA-256: `90F3F0BD942FD6F446702BAF185842196090B54882D821AE737AE1046CDAFADB`.
+- [All 16 gates passed, including the real drive corpus and landing detection](../results/rc-0.2.5-rc.8-669ae7f5aae140ca9e793fd9ad0b1781/automated.json).
+- [Installation receipt and RC7 backup](../results/landing-rc8-install-a1e5dbdfefd9432d98ebeea43f31b65d/receipt.json).
+- Six mod payloads and the native plugin copy match the exact validated package.
+  Settings and separate probe 0.2.5.3 were preserved byte-for-byte. The game stayed
+  closed; the Steam/Stream Deck installation target is unchanged.
+- Toolkit pin is `local+dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9.clean`, managed
+  0.13.0/native 0.6.0. This is an unpublished development candidate. Final
+  packaging rejects local toolkit pins; official publication/repin is required.
+- [Landing A/B test](LANDING-EFFECTS.md), FFB startup/recovery, digital gauge
+  clearing, quit and font scaling remain attended checks. No nonzero landing
+  effect has been tested on the wheel. No public release; stable remains 0.2.4.
+
+## Previous candidate — RC7
+
+**0.2.5-rc.7** was installed on 2026-09-12 16:44 UTC. It adds the KI-32 font
 scaling correction and clearer handbrake/logging/smoothing help to RC6.
 
 - Identity: `0.2.5-rc.7+8dfa61c5fb2212273059ec3714421c9e4fc7debe.clean`.
@@ -23,7 +43,7 @@ scaling correction and clearer handbrake/logging/smoothing help to RC6.
 
 ## Previous candidate — RC6
 
-**0.2.5-rc.6** is installed as of 2026-09-11 03:34 UTC, from the exact package
+**0.2.5-rc.6** was installed on 2026-09-11 03:34 UTC, from the exact package
 that passed all 16 local gates **including one real recorded drive**.
 
 - Identity: `0.2.5-rc.6+8ea54775efa42fe60b367760c72bb0f9668a1c9a.clean`.
