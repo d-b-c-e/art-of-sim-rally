@@ -24,6 +24,12 @@ namespace ArtOfSimRally.Mod
     internal static class Main { public static Settings Settings=new(); public static bool Enabled=true; }
     internal static class GameState { public static bool IsDriving=true; }
     internal static class ModLog { public static void Info(string text) { } }
+    internal static class LandingController
+    {
+        public static int Observations, Resets;
+        public static void Observe(CarDynamics car) { Observations++; }
+        public static void Reset() { Resets++; }
+    }
     internal static class FfbNative
     {
         public static bool Ready=true;

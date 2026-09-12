@@ -85,6 +85,9 @@ namespace ArtOfSimRally.Mod
 
         public bool Invert = false;
 
+        // Opt in for attended tuning; old settings retain identical steering.
+        public bool LandingEffectsEnabled = false;
+        public float LandingStrength = 5f;
 
         public bool DiagnosticLogging = false;
 

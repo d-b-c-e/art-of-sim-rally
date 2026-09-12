@@ -124,6 +124,11 @@ namespace ArtOfSimRally.Mod
         public static void ReleaseInputs() => Calls.Log.Add("native-input-close");
     }
     internal static class FfbController { public static void Reset() => Calls.Log.Add("filter-reset"); }
+    internal static class LandingController
+    {
+        public static void Tick() => Calls.Log.Add("landing-tick");
+        public static void Shutdown() => Calls.Log.Add("landing-stop");
+    }
     internal static class TelemetryPump
     {
         public static void Prepare() => Calls.Log.Add("telemetry-prepare");

@@ -113,7 +113,8 @@ static class Program
             after15Seconds = new { frames = later.Count, maxFrameMs = later.Count == 0 ? 0 : later.Max(), hitchesOver100Ms = later.Count(t => t > 100) },
             hitchesOver100Ms = timings.Count(t => t > 100),
             nativeDelivery = new { attempted, rejected, physicalTorqueVerified = false },
-            scope = "force arithmetic and timing evidence; no game or hardware playback"
+            periodicDelivery = new { observed = false, reason = "Separate landing sine bursts are not in the steering CSV; inspect support event counters and attended results." },
+            scope = "steering force arithmetic and timing evidence; no game or hardware playback"
         };
     }
 

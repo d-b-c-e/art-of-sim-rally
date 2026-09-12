@@ -46,6 +46,10 @@ $identity = "$Version+$revision.$sourceState"
 # Validate every pinned artifact before building; do not silently package a
 # locally edited vendor binary or omit a missing DLL.
 $toolkit = Join-Path $root 'lib/toolkit'
+$toolkitPin = (Get-Content -LiteralPath (Join-Path $toolkit 'VERSION') -First 1).Trim()
+if ($Version -notmatch '-rc\.' -and $toolkitPin -notmatch '^v\d+\.\d+\.\d+$') {
+    throw 'Final release requires an official toolkit release pin; local toolkit builds are for development candidates only'
+}
 $entries = 0
 foreach ($line in Get-Content -LiteralPath (Join-Path $toolkit 'MANIFEST.txt')) {
     if ($line.StartsWith('#') -or [string]::IsNullOrWhiteSpace($line)) { continue }
@@ -84,7 +88,7 @@ Copy-Item (Join-Path $root 'tools\installer\Install.bat')   $stage
 Copy-Item (Join-Path $root 'tools\installer\Uninstall.bat') $stage
 Copy-Item (Join-Path $root 'tools\installer\install.ps1')   $stage
 Copy-Item (Join-Path $root 'tools\installer\verify.ps1')   $stage
-$build = [ordered]@{ schema=1; release=$Version; modVersion=$modVersion; identity=$identity; sourceRevision=$revision; sourceState=$sourceState; toolkitPin=(Get-Content -LiteralPath (Join-Path $toolkit 'VERSION') -First 1); builtUtc=[DateTime]::UtcNow.ToString('o') }
+$build = [ordered]@{ schema=1; release=$Version; modVersion=$modVersion; identity=$identity; sourceRevision=$revision; sourceState=$sourceState; toolkitPin=$toolkitPin; builtUtc=[DateTime]::UtcNow.ToString('o') }
 $build | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $modDir 'build.json') -Encoding UTF8
 $fileVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo((Join-Path $modDir 'ArtOfSimRally.Mod.dll'))
 if ($fileVersion.ProductVersion -ne $identity -or $fileVersion.FileVersion -ne "$modVersion.0") { throw 'Built assembly identity does not match candidate' }

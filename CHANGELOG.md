@@ -9,6 +9,10 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Experimental opt-in landing vibration with independent strength: game contact
+  detection and finite 120 ms hardware sine bursts. Default off; physical feel
+  and new toolkit adoption still require attended validation.
+
 - Actual Unity Mono compatibility tests in the local RC gate, recorded-drive
   regression corpus and landing-envelope studies without hardware output.
 

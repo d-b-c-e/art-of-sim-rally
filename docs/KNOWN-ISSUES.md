@@ -400,6 +400,11 @@ Fanatec setup still needs confirmation. See [ROADMAP.md](ROADMAP.md).
 
 ### KI-4 — Force scaling is tuned for one wheel
 
+2026-09-12: the development landing-vibration candidate adds an independent
+effect strength (default off), without retuning steering. It does not establish
+per-wheel defaults or resolve the requested road/crash effects. Physical tuning
+is pending; see [LANDING-EFFECTS.md](LANDING-EFFECTS.md).
+
 | | |
 |---|---|
 | **Severity** | major on hardware unlike a MOZA R12 |

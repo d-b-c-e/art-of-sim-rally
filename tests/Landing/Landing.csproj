@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>disable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/ArtOfSimRally.Mod/LandingSignal.cs" Link="LandingSignal.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/LandingFeedback.cs" Link="LandingFeedback.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/LandingController.cs" Link="LandingController.cs" />
+  </ItemGroup>
+</Project>

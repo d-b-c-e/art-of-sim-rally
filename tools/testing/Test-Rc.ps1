@@ -67,7 +67,10 @@ try {
     $result = Run 'force-lifecycle' 'dotnet' @('run','--project','tests/ForceLifecycle/ForceLifecycle.csproj','-c','Release')
     $forceLifecycle = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($forceLifecycle.status -eq 'passed' -and $forceLifecycle.assertions -gt 0) 'Force lifecycle runner ran no assertions'
-    Checkpoint 'lifecycle' ($lifecycle.assertions+$cameraTuning.assertions+$gameState.assertions+$forceLifecycle.assertions)
+    $result = Run 'landing-feedback' 'dotnet' @('run','--project','tests/Landing/Landing.csproj','-c','Release')
+    $landing = $result | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($landing.status -eq 'passed' -and $landing.assertions -gt 0) 'Landing detector/lifecycle checks failed'
+    Checkpoint 'lifecycle' ($lifecycle.assertions+$cameraTuning.assertions+$gameState.assertions+$forceLifecycle.assertions+$landing.assertions)
     $null = Run 'recorder-build' 'dotnet' @('build','tools/testing/Recorder/Recorder.csproj','-c','Release','--nologo','-warnaserror')
     $result = Run 'recorder-tests' 'dotnet' @('run','--project','tests/Recorder/Recorder.csproj','-c','Release','--',(Join-Path $run 'synthetic'),'src/ArtOfSimRally.Mod/bin/Release/ArtOfSimRally.Mod.dll','D:/Program Files (x86)/Steam/steamapps/common/artofrally')
     $recorder = $result | Select-Object -Last 1 | ConvertFrom-Json
@@ -114,6 +117,15 @@ try {
         $recorded = $result | Select-Object -Last 1 | ConvertFrom-Json
         Assert ($recorded.status -eq 'passed' -and $recorded.detail.caseCount -gt 0) 'Recorded corpus ran no cases'
         $corpusReport = [ordered]@{ status='passed'; cases=$recorded.detail.caseCount; index=([IO.Path]::GetFullPath($Corpus)); sha256=(Get-FileHash -LiteralPath $Corpus).Hash }
+        $index = Get-Content -LiteralPath $Corpus -Raw | ConvertFrom-Json
+        $jumpCase = @($index.cases | Where-Object id -eq 'norway-stage5-reverse-m1-jump-20260911')
+        if ($jumpCase.Count -eq 1) {
+            $capturePath = Join-Path (Split-Path -Parent ([IO.Path]::GetFullPath($Corpus))) $jumpCase[0].path
+            $result = Run 'landing-recorded' 'dotnet' @('run','--no-build','--project','tests/Landing/Landing.csproj','-c','Release','--',$capturePath)
+            $landingRecorded = $result | Select-Object -Last 1 | ConvertFrom-Json
+            Assert ($landingRecorded.status -eq 'passed' -and $landingRecorded.capture.events -eq 1) 'Known recorded landing changed'
+            $corpusReport['landing'] = $landingRecorded
+        }
     }
     $gateOutput = Run 'gate-tests' 'python' @('-m','unittest','discover','-s','tests/testing','-v')
     Assert (($gateOutput -join "`n") -match 'Ran ([1-9]\d*) tests?') 'Release gate test discovery ran nothing'
@@ -136,7 +148,10 @@ try {
     $source = (Get-ChildItem -LiteralPath (Join-Path $root 'src/ArtOfSimRally.Mod') -Filter '*.cs' | Get-Content -Raw) -join "`n"
     Assert ($source -notmatch '\[DllImport\((?:Dll|"UnityForceFeedback"|"WheelFfb")') 'Duplicate native binding returned to the consumer'
     Assert ($exports -match '\bSetStrictDeviceSelection\b') 'Strict GUID selection export missing'
-    Checkpoint 'native-exports' 40
+    foreach ($name in @('CreatePeriodicBurst','PlayPeriodicBurst','StopPeriodicBurst')) {
+        Assert ($exports -match "\b$name\b") "Finite landing effect export missing: $name"
+    }
+    Checkpoint 'native-exports' 43
 
     $null = Run 'package' $shell @('-NoProfile','-File','tools/package/package.ps1','-Version',$Version)
     $zip = Join-Path $root "dist/ArtOfSimRally-$Version.zip"

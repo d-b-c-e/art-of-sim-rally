@@ -22,6 +22,8 @@ CASES["support-identity"] += " Collect while paused immediately after a short di
 CASES["input-persistence"] += " For 0.2.5, check axis and separate-shifter GUID identity after USB enumeration changes; missing identities must not substitute another device. Reconnect while paused with another reader open, allow five seconds; Assign discovers new devices. Resume an unfinished assignment and confirm it cancels."
 CASES["support-identity"] += " After a diagnostic drive and normal quit/relaunch, verify previous-session counters retain their original build and timestamps, separate from current counters."
 CASES["telemetry"] += " Verify 0.2.5 connections prepare while idle; a driving destination edit keeps the old endpoint until pause. Disabling telemetry must immediately park the consumer; re-enable while paused."
+CASES["ffb-lifecycle"] += " Repeat launches including focus changes during startup; verify acquisition recovers. Test normal Quit and Alt+F4 with the developer probe removed. For landing effects: drive the same jump with Landing vibration off, then enabled at strength 5 while paused. Confirm one short vibration on touchdown, unchanged steering between jumps, and no triggers on ordinary contact jitter/restarts/replay. Pause/alt-tab/disable during or just after a landing; vibration must stop. Inspect driver-acceptance counters and save support. Do not pass landing feel from offline replay."
+CASES["input-persistence"] += " Verify Landing vibration and its independent strength persist. Increase/decrease UMM font scale; explanations, headings and status text should scale and wrap legibly."
 
 def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest().upper()

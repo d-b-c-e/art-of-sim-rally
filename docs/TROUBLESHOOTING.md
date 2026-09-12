@@ -121,10 +121,16 @@ At the default **0.20**, each force update blends 20% of the previous output wit
 rattle, but also soften bumps and add response delay. Smoothing filters wheel
 force, not steering input; it does not reduce a sustained force like Strength does.
 
-The current mod sends a constant steering-force signal. Lowering Strength lowers
+Stable 0.2.4 sends a constant steering-force signal. Lowering Strength lowers
 the detail in that signal too; independent road/landing/crash effects are not yet
 shipped. Telemetry sends data to external dashboards/shakers/motion apps and does
 not add vibration or alter the wheel force pipeline.
+
+The development [landing-vibration candidate](LANDING-EFFECTS.md) adds an
+independent effect, off by default. Enable it while paused and check its status.
+If setup or delivery fails, toggle it off/on while paused and export support.
+Some drivers may reject sine effects; steering continues. Road/crash effects
+remain planned. This is not in the published 0.2.4 download.
 
 ## Settings explanations stay small when increasing Mod Manager scale
 

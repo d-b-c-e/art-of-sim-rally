@@ -41,6 +41,12 @@ missing or failing corpus fails the run.
 
 ## Automated coverage
 
+Landing detector/delivery/game-boundary tests run within the lifecycle checkpoint;
+the known Norway corpus case also checks the actual production detector against
+its unchanged contact/motion samples. Native finite-effect lifetime is verified
+upstream using fake effects. Actual landing feel remains an attended test; see
+[LANDING-EFFECTS.md](LANDING-EFFECTS.md).
+
 | Check | Evidence and limits |
 |---|---|
 | Production build | net48, warnings as errors. |

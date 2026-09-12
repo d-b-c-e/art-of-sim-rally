@@ -126,6 +126,7 @@ namespace ArtOfSimRally.Mod
             __instance.forceFeedback = _smoothed * GameForceFeedbackRange;
 
             FfbNative.SetForce((int)(_smoothed * FfbNative.ForceMax));
+            LandingController.Observe(__instance);
 
             if (cfg.DiagnosticLogging)
             {
@@ -180,6 +181,7 @@ namespace ArtOfSimRally.Mod
         /// <summary>Clears filter state between stages so a stale force is not carried over.</summary>
         public static void Reset()
         {
+            LandingController.Reset();
             _smoothed = 0f;
             _peakMz = 0f;
             _peakSpeedKmh = 0f;

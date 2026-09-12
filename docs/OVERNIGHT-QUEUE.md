@@ -1,5 +1,15 @@
 # Overnight investigation and implementation queue
 
+## Landing follow-through — 2026-09-12
+
+Owner requested implementing/testing FR-2's landing feedback. The consumer
+detector, independent strength UI and finite native-burst integration are ready
+for combined validation. The unchanged real drive yields one event at first
+rear contact. Shared native finite duration/focus/watchdog fixes belong to the
+toolkit's local 0.13.0 candidate, not a published toolkit release. No nonzero
+effect has been physically evaluated. Follow [LANDING-EFFECTS.md](LANDING-EFFECTS.md)
+for off/on testing; retain FFB startup, gauges, quit and other RC checks.
+
 ## Support follow-through — 2026-09-12
 
 T300/TSS setup questions have a code-checked unsent reply in USER-FEEDBACK.

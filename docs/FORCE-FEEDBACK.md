@@ -1,5 +1,10 @@
 # Force feedback
 
+Development update 2026-09-12: [landing vibration](LANDING-EFFECTS.md) uses a
+separate finite hardware sine effect with its own strength. It is off by default
+and awaits attended tuning. The steering curve below remains unchanged; stable
+0.2.4 contains no dedicated landing effect.
+
 ## The situation
 
 art of rally ships a complete, fully written force feedback implementation that

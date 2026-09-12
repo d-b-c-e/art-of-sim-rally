@@ -1,11 +1,39 @@
 # Roadmap
 
-Status reviewed 2026-09-11 after the attended bug follow-up.
+Status reviewed 2026-09-12 after the owner requested landing-effect implementation.
 **0.2.4 is published; the local 0.2.5 candidate adds tested fixes and awaits a drive.**
 See [current evidence](reviews/2026-09-09-overnight-025.md) and
 [installed identity](LOCAL-DEPLOYMENT.md).
 The defect register is [KNOWN-ISSUES.md](KNOWN-ISSUES.md); the implementation review
 is [2026-09-06-rc-review.md](reviews/2026-09-06-rc-review.md).
+
+## Active feature — landing vibration
+
+An opt-in, finite hardware sine burst now has its own strength control, separate
+from steering Strength/Smoothing. The game detector reproduces the one landing
+in the saved Norway drive and rejects jitter/reset cases offline. Toolkit
+finite-burst work stays upstream; local development artifacts must be officially
+released/repinned before public mod publication. Wheel feel is pending.
+See [implementation, limits and A/B drive](LANDING-EFFECTS.md).
+
+Remaining feature priorities:
+
+1. **RWD snapback/tankslap investigation (KI-6):** capture steering/slip recovery
+   before deciding whether an optional damper is justified.
+2. **Independent road and crash effects (FR-2):** landing is the first effect;
+   road texture and collisions need their own reliable signals and tuning.
+3. **TSS/Fanatec follow-up and T300 rotation:** verify actual devices and modes;
+   use reports to improve setup guidance and eventually per-wheel starting settings.
+4. **Camera compatibility:** PS5-controller interaction in issue #1 and the
+   separate Nexus camera-mod combination still need scoped testing.
+5. **Performance:** diagnose reported hitches with evidence; move UDP sending to
+   a bounded worker only if measurement justifies that transport change.
+6. **Distribution/tooling:** Nexus packaging and richer regression captures;
+   full deterministic Unity input playback remains a separate design effort.
+
+Already implemented: camera-key remapping, direct analog handbrake input,
+strict USB identity/recovery, diagnostics, lifecycle fixes and font scaling.
+These are validation/support work rather than missing features.
 
 The four post-0.2.4 [overnight items](OVERNIGHT-QUEUE.md) are implemented with
 offline coverage: USB identity/idle recovery, retained diagnostic summaries,
@@ -53,9 +81,8 @@ still requiring the complete attended checks:
 
 Development tooling is separate: bounded capture probe, external Start/Stop,
 game-free force replay, a saved regression corpus and the release evidence gate.
-No recorder ships in the release mod. A local drive log confirms loading and force
-evaluation, but no completed capture was saved. The first real game case needs to be
-captured; generated fixtures validate the tooling, not a playthrough.
+No recorder ships in the release mod. One completed real jump drive is preserved
+and passes strict steering replay; it does not measure the new periodic force.
 
 Run [PRE-RELEASE-TESTING.md](PRE-RELEASE-TESTING.md). The release needs the exact
 packaged candidate tested for camera transitions, cold/repeated/new-stage stutter,
@@ -69,9 +96,12 @@ available. Fanatec-specific confirmation and RWD wheel snap reports remain open.
 
 ## Toolkit adoption: implemented, awaiting attended validation
 
-The pin is **toolkit v0.12.0**, native component **0.5.0**, downloaded from the
+Stable 0.2.4/RC7 use **toolkit v0.12.0**, native component **0.5.0**, downloaded from the
 [official release](https://github.com/d-b-c-e/dbce-wheel-mod-toolkit/releases/tag/v0.12.0).
-All five vendored files match its independently hashed archive.
+The landing candidate uses local clean toolkit commit
+`dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9` (0.13.0/native 0.6.0), whose full local
+package and zero-output R12 ABI checks pass. Its official publication/repin is
+still pending. Vendored hashes identify the exact local artifacts.
 Production references and packages `Dbce.Wheel.Ffb.dll`: the shared wrapper handles
 loading, enumeration, FFB, shifter and direct-input reads. The native alias remains
 `UnityForceFeedback.dll`, bound from one exact module handle.
@@ -79,8 +109,8 @@ loading, enumeration, FFB, shifter and direct-input reads. The native alias rema
 Shared `AxleForceCurve@1` implements the released gain, fade, clamp, then EMA
 pipeline. Local ForceCurve is only a forwarding adapter. The original formula is
 frozen in consumer regression with the game's actual managed Mathf. Existing
-`simlite@2` remains a different tune; it is not the adopted pipeline. No new damper,
-periodic effect, assist or physics behavior is enabled.
+`simlite@2` remains a different tune; it is not the adopted pipeline. The landing
+candidate adds an opt-in periodic effect; no damper, assist or physics changes.
 
 New explicit FFB picker choices persist an instance GUID. Missing GUIDs report a
 setup error and never select another wheel. Existing name/index settings remain

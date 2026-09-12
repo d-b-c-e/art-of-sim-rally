@@ -588,6 +588,9 @@
         <member name="F:Dbce.Wheel.Ffb.WheelFfbNative.ForceMax">
             <summary>Full scale of <see cref="M:Dbce.Wheel.Ffb.WheelFfbNative.SetForce(System.Int32)"/>: DirectInput's nominal maximum.</summary>
         </member>
+        <member name="P:Dbce.Wheel.Ffb.WheelFfbNative.SupportsPeriodicBursts">
+            <summary>True when the exact loaded native module supports all finite-burst operations.</summary>
+        </member>
         <member name="P:Dbce.Wheel.Ffb.WheelFfbNative.LoadedFrom">
             <summary>Absolute path the DLL was loaded from, or null.</summary>
         </member>
@@ -633,6 +636,19 @@
         </member>
         <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.UpdatePeriodic(System.Int32,System.Single,System.Single)">
             <summary>Envelope update; safe to call every frame (unchanged envelopes never reach the driver).</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.CreatePeriodicBurst(System.Int32,System.Int32)">
+            <summary>Create an idle sine burst (1..100 Hz, 1..500 ms), or -1 on failure.
+            Shares four slots with continuous periodics. Requires native component 0.6.0.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.PlayPeriodicBurst(System.Int32,System.Single,System.Single)">
+            <summary>Explicitly restart one finite burst. True means the native play was accepted,
+            not proof of physical output. Zero stops. Failed events must not be queued/retried.
+            Every positive magnitude maps to at least one device unit; no 5% change gate.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.StopPeriodicBurst(System.Int32)">
+            <summary>Stop a valid burst slot, including an already stopped slot. Retains the slot.
+            ReleasePeriodics frees all continuous and burst slots. May stop while FFB is not Ready.</summary>
         </member>
         <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.DeviceGuid(System.Int32)">
             <summary>

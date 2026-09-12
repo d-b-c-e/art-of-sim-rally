@@ -1,5 +1,14 @@
 # User feedback and support follow-up
 
+## Landing feature implementation — 2026-09-12
+
+Owner requested implementation/testing before the next release. FR-2 now has
+an opt-in landing-vibration candidate with an independent strength control.
+Road/crash effects remain planned. The user's saved one-jump drive verifies the
+detector; physical feel and reporter hardware support are not yet confirmed.
+See [landing evidence and test steps](LANDING-EFFECTS.md). Do not tell reporters
+this is in the stable download until it is published.
+
 ## T300/TSS setup questions — received 2026-09-12
 
 The user enjoys the new version and acknowledges the stutter work; exact build

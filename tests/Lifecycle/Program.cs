@@ -56,19 +56,22 @@ static class Program
         Check(Calls.Log.IndexOf("native-input-close")<Calls.Log.IndexOf("diagnostic-save"),"diagnostics saved before outputs released");
         Check(Calls.Log.IndexOf("native-input-close")<Calls.Log.IndexOf("shifter-save"),"shifter selection saved before outputs released");
         Check(Calls.Log[0]=="force:0", "shutdown did not zero force first");
-        foreach(string call in new[] {"filter-reset","native-close","telemetry-park","telemetry-close","shifter-close","input-close","native-input-close"})
+        foreach(string call in new[] {"filter-reset","landing-stop","native-close","telemetry-park","telemetry-close","shifter-close","input-close","native-input-close"})
             Check(Calls.Log.IndexOf(call)>=0 && Calls.Log.IndexOf(call)<disk &&
                 Calls.Log.IndexOf(call)<Calls.Log.IndexOf("camera-save"), call+" happened after save");
         var watchdog=new ModWatchdog(); Calls.Log.Clear(); ArtOfSimRally.Mod.Main.Enabled=true; GameState.IsDriving=true;
         typeof(ModWatchdog).GetMethod("Update",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(watchdog,null);
         Check(!Calls.Log.Contains("telemetry-prepare") && Calls.Log.Contains("telemetry-stop-disabled"), "driving watchdog connected/did not check telemetry disable");
         Check(!Calls.Log.Contains("force-recover"), "driving watchdog attempted FFB acquisition");
+        Check(Calls.Log.Contains("landing-tick"), "landing lifecycle not observed during driving");
         Check(!Calls.Log.Contains("save") && !Calls.Log.Contains("camera-save") && !Calls.Log.Contains("diagnostic-save") && !Calls.Log.Contains("shifter-save"),"watchdog saved while driving");
         GameState.IsDriving=false;
+        Calls.Log.Clear();
         typeof(ModWatchdog).GetMethod("Update",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(watchdog,null);
         Check(Calls.Log.IndexOf("force:0")<Calls.Log.IndexOf("save"),"idle save preceded release");
         Check(Calls.Log.IndexOf("telemetry-prepare")>Calls.Log.IndexOf("force:0"),"connection setup preceded force release");
         Check(Calls.Log.IndexOf("force-recover")>Calls.Log.IndexOf("force:0"), "FFB acquisition preceded force release");
+        Check(Calls.Log.IndexOf("landing-tick")>Calls.Log.IndexOf("force:0"), "landing preparation preceded force release");
         Check(Calls.Log.IndexOf("force:0")<Calls.Log.IndexOf("camera-save"),"camera save preceded release");
         Check(Calls.Log.IndexOf("force:0")<Calls.Log.IndexOf("diagnostic-save"),"diagnostics idle save preceded release");
         Calls.Log.Clear(); ArtOfSimRally.Mod.Main.Enabled=false;

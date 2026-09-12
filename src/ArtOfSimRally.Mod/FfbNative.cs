@@ -107,6 +107,7 @@ namespace ArtOfSimRally.Mod
         }
         public static void Shutdown()
         {
+            LandingController.Shutdown();
             WheelFfbNative.Zero();
             WheelFfbNative.Stop();
             WheelFfbNative.Shutdown();

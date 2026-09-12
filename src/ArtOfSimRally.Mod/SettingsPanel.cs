@@ -120,6 +120,17 @@ namespace ArtOfSimRally.Mod
                 cfg.Invert = Toggle(cfg.Invert, "Invert direction",
                     "Turn on if the wheel pulls the wrong way.");
 
+                cfg.LandingEffectsEnabled = Toggle(cfg.LandingEffectsEnabled, "Landing vibration (experimental)",
+                    "A short vibration when landing from a jump. Enable while paused. Requires wheel sine-effect support; " +
+                    "steering Strength and Smoothing keep their current behavior.");
+                if (cfg.LandingEffectsEnabled)
+                {
+                    cfg.LandingStrength = Slider(cfg.LandingStrength, 0f, 20f, "Landing strength",
+                        "Maximum vibration as a percentage of the wheel's nominal force, independent of steering Strength. " +
+                        "Start at 5; smaller landings use less. Zero disables the vibration.");
+                    GUILayout.Label("      " + LandingController.Status, Wrap);
+                }
+
                 cfg.DiagnosticLogging = Toggle(cfg.DiagnosticLogging, "Log detail for support",
                     "Enable before a short reproduction, then pause and create a support file in this session. " +
                     "Adds force traces and aggregate frame-hitch counts; switch off afterward. " +

@@ -119,7 +119,8 @@ static class Program
         var original=new Settings { Strength=15, Smoothing=.5f, BonnetHeight=1.234f };
         SettingsPersistence.Write(original,path);
         string before=File.ReadAllText(path);
-        var changed=new Settings { Strength=26, Smoothing=.2f, BonnetHeight=2.345f };
+        Check(!new Settings().LandingEffectsEnabled && new Settings().LandingStrength==5f,"existing installs must opt in to landing force");
+        var changed=new Settings { Strength=26, Smoothing=.2f, BonnetHeight=2.345f, LandingEffectsEnabled=true, LandingStrength=3.5f };
         var pending=new DeferredSave(); pending.MarkDirty();
         using(var locked=File.Open(path,FileMode.Open,FileAccess.ReadWrite,FileShare.None))
             Check(!pending.Flush(0,false,false,()=>{ SettingsPersistence.Write(changed,path); return true; }) && pending.Pending,"locked file reported success");
@@ -130,6 +131,7 @@ static class Program
         {
             var restored=(Settings)new XmlSerializer(typeof(Settings)).Deserialize(input)!;
             Check(restored.Strength==26 && restored.Smoothing==.2f && restored.BonnetHeight==2.345f,"UMM-compatible settings roundtrip changed values");
+            Check(restored.LandingEffectsEnabled && restored.LandingStrength==3.5f,"landing settings did not persist");
         }
     }
 
@@ -143,9 +145,10 @@ static class Program
         Check(NativeDiagnostics.Describe("UnityForceFeedback.dll").Contains("not loaded"), "inspection loaded native DLL");
         Check(WheelFfbNative.Load(directory, "UnityForceFeedback.dll"), WheelFfbNative.LastError);
         Check(!WheelFfbNative.Ready, "binding unexpectedly acquired a device");
-        Check(WheelFfbNative.Version == 500, "native component changed; review candidate ABI");
+        Check(WheelFfbNative.Version == 600, "native component changed; review candidate ABI");
+        Check(WheelFfbNative.SupportsPeriodicBursts, "finite periodic burst API is unavailable");
         string description = NativeDiagnostics.Describe("UnityForceFeedback.dll");
-        Check(description.Contains("0.5.0"), "native version decoding");
+        Check(description.Contains("0.6.0"), "native version decoding");
         Check(description.Contains(NativeDiagnostics.FileHash(source)), "mapped DLL hash");
         Check(description.Contains(alias), "mapped DLL path");
         Check(NativeDiagnostics.Describe("kernel32.dll").Contains("export missing"), "missing-export fallback");
@@ -155,7 +158,11 @@ static class Program
             var fields = typeof(WheelFfbNative).GetFields(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
                 .Where(f => typeof(Delegate).IsAssignableFrom(f.FieldType)).ToArray();
             Check(fields.Length >= 38, "native binding scan is empty/incomplete");
-            foreach (var field in fields) Check(NativeLibrary.TryGetExport(module, field.Name, out _), "Missing export " + field.Name);
+            foreach (var field in fields)
+            {
+                string export = field.Name switch { "_createBurst" => "CreatePeriodicBurst", "_playBurst" => "PlayPeriodicBurst", "_stopBurst" => "StopPeriodicBurst", _ => field.Name };
+                Check(field.GetValue(null)!=null && NativeLibrary.TryGetExport(module, export, out _), "Missing binding/export " + export);
+            }
         }
         finally { NativeLibrary.Free(module); } // Toolkit keeps its own successful reference.
     }

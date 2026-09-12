@@ -54,6 +54,7 @@ namespace ArtOfSimRally.Mod
             TelemetryPump.StopIfDisabled();
             if (!Main.Enabled)
             {
+                LandingController.Tick();
                 WheelInput.FlushLearnedRanges();
                 Shifter.FlushSelection();
                 CameraTuner.Flush();
@@ -68,6 +69,7 @@ namespace ArtOfSimRally.Mod
             // it cannot.
             if (GameState.IsDriving)
             {
+                LandingController.Tick();
                 _wheelReleased = false;
                 return;
             }
@@ -85,6 +87,8 @@ namespace ArtOfSimRally.Mod
                 // stage; saving it there could contribute to the reported KI-5 hitch.
             }
             Main.RecoverForceFeedback();
+            // Native effect allocation, like acquisition, follows force release.
+            LandingController.Tick();
             TelemetryPump.Prepare();
             // Retry failed writes at most once per five seconds, only while idle.
             WheelInput.FlushLearnedRanges();
@@ -124,6 +128,7 @@ namespace ArtOfSimRally.Mod
             // force can remain latched in the driver.
             FfbNative.SetForce(0);
             FfbController.Reset();
+            LandingController.Shutdown();
             FfbNative.Shutdown();
             TelemetryPump.Park();
             TelemetryPump.Shutdown();

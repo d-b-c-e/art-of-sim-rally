@@ -18,6 +18,10 @@ adds USB identity/recovery fixes, previous-session diagnostics and lifecycle
 corrections. [Attended follow-up fixes](docs/reviews/2026-09-11-bug-follow-up.md)
 address startup FFB and exit cleanup; hardware retests are pending.
 
+Development now also includes [experimental landing vibration](docs/LANDING-EFFECTS.md)
+with independent strength. It is off by default, awaiting a wheel comparison,
+and is not in the stable download.
+
 1. Install [Unity Mod Manager](https://www.nexusmods.com/site/mods/21) and point
    it at art of rally. The game is already in its supported list.
 

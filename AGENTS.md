@@ -41,6 +41,15 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-12) — do not overstate this
 
+Landing vibration is implemented for a new development candidate: opt-in,
+independent 5% strength default (20% cap), three-cycle 25 Hz/120 ms native sine.
+Game detector rejects jitter/reset cases and matches the one real landing.
+Toolkit local pin `dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9.clean` is a validated
+0.13.0 development build, native 0.6.0; it is NOT a published toolkit version.
+The native API now has finite bursts and all-effect focus/watchdog stopping.
+Publish/officially repin the toolkit before a public mod release; final packaging
+rejects local toolkit pins. See `docs/LANDING-EFFECTS.md`. Nonzero feel is pending.
+
 RC7 (`8dfa61c5...clean`) is installed after all 16 local gates, including the
 real drive corpus. It corrects fixed-size settings help/headings (KI-32) and
 clarifies separate USB handbrake setup, logging and smoothing. Visual scale
@@ -68,9 +77,10 @@ diagnostic retention (KI-19), stale-force release (KI-22), deferred binding edit
 coverage; new candidate hardware testing remains pending. See
 `docs/reviews/2026-09-09-overnight-025.md` and `docs/LOCAL-DEPLOYMENT.md` for the
 exact validated/installed artifact, hashes and receipts. The Stream Deck Steam
-550320 button targets that installation. Toolkit **v0.12.0**, native **0.5.0**
-remain unchanged: shared wrapper, AxleForceCurve@1 and telemetry are consumed in
-production. No force tune, new wheel effects, physics or assist changes.
+550320 button targets that installation. Stable 0.2.4 and RC7 use toolkit
+**v0.12.0**, native **0.5.0**; the new landing candidate uses the local toolkit
+above. AxleForceCurve@1 steering arithmetic and telemetry layout are unchanged.
+Landing vibration is a separate periodic output; no physics or assist changes.
 
 The separate developer probe now records schema-3 motion/contact/suspension
 context, with standalone event/force analysis and schema-1/2 compatibility. It
