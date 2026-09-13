@@ -41,7 +41,14 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-12) — do not overstate this
 
-Landing vibration is implemented and installed in RC8: opt-in,
+RC9 and the matching optional SimHub landing companion are installed. All 16
+local gates passed, including .NET/actual Mono transport and SimHub import tests.
+Live SimHub zero-output smoke confirms profile/plugin, reception and expiry.
+Game closed, SimHub running; physical thud test pending. Exact identity
+`0.2.5-rc.9+c4126ba6eba96e0c12440c3442375783b7a08dff.clean` and receipts in
+`docs/LOCAL-DEPLOYMENT.md` / `docs/reviews/2026-09-12-simhub-landing-thud.md`.
+
+Wheel landing vibration was introduced in RC8: opt-in,
 independent 5% strength default (20% cap), three-cycle 25 Hz/120 ms native sine.
 Game detector rejects jitter/reset cases and matches the one real landing.
 Toolkit local pin `dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9.clean` is a validated
@@ -56,13 +63,13 @@ landing report is about the ButtKicker.** Do not retune steering or wheel bursts
 to fix that symptom. An optional SimHub plugin/profile now implements the FR-2
 landing thud: dedicated loopback cue, independent strength, 30 Hz/180 ms shaped
 envelope. It defaults off and leaves wheel/Forza physics unchanged. See
-`tools/simhub/README.md`. Candidate package/deployment and physical feel are pending.
+`tools/simhub/README.md`. Physical feel is pending; RC9 is installed for retest.
 The complete hardware gate remains pending. Logs are preserved; game is now closed,
 SimHub is running, no recording running. See `docs/reviews/2026-09-12-landing-wheel-test.md`. Do not redeploy while
 the game is running. The toolkit interaction review found no ordinary constant-
 force call cancelling the burst; stop timing/driver waveform remain unobserved.
 
-RC8 (`b9598f5c...clean`) is installed after all 16 local gates, including the
+Previous RC8 (`b9598f5c...clean`) passed all 16 local gates, including the
 real drive corpus and 9,044 landing assertions (one recorded event at row 4230).
 It includes RC7's fixed-size settings help/headings correction (KI-32) and
 clearer separate USB handbrake, logging and smoothing help. Landing feel and
