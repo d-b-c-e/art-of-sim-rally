@@ -1,14 +1,14 @@
-# Release readiness — 2026-09-09
+# Release readiness — 2026-09-13
 
-**Current: stable 0.2.4 is published; 0.2.5 development candidates are installed
-locally after validation.** [Current implementation and candidate evidence](reviews/2026-09-09-overnight-025.md)
-records the USB, diagnostics, lifecycle and developer-capture work. New hardware
-and full attended checks remain pending. The earlier RC5 drive log has no
-initialization errors, connection failures or exceptions.
-See [0.2.4 release handoff](reviews/2026-09-09-release-0.2.4.md) for exact final
-artifact, automated checks, publication verification and preserved-settings install; [local deployment](LOCAL-DEPLOYMENT.md)
-records the installed identity. Full attended cases and a final-labelled drive
-remain pending. The entries below are historical snapshots, superseded by that handoff.
+**Current: stable 0.2.5 is published and installed.** The owner accepted RC8's
+wheel/shaker result and authorized release with landing vibration enabled by
+default at strength 5. All 16 final local gates passed; published downloads and
+installed payloads match the exact validated artifact. Settings were preserved.
+See the [0.2.5 release record](reviews/2026-09-13-release-0.2.5.md) and
+[local deployment](LOCAL-DEPLOYMENT.md) for identities, checksums and receipts.
+Full attended cases, additional hardware and a separate final-artifact drive
+remain unverified; overall acceptance does not fabricate those passes.
+The entries below are historical snapshots, superseded by the current handoff.
 
 ## Historical release and candidate evidence
 

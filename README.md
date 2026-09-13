@@ -13,7 +13,7 @@ properly on a racing wheel.
 
 ## Install
 
-**Version 0.2.5** adds [wheel landing vibration](docs/LANDING-EFFECTS.md), enabled
+**Stable release: 0.2.5.** Adds [wheel landing vibration](docs/LANDING-EFFECTS.md), enabled
 by default at strength 5, plus USB identity/recovery, retained diagnostics,
 FFB startup and exit cleanup fixes. Existing saved preferences are preserved.
 The owner accepted RC8 after wheel and shaker testing; additional wheel brands

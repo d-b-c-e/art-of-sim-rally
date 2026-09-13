@@ -1,13 +1,13 @@
 # Roadmap
 
-Status reviewed 2026-09-13 UTC after owner RC8 acceptance and release request.
-**Preparing 0.2.5 with wheel landing vibration enabled by default at strength 5.**
-See [current evidence](reviews/2026-09-09-overnight-025.md) and
+Status reviewed 2026-09-13 UTC after owner RC8 acceptance and publication.
+**0.2.5 is published with wheel landing vibration enabled by default at strength 5.**
+See [release evidence](reviews/2026-09-13-release-0.2.5.md) and
 [installed identity](LOCAL-DEPLOYMENT.md).
 The defect register is [KNOWN-ISSUES.md](KNOWN-ISSUES.md); the implementation review
 is [2026-09-06-rc-review.md](reviews/2026-09-06-rc-review.md).
 
-## Active feature — landing vibration
+## Released feature — landing vibration
 
 A finite hardware sine burst now has its own strength control, separate
 from steering Strength/Smoothing. The game detector reproduces the one landing
@@ -46,9 +46,10 @@ reproduced lifecycle fixes, and separate development signal captures. Additional
 telemetry connection/disable work (KI-25) follows that audit. Manual hardware
 checks remain required. The first real jump capture now passes runtime-aware
 replay and is preserved in the regression corpus. FFB startup/exit and probe
-shutdown fixes are installed in RC8; local gauge idle bindings were reloaded and
+shutdown fixes are installed in 0.2.5; local gauge idle bindings were reloaded and
 need a physical retest. Landing detection passes 30/60/120 Hz cases; the finite
-vibration now needs wheel assessment. See [the follow-up](reviews/2026-09-11-bug-follow-up.md). Synchronous UDP send
+vibration has owner acceptance, with the full hardware matrix still incomplete.
+See [the follow-up](reviews/2026-09-11-bug-follow-up.md). Synchronous UDP send
 remains a potential future bounded-worker task, requiring measured need and
 careful park/drop/shutdown behavior; it is not a confirmed stutter diagnosis.
 [USER-FEEDBACK.md](USER-FEEDBACK.md) records the T300/TSS report, camera-key
@@ -67,7 +68,7 @@ offline coverage; motion/shaker and combined-camera-mod tests remain pending.
 New FFB effects and RWD damping remain a separate captured-signal/attended tuning
 cycle. No rotation override is justified by the current T300 evidence.
 
-## Now — validate the 0.2.5 candidate and capture real signals
+## Now — remaining 0.2.5 validation and real signal captures
 
 Owner RC5 testing was accepted for 0.2.4; earlier 0.2.3 RC6 feedback also reported
 working cameras and controls. These are scoped results, not a complete matrix. Implemented;

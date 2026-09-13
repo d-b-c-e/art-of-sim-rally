@@ -39,9 +39,17 @@ third-party binaries, nothing that would force the repo private.
 | `docs/DEVELOPMENT-CAPTURE.md` | Separate probe schema, motion/contact units, standalone analysis and interpretation limits. |
 | `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP, RELEASING |
 
-## Status (2026-09-12) — do not overstate this
+## Status (2026-09-13) — do not overstate this
 
-**Release preparation 2026-09-13 UTC:** owner accepted RC8 and the built-in
+**0.2.5 is published and installed.** All 16 final local gates passed; the
+published ZIP/checksum and installed payloads match. Release source/tag is
+`c6242a0a163315f7a390d3860c6204b4ca215619`; ZIP SHA-256 is
+`8A7F9FC044058B0890F7323138E3DFCBC998B31C67C57E14272D410C6BFCA502`.
+No Actions build or SimHub helper. Game closed, SimHub running, no recording.
+Default landing strength is 5; owner's saved enabled/20 and SimHub gains remain.
+See `docs/LOCAL-DEPLOYMENT.md` for exact receipts and acceptance limits.
+
+**Owner acceptance 2026-09-13 UTC:** owner accepted RC8 and the built-in
 30 Hz shaker profile: landings felt better and amplifier CLIP was observed.
 Authorized 0.2.5 release and default-on wheel landing vibration (strength 5).
 Existing saved opt-outs/strengths remain intact; the owner's installed strength
@@ -70,20 +78,20 @@ pins. See `docs/LANDING-EFFECTS.md`.
 First RC8 owner drive on 2026-09-12: eight nonzero landing requests accepted,
 including magnitude .20. **Owner clarified wheel FFB is fine; the weak/buzzy
 landing report is about the ButtKicker.** Do not retune steering or wheel bursts
-to fix that symptom. Built-in SimHub Impacts/Road impacts tuning is the
-next FR-2 follow-up; current wheel landing controls do not change telemetry.
+to fix that symptom. Built-in SimHub Impacts/Road impacts tuning was subsequently
+accepted; current wheel landing controls do not change telemetry.
 The complete hardware gate remains pending. Logs are preserved; game is closed, no recording
 running. See `docs/reviews/2026-09-12-landing-wheel-test.md`. Do not redeploy while
 the game is running. The toolkit interaction review found no ordinary constant-
 force call cancelling the burst; stop timing/driver waveform remain unobserved.
 
-RC8 (`b9598f5c...clean`) is installed after all 16 local gates, including the
+RC8 (`b9598f5c...clean`) was installed after all 16 local gates, including the
 real drive corpus and 9,044 landing assertions (one recorded event at row 4230).
 It includes RC7's fixed-size settings help/headings correction (KI-32) and
-clearer separate USB handbrake, logging and smoothing help. Landing feel and
-visual scale verification are pending. Settings and optional probe 0.2.5.3 were
-preserved; landing defaults off/strength 5. Game stayed closed. Stable remains
-0.2.4. Exact evidence is in
+clearer separate USB handbrake, logging and smoothing help. Owner subsequently
+accepted landing feel; visual scale verification remains pending. Settings and
+optional probe 0.2.5.3 were preserved; RC8 defaulted off/strength 5. Game stayed
+closed. Stable was 0.2.4 at that point. Exact evidence is in
 `docs/LOCAL-DEPLOYMENT.md`; the latest unsent support draft is in USER-FEEDBACK.
 
 **Attended update 2026-09-10:** installed RC5 failed FFB startup (KI-28) and
@@ -96,14 +104,14 @@ thread cancellation. The old probe reproduces a Mono cleanup hang in isolation;
 corrected listening/reading/queued-command shutdown passes. Local DSS round-gauge
 idle bindings were repaired and SimHub reloaded both displays; physical retest
 is pending. RC6 (`8ea54775...clean`) and separate probe 0.2.5.3 were installed after
-all 16 local gates, including the real drive corpus. Stable is still 0.2.4.
+all 16 local gates, including the real drive corpus. Stable was then 0.2.4.
 See `docs/reviews/2026-09-11-bug-follow-up.md` and the deployment receipt.
 
-Published stable remains **0.2.4**. Current development is **0.2.5**: strict USB
+Published stable is **0.2.5**, including strict USB
 axis/shifter identity and idle reader recovery (KI-21/KI-23), last-session
 diagnostic retention (KI-19), stale-force release (KI-22), deferred binding edits
 (KI-24), and idle telemetry connection/disable handling (KI-25). All have offline
-coverage; new candidate hardware testing remains pending. See
+coverage and owner overall RC8 acceptance; full hardware testing remains pending. See
 `docs/reviews/2026-09-09-overnight-025.md` and `docs/LOCAL-DEPLOYMENT.md` for the
 exact validated/installed artifact, hashes and receipts. The Stream Deck Steam
 550320 button targets that installation. Stable 0.2.4 and RC7 use toolkit

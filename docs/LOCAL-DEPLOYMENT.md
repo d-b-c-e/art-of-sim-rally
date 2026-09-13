@@ -6,7 +6,22 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.5 work
+## Installed stable — 0.2.5
+
+**[0.2.5 is published](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.5)
+and installed as of 2026-09-13 03:57 UTC.** Wheel landing vibration defaults on
+at strength 5; existing saved settings, including the owner's enabled/20, remain.
+The accepted built-in SimHub profile and gains are unchanged.
+
+- Identity: `0.2.5+c6242a0a163315f7a390d3860c6204b4ca215619.clean`.
+- ZIP SHA-256: `8A7F9FC044058B0890F7323138E3DFCBC998B31C67C57E14272D410C6BFCA502`.
+- [All 16 final local gates passed](../results/rc-0.2.5-ab78d6a9af8446b9ac562904e7062c6a/automated.json), including actual Unity Mono and the real drive corpus.
+- [Installation receipt and RC8 backup](../results/release-025-install-2bd3016bb6334b8ea4effb6142c15c2b/receipt.json): all payloads verified, settings and separate probe 0.2.5.3 preserved. Game closed throughout; Steam/Stream Deck target unchanged.
+- [Published download verification](../results/release-025-published-b7832204b25e4f5cb6d1db48bd0adc3f/verification.json): ZIP and checksum match the exact final artifact.
+- Official toolkit v0.13.0 replaces the local pin with byte-identical RC8 binaries. No SimHub helper or recorder is shipped.
+- [Owner acceptance and release limits](reviews/2026-09-13-release-0.2.5.md): overall RC8 acceptance authorizes publication; full attended matrix and a separate final-artifact drive remain unverified.
+
+## Previous candidate — RC8 restored after RC9 withdrawal
 
 **RC8 restored on 2026-09-13 01:36 UTC.** The owner rejected RC9's extra SimHub
 helper; its game code/plugin/profile were removed. The exact RC8 archive below
