@@ -1,9 +1,9 @@
 # Force feedback
 
-Development update 2026-09-12: [landing vibration](LANDING-EFFECTS.md) uses a
-separate finite hardware sine effect with its own strength. It is off by default
-and awaits attended tuning. The steering curve below remains unchanged; stable
-0.2.4 contains no dedicated landing effect.
+Version 0.2.5: [landing vibration](LANDING-EFFECTS.md) uses a separate finite
+hardware sine effect with its own strength. It defaults on at strength 5;
+saved opt-outs and custom strengths are preserved. The owner accepted RC8 wheel
+FFB; additional driver support remains unverified. The steering curve is unchanged.
 
 ## The situation
 

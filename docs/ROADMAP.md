@@ -1,7 +1,7 @@
 # Roadmap
 
-Status reviewed 2026-09-12 after the owner requested landing-effect implementation.
-**0.2.4 is published; the local 0.2.5 candidate adds tested fixes and awaits a drive.**
+Status reviewed 2026-09-13 UTC after owner RC8 acceptance and release request.
+**Preparing 0.2.5 with wheel landing vibration enabled by default at strength 5.**
 See [current evidence](reviews/2026-09-09-overnight-025.md) and
 [installed identity](LOCAL-DEPLOYMENT.md).
 The defect register is [KNOWN-ISSUES.md](KNOWN-ISSUES.md); the implementation review
@@ -9,11 +9,12 @@ is [2026-09-06-rc-review.md](reviews/2026-09-06-rc-review.md).
 
 ## Active feature — landing vibration
 
-An opt-in, finite hardware sine burst now has its own strength control, separate
+A finite hardware sine burst now has its own strength control, separate
 from steering Strength/Smoothing. The game detector reproduces the one landing
 in the saved Norway drive and rejects jitter/reset cases offline. Toolkit
-finite-burst work stays upstream; local development artifacts must be officially
-released/repinned before public mod publication. Wheel feel is pending.
+finite-burst work is officially published and pinned as v0.13.0, with identical
+binaries to the tested RC8. Owner wheel feedback is accepted;
+the full hardware matrix remains incomplete.
 See [implementation, limits and A/B drive](LANDING-EFFECTS.md).
 
 Remaining feature priorities:
@@ -23,8 +24,8 @@ Remaining feature priorities:
 2. **ButtKicker landing thud and independent road/crash effects (FR-2):** owner
    says wheel FFB is fine; the desired hard landing impact is on the shaker.
    RC9's extra SimHub helper was rejected and removed. Use built-in Impacts/Road
-   impacts with existing velocity/suspension telemetry. A 30 Hz comparison profile
-   is ready; check effect output and amplifier clipping before further tuning.
+   impacts with existing velocity/suspension telemetry. The owner accepted the
+   30 Hz comparison and observed amplifier clipping; no further gain increase.
    Road texture and collisions need their own reliable signals and tuning.
 3. **TSS/Fanatec follow-up and T300 rotation:** verify actual devices and modes;
    use reports to improve setup guidance and eventually per-wheel starting settings.
@@ -102,10 +103,9 @@ available. Fanatec-specific confirmation and RWD wheel snap reports remain open.
 
 Stable 0.2.4/RC7 use **toolkit v0.12.0**, native component **0.5.0**, downloaded from the
 [official release](https://github.com/d-b-c-e/dbce-wheel-mod-toolkit/releases/tag/v0.12.0).
-The landing candidate uses local clean toolkit commit
-`dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9` (0.13.0/native 0.6.0), whose full local
-package and zero-output R12 ABI checks pass. Its official publication/repin is
-still pending. Vendored hashes identify the exact local artifacts.
+Version 0.2.5 uses official toolkit **v0.13.0/native 0.6.0**, published from
+`dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9`. All five vendored files are identical
+to those tested in RC8. Full local package and zero-output R12 ABI checks pass.
 Production references and packages `Dbce.Wheel.Ffb.dll`: the shared wrapper handles
 loading, enumeration, FFB, shifter and direct-input reads. The native alias remains
 `UnityForceFeedback.dll`, bound from one exact module handle.
@@ -114,7 +114,7 @@ Shared `AxleForceCurve@1` implements the released gain, fade, clamp, then EMA
 pipeline. Local ForceCurve is only a forwarding adapter. The original formula is
 frozen in consumer regression with the game's actual managed Mathf. Existing
 `simlite@2` remains a different tune; it is not the adopted pipeline. The landing
-candidate adds an opt-in periodic effect; no damper, assist or physics changes.
+release adds a periodic effect, default on at strength 5; no damper, assist or physics changes.
 
 New explicit FFB picker choices persist an instance GUID. Missing GUIDs report a
 setup error and never select another wheel. Existing name/index settings remain

@@ -127,7 +127,7 @@ builds unless the owner changes it. The repository had no Actions workflows when
 checked on that date. GitHub hosts the source and release assets; it does not
 need to rebuild the archive.
 
-1. Vendor released toolkit v0.12.0 using the transactional Sync-Toolkit.ps1.
+1. Vendor released toolkit v0.13.0 using the transactional Sync-Toolkit.ps1.
    Confirm VERSION and hashes; do not label an unreleased toolkit build as a
    published toolkit version. Building this consumer locally is the normal path.
 2. Keep `Version.props` and source Info.json on the same numeric UMM version.

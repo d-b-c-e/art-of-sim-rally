@@ -1,10 +1,13 @@
-# Landing vibration candidate
+# Landing vibration
 
-Implemented for development testing on 2026-09-12 at the owner's request.
-This feature is not in stable 0.2.4. It is off by default and requires the new
-toolkit finite-periodic API (managed 0.13.0/native 0.6.0). A local development
-pin is identified by its exact commit, not represented as a published release.
-The toolkit must be published and officially repinned before a public mod release.
+Implemented on 2026-09-12 and accepted for the 0.2.5 release by the owner.
+It defaults **on at strength 5** for new settings and older files without landing
+fields. Explicit saved opt-outs and custom strengths are preserved. It requires
+the toolkit finite-periodic API (managed 0.13.0/native 0.6.0). The original RC8
+used the local development pin below. Version 0.2.5 pins official
+[toolkit v0.13.0](https://github.com/d-b-c-e/dbce-wheel-mod-toolkit/releases/tag/v0.13.0),
+published from the same frozen source/archive. All five vendored DLL/XML files
+are byte-identical to those used in RC8.
 
 Frozen toolkit source: `dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9`, local archive
 SHA-256 `2F73F5427465CD85E8D969EE7ECAF7D9C2CB08ED923DA80C4AC7C7234AF1B0CC`.
@@ -76,7 +79,7 @@ record each landing's air time, descent, magnitude and driver acceptance.
 1. Start with the installed candidate, usual steering tune and **Landing vibration
    off**. Enable **Log detail for support** for this short comparison. Drive a
    familiar stage with a jump and note steering/landing feel.
-2. Pause. Enable **Force feedback → Landing vibration (experimental)**, leave
+2. Pause. Enable **Force feedback → Landing vibration**, leave
    **Landing strength at 5**, and wait for Ready. Repeat the same stage/jump.
 3. Confirm one short vibration at touchdown, with ordinary steering unchanged
    between jumps. Compare with a smaller hop and bumpy ground if available.
@@ -93,3 +96,9 @@ change telemetry.** Shaker thud enhancement is a separate FR-2 follow-up.
 See [the corrected interpretation](reviews/2026-09-12-landing-wheel-test.md).
 Unsupported-driver behavior and exact packaged release sign-off remain pending.
 Existing FFB startup/recovery, gauges and quit retests still apply.
+
+Owner follow-up on 2026-09-12: landings felt better with built-in SimHub effects
+at 30 Hz and the amplifier CLIP indicator lit. The owner accepted the result,
+requested release and default-on wheel landing vibration. Keep shaker gains as
+tested; no extra helper or amplified physical telemetry. This acceptance is not
+a separate pass for every item in the hardware matrix.

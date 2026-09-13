@@ -13,14 +13,14 @@ properly on a racing wheel.
 
 ## Install
 
-**Stable release: 0.2.4.** The [0.2.5 development candidate](docs/reviews/2026-09-09-overnight-025.md)
-adds USB identity/recovery fixes, previous-session diagnostics and lifecycle
-corrections. [Attended follow-up fixes](docs/reviews/2026-09-11-bug-follow-up.md)
-address startup FFB and exit cleanup; hardware retests are pending.
+**Version 0.2.5** adds [wheel landing vibration](docs/LANDING-EFFECTS.md), enabled
+by default at strength 5, plus USB identity/recovery, retained diagnostics,
+FFB startup and exit cleanup fixes. Existing saved preferences are preserved.
+The owner accepted RC8 after wheel and shaker testing; additional wheel brands
+and the complete hardware transition matrix remain unverified.
 
-Development now also includes [experimental landing vibration](docs/LANDING-EFFECTS.md)
-with independent strength. It is off by default, awaiting a wheel comparison,
-and is not in the stable download.
+ButtKicker effects use ordinary telemetry and SimHub's built-in Impacts/Road
+impacts. No extra SimHub helper is needed; wheel landing strength is independent.
 
 1. Install [Unity Mod Manager](https://www.nexusmods.com/site/mods/21) and point
    it at art of rally. The game is already in its supported list.
@@ -48,7 +48,7 @@ is loaded from there, so no extra copying is needed.
 
 Everything is in the Ctrl+F10 panel, in collapsible sections. Pause before
 assigning controls, selecting a separate shifter or changing the telemetry
-destination; the 0.2.5 candidate defers device/connection setup until idle.
+destination; device/connection setup is deferred until idle.
 
 **Force feedback** — pick your wheel from the **Wheel** dropdown, then set
 **Strength** (0–100; 50 is the tuned default, and the right starting point). If two devices share a name, choose one
@@ -61,7 +61,7 @@ gear: click **set**, then move the lever into that gate. H-pattern and sequentia
 are both supported, and the bindings shown match the mode you picked.
 
 **Separate USB controls:** Wheel input (direct) can assign steering, pedals and
-handbrake from different devices. In the 0.2.5 candidate, new bindings and separate
+handbrake from different devices. New bindings and separate
 shifter selections retain their device GUID; a missing device stays neutral.
 Ambiguous old same-name bindings require reassignment. See [controls](docs/CONTROLS.md).
 
@@ -120,7 +120,7 @@ before a fresh game launch to use our bonnet/bumper views. Settings are preserve
 pause, then create the support file before restarting. Ordinary logs are available
 without detailed logging. 0.2.4 adds bounded log reads, loaded-mod/input details and
 frame-hitch counts; see [the instructions](docs/TROUBLESHOOTING.md#collecting-an-intermittent-slowdown-or-ffb-report).
-The 0.2.5 candidate also retains a bounded summary after a normal exit, labelled
+Version 0.2.5 also retains a bounded summary after a normal exit, labelled
 with the previous session's build and timestamps. It cannot recover a crash trace.
 
 **A shifter gate that also accelerates or brakes** means the game auto-bound that

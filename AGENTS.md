@@ -41,22 +41,31 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-12) — do not overstate this
 
+**Release preparation 2026-09-13 UTC:** owner accepted RC8 and the built-in
+30 Hz shaker profile: landings felt better and amplifier CLIP was observed.
+Authorized 0.2.5 release and default-on wheel landing vibration (strength 5).
+Existing saved opt-outs/strengths remain intact; the owner's installed strength
+20 is retained. Preserve the exact acceptance/log evidence separately from the
+incomplete full hardware matrix. Official toolkit v0.13.0 is published and
+pinned; all five vendored files are identical to the tested local RC8 artifacts.
+See `docs/reviews/2026-09-13-release-0.2.5.md` for the current release record.
+
 **RC9 withdrawn:** owner rejected the extra SimHub helper. Removed its source,
 plugin/profile and restored the exact previously validated RC8 artifact on
 2026-09-13 01:36 UTC. Keep shaker improvements on standard Forza telemetry and
 built-in SimHub effects. A separate **Art of Sim Rally - built-in impacts 30Hz**
 profile is selected for comparison; original profile and gains are preserved.
-Game closed, SimHub running, no recording. Physical improvement is untested.
+Game closed, SimHub running, no recording. Owner subsequently accepted the physical improvement.
 See `docs/reviews/2026-09-12-builtin-shaker-correction.md` and deployment receipts.
 
-Landing vibration is implemented and installed in RC8: opt-in,
+Landing vibration was implemented and installed in RC8: initially opt-in,
 independent 5% strength default (20% cap), three-cycle 25 Hz/120 ms native sine.
 Game detector rejects jitter/reset cases and matches the one real landing.
-Toolkit local pin `dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9.clean` is a validated
-0.13.0 development build, native 0.6.0; it is NOT a published toolkit version.
+RC8 used local pin `dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9.clean`.
+That frozen source/archive is now the official toolkit v0.13.0, native 0.6.0.
 The native API now has finite bursts and all-effect focus/watchdog stopping.
-Publish/officially repin the toolkit before a public mod release; final packaging
-rejects local toolkit pins. See `docs/LANDING-EFFECTS.md`.
+The official repin is complete; final packaging still rejects local toolkit
+pins. See `docs/LANDING-EFFECTS.md`.
 
 First RC8 owner drive on 2026-09-12: eight nonzero landing requests accepted,
 including magnitude .20. **Owner clarified wheel FFB is fine; the weak/buzzy
@@ -98,8 +107,8 @@ coverage; new candidate hardware testing remains pending. See
 `docs/reviews/2026-09-09-overnight-025.md` and `docs/LOCAL-DEPLOYMENT.md` for the
 exact validated/installed artifact, hashes and receipts. The Stream Deck Steam
 550320 button targets that installation. Stable 0.2.4 and RC7 use toolkit
-**v0.12.0**, native **0.5.0**; the new landing candidate uses the local toolkit
-above. AxleForceCurve@1 steering arithmetic and telemetry layout are unchanged.
+**v0.12.0**, native **0.5.0**; 0.2.5 uses official v0.13.0/native 0.6.0.
+AxleForceCurve@1 steering arithmetic and telemetry layout are unchanged.
 Landing vibration is a separate periodic output; no physics or assist changes.
 
 The separate developer probe now records schema-3 motion/contact/suspension
@@ -139,7 +148,7 @@ owner's MOZA R12 rig unless stated otherwise.
 | **Direct wheel input** (`WheelInput`) | Verified driving on the owner's rig 2026-09-03 after the steering-sign fix (assignment is direction-independent; Flip per channel). Released in 0.2.2. Fanatec user pending. |
 | Crash fix (shifter choice after FFB failure), FFB candidate fallback, capability labels | Released in 0.2.2; init verified here, Fanatec user pending. |
 | Rewired DirectInput backend switch (`InputBackend`) | **Abandoned** after four attempts. Settings.xml-only experiment. Do not retry — see below. |
-| Toolkit adoption | Managed wrapper and AxleForceCurve@1 adopted; new explicit FFB selections persist strict GUIDs. Offline tests and local Mono loading/drive pass; full hardware lifecycle matrix pending. Damper/periodic effects remain unused. |
+| Toolkit adoption | Managed wrapper and AxleForceCurve@1 adopted; explicit FFB selections persist strict GUIDs. Landing uses the finite periodic API. Offline tests and local Mono loading/drive pass; full hardware lifecycle matrix pending. Damper remains unused. |
 
 The game's force feedback was half-built: `ForceFeedback` is never attached,
 `Wheel.Mz` is computed only `if (cardynamics.enableForceFeedback)`, which

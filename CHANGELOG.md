@@ -7,11 +7,13 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.5] - 2026-09-13
+
 ### Added
 
-- Experimental opt-in landing vibration with independent strength: game contact
-  detection and finite 120 ms hardware sine bursts. Default off; physical feel
-  and new toolkit adoption still require attended validation.
+- Wheel landing vibration with independent strength: game contact detection and
+  finite 120 ms hardware sine bursts. Enabled by default at strength 5; existing
+  saved choices are preserved. Steering force and SimHub telemetry stay separate.
 
 - Actual Unity Mono compatibility tests in the local RC gate, recorded-drive
   regression corpus and landing-envelope studies without hardware output.

@@ -21,6 +21,11 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+Release note 2026-09-13: owner accepted RC8 and authorized 0.2.5 with default-on
+wheel landing vibration. The built-in SimHub thud felt better; amplifier CLIP was
+observed. This overall acceptance does not resolve the individual unverified
+hardware cases below. [Release evidence](reviews/2026-09-13-release-0.2.5.md).
+
 ### KI-32 — Settings explanations ignore Mod Manager font scaling
 
 **Cosmetic; reported 2026-09-12, confirmed in source.** The T300/TSS user can

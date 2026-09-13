@@ -119,7 +119,18 @@ static class Program
         var original=new Settings { Strength=15, Smoothing=.5f, BonnetHeight=1.234f };
         SettingsPersistence.Write(original,path);
         string before=File.ReadAllText(path);
-        Check(!new Settings().LandingEffectsEnabled && new Settings().LandingStrength==5f,"existing installs must opt in to landing force");
+        Check(new Settings().LandingEffectsEnabled && new Settings().LandingStrength==5f,"new settings use the default landing vibration");
+        var serializer=new XmlSerializer(typeof(Settings));
+        using(var legacyXml=new StringReader("<Settings><Strength>15</Strength></Settings>"))
+        {
+            var legacy=(Settings)serializer.Deserialize(legacyXml)!;
+            Check(legacy.LandingEffectsEnabled && legacy.LandingStrength==5f && legacy.Strength==15,"pre-feature settings inherit landing defaults without altering steering");
+        }
+        using(var optedOutXml=new StringReader("<Settings><LandingEffectsEnabled>false</LandingEffectsEnabled><LandingStrength>3.5</LandingStrength></Settings>"))
+        {
+            var optedOut=(Settings)serializer.Deserialize(optedOutXml)!;
+            Check(!optedOut.LandingEffectsEnabled && optedOut.LandingStrength==3.5f,"saved opt-out and strength survive upgrade");
+        }
         var changed=new Settings { Strength=26, Smoothing=.2f, BonnetHeight=2.345f, LandingEffectsEnabled=true, LandingStrength=3.5f };
         var pending=new DeferredSave(); pending.MarkDirty();
         using(var locked=File.Open(path,FileMode.Open,FileAccess.ReadWrite,FileShare.None))

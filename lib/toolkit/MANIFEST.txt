@@ -1,4 +1,4 @@
-# Sync-Toolkit SHA-256; selected parts: native,dotnet; toolkit local+dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9.clean
+# Sync-Toolkit SHA-256; selected parts: native,dotnet; toolkit v0.13.0
 E56E0BBADF128872B50E3AD0419BA1E04BAC65723047EC5A0E10151FAFBFDC65  dotnet/Dbce.Wheel.Ffb.dll
 C0909589273299F15EF31B1C8DC7E1C9A882DDC277FFDC4A559808429CA73E04  dotnet/Dbce.Wheel.Ffb.xml
 5D02243A3A2EA7C87706384C175CDE19227C7F2800159FAA838B92282706E08A  dotnet/Dbce.Wheel.Telemetry.dll

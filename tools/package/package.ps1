@@ -126,6 +126,12 @@ Launch the game and press Ctrl+F10 for the settings panel.
   wheel pulls toward lock instead of back to centre, tick "Invert direction".
   Force fades in between 3 and 12 km/h - that is deliberate.
 
+* Landing vibration is on by default at strength 5, independently of steering
+  strength. Adjust or disable it under Force feedback while paused. Existing
+  saved choices are kept. Requires wheel sine-effect support; this setting does
+  not control the ButtKicker. SimHub's built-in Impacts/Road impacts use ordinary
+  telemetry and need no extra helper/plugin.
+
 * Fanatec, or any wheel the game's controls screen ignores: open Wheel input
   (direct) in the mod panel, tick "Read the wheel directly", then Assign
   steering and each pedal by moving it. Flip a row if it runs backwards.
@@ -174,10 +180,9 @@ KNOWN LIMITS
   should apply to any wheel Rewired does not recognise, which is likely most
   modern direct-drive bases, but that is reasoning rather than testing.
 
-* Owner testing of 0.2.4-rc.5 was accepted for the earlier 0.2.4 release. New 0.2.5
-  input and diagnostic work has separate offline evidence and requires attended
-  checks. The complete hardware scenario matrix remains pending. See the source
-  release-readiness notes for evidence tied to this exact package.
+* The owner accepted RC8 and requested this 0.2.5 release after wheel and shaker
+  testing. The full hardware scenario matrix, including additional wheel brands,
+  remains incomplete. See the source release notes for evidence and limits.
 
 * This is a bonnet camera, not a cockpit camera. art of rally's cars have no
   modelled interiors, so there is nothing to sit inside of.

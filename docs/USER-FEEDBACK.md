@@ -2,6 +2,14 @@
 
 ## Landing feature implementation — 2026-09-12
 
+**Accepted for release:** owner reports landings felt better with the built-in
+30 Hz profile and saw the amplifier CLIP light. They called it good enough,
+authorized release and asked for landing vibration on by default. Implemented
+the existing wheel feature's default at strength 5, preserving saved preferences.
+The rig's installed strength 20 remains its saved setting. No SimHub helper or
+further shaker gain increase. Latest preserved RC8 log has four accepted wheel
+bursts. Full hardware matrix cases remain individually unverified.
+
 First RC8 owner drive: initially reported a subtle landing effect, then clarified
 that **wheel FFB is fine; the ButtKicker should deliver a hard, noticeable thud**.
 The maximum wheel slider and eight accepted wheel requests do not measure shaker
