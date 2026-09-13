@@ -54,6 +54,7 @@ namespace ArtOfSimRally.Mod
             TelemetryPump.StopIfDisabled();
             if (!Main.Enabled)
             {
+                ShakerLanding.Tick();
                 LandingController.Tick();
                 WheelInput.FlushLearnedRanges();
                 Shifter.FlushSelection();
@@ -69,6 +70,7 @@ namespace ArtOfSimRally.Mod
             // it cannot.
             if (GameState.IsDriving)
             {
+                ShakerLanding.Tick();
                 LandingController.Tick();
                 _wheelReleased = false;
                 return;
@@ -90,6 +92,7 @@ namespace ArtOfSimRally.Mod
             // Native effect allocation, like acquisition, follows force release.
             LandingController.Tick();
             TelemetryPump.Prepare();
+            ShakerLanding.Tick();
             // Retry failed writes at most once per five seconds, only while idle.
             WheelInput.FlushLearnedRanges();
             Shifter.FlushSelection();
@@ -132,6 +135,7 @@ namespace ArtOfSimRally.Mod
             FfbNative.Shutdown();
             TelemetryPump.Park();
             TelemetryPump.Shutdown();
+            ShakerLanding.Shutdown();
             BonnetCamera.Release(unloading);
             Shifter.Close();
             WheelInput.Close();

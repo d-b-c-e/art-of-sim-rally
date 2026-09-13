@@ -405,7 +405,9 @@ effect strength (default off), without retuning steering. It does not establish
 per-wheel defaults or resolve the requested road/crash effects. First RC8 owner
 clarification: wheel FFB is fine; the weak landing thud concerns the ButtKicker,
 not the wheel. Eight wheel-driver accepted cues do not measure shaker output.
-Investigate SimHub pulse shaping and a dedicated haptic landing event under FR-2.
+FR-2 now has an optional SimHub companion and dedicated, expiring haptic landing
+event. Its 30 Hz/180 ms thud and independent strength require attended testing;
+this does not resolve road/crash effects or establish amplifier headroom.
 [Evidence and next comparison](reviews/2026-09-12-landing-wheel-test.md).
 Full hardware validation remains open; see [LANDING-EFFECTS.md](LANDING-EFFECTS.md).
 

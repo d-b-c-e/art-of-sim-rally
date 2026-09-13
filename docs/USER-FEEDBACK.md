@@ -11,6 +11,12 @@ FR-2, keeping physical telemetry accurate. Logs are preserved while paused; no
 new recording was running. Full lifecycle checks remain pending.
 [Corrected attended evidence](reviews/2026-09-12-landing-wheel-test.md).
 
+Follow-up implementation: a separate optional SimHub companion receives an
+expiring landing cue, with a 30 Hz tone and 180 ms shaped envelope. Independent
+shaker strength 0..100 defaults to 50 when enabled; the feature defaults off.
+Original SimHub profile/gain are preserved. Physical feel and amplifier headroom
+remain unmeasured. [Candidate setup and retest](../tools/simhub/README.md).
+
 Owner requested implementation/testing before the next release. FR-2 now has
 an opt-in landing-vibration candidate with an independent strength control.
 Road/crash effects remain planned. The user's saved one-jump drive verifies the

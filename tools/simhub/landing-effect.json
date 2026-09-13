@@ -1,0 +1,16 @@
+{
+  "ContainerType": "CustomEffectContainer",
+  "IsEnabled": true,
+  "Gain": 100.0,
+  "Description": "Art of Sim Rally - landing thud",
+  "FrontLeftFormula": { "Expression": "isnull([ArtOfSimRallyHaptics.LandingPulse], 0)" },
+  "FrontRightFormula": { "Expression": "isnull([ArtOfSimRallyHaptics.LandingPulse], 0)" },
+  "RearLeftFormula": { "Expression": "isnull([ArtOfSimRallyHaptics.LandingPulse], 0)" },
+  "RearRightFormula": { "Expression": "isnull([ArtOfSimRallyHaptics.LandingPulse], 0)" },
+  "ForceFrequencies": false,
+  "AlwaysExecute": false,
+  "ContainerId": "a0561d71-422a-4574-8a73-f99471985fce",
+  "AggregationMode": "Mono",
+  "Filter": { "GammaValue": 1.0, "InputGain": 100.0, "MinimumForce": 0, "Threshold": 0, "FilterType": "GammaFilter" },
+  "Output": { "UseHighFrequency": false, "Frequency": 30, "UseWhiteNoise": false, "UsePrehemptiveMode": false, "OutputType": "ToneOutput" }
+}

@@ -24,6 +24,7 @@ CASES["support-identity"] += " After a diagnostic drive and normal quit/relaunch
 CASES["telemetry"] += " Verify 0.2.5 connections prepare while idle; a driving destination edit keeps the old endpoint until pause. Disabling telemetry must immediately park the consumer; re-enable while paused."
 CASES["ffb-lifecycle"] += " Repeat launches including focus changes during startup; verify acquisition recovers. Test normal Quit and Alt+F4 with the developer probe removed. For landing effects: drive the same jump with Landing vibration off, then enabled at strength 5 while paused. Confirm one short vibration on touchdown, unchanged steering between jumps, and no triggers on ordinary contact jitter/restarts/replay. Pause/alt-tab/disable during or just after a landing; vibration must stop. Inspect driver-acceptance counters and save support. Do not pass landing feel from offline replay."
 CASES["input-persistence"] += " Verify Landing vibration and its independent strength persist. Increase/decrease UMM font scale; explanations, headings and status text should scale and wrap legibly."
+CASES["telemetry"] += " For the matching SimHub companion: select Art of Sim Rally - landing thud profile. Enable Telemetry / ButtKicker landing thud while paused at strength 50. Compare the same jump with it off/on. Check one short thud, no false bumps or repeat after restart, pause/focus/finish/quit clears, regular wheel/gauges unchanged, saved settings survive relaunch. Note amplifier CLIP before increasing strength; record physical feel plus AcceptedLandings/RejectedPackets and both installed package identities. Offline tests do not pass physical output."
 
 def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest().upper()
@@ -42,6 +43,10 @@ def verify_automated(path):
     require(len(checks) == len(AUTOMATED) and {c["name"] for c in checks} == AUTOMATED, "Missing/duplicate automated checks")
     require(all(c.get("status") == "passed" and c.get("assertions", 0) > 0 for c in checks), "Empty or failed automated check")
     require(digest(report["artifact"]) == report["artifactSha256"], "Candidate archive changed")
+    companion = report.get("simHubCompanion")
+    if companion:
+        require(companion.get("identity") == report.get("identity") and companion.get("status") == "passed", "Companion identity differs")
+        require(digest(companion["artifact"]) == companion["sha256"], "SimHub companion archive changed")
     return report
 
 def initialize(report_path, output):

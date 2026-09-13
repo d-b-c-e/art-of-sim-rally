@@ -32,6 +32,8 @@
     beside the mod.
   -->
   <ItemGroup>
+    <Compile Include="../Haptics/HapticProtocol.cs" Link="HapticProtocol.cs" />
+    <Compile Include="../Haptics/HapticSender.cs" Link="HapticSender.cs" />
     <Reference Include="Dbce.Wheel.Ffb">
       <HintPath>..\..\lib\toolkit\dotnet\Dbce.Wheel.Ffb.dll</HintPath>
       <Private>true</Private>

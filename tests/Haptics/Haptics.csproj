@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFrameworks>net8.0;net48</TargetFrameworks><OutputType>Exe</OutputType><LangVersion>latest</LangVersion><TreatWarningsAsErrors>true</TreatWarningsAsErrors></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/Haptics/*.cs" Link="%(Filename).cs" />
+    <Compile Include="../../tools/simhub/HapticReceiver.cs" Link="HapticReceiver.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/ShakerLanding.cs" Link="ShakerLanding.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/LandingSignal.cs" Link="LandingSignal.cs" />
+  </ItemGroup>
+</Project>

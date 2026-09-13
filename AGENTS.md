@@ -53,10 +53,12 @@ rejects local toolkit pins. See `docs/LANDING-EFFECTS.md`.
 First RC8 owner drive on 2026-09-12: eight nonzero landing requests accepted,
 including magnitude .20. **Owner clarified wheel FFB is fine; the weak/buzzy
 landing report is about the ButtKicker.** Do not retune steering or wheel bursts
-to fix that symptom. SimHub thud shaping/dedicated haptic landing export is the
-next FR-2 follow-up; current wheel landing controls do not change telemetry.
-The complete hardware gate remains pending. Logs are preserved; game is paused, no recording
-running. See `docs/reviews/2026-09-12-landing-wheel-test.md`. Do not redeploy while
+to fix that symptom. An optional SimHub plugin/profile now implements the FR-2
+landing thud: dedicated loopback cue, independent strength, 30 Hz/180 ms shaped
+envelope. It defaults off and leaves wheel/Forza physics unchanged. See
+`tools/simhub/README.md`. Candidate package/deployment and physical feel are pending.
+The complete hardware gate remains pending. Logs are preserved; game is now closed,
+SimHub is running, no recording running. See `docs/reviews/2026-09-12-landing-wheel-test.md`. Do not redeploy while
 the game is running. The toolkit interaction review found no ordinary constant-
 force call cancelling the burst; stop timing/driver waveform remain unobserved.
 
@@ -107,7 +109,7 @@ KI-31's one-unit difference is reproduced by actual Mono's intermediate numeric
 precision. Runtime-aware replay now passes without changing any capture bytes;
 `results/regression-corpus/index.json` is the first real regression corpus.
 New captures include a force-conversion contract; exact delivery checks remain.
-Nothing is recording; the current RC8 test game remains paused (2026-09-12).
+Nothing is recording; the game is closed (2026-09-12 follow-up).
 See docs/reviews/2026-09-10-first-jump-capture.md. Pause/Stop and verify files before
 quitting. Broader signal-ordering and probe-overhead comparisons remain pending. Read
 `docs/DEVELOPMENT-CAPTURE.md` before interpreting landing/slide candidates.

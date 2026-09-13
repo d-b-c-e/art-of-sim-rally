@@ -89,7 +89,9 @@ record each landing's air time, descent, magnitude and driver acceptance.
 First RC8 test on 2026-09-12: eight live wheel cues were accepted, including the
 20% maximum. The owner clarified that wheel FFB is fine; their weak/buzzy landing
 report concerns the ButtKicker. **This setting does not control the shaker or
-change telemetry.** Shaker thud enhancement is a separate FR-2 follow-up.
+change telemetry.** A separate [SimHub companion](../tools/simhub/README.md) now
+implements the requested shaker thud for candidate testing: independent strength,
+30 Hz and a finite 180 ms envelope. Its attended feel is pending.
 See [the corrected interpretation](reviews/2026-09-12-landing-wheel-test.md).
 Unsupported-driver behavior and exact packaged release sign-off remain pending.
 Existing FFB startup/recovery, gauges and quit retests still apply.

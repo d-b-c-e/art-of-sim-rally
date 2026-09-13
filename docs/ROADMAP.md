@@ -13,7 +13,10 @@ An opt-in, finite hardware sine burst now has its own strength control, separate
 from steering Strength/Smoothing. The game detector reproduces the one landing
 in the saved Norway drive and rejects jitter/reset cases offline. Toolkit
 finite-burst work stays upstream; local development artifacts must be officially
-released/repinned before public mod publication. Wheel feel is pending.
+released/repinned before public mod publication. The owner says wheel FFB is fine;
+complete lifecycle acceptance remains pending. A separate optional SimHub landing
+plugin/profile now implements a 30 Hz, 180 ms shaker pulse with its own strength,
+default off. [Install and retest](../tools/simhub/README.md); physical feel is pending.
 See [implementation, limits and A/B drive](LANDING-EFFECTS.md).
 
 Remaining feature priorities:
@@ -22,8 +25,8 @@ Remaining feature priorities:
    before deciding whether an optional damper is justified.
 2. **ButtKicker landing thud and independent road/crash effects (FR-2):** owner
    says wheel FFB is fine; the desired hard landing impact is on the shaker.
-   Tune SimHub pulse frequency/envelope and check clipping first; if needed,
-   export a dedicated derived haptic event without falsifying physical telemetry.
+   The dedicated haptic export and SimHub pulse are implemented; retest the
+   exact candidate/profile and check clipping before tuning further.
    Road texture and collisions need their own reliable signals and tuning.
 3. **TSS/Fanatec follow-up and T300 rotation:** verify actual devices and modes;
    use reports to improve setup guidance and eventually per-wheel starting settings.
