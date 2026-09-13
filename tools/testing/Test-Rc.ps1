@@ -81,7 +81,11 @@ try {
     Assert ($hooks.status -eq 'passed' -and $hooks.assertions -gt 0) 'Probe hooks runner ran no assertions'
     $null = Run 'runtime-build' 'dotnet' @('build','tests/RuntimeCompatibility/RuntimeCompatibility.csproj','-c','Release','--nologo','-warnaserror')
     $result = Run 'unity-mono-runtime' 'python' @('tools/testing/Run-UnityMono.py','tests/RuntimeCompatibility/bin/Release/net48/RuntimeCompatibility.exe')
-    $runtime = $result | Select-Object -Last 1 | ConvertFrom-Json
+    # Mono can emit a BOM-only line after the JSON when redirected streams close.
+    # Keep the original log; ignore empty/marker-only lines before parsing.
+    $runtimeLines = @($result | ForEach-Object { ([string]$_).TrimStart([char]0xfeff) } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    $runtime = $runtimeLines | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($runtime.status -eq 'passed' -and $runtime.runtime -eq 'Unity Mono' -and $runtime.assertions -gt 0) 'Actual Unity Mono compatibility checks failed'
     Checkpoint 'dev-recorder' ($recorder.assertions+$hooks.assertions+$runtime.assertions)
     $result = Run 'replay' 'dotnet' @('run','--project','tools/testing/Replay/Replay.csproj','-c','Release','--','--replay',$recorder.syntheticCapture)
