@@ -56,8 +56,8 @@ function Find-ArtOfRally {
     # Every library folder, not just the default one.
     $libraries = @($steam)
     $vdf = Join-Path $steam 'steamapps\libraryfolders.vdf'
-    if (Test-Path $vdf) {
-        foreach ($line in Get-Content $vdf) {
+    if (Test-Path -LiteralPath $vdf) {
+        foreach ($line in Get-Content -LiteralPath $vdf) {
             if ($line -match '"path"\s+"(.+?)"') {
                 $libraries += ($Matches[1] -replace '\\\\', '\')
             }
@@ -71,7 +71,7 @@ function Find-ArtOfRally {
     foreach ($lib in $libraries) {
         if (-not $seen.Add($lib.TrimEnd([char]92))) { continue }   # 92 = backslash
         $candidate = Join-Path $lib 'steamapps\common\artofrally'
-        if (Test-Path (Join-Path $candidate 'artofrally.exe')) { return $candidate }
+        if (Test-Path -LiteralPath (Join-Path $candidate 'artofrally.exe') -PathType Leaf) { return $candidate }
     }
     return $null
 }
@@ -81,11 +81,13 @@ if (-not $GameDir) {
     $GameDir = Find-ArtOfRally
 }
 
-if (-not $GameDir -or -not (Test-Path (Join-Path $GameDir 'artofrally.exe'))) {
+if (-not $GameDir -or -not (Test-Path -LiteralPath (Join-Path $GameDir 'artofrally.exe') -PathType Leaf)) {
     Fail "Could not find art of rally."
     Say ""
-    Say "  Run this again with the folder containing artofrally.exe, e.g.:"
-    Say "    .\install.ps1 -GameDir ""D:\Games\artofrally""" DarkGray
+    Say "  In Steam: Library > art of rally > Manage > Browse local files."
+    Say "  Open PowerShell in this extracted download and use that folder:"
+    $modeArgument = if ($Uninstall) { ' -Uninstall' } else { '' }
+    Say "    powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -GameDir ""D:\Games\artofrally""$modeArgument" DarkGray
     Say ""
     exit 1
 }
@@ -105,8 +107,8 @@ if (Get-Process artofrally -ErrorAction SilentlyContinue) {
 
 # Checked per-game, not globally: Unity Mod Manager is installed into each game
 # separately, so having it for another title does not help here.
-$ummInstalled = (Test-Path (Join-Path $GameDir 'artofrally_Data\Managed\UnityModManager\UnityModManager.dll'))
-if (-not $ummInstalled) {
+$ummInstalled = (Test-Path -LiteralPath (Join-Path $GameDir 'artofrally_Data\Managed\UnityModManager\UnityModManager.dll') -PathType Leaf)
+if (-not $ummInstalled -and -not $Uninstall) {
     Fail "Unity Mod Manager is not installed for art of rally."
     Say ""
     Say "  This mod runs on top of Unity Mod Manager, so that has to go on first." Yellow
@@ -122,7 +124,7 @@ if (-not $ummInstalled) {
     Say ""
     exit 1
 }
-Ok "Unity Mod Manager present"
+if ($ummInstalled) { Ok "Unity Mod Manager present" }
 
 $modDir    = Join-Path $GameDir 'Mods\ArtOfSimRally'
 $nativeDir = Join-Path $GameDir 'artofrally_Data\Plugins\x86_64'
@@ -172,15 +174,24 @@ if ($Uninstall) {
 # --- install ---------------------------------------------------------------
 
 $source = Join-Path $here 'ArtOfSimRally'
-if (-not (Test-Path $source)) {
+if (-not (Test-Path -LiteralPath $source)) {
     Fail "Cannot find the mod files next to this script."
     Say "  Extract the whole zip first, then run Install.bat from inside it."
     exit 1
 }
 
 # Validate the entire extracted package before touching the game directory.
-. (Join-Path $here 'verify.ps1')
-$manifest = Assert-Payload $here
+try {
+    . (Join-Path $here 'verify.ps1')
+    $manifest = Assert-Payload $here
+} catch {
+    Fail "The extracted download is incomplete or has changed."
+    Say "  $($_.Exception.Message)" DarkGray
+    Say "  Download the mod ZIP again (not Source code), use Extract All into a"
+    Say "  fresh folder, then run Install.bat. No game files were changed."
+    exit 1
+}
+Ok "Package verified: $($manifest.release)"
 
 try {
     New-Item -ItemType Directory -Force -Path $modDir | Out-Null
@@ -190,11 +201,11 @@ try {
     # The native plugin goes in both places on purpose. The mod loads it by
     # absolute path from its own folder, but the game's own (unused) force
     # feedback code looks in Plugins\x86_64, and a copy there also covers any
-    # runtime that will not resolve it from the mod folder. It is 160 KB.
+    # runtime that will not resolve it from the mod folder.
     $native = Join-Path $source 'UnityForceFeedback.dll'
-    if (Test-Path $native) {
+    if (Test-Path -LiteralPath $native) {
         New-Item -ItemType Directory -Force -Path $nativeDir | Out-Null
-        Copy-Item $native $nativeDir -Force
+        Copy-Item -LiteralPath $native -Destination $nativeDir -Force
         Ok "Force feedback plugin installed"
     } else { throw 'Native DLL missing from verified package' }
 }
@@ -206,13 +217,21 @@ catch [System.UnauthorizedAccessException] {
     Say ""
     exit 1
 }
+catch [System.IO.IOException] {
+    Fail "Could not copy the mod files."
+    Say "  $($_.Exception.Message)" DarkGray
+    Say "  Close the game and anything holding its files, check free disk space,"
+    Say "  then run Install.bat again before launching. Some files may already"
+    Say "  have been replaced; a successful retry verifies the complete install."
+    exit 1
+}
 
 # --- verify ----------------------------------------------------------------
 
 Say ""
 Say "Verifying..."
 $expected = $modFiles
-$missing = $expected | Where-Object { -not (Test-Path (Join-Path $modDir $_)) }
+$missing = $expected | Where-Object { -not (Test-Path -LiteralPath (Join-Path $modDir $_)) }
 if ($missing) {
     Fail "Missing after install: $($missing -join ', ')"
     exit 1
@@ -225,15 +244,21 @@ foreach ($name in $modFiles) {
 if ((Get-FileHash -LiteralPath (Join-Path $nativeDir 'UnityForceFeedback.dll') -Algorithm SHA256).Hash -ne $manifest.files.'ArtOfSimRally/UnityForceFeedback.dll') {
     throw 'Installed plugin copy does not match package'
 }
-Ok "All files in place"
+Ok "All installed files match release $($manifest.release)"
 
 Say ""
 Say "Done." Green
 Say ""
-Say "  1. Launch art of rally"
+Say "  1. Launch art of rally through Steam"
 Say "  2. Press Ctrl+F10 for the mod settings"
-Say "  3. Set Force feedback Strength (0-100; 50 is the default)."
-Say "     If the wheel pulls away from centre, enable Invert direction."
+Say "  3. While paused, select your wheel under Force feedback > Wheel."
+Say "     Keep the game focused while setup completes. Strength defaults to 50;"
+Say "     lower it if too heavy. Test while moving: force fades in at 3-12 km/h."
+Say "  4. For a separate USB handbrake or unread controls, use Wheel input (direct)."
+Say "     Read README.txt for setup, updates and troubleshooting."
+Say ""
+Say "  Your existing settings are preserved. New settings enable landing"
+Say "  vibration at strength 5; saved choices are kept."
 Say ""
 Say "  Trouble? In the settings panel press 'Create support file on Desktop'"
 Say "  and attach that file to a bug report."

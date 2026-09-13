@@ -102,7 +102,7 @@ available. Fanatec-specific confirmation and RWD wheel snap reports remain open.
 
 ## Toolkit adoption: implemented, awaiting attended validation
 
-Stable 0.2.4/RC7 use **toolkit v0.12.0**, native component **0.5.0**, downloaded from the
+Earlier 0.2.4/RC7 used **toolkit v0.12.0**, native component **0.5.0**, downloaded from the
 [official release](https://github.com/d-b-c-e/dbce-wheel-mod-toolkit/releases/tag/v0.12.0).
 Version 0.2.5 uses official toolkit **v0.13.0/native 0.6.0**, published from
 `dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9`. All five vendored files are identical

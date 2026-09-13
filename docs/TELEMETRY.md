@@ -1,5 +1,8 @@
 # Telemetry
 
+For setup, start with [SimHub and ButtKicker](SETUP.md#simhub-and-buttkicker).
+This reference describes packet contents, units and developer checks.
+
 ## Why Forza's format
 
 art of rally has no telemetry output. Rather than invent a format and then
@@ -163,7 +166,7 @@ wheel landing strength does not control the ButtKicker. The local built-in
 30 Hz comparison profile preserves original gains. See the
 [findings and A/B procedure](reviews/2026-09-12-builtin-shaker-correction.md).
 
-In the 0.2.5 candidate, enable telemetry and configure its destination while
+In 0.2.5, enable telemetry and configure its destination while
 paused or in a menu. The idle watchdog opens the connection after releasing
 force. If edited during driving, the working destination remains active until
 pause applies the change; the panel shows the actual endpoint and pending state.

@@ -38,6 +38,9 @@ third-party binaries, nothing that would force the repo private.
 | `docs/TROUBLESHOOTING.md` | User-facing fixes by symptom; the Fanatec section is the most-needed page. |
 | `docs/DEVELOPMENT-CAPTURE.md` | Separate probe schema, motion/contact units, standalone analysis and interpretation limits. |
 | `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP, RELEASING |
+| `docs/SETUP.md` / `docs/README.md` / `docs/BUILDING.md` | Player setup, documentation index and developer prerequisites. README stays a short install/first-drive entry point. |
+| `tools/installer/README.txt` | Standalone ZIP guide; packaging replaces `@RELEASE@`. Keep aligned with player docs; link online to files not in the archive. |
+| `tools/testing/Test-Installer.ps1` | Isolated real batch/Windows PowerShell installer checks; also included in Test-Rc. No game/hardware output. |
 
 ## Status (2026-09-13) — do not overstate this
 
@@ -322,6 +325,14 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
   shows Rewired's view, the ffb.log section shows DirectInput's. Compare them.
 
 ## Testing
+
+Documentation/installer audit 2026-09-13: current user instructions live in
+README/SETUP/TROUBLESHOOTING; dated reviews remain history. The revised installer
+accepts literal custom paths, forwards batch arguments/exit codes, initializes
+Windows PowerShell's own module path, and can uninstall after UMM removal.
+These installer changes are unreleased; the published 0.2.5 ZIP and installed
+game payload stay immutable. Docs-only and installer-only work does not require
+replacing the already-current game DLLs. Record package validation separately.
 
 **Keep the installed copy current without asking again** (standing owner request,
 2026-09-09 UTC). Local deployment is a checklist item when finishing a feature or

@@ -1,5 +1,12 @@
 # User feedback and support follow-up
 
+**Current, 2026-09-13:** 0.2.5 is published/installed, including default-on wheel
+landing vibration and clearer/scaling-aware settings help. The owner accepted
+the built-in SimHub comparison and observed clipping. Current setup answers
+are in [SETUP.md](SETUP.md) and [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+Dated reports and unsent drafts below preserve their original context; replace
+old version references before sending them. No new public reply was sent.
+
 ## Landing feature implementation — 2026-09-12
 
 **Accepted for release:** owner reports landings felt better with the built-in

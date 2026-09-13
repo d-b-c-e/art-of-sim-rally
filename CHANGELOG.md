@@ -7,6 +7,20 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Shorter install/first-drive README and dedicated setup/build guides, including
+  separate USB handbrakes, updates/removal, SimHub and support-file instructions.
+- Standalone release readme with usable online links and current 0.2.5 defaults.
+- Installer reports the verified release and explains incomplete downloads clearly.
+
+### Fixed
+
+- Uninstaller can remove the mod after Unity Mod Manager has been removed.
+- Batch launchers forward custom-folder arguments and preserve failure exit codes.
+- Batch launchers use Windows PowerShell's own modules when started from PowerShell 7.
+- Installer treats game paths containing square brackets literally.
+
 ## [0.2.5] - 2026-09-13
 
 ### Added

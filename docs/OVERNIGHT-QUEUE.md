@@ -1,5 +1,11 @@
 # Overnight investigation and implementation queue
 
+**Current, 2026-09-13:** 0.2.5 is published and installed with official toolkit
+v0.13.0. Owner accepted wheel landing vibration and the built-in 30 Hz SimHub
+comparison. The helper was rejected and removed. Remaining work is in the
+[roadmap](ROADMAP.md); full hardware checks remain pending. The dated queue
+entries below preserve earlier states and do not describe the current install.
+
 ## Landing follow-through — 2026-09-12
 
 Owner requested implementing/testing FR-2's landing feedback. The consumer

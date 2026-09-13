@@ -1,5 +1,9 @@
 # Landing vibration
 
+For the controls, see [steering force and landing vibration](SETUP.md#steering-force-and-landing-vibration).
+For a ButtKicker, use [SimHub setup](SETUP.md#simhub-and-buttkicker); the wheel
+landing setting does not control it.
+
 Implemented on 2026-09-12 and accepted for the 0.2.5 release by the owner.
 It defaults **on at strength 5** for new settings and older files without landing
 fields. Explicit saved opt-outs and custom strengths are preserved. It requires
@@ -49,7 +53,7 @@ after recovery; toggle the effect while paused to retry setup.
 
 ## Evidence and limits
 
-- Installed RC8 is the exact clean-source package from commit
+- The accepted RC8 was the exact clean-source package from commit
   `b9598f5cb6b0a48965b37f4f8d27f350fd59be49`. All 16 local gates passed, including
   the preserved drive corpus and 9,044 landing assertions. See the
   [gate and deployment receipt](LOCAL-DEPLOYMENT.md). No attended case is passed
@@ -76,7 +80,7 @@ record each landing's air time, descent, magnitude and driver acceptance.
 
 ## Attended comparison
 
-1. Start with the installed candidate, usual steering tune and **Landing vibration
+1. Start with the build being tested, usual steering tune and **Landing vibration
    off**. Enable **Log detail for support** for this short comparison. Drive a
    familiar stage with a jump and note steering/landing feel.
 2. Pause. Enable **Force feedback → Landing vibration**, leave
@@ -94,7 +98,8 @@ First RC8 test on 2026-09-12: eight live wheel cues were accepted, including the
 report concerns the ButtKicker. **This setting does not control the shaker or
 change telemetry.** Shaker thud enhancement is a separate FR-2 follow-up.
 See [the corrected interpretation](reviews/2026-09-12-landing-wheel-test.md).
-Unsupported-driver behavior and exact packaged release sign-off remain pending.
+Unsupported-driver behavior and a separate final-artifact drive remain pending;
+the owner authorized publication based on RC8 acceptance.
 Existing FFB startup/recovery, gauges and quit retests still apply.
 
 Owner follow-up on 2026-09-12: landings felt better with built-in SimHub effects

@@ -1,9 +1,32 @@
 # Troubleshooting
 
-Start with the support file: Ctrl+F10 → *Devices and troubleshooting* →
-**Create support file on Desktop**. It shows what the game's input library sees,
-what DirectInput sees, and what the mod did — and the two views disagreeing is
-usually the answer. Attach it when you report a problem.
+For initial setup, use the [setup guide](SETUP.md). If the mod loads, pause and
+collect a support file: Ctrl+F10 → *Devices and troubleshooting* →
+**Create support file on Desktop**. Attach it when reporting a problem.
+
+## Installation or settings panel missing
+
+- **Missing Install.bat:** download `ArtOfSimRally-0.2.5.zip` from release
+  **Assets**, not either **Source code** archive. Use **Extract All** before
+  running it; keep the extracted files together.
+- **Game not found:** [supply the folder containing artofrally.exe](SETUP.md#custom-game-folder).
+- **UMM missing:** run Unity Mod Manager, select **Art of Rally**, check the game
+  folder and click **Install**. Having UMM for another game is not enough.
+- **Access denied or file in use:** close the game fully. Retry the installer;
+  use **Run as administrator** only if the folder still denies access.
+- **Package verification failed:** download again and extract into a new folder.
+  Do not mix files from different releases or edit the manifest to bypass checks.
+- **No mod entry / Ctrl+F10 does nothing:** launch through Steam and check UMM
+  was installed into that same game folder. The mod should be at
+  `Mods/ArtOfSimRally`, not `Mods/Mods/ArtOfSimRally`. After a game update, check
+  UMM's install status again.
+- **Red entry or an old version:** close the game and reinstall the full release.
+  If the panel cannot export support, attach UMM's
+  `artofrally_Data/Managed/UnityModManager/Log.txt` from the game folder to an issue.
+
+The installer checks UMM's file is present; the in-game version/load check
+confirms whether the mod actually loaded. Use UMM **0.27.0 or newer**, as required
+by the mod's `Info.json`.
 
 ## Collecting an intermittent slowdown or FFB report
 
@@ -18,7 +41,7 @@ The **Log detail for support** checkboxes in **Force feedback** and **Devices
 and troubleshooting** control the same setting; either is sufficient. Attach
 the generated `art-of-sim-rally-support-*.txt` file from your Desktop.
 
-The 0.2.5 candidate retains a small diagnostic summary at idle/normal exit and
+Version 0.2.5 retains a small diagnostic summary at idle/normal exit and
 includes it in the next support file as **previous session** evidence. Its build
 and timestamp may differ from the current session. A crash can lose measurements
 since the last idle save; collecting immediately after the hitch is still best.
@@ -68,12 +91,12 @@ device and are read the same way: Assign, press the pedal.
 
 ## Separate handbrake (TSS or other USB device)
 
-The 0.2.5 candidate identifies newly assigned axes/buttons by device instance GUID
+Version 0.2.5 identifies newly assigned axes/buttons by device instance GUID
 and retries unavailable readers while paused. If an old binding reports identical
 devices, pause and use Assign again for that row. Assign also discovers devices
 plugged in after launch. Existing unambiguous bindings upgrade automatically after
 a successful read; their calibration is preserved. Hardware validation is pending.
-For a separate shifter, pause before choosing its device. The candidate also
+For a separate shifter, pause before choosing its device. Version 0.2.5 also
 retains that selection by GUID; reconnect/reselect if it reports unavailable.
 Old identical-name selections need an explicit choice. Automatic native shifter
 hotplug recovery remains unverified.
@@ -121,21 +144,18 @@ At the default **0.20**, each force update blends 20% of the previous output wit
 rattle, but also soften bumps and add response delay. Smoothing filters wheel
 force, not steering input; it does not reduce a sustained force like Strength does.
 
-Stable 0.2.4 sends a constant steering-force signal. Lowering Strength lowers
-the detail in that signal too; independent road/landing/crash effects are not yet
-shipped. Telemetry sends data to external dashboards/shakers/motion apps and does
-not add vibration or alter the wheel force pipeline.
-
-The development [landing-vibration candidate](LANDING-EFFECTS.md) adds an
-independent effect, off by default. Enable it while paused and check its status.
+Lowering Strength lowers steering-force detail too. Version 0.2.5 adds
+independent [landing vibration](LANDING-EFFECTS.md), on by default at strength 5;
+existing saved choices are preserved. Check its status while paused.
 If setup or delivery fails, toggle it off/on while paused and export support.
 Some drivers may reject sine effects; steering continues. Road/crash effects
-remain planned. This is not in the published 0.2.4 download.
+remain planned. For a ButtKicker, use [SimHub's built-in effects](SETUP.md#simhub-and-buttkicker);
+wheel Landing strength does not change the shaker or telemetry.
 
 ## Settings explanations stay small when increasing Mod Manager scale
 
-Stable 0.2.4 fixes explanatory text at 11 pixels, regardless of UMM's scale.
-The 0.2.5 candidate removes that override and uses the current UMM font for
+Version 0.2.4 fixed explanatory text at 11 pixels, regardless of UMM's scale.
+Version 0.2.5 removes that override and uses the current UMM font for
 explanations, headings and wrapped status text. No separate mod font option is
 needed. Visual testing at normal/enlarged scale is still pending (KI-32).
 
@@ -166,14 +186,14 @@ it. If you still see it, the support file's force-feedback section will show
 ## No force feedback at all
 
 - In 0.2.3 and later support files, compare **build**, **mod sha256**, **mapped
-  file** and **file sha256** with the candidate manifest. `preload requested` is
+  file** and **file sha256** with the release manifest. `preload requested` is
   only the path requested, not proof of which module was bound. Inspection does
   not load the plugin; `(not loaded)` may simply mean FFB/input is disabled.
 - The installer intentionally puts UnityForceFeedback.dll in both the mod folder
   and Plugins/x86_64. **Do not delete a copy just because it is in Plugins.**
   If hashes differ, close the game and reinstall the complete package, then
   capture a fresh support file. Multiple resident modules are reported as ambiguous.
-- Toolkit pin **v0.12.0** and native component **0.5.0** are different version
+- In 0.2.5, toolkit pin **v0.13.0** and native component **0.6.0** are different version
   sequences; that combination is expected. Older support files call the latter
   `native abi`, and their `loaded from` field only recorded the preload request.
 - The support file's force-feedback section says whether the mod computed
@@ -204,7 +224,8 @@ the real wheel explicitly in the *Wheel* dropdown.
 ## The camera moves about at the end of a stage
 
 Version 0.2.3 and later restore the stock camera when the game enters a replay or
-results cinematic. The code fix still needs visual confirmation. Note which
+results cinematic. Owner camera smoke testing passed, but the full transition
+matrix remains incomplete. If it happens again, note which
 mounted/stock view you used beforehand and attach a support file and short video.
 For reversed stock views, also inspect the ChangeCamera binding and record whether
 a PS5 controller is attached: that resolved issue #1's original reporter's symptom.

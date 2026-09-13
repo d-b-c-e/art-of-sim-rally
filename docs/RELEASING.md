@@ -1,5 +1,8 @@
 # Releasing
 
+Player instructions are in [SETUP.md](SETUP.md). Local build prerequisites are
+in [BUILDING.md](BUILDING.md). This document is for maintainers.
+
 ## One mod, not four
 
 All four features ship as a single mod with per-feature toggles, and that is
@@ -77,8 +80,8 @@ provides:
 1. `Info.json` — `Id`, `DisplayName`, `Version`, `AssemblyName`, `EntryMethod`.
 2. `Main.Load(UnityModManager.ModEntry)` — creates the Harmony instance, patches,
    installs the watchdog.
-3. `Settings : UnityModManager.ModSettings, IDrawable` with `[Draw]` attributes,
-   giving the Ctrl+F10 panel.
+3. `Settings : UnityModManager.ModSettings` with plain serialized fields;
+   `SettingsPanel` draws the custom Ctrl+F10 interface.
 4. References to `UnityModManager.dll` and its Harmony, extracted into `lib/umm`
    and **never committed**.
 
@@ -87,8 +90,7 @@ Two build notes worth keeping:
 - The project targets **net48**, not net472, because UMM's own assemblies are
   built against .NET Framework 4.8 and will not resolve from a lower target.
   Unity 2019.4's Mono runs both.
-- `IDrawable` lives in the `UnityModManagerNet` namespace directly, not nested
-  inside `UnityModManager`.
+- The custom panel owns labels/help and section layout; UMM owns the surrounding UI.
 
 Shipping both loaders remains possible — two thin entry assemblies over the shared
 core — but keep one as the documented default so support questions stay simple.
@@ -97,6 +99,10 @@ core — but keep one as the documented default so support questions stay simple
 
 The zip contains `ArtOfSimRally/` at its root for UMM, plus Install.bat,
 Uninstall.bat, install.ps1, verify.ps1, README.txt, LICENSE and manifest.json.
+The standalone README.txt is generated from `tools/installer/README.txt`, with
+`@RELEASE@` replaced at packaging time. Keep it aligned with README.md and SETUP.md;
+use web links for details that are not included in the ZIP. Published archives
+are immutable; updated installer/docs payloads go into the next package.
 The mod folder contains only Info.json, build.json, ArtOfSimRally.Mod.dll,
 Dbce.Wheel.Ffb.dll, Dbce.Wheel.Telemetry.dll and UnityForceFeedback.dll. No game
 or UMM assemblies or user Settings.xml are packaged. The development recorder
@@ -175,10 +181,10 @@ the toolkit. No automated path in this repo recreates a Unity playthrough.
 
 | Where | Notes |
 |---|---|
-| **Nexus Mods** | The main one. art of rally has an active page and the existing camera mod lives there. Expects UMM. |
-| **GitHub releases** | Source of truth, links from everywhere else. |
-| **OverTake.gg** | Sim racing audience specifically — the people who care most about the FFB and telemetry. |
-| **Official Discord** | Community camera mods are already shared there. |
+| **GitHub releases** | Current distribution and source of truth; exact validated ZIP/checksum. |
+| **Nexus Mods** | Planned distribution; UMM packaging. No current listing is claimed here. |
+| **OverTake.gg** | Possible future distribution for the sim racing audience. |
+| **Official Discord** | Possible announcement/support channel; posting is a separate authorized action. |
 | **In-game CurseForge browser** | `ModManager` with `GameID 78103`. Content pipeline — cars, liveries, stages. Almost certainly will not accept a code mod; unverified. |
 
 ## Honesty in the release notes

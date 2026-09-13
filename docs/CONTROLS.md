@@ -1,5 +1,9 @@
 # Controls and binding
 
+For setup steps, start with [wheel/pedals](SETUP.md#wheel-and-pedals) or
+[a separate USB handbrake](SETUP.md#separate-usb-handbrake). The reference below
+includes the original game-input investigations and dated fixes.
+
 **Short answer: no binding utility is needed.** art of rally has a proper
 native rebinding UI with split-axis support, and Rewired already recognises
 most wheels. Verified from the shipped assemblies, 2026-08-31.
@@ -209,7 +213,7 @@ the direct read, once the steering assignment was made direction-independent
 (a left turn during Assign had made left positive). Fanatec verification is
 still outstanding — [KI-3](KNOWN-ISSUES.md#ki-3--fanatec-fixes-are-unverified-on-fanatec-hardware).
 
-### Candidate 0.2.5 identity and recovery
+### Version 0.2.5 identity and recovery
 
 Direct channels may come from different USB devices. A new assignment stores
 `device|index|axis:N|rest|far|guid:<instance-guid>` (or `button:N`). Legacy

@@ -206,7 +206,10 @@ try {
     Assert ((Get-FileHash -LiteralPath $settings).Hash -eq $settingsHash) 'Uninstall changed settings'
     Assert (Test-Path -LiteralPath (Join-Path $mod 'user-notes.txt')) 'Uninstall removed user files'
     Assert (-not (Test-Path -LiteralPath (Join-Path $mod 'ArtOfSimRally.Mod.dll'))) 'Uninstall left managed payload'
-    Checkpoint 'installer' 6
+    $result = Run 'installer-entrypoints' $shell @('-NoProfile','-File','tools/testing/Test-Installer.ps1','-PackageDirectory',$extracted)
+    $installerChecks = $result | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($installerChecks.status -eq 'passed' -and $installerChecks.assertions -gt 0) 'Installer entry-point checks ran no assertions'
+    Checkpoint 'installer' (6 + $installerChecks.assertions)
     # Corrupt package must fail before copying anything to the fake game.
     Add-Content -LiteralPath (Join-Path $extracted 'ArtOfSimRally/Info.json') -Value 'tampered'
     $null = Run 'install-reject' $shell @('-NoProfile','-File',$installer,'-GameDir',$game) $true

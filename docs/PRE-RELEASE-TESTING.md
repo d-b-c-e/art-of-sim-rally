@@ -16,21 +16,30 @@ Remove the probe for the final attended checks of the shipped setup.
 Full RC checks require Windows x64, PowerShell 7, .NET 8+ SDK/runtime and .NET
 Framework 4.8, Python 3, installed game/UMM build references, and the Visual Studio
 x64 `dumpbin` path in the script. Close the game for installer guards.
+See [BUILDING.md](BUILDING.md) for references and the runner's machine-specific
+paths. Replace `X.Y.Z` below with the numeric version in `Version.props` and `N`
+with an unused candidate number; these are placeholders, not literal labels.
 
 ```powershell
-./tools/testing/Test-Rc.ps1 -Version 0.2.5-rc.6
+./tools/testing/Test-Rc.ps1 -Version X.Y.Z-rc.N
 # Once real cases exist, include them on every candidate:
-./tools/testing/Test-Rc.ps1 -Version 0.2.5-rc.7 -Corpus './results/regression-corpus/index.json'
+./tools/testing/Test-Rc.ps1 -Version X.Y.Z-rc.N -Corpus './results/regression-corpus/index.json'
 # Validate the exact final-labelled artifact with the same offline suite:
-./tools/testing/Test-Rc.ps1 -Version 0.2.5 -Final
+./tools/testing/Test-Rc.ps1 -Version X.Y.Z -Final
 ```
 
-See [the current overnight review](reviews/2026-09-09-overnight-025.md) for used
-0.2.5 RC numbers and evidence. Choose a new RC number for every rebuild. Existing ZIPs/staging directories are
+Published 0.2.5 and its earlier RCs are historical evidence; do not overwrite
+them. Choose a new RC number for every rebuild. Existing ZIPs/staging directories are
 never overwritten. The script writes `dist/ArtOfSimRally-<version>.zip`, its SHA-256,
 and a unique `results/rc-*` folder containing logs, `source.json`, `automated.json`
 and `manual.json`. Installer tests use a fake game directory; nothing is installed
 in Steam, launched, published or sent to a physical wheel.
+
+Installer checks also exercise the real batch entry points under Windows
+PowerShell: fresh install, upgrade, retained settings, uninstall after UMM
+removal, missing/corrupt files, locked-file failure/retry and paths with spaces
+and square brackets. Run this subset with
+`./tools/testing/Test-Installer.ps1 -PackageDirectory <extracted-package>`.
 
 `Version.props` and Info.json hold numeric UMM version 0.2.5. The assembly also
 embeds the RC label, full Git revision and source state. `build.json` and the

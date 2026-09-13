@@ -33,14 +33,14 @@ enlarge ordinary settings text through UMM, but explanations stay small.
 `SettingsPanel.Help` forces an 11-pixel font; section headers also force 14 pixels.
 The wrapped status style is cached beyond UMM's font replacement.
 
-The 0.2.5 candidate now inherits the current label style for help and headers,
+Version 0.2.5 now inherits the current label style for help and headers,
 and refreshes the wrapped/help styles each draw. Local UMM inspection confirms
 its scale setting replaces `GUI.skin.font`; no extra multiplier is needed.
-Visual confirmation at normal and enlarged scale remains pending. Stable 0.2.4
+Visual confirmation at normal and enlarged scale remains pending. Version 0.2.4
 still has the defect. Handbrake, logging and smoothing help is also clearer;
 input behavior, force arithmetic and saved settings are unchanged.
 
-RC7 is installed after all 16 local gates including the recorded drive corpus;
+RC7 was installed after all 16 local gates including the recorded drive corpus;
 [exact package and receipt](LOCAL-DEPLOYMENT.md). Those checks do not render the UI.
 
 **2026-09-11 update:** KI-28 has focused-window/idle acquisition recovery; the
@@ -88,15 +88,15 @@ this with a force tune or claim an upstream encoder defect without evidence.
 **Confirmed on owner's RC5 retry, before probe load.** Player.log reports
 `FFB initialise/start failed (0x80040205)`. Native logs show effect creation
 succeeded, effect start lost exclusive acquisition, and reacquisition failed with
-`0x80070578` (invalid window handle), then the wrapper shut down. There is no
-automatic startup retry in the mod. Direct input still opened all four readers;
+`0x80070578` (invalid window handle), then the wrapper shut down. RC5 had no
+automatic startup retry. Direct input still opened all four readers;
 the owner had steering input but no FFB. The capture consequently has zero force
 rows. FFB remained enabled, strength 50, smoothing 0.2; nothing intentionally
 turned it off.
 
 The supplied foreground window was outside the game process, so native code
 selected an own-process window. The failure suggests startup window/focus timing;
-which window became invalid still needs confirmation. Development now defers
+which window became invalid still needs confirmation. Version 0.2.5 defers
 initial acquisition until a valid owned foreground window is stable, with five
 idle attempts at five-second intervals. Wheel/shifter readers close before
 acquisition and reopen using saved identity. Current explicit retry is the
@@ -117,7 +117,7 @@ The developer probe now prefixes that menu action: if a capture is pending, it
 calls the mod's normal output shutdown, whose probe postfix writes the capture.
 The kill is allowed only once the buffers are saved; a release/save failure
 cancels that quit and logs the retained-capture status for an explicit Stop retry.
-The development shipping mod also releases outputs on this menu action, with
+Version 0.2.5 also releases outputs on this menu action, with
 or without a capture; the probe remains responsible only for saving/cancellation.
 Tests cover no-op exit, failed release/write, missing save, successful retry and
 actual Harmony attachment to ExitGame.Exit. The new probe loads in Unity and
@@ -128,7 +128,7 @@ the saved manifest/CSVs, then quit. [Drive evidence](reviews/2026-09-10-attended
 
 ### KI-25 — Telemetry connection work runs from physics; disabling can leave live output
 
-**Reproduced connection path offline; corrected in 0.2.5 candidate, live consumers
+**Reproduced connection path offline; corrected in 0.2.5, live consumers
 pending.** `Emit` called `EnsureSender`, which constructed the shared sender while
 UNDERWAY, including synchronous hostname resolution for non-IP destinations.
 Actual production connection code reproduced socket creation in driving state;
@@ -147,7 +147,7 @@ measurement. Toolkit packet encoding and physics sampling are unchanged.
 
 ### KI-24 — Binding edits can write settings during driving
 
-**Reproduced offline; corrected in 0.2.5 candidate, UI validation pending.** An
+**Reproduced offline; corrected in 0.2.5, UI validation pending.** An
 assignment started while paused could complete after resuming and synchronously
 save Settings.xml. Flip/Clear also saved immediately even if the panel was open
 over active driving. Assignment now cancels on resume; edits use the existing
@@ -156,7 +156,7 @@ the latest edit. No evidence links this specific interaction to a reported hitch
 
 ### KI-23 — Separate shifter picker trusts a stale device index
 
-**Reproduced offline; corrected in 0.2.5 candidate, hardware validation pending.**
+**Reproduced offline; corrected in 0.2.5, hardware validation pending.**
 `Shifter.Open` ignored the stored name and opened the saved index. Restart or
 another controller-list refresh could make it open another USB device. The
 panel also cached labels while the shared native table could be refreshed.
@@ -172,7 +172,7 @@ and TSS/Fanatec confirmation are not claimed.
 
 ### KI-22 — Missing front-wheel data leaves the last force active
 
-**Reproduced offline; corrected in 0.2.5 candidate, hardware validation pending.**
+**Reproduced offline; corrected in 0.2.5, hardware validation pending.**
 With game state still UNDERWAY, missing axles/front/left/right wheel made
 `FfbController.DriveWheel` return before zeroing a prior force. The watchdog also
 considered the game driving, so it did not release that output. Missing/invalid
@@ -183,7 +183,7 @@ and a fake output sink; no physical force was sent or runtime occurrence claimed
 
 ### KI-21 — Direct-input identity fallback and missing-reader rediscovery
 
-**Input correctness; reproduced offline in 0.2.4, corrected in 0.2.5 candidate;
+**Input correctness; reproduced offline in 0.2.4, corrected in 0.2.5;
 hardware validation pending.** Legacy channel bindings stored a name and index.
 `Resolve` trusted the index or selected the first same-name controller, so
 identical devices could supply the wrong axis after USB order changed. A missing
@@ -217,7 +217,7 @@ off/on if needed. Collect immediately after a short reproduction while paused.
 Support creation now refuses to do synchronous disk work while driving. These are
 diagnostic improvements, not a verified slowdown fix.
 
-The 0.2.5 candidate also retains an opt-in summary at idle/normal-exit boundaries
+Version 0.2.5 also retains an opt-in summary at idle/normal-exit boundaries
 under `%LOCALAPPDATA%/ArtOfSimRally/last-session-frame-health.xml`. The next mod
 session includes it as previous-session evidence, with build and UTC timestamps.
 It is capped at 8 KiB and rejects corrupt, future-dated or over-30-day-old data.
@@ -556,6 +556,22 @@ destination switching and repeat shutdown. SimHub remains an attended gate.
 
 ## Resolved
 
+### KI-33 — Installer entry points and removal prerequisites
+
+**Tooling; fixed in source after 0.2.5, not yet in a published ZIP.** Uninstall
+required UMM even after it had already been removed. Batch launchers dropped
+custom `GameDir` arguments and could conceal errors after their final pause.
+Wildcard path checks failed for literal game folders containing square brackets.
+Launching through PowerShell 7 could also inherit an incompatible module path.
+
+The revised launchers preserve arguments/status and initialize Windows
+PowerShell's own modules. Removal no longer needs UMM; game paths use literal
+checks. Incomplete downloads and copy failures have actionable instructions.
+The isolated `Test-Installer.ps1` suite exercises the actual batch/PowerShell
+entry points, settings-preserving install/upgrade/removal and failure/retry.
+Published 0.2.5 archives remain unchanged. The installer is not transactional:
+a mid-copy failure requires a successful full retry before launching the game.
+
 ### KI-31 — First saved Unity capture fails exact offline integer replay
 
 **Resolved in development tooling, 2026-09-11; original observation below.**
@@ -650,9 +666,8 @@ Detail on R-6 through R-11 is in [FORCE-FEEDBACK.md](FORCE-FEEDBACK.md) and
 
 ## Upstream, recorded here
 
-This is a historical record of the shared-model investigation. The current
-candidate consumes the versioned `AxleForceCurve@1` compatibility pipeline from
-toolkit v0.12.0; the generic ForceModel/SimLite pipeline remains unused.
+This is a historical record of the shared-model investigation. Version 0.2.5 consumes the versioned `AxleForceCurve@1` compatibility pipeline from
+toolkit v0.13.0; the generic ForceModel/SimLite pipeline remains unused.
 
 ### U-1 — `simlite@1` was not art of rally's tuning; `simlite@2` is
 
@@ -693,7 +708,7 @@ even at constant speed: 0.80 then 0.16 here versus 1.00 then 0.32 upstream for
 We fade then clamp; `ForceModel.Compute` used to clamp then fade. Four of 640
 vector rows differed, all at 5–7.5 km/h, worst 1,086/10,000 at the wheel. Detail
 and the table are in
-[FORCE-FEEDBACK.md](FORCE-FEEDBACK.md#clamp-order-fade-first-clamp-last-measured-2026-09-04).
+[FORCE-FEEDBACK.md](FORCE-FEEDBACK.md#toolkit-conformance-static-and-dynamic-evidence).
 
 **Aligned to our order in toolkit v0.7.0** (2026-09-04), on the reasoning that a
 device limit applied before a model term stops being a boundary constraint and

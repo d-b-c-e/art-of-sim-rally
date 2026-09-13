@@ -1,5 +1,8 @@
 # Camera
 
+For the current controls and remapping steps, see [camera setup](SETUP.md#cameras).
+The sections below explain the design and preserve the implementation history.
+
 ## The accepted concession
 
 **This is a bonnet camera, not a cockpit camera.** That is a decision, not a

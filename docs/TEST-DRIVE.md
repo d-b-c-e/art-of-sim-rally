@@ -5,10 +5,11 @@ developer mod observes game signals; a standalone command replays them without
 the game or wheel. Record a representative drive once, then reuse that case on
 subsequent builds. Allow about 20–30 minutes for attended release checks.
 
-The installed Stream Deck target uses the **0.2.5 candidate** recorded in
+The installed Stream Deck target uses **stable 0.2.5**, recorded in
 [LOCAL-DEPLOYMENT.md](LOCAL-DEPLOYMENT.md), with settings/backups preserved.
-Published stable remains 0.2.4. Candidate changes pass offline checks; the new
-drive and detailed scenario matrix remain pending.
+The owner accepted RC8 and authorized publication. The separate final-artifact
+drive and full scenario matrix remain pending. This guide is for subsequent
+development capture/testing, not required player installation steps.
 
 1. **Prepare the candidate.** Close art of rally, retain the previous ZIP and
    Settings.xml, and install the exact ZIP identified by the successful
