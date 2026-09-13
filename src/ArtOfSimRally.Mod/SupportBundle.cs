@@ -57,7 +57,6 @@ namespace ArtOfSimRally.Mod
                 WriteHeader(sb);
                 WriteSettings(sb);
                 LandingController.AppendSupport(sb);
-                ShakerLanding.AppendSupport(sb);
                 Main.WriteLoadedMods(sb);
                 FrameHealth.Current.Append(sb);
                 FrameHealthPersistence.AppendPrevious(sb);

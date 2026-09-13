@@ -1,5 +1,11 @@
 # ButtKicker landing thud — RC9
 
+**Withdrawn at the owner's request on 2026-09-12.** The helper was unnecessary
+before investigating SimHub's existing effects. Its code/plugin/profile have
+been removed and the exact validated RC8 package restored. This document records
+the historical experiment only. Current work uses built-in Impacts/Road impacts;
+see [the correction and comparison](2026-09-12-builtin-shaker-correction.md).
+
 The owner clarified that wheel FFB was fine and requested a more distinct
 ButtKicker impact. Implemented a separate haptic cue and optional SimHub companion;
 no wheel retune or physical telemetry amplification. Stable remains 0.2.4.

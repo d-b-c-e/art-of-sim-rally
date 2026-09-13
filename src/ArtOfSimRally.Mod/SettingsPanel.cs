@@ -296,16 +296,6 @@ namespace ArtOfSimRally.Mod
                     Help("Destination change pending: pause to apply it. The current connection stays active until then.");
                 Help("Set the host and port while paused or in a menu. Connection changes apply " +
                      "there without restarting the game. Telemetry stays off until a connection is ready.");
-                cfg.ShakerLandingEnabled = Toggle(cfg.ShakerLandingEnabled, "ButtKicker landing thud (SimHub)",
-                    "Sends a separate landing cue to the optional Art of Sim Rally SimHub plugin and its landing profile. " +
-                    "Enable while paused. Wheel feedback and motion telemetry stay independent.");
-                if (cfg.ShakerLandingEnabled)
-                {
-                    cfg.ShakerLandingStrength = (int)Slider(cfg.ShakerLandingStrength, 0f, 100f, "Shaker landing strength",
-                        "Maximum landing cue level for SimHub. Start at 50 and increase after testing; " +
-                        "SimHub and amplifier gains still apply. The SimHub profile controls pulse frequency.");
-                    GUILayout.Label("      " + ShakerLanding.Status, Wrap);
-                }
             }
 
             End();

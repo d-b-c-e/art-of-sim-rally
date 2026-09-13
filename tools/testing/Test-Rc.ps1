@@ -70,18 +70,7 @@ try {
     $result = Run 'landing-feedback' 'dotnet' @('run','--project','tests/Landing/Landing.csproj','-c','Release')
     $landing = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($landing.status -eq 'passed' -and $landing.assertions -gt 0) 'Landing detector/lifecycle checks failed'
-    $result = Run 'haptics' 'dotnet' @('run','--project','tests/Haptics/Haptics.csproj','-c','Release','-f','net8.0')
-    $haptics = $result | Select-Object -Last 1 | ConvertFrom-Json
-    Assert ($haptics.status -eq 'passed' -and $haptics.assertions -gt 0 -and -not $haptics.audioOutput) 'Haptics loopback/lifecycle tests failed'
-    $null = Run 'haptics-mono-build' 'dotnet' @('build','tests/Haptics/Haptics.csproj','-c','Release','-f','net48','--nologo','-warnaserror')
-    $result = Run 'haptics-unity-mono' 'python' @('tools/testing/Run-UnityMono.py','tests/Haptics/bin/Release/net48/Haptics.exe')
-    $hapticsMono = $result | Select-Object -Last 1 | ConvertFrom-Json
-    Assert ($hapticsMono.status -eq 'passed' -and $hapticsMono.assertions -eq $haptics.assertions) 'Actual Unity Mono haptics checks failed'
-    $null = Run 'simhub-import-build' 'dotnet' @('build','tests/SimHub/SimHub.csproj','-c','Release','--nologo','-warnaserror')
-    $result = Run 'simhub-import' (Join-Path $root 'tests/SimHub/bin/Release/net48/SimHub.exe') @('C:/Program Files (x86)/SimHub',(Join-Path $root 'tools/simhub/landing-effect.json'),(Join-Path $run 'simhub-import'))
-    $simhubImport = $result | Select-Object -Last 1 | ConvertFrom-Json
-    Assert ($simhubImport.status -eq 'passed' -and $simhubImport.assertions -gt 0 -and -not $simhubImport.audioOutput) 'SimHub profile import failed'
-    Checkpoint 'lifecycle' ($lifecycle.assertions+$cameraTuning.assertions+$gameState.assertions+$forceLifecycle.assertions+$landing.assertions+$haptics.assertions+$hapticsMono.assertions+$simhubImport.assertions)
+    Checkpoint 'lifecycle' ($lifecycle.assertions+$cameraTuning.assertions+$gameState.assertions+$forceLifecycle.assertions+$landing.assertions)
     $null = Run 'recorder-build' 'dotnet' @('build','tools/testing/Recorder/Recorder.csproj','-c','Release','--nologo','-warnaserror')
     $result = Run 'recorder-tests' 'dotnet' @('run','--project','tests/Recorder/Recorder.csproj','-c','Release','--',(Join-Path $run 'synthetic'),'src/ArtOfSimRally.Mod/bin/Release/ArtOfSimRally.Mod.dll','D:/Program Files (x86)/Steam/steamapps/common/artofrally')
     $recorder = $result | Select-Object -Last 1 | ConvertFrom-Json
@@ -173,15 +162,7 @@ try {
     $build = Get-Content -LiteralPath (Join-Path $extracted 'ArtOfSimRally/build.json') -Raw | ConvertFrom-Json
     $versionInfo = [Diagnostics.FileVersionInfo]::GetVersionInfo((Join-Path $extracted 'ArtOfSimRally/ArtOfSimRally.Mod.dll'))
     Assert ($versionInfo.ProductVersion -eq $build.identity) 'Archive build identity differs'
-    $result = Run 'simhub-package' $shell @('-NoProfile','-File','tools/simhub/Build-Haptics.ps1','-Version',$Version)
-    $simhubPackage = $result | Select-Object -Last 1 | ConvertFrom-Json
-    Assert ($simhubPackage.status -eq 'passed' -and $simhubPackage.identity -eq $build.identity) 'Companion identity differs from game package'
-    $simhubExtracted = Join-Path $run 'simhub-package'
-    Expand-Archive -LiteralPath $simhubPackage.artifact -DestinationPath $simhubExtracted
-    $result = Run 'simhub-installer' $shell @('-NoProfile','-File','tests/Haptics/Test-Package.ps1','-PackageDirectory',$simhubExtracted,'-OutputDirectory',(Join-Path $run 'simhub-installer'))
-    $simhubInstall = $result | Select-Object -Last 1 | ConvertFrom-Json
-    Assert ($simhubInstall.status -eq 'passed' -and $simhubInstall.assertions -gt 0) 'Companion installer tests failed'
-    Checkpoint 'package' ($PayloadFiles.Count+$simhubInstall.assertions)
+    Checkpoint 'package' $PayloadFiles.Count
     $result = Run 'no-recorder' 'dotnet' @('run','--no-build','--project','tools/testing/Replay/Replay.csproj','-c','Release','--','--verify-release',(Join-Path $extracted 'ArtOfSimRally/ArtOfSimRally.Mod.dll'))
     $absence = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($absence.detail.recordingFeatureAbsent) 'Recorder leaked into release'
@@ -235,7 +216,6 @@ try {
     Assert (@(Compare-Object $sourceFiles $finalFiles).Count -eq 0) 'Source file list changed during gate'
     Checkpoint 'source-stability' $sourceFiles.Count
     $report = [ordered]@{ schema=1; status='passed'; release=$Version; artifact=$zip; artifactSha256=(Get-FileHash -LiteralPath $zip).Hash; identity=$build.identity; sourceState=$build.sourceState; completedUtc=[DateTime]::UtcNow.ToString('o'); checks=$checks; runtime='pending'; syntheticOnly=($corpusReport.status -ne 'passed'); recordedCorpus=$corpusReport }
-    $report['simHubCompanion'] = $simhubPackage
     $reportPath = Join-Path $run 'automated.json'
     $report | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $reportPath -Encoding UTF8
     $null = Run 'manual-template' 'python' @('tools/testing/rc_gate.py','init',$reportPath,(Join-Path $run 'manual.json'))

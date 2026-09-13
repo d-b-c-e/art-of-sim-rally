@@ -58,19 +58,3 @@ class ReleaseGateTests(unittest.TestCase):
         self.data["checks"][0]["assertions"] = 0
         self.report.write_text(json.dumps(self.data))
         with self.assertRaises(ValueError): gate.verify_automated(self.report)
-
-    def test_companion_identity_and_integrity(self):
-        companion = self.root / "simhub.zip"
-        companion.write_bytes(b"plugin fixture")
-        self.data["identity"] = "candidate.clean"
-        self.data["simHubCompanion"] = {"status": "passed", "identity": "candidate.clean",
-                                     "artifact": str(companion), "sha256": gate.digest(companion)}
-        self.report.write_text(json.dumps(self.data))
-        gate.verify_automated(self.report)
-        self.data["simHubCompanion"]["identity"] = "different.clean"
-        self.report.write_text(json.dumps(self.data))
-        with self.assertRaises(ValueError): gate.verify_automated(self.report)
-        self.data["simHubCompanion"]["identity"] = "candidate.clean"
-        self.report.write_text(json.dumps(self.data))
-        companion.write_bytes(b"changed")
-        with self.assertRaises(ValueError): gate.verify_automated(self.report)

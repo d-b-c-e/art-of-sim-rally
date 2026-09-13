@@ -8,23 +8,14 @@ publication and attended sign-off remain separate.
 
 ## Installed candidate — 0.2.5 work
 
-**0.2.5-rc.9** and its optional SimHub companion are installed as of
-2026-09-13 01:01 UTC (2026-09-12 local). Adds the dedicated ButtKicker landing
-thud, default off, with independent strength 50. [Implementation and retest](reviews/2026-09-12-simhub-landing-thud.md).
+**RC8 restored on 2026-09-13 01:36 UTC.** The owner rejected RC9's extra SimHub
+helper; its game code/plugin/profile were removed. The exact RC8 archive below
+was reinstalled, with settings/probe preserved and the Stream Deck target unchanged.
+[New receipt and RC9 backup](../results/landing-rc8-install-c9b92ca721ed45d892901e8381a45b75/receipt.json).
+SimHub now has a built-in-effects-only 30 Hz comparison profile; the original
+profile/gains are preserved. [Correction, evidence and retest](reviews/2026-09-12-builtin-shaker-correction.md).
 
-- Identity: `0.2.5-rc.9+c4126ba6eba96e0c12440c3442375783b7a08dff.clean`.
-- Game ZIP SHA-256: `FAC4FF6787FCEDFB4446805A689D51B9F7C6B5AC45F37AACB2312C795EF9E722`.
-- [All 16 gates and companion hashes](../results/rc-0.2.5-rc.9-a2ff39c577dd4a1592d426b592d5d376/automated.json),
-  [game installation receipt/backup](../results/landing-rc9-install-aa1e37b690bd4b5dba9ea2e519d12420/receipt.json).
-- Game settings and probe preserved byte-for-byte. Stream Deck still targets
-  the same installation. Toolkit pin unchanged; public stable remains 0.2.4.
-- SimHub restarted normally; companion/plugin profile loaded and zero-output
-  reception/expiry checked in the running host. Original profile/global gain
-  backed up and preserved. Physical thud and remaining hardware tests pending.
-
-## Previous candidate — RC8
-
-**0.2.5-rc.8** is installed as of 2026-09-12 23:54 UTC. It adds opt-in landing
+**0.2.5-rc.8** was first installed on 2026-09-12 23:54 UTC. It adds opt-in landing
 vibration with independent strength to RC7. The existing settings were preserved;
 landing vibration defaults to off, with strength 5 when enabled.
 

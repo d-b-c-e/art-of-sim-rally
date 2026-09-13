@@ -7,20 +7,8 @@ write plugins for every consumer, the mod emits the **Forza Horizon 4/5 "Data
 Out"** UDP packet, which SimHub, dashboards, motion rigs, wind simulators and
 bass shakers already understand.
 
-Ordinary dashboards, motion and existing shaker effects need no additional plugin.
-
-## Experimental ButtKicker landing thud
-
-The 0.2.5 candidate also offers a separate, optional
-[SimHub landing plugin and profile](../tools/simhub/README.md). Enable
-**Telemetry → ButtKicker landing thud (SimHub)** while paused. Its independent
-strength defaults to 50, with a maximum of 100; it is off by default.
-
-It exports an authored landing cue over loopback port 20779 and shapes a short
-30 Hz, 180 ms impact envelope in SimHub. It uses the same contact/descent detector
-as wheel landing vibration but operates even with wheel FFB disabled. Neither
-steering nor physical Forza fields change. Gain cannot guarantee greater physical
-output if the amplifier is already clipping; attended tuning remains required.
+That is the entire reuse argument: pick a format the ecosystem already speaks,
+and art of rally inherits the ecosystem for free with nobody writing a plugin.
 
 ## The packet
 
@@ -167,6 +155,13 @@ If the probe is right and SimHub is wrong, the problem is the SimHub game
 profile, not the emitter.
 
 ## Consumer setup
+
+**No SimHub helper/plugin is required.** The withdrawn RC9 companion has been
+removed. Existing **Impacts** and **Road impacts** use velocity and suspension
+data already exported by the mod. Tune their frequency/response in SimHub;
+wheel landing strength does not control the ButtKicker. The local built-in
+30 Hz comparison profile preserves original gains. See the
+[findings and A/B procedure](reviews/2026-09-12-builtin-shaker-correction.md).
 
 In the 0.2.5 candidate, enable telemetry and configure its destination while
 paused or in a menu. The idle watchdog opens the connection after releasing

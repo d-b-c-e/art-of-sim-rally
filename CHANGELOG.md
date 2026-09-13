@@ -9,11 +9,6 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Optional SimHub landing-thud companion and separate profile: independent
-  strength, short 30 Hz shaped pulse, duplicate/stale-event rejection and idle
-  clearing. Default off; wheel steering and physical telemetry are unchanged.
-  Package/profile and actual Unity Mono transport checks run in the local gate.
-
 - Experimental opt-in landing vibration with independent strength: game contact
   detection and finite 120 ms hardware sine bursts. Default off; physical feel
   and new toolkit adoption still require attended validation.

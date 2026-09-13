@@ -81,7 +81,6 @@ public class UIManager
 public class PanelManager { public UnityEngine.Camera mainCamera = new UnityEngine.Camera(); }
 namespace ArtOfSimRally.Mod
 {
-    internal static class ShakerLanding { public static void Tick() { } public static void Shutdown() { } }
     internal class Settings
     {
         public bool BonnetCameraEnabled=true, BumperCameraEnabled=true;

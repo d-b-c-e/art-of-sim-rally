@@ -52,9 +52,6 @@ namespace ArtOfSimRally.Mod
 
         public bool ForceFeedbackEnabled = true;
 
-        public bool ShakerLandingEnabled = false;
-        public int ShakerLandingStrength = 50;
-
         public int Strength = 50;
 
         /// <summary>
