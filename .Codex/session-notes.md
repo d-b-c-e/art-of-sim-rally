@@ -30,10 +30,14 @@
 - Existing installer isn't transactional; successful full retry is required
   after a mid-copy failure. Recovery guidance is explicit.
 
-## Finishing / evidence
+## Validation / evidence
 
-- Full local packaging gate and final link check to be recorded in
-  docs/reviews/2026-09-13-docs-install-audit.md before final push.
+- All 16 local gates pass for 0.2.5-rc.10 from 5a3c369, including actual Mono,
+  real corpus, package and 37 new batch installer assertions. Source links pass;
+  19 local-only evidence links are classified separately.
+- Full results: results/rc-0.2.5-rc.10-aa83235524f04114a3e1b09dac4614be/automated.json.
+  RC10 is validation-only, not published/installed. Final record is
+  docs/reviews/2026-09-13-docs-install-audit.md. Owner requested commit/push.
 - Preliminary fixture: results/docs-install-audit-53e42121af294e20ba7ee8e6a7849ac4.
 - Installer: results/installer-31d066ecb4b04776bceb5375e3525efe/report.json.
 - GitHub has only unchanged issue #1; no open PRs or new replies sent.

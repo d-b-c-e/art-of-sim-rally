@@ -43,8 +43,26 @@ Local preliminary evidence:
 `results/docs-install-audit-53e42121af294e20ba7ee8e6a7849ac4/fixture.json` and
 `results/installer-31d066ecb4b04776bceb5375e3525efe/report.json`.
 The fixture reused unchanged released game payloads with revised installer/docs;
-it is not a distributable replacement for 0.2.5. The full package gate and final
-link-check results are recorded after validation below.
+it is not a distributable replacement for 0.2.5.
+
+Final validation completed at **2026-09-13 05:09 UTC**:
+
+- All **16 local gates passed** for audit package `0.2.5-rc.10`, including
+  actual Unity Mono, the unchanged real drive corpus, packaging and **37 new
+  installer assertions** (43 in the combined installer checkpoint).
+- Identity: `0.2.5-rc.10+5a3c369f90209990e77c38e0ee95455484eda3dd.clean`.
+- ZIP SHA-256: `C49E48666C258DB582B8D381F7BE827E24A63145585BEB45E7089DD7FD5BE197`.
+- Automated report:
+  `results/rc-0.2.5-rc.10-aa83235524f04114a3e1b09dac4614be/automated.json`.
+- Actual packaged-installer evidence:
+  `results/installer-05bafcfd56ab4b8384a728b66b70de9c/report.json`.
+- Link scan found 199 local targets in README/top-level docs: 180 source
+  file/heading targets pass; 19 local-only evidence links are explicitly
+  classified separately. External links and historical review receipts are not
+  claimed as exhaustively checked. Report is `links.json` in the audit directory.
+- Packaged README carries the correct version and is covered by manifest checks.
+  RC10 is a local validation artifact only, not published or installed. The real
+  installation still reports the released `0.2.5+c6242a0...clean` identity.
 
 ## Scope and remaining limits
 

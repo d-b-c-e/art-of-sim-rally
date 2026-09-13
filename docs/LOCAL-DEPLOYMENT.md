@@ -21,6 +21,14 @@ The accepted built-in SimHub profile and gains are unchanged.
 - Official toolkit v0.13.0 replaces the local pin with byte-identical RC8 binaries. No SimHub helper or recorder is shipped.
 - [Owner acceptance and release limits](reviews/2026-09-13-release-0.2.5.md): overall RC8 acceptance authorizes publication; full attended matrix and a separate final-artifact drive remain unverified.
 
+## Documentation/installer audit — no game deployment
+
+The 2026-09-13 audit validates revised installer/readme packaging as local
+`0.2.5-rc.10`; all 16 gates pass. It changes no game/force code. Installed stable
+0.2.5 above remains the current game payload, and published assets are unchanged.
+The new installer/template are for the next package; no game redeployment was
+needed. [Audit and exact validation evidence](reviews/2026-09-13-docs-install-audit.md).
+
 ## Previous candidate — RC8 restored after RC9 withdrawal
 
 **RC8 restored on 2026-09-13 01:36 UTC.** The owner rejected RC9's extra SimHub
