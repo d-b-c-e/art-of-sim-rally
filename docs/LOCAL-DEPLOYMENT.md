@@ -24,8 +24,9 @@ landing vibration defaults to off, with strength 5 when enabled.
   packaging rejects local toolkit pins; official publication/repin is required.
 - [Landing A/B test](LANDING-EFFECTS.md), FFB startup/recovery, digital gauge
   clearing, quit and font scaling remain attended checks. The first nonzero
-  [owner landing test](reviews/2026-09-12-landing-wheel-test.md) reports subtle
-  vibration at maximum despite eight accepted cues; tuning remains open.
+  [owner landing test](reviews/2026-09-12-landing-wheel-test.md) logs eight accepted
+  wheel cues. Owner says wheel FFB is fine; the desired stronger ButtKicker thud
+  is a separate telemetry/haptic-output follow-up.
   No public release; stable remains 0.2.4.
 
 ## Previous candidate — RC7

@@ -403,11 +403,11 @@ Fanatec setup still needs confirmation. See [ROADMAP.md](ROADMAP.md).
 2026-09-12: the development landing-vibration candidate adds an independent
 effect strength (default off), without retuning steering. It does not establish
 per-wheel defaults or resolve the requested road/crash effects. First RC8 owner
-test finds the vibration subtle at maximum 20, despite eight accepted cues and
-a logged full-strength request. Steering reaches 99% in the trace following the
-latest touchdown; masking/clipping is a hypothesis, not measured torque.
+clarification: wheel FFB is fine; the weak landing thud concerns the ButtKicker,
+not the wheel. Eight wheel-driver accepted cues do not measure shaker output.
+Investigate SimHub pulse shaping and a dedicated haptic landing event under FR-2.
 [Evidence and next comparison](reviews/2026-09-12-landing-wheel-test.md).
-Physical tuning remains open; see [LANDING-EFFECTS.md](LANDING-EFFECTS.md).
+Full hardware validation remains open; see [LANDING-EFFECTS.md](LANDING-EFFECTS.md).
 
 | | |
 |---|---|

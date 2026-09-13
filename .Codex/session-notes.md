@@ -1,6 +1,28 @@
 # Session Notes
 <!-- Overwritten each session; previous handoffs remain in git history. -->
 
+## Owner correction — ButtKicker thud, not weak wheel FFB
+
+- Owner clarified wheel FFB is fine. The light/buzzy landing complaint applies
+  to the ButtKicker, where they want a hard thud even after maximizing settings.
+  They have not checked the amplifier CLIP light. This supersedes the wheel
+  tuning interpretation below. Do not reduce steering to investigate this symptom.
+- The wheel landing slider does not change telemetry or shaker gain. Current
+  eight accepted wheel cues are not evidence of shaker output. Corrected review,
+  known issues and roadmap preserve that distinction; full RC gate still pending.
+- Local SimHub effect inspection: general Impacts = velocity change; Road
+  impacts = calibrated suspension velocity (roll fallback); Jump landing =
+  SimHub's derived front/rear landing values. No dedicated mod haptic event is
+  exported. See results/buttkicker-landing-research-20260913/ and the corrected
+  docs/reviews/2026-09-12-landing-wheel-test.md.
+- Saved SimHub JSON still shows old values; app is running, so do not infer live
+  settings or overwrite the owner's current changes. No profile/output changes
+  made. Game still running; no deployment or hardware tests performed by agent.
+- Direction: isolate a short shaker pulse, experiment with 25–35 Hz and fast
+  attack/decay, observe input/output/clipping. If needed add a separate haptic
+  landing signal/custom effect, preserving honest acceleration/suspension data.
+  No universal extra-gain promise; amplifier/seat response remains unmeasured.
+
 ## RC8 paused log inspection — 2026-09-12 local / 2026-09-13 UTC
 
 - Owner is at the wheel; game remains paused, PID31520. No deployment/relaunch

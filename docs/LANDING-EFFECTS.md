@@ -86,9 +86,10 @@ record each landing's air time, descent, magnitude and driver acceptance.
    weak, harsh or mistaken for a steering pull. Save any developer recording
    explicitly before quitting. Finish with a run without the developer probe.
 
-First RC8 wheel test on 2026-09-12: eight live cues were accepted, including the
-20% maximum. The owner found the effect subtle even at maximum. This is live
-detection/driver evidence, not a satisfactory-feel pass; further A/B tuning is
-needed. See [the preserved logs and interpretation](reviews/2026-09-12-landing-wheel-test.md).
+First RC8 test on 2026-09-12: eight live wheel cues were accepted, including the
+20% maximum. The owner clarified that wheel FFB is fine; their weak/buzzy landing
+report concerns the ButtKicker. **This setting does not control the shaker or
+change telemetry.** Shaker thud enhancement is a separate FR-2 follow-up.
+See [the corrected interpretation](reviews/2026-09-12-landing-wheel-test.md).
 Unsupported-driver behavior and exact packaged release sign-off remain pending.
 Existing FFB startup/recovery, gauges and quit retests still apply.

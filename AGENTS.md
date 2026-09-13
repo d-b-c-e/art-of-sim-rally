@@ -51,9 +51,11 @@ Publish/officially repin the toolkit before a public mod release; final packagin
 rejects local toolkit pins. See `docs/LANDING-EFFECTS.md`.
 
 First RC8 owner drive on 2026-09-12: eight nonzero landing requests accepted,
-including magnitude .20, but the owner finds the vibration subtle at maximum.
-Detection/driver acceptance is live evidence; satisfactory feel and the complete
-hardware gate remain pending. Logs are preserved; game is paused, no recording
+including magnitude .20. **Owner clarified wheel FFB is fine; the weak/buzzy
+landing report is about the ButtKicker.** Do not retune steering or wheel bursts
+to fix that symptom. SimHub thud shaping/dedicated haptic landing export is the
+next FR-2 follow-up; current wheel landing controls do not change telemetry.
+The complete hardware gate remains pending. Logs are preserved; game is paused, no recording
 running. See `docs/reviews/2026-09-12-landing-wheel-test.md`. Do not redeploy while
 the game is running. The toolkit interaction review found no ordinary constant-
 force call cancelling the burst; stop timing/driver waveform remain unobserved.

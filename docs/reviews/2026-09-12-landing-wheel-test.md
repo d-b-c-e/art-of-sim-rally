@@ -1,7 +1,11 @@
-# RC8 first landing wheel test — 2026-09-12 local
+# RC8 first landing test — 2026-09-12 local
 
-Owner tested the installed RC8 on the MOZA R12 and reported that landing vibration
-still felt subtle at maximum strength. The game was paused, not exited. Logs were
+Owner tested the installed RC8 on the MOZA R12. **Clarification: the wheel FFB is
+fine; the weak/buzzy landing report concerns the ButtKicker.** The initial review
+mistakenly applied this feedback to wheel vibration. The owner wants a hard,
+noticeable shaker thud even after maximizing their current ButtKicker settings.
+They have not checked the amplifier's clipping indicator. The game was paused,
+not exited. Logs were
 preserved at approximately 00:14 UTC on 2026-09-13; no settings, wheel outputs or
 installed files were changed during inspection.
 
@@ -40,7 +44,13 @@ is not evidence of a persistence defect. Existing steering is Strength=50,
 Smoothing=0.2. The probe's read-only Status reports Idle, zero frames/force rows;
 no new recording exists for these drives.
 
-## Interpretation and next comparison
+## Interpretation
+
+The eight cues below are wheel-driver commands, not ButtKicker output. The mod's
+Landing strength slider does not affect telemetry or SimHub shaker gain. Its
+20% cap and 25 Hz/120 ms waveform therefore do not explain the reported weak
+ButtKicker thud. Owner clarification withdraws the earlier recommendation to
+reduce steering gain as the next test for this symptom.
 
 Detection and nonzero driver acceptance have live evidence. They do not measure
 physical torque, prove all actual jumps were detected, or establish satisfactory
@@ -53,10 +63,8 @@ these logs cannot prove its time-aligned physical waveform. Frequency, duration
 and wheelbase filtering may also affect perception. Do not raise amplitude or
 retune the established steering curve based only on an accepted return value.
 
-Next useful A/B: same jump with landing strength unchanged and only steering
-Strength temporarily reduced; compare the wheel separately from the ButtKicker.
-Restore the original steering tune afterward. If the cue remains weak, evaluate
-a bounded lower-frequency/longer-duration development variant in a new artifact.
+The following toolkit review is retained as independent wheel-path evidence,
+not a diagnosis of the ButtKicker report:
 The toolkit task's read-only review found no ordinary steering-update path that
 cancels the burst: constant-force updates target a separate effect, periodic
 effect gain is full-scale, and no toolkit global gain attenuates the request.
@@ -72,6 +80,34 @@ latency, immediate steering command and stop reason/elapsed diagnostics before
 claiming waveform delivery or choosing a universal higher gain. The frozen
 toolkit snapshot remains unchanged. Export support while paused before exit.
 
-Landing feel remains a tuning follow-up under KI-4/FR-2, not an attended pass.
+Wheel FFB has a positive owner report; this does not pass every landing/lifecycle
+case. The ButtKicker thud remains a distinct FR-2 telemetry/haptic-output task.
 Startup worked on this launch; repeated acquisition, focus, quit, physical gauge
 clearing and the complete RC8 matrix remain pending. No public publication.
+
+## ButtKicker follow-up
+
+The installed SimHub reader/effect pipeline must be distinguished from wheel
+effects. Local SimHub effect inspection confirms general Impacts uses velocity
+change, Road impacts uses calibrated suspension velocity (with a roll fallback),
+and Jump landing consumes SimHub's own front/rear landing values. RC8 sends
+motion and suspension but no dedicated haptic landing event. Maximizing a gain
+does not establish that a weak or brief source reaches full output.
+
+SimHub's saved profile file still has its earlier global gain near 80%, general
+Impacts at 99%, and Road impacts/Jump landing disabled. **The app is running:
+these saved values cannot overrule the owner's report of current live changes.**
+Do not overwrite that file while SimHub is running or infer remaining headroom
+from its old values.
+
+The next comparison should isolate a brief shaker pulse, lower its frequency
+from the saved 44–50 Hz toward an experimental 25–35 Hz range, shape attack/decay,
+and inspect input/output levels and amplifier clipping. These are tuning starting
+points, not a guaranteed hardware response or authorization for unattended output.
+If generic effects cannot produce a reliable cue, export a separate derived
+landing event for a SimHub custom effect; retain physical telemetry units and
+dashboard/motion behavior. Do not fake larger acceleration/suspension values.
+
+Primary reference: [SimHub effect gain, frequency and gain modulation](https://github.com/SHWotever/SimHub/wiki/ShakeIt-V3-Effects-configuration).
+Local effect inspection lives in `results/buttkicker-landing-research-20260913/`;
+third-party decompiled sources remain local and uncommitted.

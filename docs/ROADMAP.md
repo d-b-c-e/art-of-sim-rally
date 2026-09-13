@@ -20,8 +20,11 @@ Remaining feature priorities:
 
 1. **RWD snapback/tankslap investigation (KI-6):** capture steering/slip recovery
    before deciding whether an optional damper is justified.
-2. **Independent road and crash effects (FR-2):** landing is the first effect;
-   road texture and collisions need their own reliable signals and tuning.
+2. **ButtKicker landing thud and independent road/crash effects (FR-2):** owner
+   says wheel FFB is fine; the desired hard landing impact is on the shaker.
+   Tune SimHub pulse frequency/envelope and check clipping first; if needed,
+   export a dedicated derived haptic event without falsifying physical telemetry.
+   Road texture and collisions need their own reliable signals and tuning.
 3. **TSS/Fanatec follow-up and T300 rotation:** verify actual devices and modes;
    use reports to improve setup guidance and eventually per-wheel starting settings.
 4. **Camera compatibility:** PS5-controller interaction in issue #1 and the
