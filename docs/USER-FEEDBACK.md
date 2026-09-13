@@ -2,6 +2,12 @@
 
 ## Landing feature implementation — 2026-09-12
 
+First RC8 owner drive: "even at max value it still feels pretty subtle". Eight
+landing requests were logged and accepted, including maximum magnitude 0.20;
+the intended three-cycle 25 Hz/120 ms cue needs further feel comparison. Logs
+are preserved while paused; no new recording was running. Do not mark tuning or
+the complete hardware lifecycle gate passed. [Attended evidence](reviews/2026-09-12-landing-wheel-test.md).
+
 Owner requested implementation/testing before the next release. FR-2 now has
 an opt-in landing-vibration candidate with an independent strength control.
 Road/crash effects remain planned. The user's saved one-jump drive verifies the

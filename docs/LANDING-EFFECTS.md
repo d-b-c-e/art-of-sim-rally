@@ -86,5 +86,9 @@ record each landing's air time, descent, magnitude and driver acceptance.
    weak, harsh or mistaken for a steering pull. Save any developer recording
    explicitly before quitting. Finish with a run without the developer probe.
 
-The physical comparison, unsupported-driver behavior and exact packaged release
-sign-off remain pending. Existing FFB startup, gauges and quit retests still apply.
+First RC8 wheel test on 2026-09-12: eight live cues were accepted, including the
+20% maximum. The owner found the effect subtle even at maximum. This is live
+detection/driver evidence, not a satisfactory-feel pass; further A/B tuning is
+needed. See [the preserved logs and interpretation](reviews/2026-09-12-landing-wheel-test.md).
+Unsupported-driver behavior and exact packaged release sign-off remain pending.
+Existing FFB startup/recovery, gauges and quit retests still apply.

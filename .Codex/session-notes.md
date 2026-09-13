@@ -1,6 +1,29 @@
 # Session Notes
 <!-- Overwritten each session; previous handoffs remain in git history. -->
 
+## RC8 paused log inspection — 2026-09-12 local / 2026-09-13 UTC
+
+- Owner is at the wheel; game remains paused, PID31520. No deployment/relaunch
+  or output test. They report landing vibration subtle even at maximum.
+- Eight live landing cues, all driver-accepted, culminating in 0.20 magnitude,
+  25 Hz/120 ms after .983 s airborne / 12.22 m/s descent. The following decimated
+  steering trace is .99; masking/clipping is plausible but not physically proven.
+- Preserve evidence: results/landing-rc8-attended-00f123be246b482d820e3cfbf31507bd/.
+  Native current-session subset avoids many historical failures in appended log.
+  Startup/start succeeded this launch; no current SetParameters failures.
+  Autocenter0x800700AA recorded separately. Last constant-force request is zero.
+- Probe Status: Idle, zero frames/forces. No recording exists for this test.
+  Settings.xml still says landing5, but live requests confirm changed strength;
+  do not diagnose persistence while user is paused before exit.
+- Read docs/reviews/2026-09-12-landing-wheel-test.md. Eight accepted requests do
+  not pass feel, all-jump detection or complete RC matrix. Toolkit read-only
+  review found no routine steering update cancelling the burst. Stop timing,
+  Play latency and driver-adjusted parameters are not observed; add diagnostics
+  before claiming waveform delivery. Keep the frozen snapshot and installed RC8.
+- Useful next comparison: unchanged landing strength, temporarily lighter
+  steering, wheel evaluated separately from shaker; then bounded frequency/
+  duration variant only if needed. Support export while paused is useful.
+
 ## Landing candidate installed — 2026-09-12 23:54 UTC
 
 - Owner requested landing-effect implementation/testing and asked about remaining

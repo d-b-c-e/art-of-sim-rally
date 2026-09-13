@@ -48,7 +48,15 @@ Toolkit local pin `dd0ef20ad0cdaccc7a67f10a707dbd2a27a6efe9.clean` is a validate
 0.13.0 development build, native 0.6.0; it is NOT a published toolkit version.
 The native API now has finite bursts and all-effect focus/watchdog stopping.
 Publish/officially repin the toolkit before a public mod release; final packaging
-rejects local toolkit pins. See `docs/LANDING-EFFECTS.md`. Nonzero feel is pending.
+rejects local toolkit pins. See `docs/LANDING-EFFECTS.md`.
+
+First RC8 owner drive on 2026-09-12: eight nonzero landing requests accepted,
+including magnitude .20, but the owner finds the vibration subtle at maximum.
+Detection/driver acceptance is live evidence; satisfactory feel and the complete
+hardware gate remain pending. Logs are preserved; game is paused, no recording
+running. See `docs/reviews/2026-09-12-landing-wheel-test.md`. Do not redeploy while
+the game is running. The toolkit interaction review found no ordinary constant-
+force call cancelling the burst; stop timing/driver waveform remain unobserved.
 
 RC8 (`b9598f5c...clean`) is installed after all 16 local gates, including the
 real drive corpus and 9,044 landing assertions (one recorded event at row 4230).
@@ -97,7 +105,7 @@ KI-31's one-unit difference is reproduced by actual Mono's intermediate numeric
 precision. Runtime-aware replay now passes without changing any capture bytes;
 `results/regression-corpus/index.json` is the first real regression corpus.
 New captures include a force-conversion contract; exact delivery checks remain.
-Nothing is recording; the game is closed.
+Nothing is recording; the current RC8 test game remains paused (2026-09-12).
 See docs/reviews/2026-09-10-first-jump-capture.md. Pause/Stop and verify files before
 quitting. Broader signal-ordering and probe-overhead comparisons remain pending. Read
 `docs/DEVELOPMENT-CAPTURE.md` before interpreting landing/slide candidates.
