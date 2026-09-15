@@ -36,9 +36,10 @@ internal static class SignalAnalysis
         float? airborneStart = null, highSlipStart = null;
         float airborneDuration = 0;
         Vector3? contactAcceleration = null;
+        bool observedGround = false;
         void Clear()
         {
-            previous = firstContact = null; airborneStart = highSlipStart = null; contactAcceleration = null;
+            previous = firstContact = null; airborneStart = highSlipStart = null; contactAcceleration = null; observedGround = false;
         }
         void Event(string kind, Row row, float duration, Vector3? acceleration)
         {
@@ -101,7 +102,8 @@ internal static class SignalAnalysis
             }
             if (current.Mask == 0)
             {
-                airborneStart ??= current.Time; firstContact = null; contactAcceleration = null;
+                if (observedGround) airborneStart ??= current.Time;
+                firstContact = null; contactAcceleration = null;
             }
             else if (airborneStart.HasValue)
             {
@@ -115,6 +117,7 @@ internal static class SignalAnalysis
                     airborneStart = null; firstContact = null; contactAcceleration = null;
                 }
             }
+            if (current.Mask != 0) observedGround = true;
             if (current.Mask != 0 && force[4] >= 12 && force[3] > 0)
             {
                 if (force[2] >= 2 * force[3]) highSlipStart ??= current.Time;

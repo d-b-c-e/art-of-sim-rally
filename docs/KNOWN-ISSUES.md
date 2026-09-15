@@ -563,6 +563,26 @@ destination switching and repeat shutdown. SimHub remains an attended gate.
 
 ## Resolved
 
+### KI-35 — Adding a second regression capture fails to replace the index
+
+**Developer tooling; reproduced/fixed 2026-09-15.** PowerShell converts `$null`
+to an empty string for `File.Replace`'s backup filename, which .NET rejects.
+The new case files were copied/verified but the original one-case index remained
+intact. Use `[NullString]::Value` and test appending a second case while preserving
+the first. The owner's interrupted promotion was recovered from its validated
+temporary index with both recordings rechecked. No original evidence was changed.
+[Crash capture follow-through](reviews/2026-09-15-crash-capture.md).
+
+### KI-34 — Offline analysis mistakes post-reset ground contact for a landing
+
+**Developer analysis; reproduced/fixed 2026-09-15.** In the crash baseline, a
+teleport at force row 2045 placed the car briefly airborne; row 2054 was then
+reported as a landing candidate. The analyzer cleared prior history but armed
+again without observing ground contact after the reset. Require that contact
+before an airborne transition can qualify. Spawn/reset regressions now cover
+this case. Shipping landing detection is unchanged and already has ground arming.
+[Evidence](reviews/2026-09-15-crash-capture.md).
+
 ### KI-33 — Installer entry points and removal prerequisites
 
 **Tooling; fixed in source after 0.2.5, not yet in a published ZIP.** Uninstall

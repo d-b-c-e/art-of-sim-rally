@@ -24,8 +24,17 @@ static class Program
                     Px = 0, Py = 0, Pz = i * .2f, Vx = 0, Vy = 0, Vz = 10, LocalVx = 0, LocalVy = 0, LocalVz = 10,
                     CompressionFL = .1f, CompressionFR = .12f, CompressionRL = .08f, CompressionRR = .15f, TravelFL = .2f, TravelFR = .2f, TravelRL = .25f, TravelRR = .25f } });
             session.Delivery(true); previous = output;
+            session.Collision(Collision(i + 1, i * .02f));
         }
     }
+    static CollisionSample Collision(float time, float physics) => new CollisionSample
+    {
+        Time = time, PhysicsTime = physics, BodyId = -123456789, OtherId = 123456789, OtherLayer = 8,
+        Road = 0, Crowd = 1, Contacts = 1, Examined = 1, Selected = 0,
+        Rvx = 0, Rvy = 0, Rvz = -10, Ix = 0, Iy = 0, Iz = 100, Mass = 100,
+        Px = 1, Py = 2, Pz = 3, Qx = 0, Qy = 0, Qz = 0, Qw = 1,
+        Vx = 0, Vy = 0, Vz = 10, Nx = 0, Ny = 0, Nz = -1, Cpx = 1, Cpy = 2, Cpz = 4
+    };
     static string Capture(string root)
     {
         var session = new CaptureSession();
@@ -40,8 +49,8 @@ static class Program
         string saved = session.SavedDirectory;
         var receipt = XDocument.Load(Path.Combine(saved, "manifest.xml")).Root;
         Check((bool)receipt.Attribute("complete"), "complete capture rejected");
-        Check((int)receipt.Attribute("schema") == 3, "motion schema not declared");
-        foreach (string kind in new[] { "frames", "forces", "signals" })
+        Check((int)receipt.Attribute("schema") == 4, "collision schema not declared");
+        foreach (string kind in new[] { "frames", "forces", "signals", "collisions" })
         {
             Check((int)receipt.Element(kind).Attribute("count") == 4, "wrong count");
             Check(receipt.Element(kind).Value == ArtifactHash.FileHash(Path.Combine(saved, kind + ".csv")), "wrong hash");
@@ -50,6 +59,10 @@ static class Program
         Check(signalRows.All(row => row.Length == 27 && row[3] == "1" && row[5] == "15"), "signal layout/availability/contact lost");
         Check(signalRows[2][0] == "2" && signalRows[2][1] == "3" && signalRows[2][2] == "1", "motion did not follow force reset epoch");
         Check(signalRows[1][4] == "0.02" && signalRows[1][11] == "10" && signalRows[1][18] == "10" && signalRows[1][19] == "0.1" && signalRows[1][26] == "0.25", "signal values/units lost");
+        var collisionRows = File.ReadAllLines(Path.Combine(saved, "collisions.csv")).Skip(1).Select(row => row.Split(',')).ToArray();
+        Check(collisionRows.All(row => row.Length == 36), "collision layout changed");
+        Check(collisionRows[2][3] == "1" && collisionRows[2][4] == "2", "collision epoch/preceding row lost");
+        Check(collisionRows[0][5] == "-123456789" && collisionRows[0][6] == "123456789", "collision IDs rounded through floats");
         Check(!session.Stop(false), "duplicate STOP rewrote evidence");
         Check(session.Start(false, Identity(), root, 1, 1), "second START failed");
         Samples(session); Check(session.Stop(false), "truncated save failed");
@@ -71,6 +84,17 @@ static class Program
         for (int i = 0; i < 10000; i++) session.Force(new ForceSample { Motion = new MotionSample { Valid = 1, Qw = 1 } });
         Check(GC.GetAllocatedBytesForCurrentThread() == allocated, "motion sampling allocated managed objects");
         Check(session.Stop(false), "allocation capture save failed");
+        Check(session.Start(false, Identity(), root, 1, 1), "collision allocation setup failed");
+        session.Collision(Collision(1, 1));
+        allocated = GC.GetAllocatedBytesForCurrentThread();
+        for (int i = 0; i < 5000; i++) session.Collision(Collision(i + 2, i + 2));
+        Check(GC.GetAllocatedBytesForCurrentThread() == allocated, "collision sampling allocated");
+        Check(session.Describe.Contains("collisions=4096") && session.Describe.Contains("incomplete=True"), "collision overflow hidden");
+        Check(session.Stop(false), "collision overflow save failed");
+        var overflow = XDocument.Load(Path.Combine(session.SavedDirectory, "manifest.xml")).Root;
+        Check(!(bool)overflow.Attribute("complete") && (int)overflow.Element("collisions").Attribute("count") == 4096, "collision overflow silently complete");
+        session.Collision(Collision(9999, 9999));
+        Check(!session.Pending, "stopped collision resurrected capture");
         return saved;
     }
     static void Pipe()
@@ -148,6 +172,8 @@ static class Program
         Check(access.Send.ReturnType == typeof(bool) && access.Send.GetParameters().Single().ParameterType == typeof(int), "native observation signature changed");
         Check(!access.Update.IsStatic && access.Shutdown.IsStatic && access.Reset.IsStatic, "lifecycle signatures changed");
         Check(!access.Exit.IsStatic && access.Exit.DeclaringType.Name == "ExitGame" && access.Exit.ReturnType == typeof(void), "menu exit signature changed");
+        Check(access.Collision.GetParameters().Single().ParameterType.Name == "Collision" && access.Collision.ReturnType == typeof(void), "collision callback signature changed");
+        Check(access.PlayerBody() == null && !access.Restarting(), "passive menu query created state");
         Check(access.Smoothed() == 0, "unexpected filter initialization");
         var main = mod.GetType("ArtOfSimRally.Mod.Main", true);
         var cfg = Activator.CreateInstance(mod.GetType("ArtOfSimRally.Mod.Settings", true));

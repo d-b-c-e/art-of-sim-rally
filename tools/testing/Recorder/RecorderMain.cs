@@ -42,7 +42,7 @@ namespace ArtOfSimRally.Testing
                 entry.Logger.Error("Developer probe could not attach: " + ex.Message); return false;
             }
         }
-        private static void Attach(System.Reflection.Assembly mod, System.Reflection.Assembly force)
+        private static void Attach(System.Reflection.Assembly mod, System.Reflection.Assembly force, bool includeCollision = true)
         {
             subject = new SubjectAccess(mod, force);
             patches = new Harmony(PatchId);
@@ -52,6 +52,7 @@ namespace ArtOfSimRally.Testing
             patches.Patch(subject.Update, postfix: Hook(nameof(Frame)));
             patches.Patch(subject.Shutdown, postfix: Hook(nameof(Shutdown)));
             patches.Patch(subject.Exit, prefix: Hook(nameof(BeforeGameExit)));
+            if (includeCollision) patches.Patch(subject.Collision, prefix: Hook(nameof(BeforeCollision)));
         }
         private static HarmonyMethod Hook(string name) => new HarmonyMethod(typeof(RecorderMain), name);
         private static string Command(string command)
@@ -136,6 +137,45 @@ namespace ArtOfSimRally.Testing
             catch (Exception ex) { Session.AbortSampling(ex.Message); }
         }
         private static void BeforeSend(int __0) { if (observing) { device = __0; sent = true; } }
+        // Passive prefix: the original callback may finish the stage for
+        // terminal damage. Never change its arguments, return value or physics.
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        private static void BeforeCollision(PlayerCollider __instance, Collision __0)
+        {
+            try
+            {
+                if (!Session.Active || !subject.Enabled() || !subject.Driving() || subject.Restarting() ||
+                    __instance == null || __0 == null) return;
+                var body = __instance.GetComponent<Rigidbody>();
+                if (body == null || body != (subject.PlayerBody() as Rigidbody)) return;
+                var other = __0.collider;
+                if (other == null) return;
+                var relative = __0.relativeVelocity; var impulse = __0.impulse;
+                var p = body.position; var q = body.rotation; var v = body.velocity;
+                int contacts = __0.contactCount, examined = Math.Min(contacts, CollisionFormat.ContactLimit), selected = -1;
+                Vector3 normal = Vector3.zero, point = Vector3.zero;
+                float strongest = -1;
+                for (int i = 0; i < examined; i++)
+                {
+                    var contact = __0.GetContact(i);
+                    float projection = Math.Abs(Vector3.Dot(relative, contact.normal));
+                    if (projection > strongest)
+                    { strongest = projection; selected = i; normal = contact.normal; point = contact.point; }
+                }
+                Session.Collision(new CollisionSample
+                {
+                    Time = Time.realtimeSinceStartup, PhysicsTime = Time.fixedTime,
+                    BodyId = body.GetInstanceID(), OtherId = other.GetInstanceID(), OtherLayer = other.gameObject.layer,
+                    Road = other.CompareTag("Road") ? 1 : 0, Crowd = other.CompareTag("Crowd") ? 1 : 0,
+                    Contacts = contacts, Examined = examined, Selected = selected,
+                    Rvx = relative.x, Rvy = relative.y, Rvz = relative.z, Ix = impulse.x, Iy = impulse.y, Iz = impulse.z,
+                    Mass = body.mass, Px = p.x, Py = p.y, Pz = p.z, Qx = q.x, Qy = q.y, Qz = q.z, Qw = q.w,
+                    Vx = v.x, Vy = v.y, Vz = v.z, Nx = normal.x, Ny = normal.y, Nz = normal.z,
+                    Cpx = point.x, Cpy = point.y, Cpz = point.z
+                });
+            }
+            catch (Exception ex) { Session.AbortSampling("Collision observation: " + ex.Message); }
+        }
         private static void AfterSend(bool __result) { if (observing) Session.Delivery(__result); }
         private static void Reset() => Session.Reset();
         private static void Frame()

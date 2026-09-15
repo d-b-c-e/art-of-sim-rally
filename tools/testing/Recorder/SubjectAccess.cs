@@ -19,8 +19,9 @@ namespace ArtOfSimRally.Testing
     {
         private const BindingFlags Flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
         public readonly Assembly Mod;
-        public readonly MethodInfo Drive, Reset, Update, Shutdown, Send, Exit;
-        public readonly Func<bool> Enabled, Driving, ForceEnabled, Ready, Direct;
+        public readonly MethodInfo Drive, Reset, Update, Shutdown, Send, Exit, Collision;
+        public readonly Func<bool> Enabled, Driving, ForceEnabled, Ready, Direct, Restarting;
+        public readonly Func<object> PlayerBody;
         public readonly Func<float> Smoothed;
         public readonly Func<Tune> ReadTune;
         private readonly Func<float>[] channels = new Func<float>[5];
@@ -43,6 +44,22 @@ namespace ArtOfSimRally.Testing
             var game = Drive.GetParameters()[0].ParameterType.Assembly;
             Exit = game.GetType("ExitGame", true).GetMethod("Exit", BindingFlags.Instance | BindingFlags.Public)
                 ?? throw new MissingMethodException("ExitGame.Exit");
+            Collision = game.GetType("PlayerCollider", true).GetMethod("OnCollisionEnter", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?? throw new MissingMethodException("PlayerCollider.OnCollisionEnter");
+            Restarting = Getter<bool>(state, "IsRestarting");
+            // Read the passive existing-manager property once per query. Do not
+            // retain the manager or invoke GameEntryPoint's lazy factory.
+            var existing = Expression.Property(null, state.GetProperty("ExistingManager", Flags));
+            var manager = Expression.Variable(existing.Type, "manager");
+            var playerAccess = Expression.PropertyOrField(manager, "playerManager");
+            var player = Expression.Variable(playerAccess.Type, "player");
+            var nothing = Expression.Constant(null, typeof(object));
+            PlayerBody = Expression.Lambda<Func<object>>(Expression.Block(new[] { manager, player },
+                Expression.Assign(manager, existing),
+                Expression.Condition(Expression.Equal(manager, Expression.Constant(null, manager.Type)), nothing,
+                    Expression.Block(Expression.Assign(player, playerAccess),
+                        Expression.Condition(Expression.Equal(player, Expression.Constant(null, player.Type)), nothing,
+                            Expression.Convert(Expression.PropertyOrField(player, "playerRigidBody"), typeof(object))))))).Compile();
             Enabled = Getter<bool>(main, "Enabled"); Driving = Getter<bool>(state, "IsDriving");
             Ready = Getter<bool>(native, "Ready"); Direct = Getter<bool>(input, "Enabled");
             Smoothed = Expression.Lambda<Func<float>>(Expression.Field(null, controller.GetField("_smoothed", Flags))).Compile();

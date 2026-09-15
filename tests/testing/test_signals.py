@@ -127,11 +127,19 @@ class SignalTests(unittest.TestCase):
                 self.assertIn("signals:", self.run_replay(expected=1))
 
     def test_event_report_is_bounded(self):
-        self.samples(([0] * 5 + [15] * 4) * 140)
+        self.samples([15] + ([0] * 5 + [15] * 4) * 140)
         report = self.result()
         self.assertEqual(report["landingCandidates"], 140)
         self.assertEqual(len(report["events"]), 128)
         self.assertEqual(report["omittedEvents"], 12)
+
+    def test_spawn_and_reset_in_air_do_not_become_landings(self):
+        self.samples([0] * 10 + [15] * 4)
+        self.assertEqual(self.result()["landingCandidates"], 0)
+        self.samples([15] * 4 + [0] * 10 + [15] * 4)
+        for i in range(4, 18): self.signals[i][6] += 1000
+        self.write()
+        self.assertEqual(self.result()["landingCandidates"], 0)
 
     def test_schema_three_promotion_preserves_signal_bytes(self):
         from test_replay import ROOT

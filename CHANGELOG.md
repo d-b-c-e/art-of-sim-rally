@@ -9,6 +9,10 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Separate developer probe records body collisions, including relative motion,
+  impulse and contact direction, with validated schema-4 replay and legacy capture
+  support. This is developer instrumentation, not a new wheel or motion effect.
+
 - Offline telemetry regressions for front/side collision trajectories at multiple
   sample rates and headings, including reset suppression. Crash feedback remains
   under investigation; this does not add a wheel effect or alter motion signals.
@@ -22,6 +26,8 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Developer analysis no longer reports a landing from an airborne spawn/reset.
+- Developer corpus tool can append a second recording without losing the existing index.
 - Uninstaller can remove the mod after Unity Mod Manager has been removed.
 - Batch launchers forward custom-folder arguments and preserve failure exit codes.
 - Batch launchers use Windows PowerShell's own modules when started from PowerShell 7.

@@ -1,6 +1,6 @@
 # Development signal capture
 
-The removable developer probe now writes schema 3. Install and control it using
+The removable developer probe 0.2.5.4 now writes schema 4. Install and control it using
 [TEST-DRIVE.md](TEST-DRIVE.md). Nothing starts automatically; no recorder is
 installed by the release package. The replay executable runs without Unity, the
 game or a wheel, and never emits hardware force.
@@ -26,7 +26,8 @@ regression cannot stall the release gate forever. This does not emulate Unity.
 
 ## Recorded contract
 
-Keep `manifest.xml`, `frames.csv`, `forces.csv` and `signals.csv` together.
+Keep `manifest.xml`, `frames.csv`, `forces.csv`, `signals.csv` and (schema 4)
+`collisions.csv` together.
 The receipt hashes every CSV and identifies the game, mod, recorder and toolkit.
 Schema 3 keeps schema 2's stateful force rows, adding exactly one signal row per
 force row with the same zero-based index, realtime timestamp and reset epoch.
@@ -93,21 +94,46 @@ These are conservative research thresholds, not production effect defaults.
 Acceleration includes game motion/gravity; it is not a calibrated landing impulse.
 Neither landing nor slide candidates classify a crash or prescribe gain/damping.
 
-Schema 1 and 2 remain readable and explicitly report unavailable signal context.
-Only continuous game-origin schema 2/3 captures can enter a regression corpus;
-schema 3 promotion preserves and rechecks the signal file too. Hashes, row counts,
+Schemas 1–3 remain readable, explicitly reporting unavailable newer observations.
+Only continuous game-origin schema 2/3/4 captures can enter a regression corpus;
+promotion preserves and rechecks all files declared by the schema. Hashes, row counts,
 alignment, finite values, contact flags, quaternion and local projection are
 validated before a successful report. Signal files are limited to 64 MiB; world
 positions above 10 million meters or velocities above 10,000 m/s are rejected as
 outside this capture contract. Synthetic test fixtures never qualify as driving
 evidence merely because they exercise the game-origin protocol.
 
+## Body collisions — schema 4
+
+`collisions.csv` is an event stream of active-player collision entries, separate
+from the wheel-contact flags. It records realtime/physics time, reset epoch,
+preceding force row (-1 if none), body/counterpart instance IDs, layer and
+road/crowd flags. IDs are process-local integers, not persistent object names.
+World relative velocity and body velocity use m/s; total impulse uses N·s;
+mass uses kg; position/contact point use meters. The quaternion maps car-local
+to world coordinates; normals are unit world vectors. Impulse/mass is a diagnostic
+delta-velocity magnitude, not measured steering torque or a wheel gain.
+
+The passive prefix reads the collision before game handling can end the stage.
+It checks current player identity, driving and restart state without constructing
+an event manager. Collision entries can be observed even if FFB is unavailable;
+a force-empty capture remains diagnostic evidence and cannot enter the steering
+regression corpus. No `OnCollisionStay` events or timestamps synthesized from
+velocity spikes are included.
+
+At most eight contacts are examined per entry; the strongest absolute
+normal-relative-speed contact is retained. `contacts`, `examined` and `selected`
+make this limit explicit. No contacts means selected=-1 and zero normal/point,
+with derived normal speed reported unavailable. The 4,096-entry buffer is
+allocated at Start; overflow marks the capture incomplete. Stop hashes/saves the
+new file and replay rejects missing/tampered/invalid data. Live collision events
+still need verification; actual Mono hook attachment and offline tests pass.
+
 ## Next attended capture
 
-For the owner's new crash-feedback request, the next probe extension is body
-collision observation. **This is planned, not present in schema 3.** Wheel
-contact flags alone cannot label crashes. Preserve existing capture/replay
-compatibility and follow the [collision study and capture sequence](research/2026-09-14-crash-feedback.md).
+The owner's first crash baseline has 2,947 verified force/motion rows, multiple
+sharp decelerations and no body-collision callbacks (old probe 0.2.5.3).
+[Analysis and next capture](reviews/2026-09-15-crash-capture.md).
 
 Keep the existing force tune. Capture ordinary road, a jump/landing and a
 controlled slide, noting car/stage and approximate event times. Compare those

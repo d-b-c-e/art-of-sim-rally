@@ -18,7 +18,7 @@ static class Program
     {
         var manifest = XDocument.Load(Path.Combine(directory, "manifest.xml")).Root!;
         int schema = (int?)manifest.Attribute("schema") ?? 0;
-        Check(schema >= 1 && schema <= 3, "unknown capture schema");
+        Check(schema >= 1 && schema <= 4, "unknown capture schema");
         Check((string?)manifest.Attribute("complete") == "true", "truncated/incomplete capture");
         Check(!string.IsNullOrWhiteSpace((string?)manifest.Element("modSha256")), "missing build identity");
         string? deliveryContract = (string?)manifest.Element("forceQuantization");
@@ -104,7 +104,8 @@ static class Program
             runtimeRoundingDifferences,
             resetBoundaries = resets,
             stateful = schema >= 2,
-            signals = schema == 3 ? SignalAnalysis.Read(directory, manifest, forceRows) : new { available = false, reason = "legacy capture has no motion/contact observations" },
+            signals = schema >= 3 ? SignalAnalysis.Read(directory, manifest, forceRows) : new { available = false, reason = "legacy capture has no motion/contact observations" },
+            collisions = schema >= 4 ? CollisionAnalysis.Read(directory, manifest, forceRows) : new { available = false, reason = "legacy capture has no body-collision observations" },
             forceRows = forces.Length - 1,
             drivingFrames = timings.Count,
             p95FrameMs = timings[(int)((timings.Count - 1) * .95)],
@@ -166,7 +167,7 @@ static class Program
             Check(ArtifactHash.FileHash(Path.Combine(path, "manifest.xml")) == item.GetProperty("manifestSha256").GetString(), "Corpus receipt changed: " + id);
             var receipt = XDocument.Load(Path.Combine(path, "manifest.xml")).Root!;
             Check((string?)receipt.Attribute("origin") == "game", "Corpus case is not a recorded game session: " + id);
-            Check((int?)receipt.Attribute("schema") is 2 or 3, "Corpus requires continuous schema-2/3 recordings: " + id);
+            Check((int?)receipt.Attribute("schema") is 2 or 3 or 4, "Corpus requires continuous schema-2/3/4 recordings: " + id);
             reports.Add(new { id, result = Replay(path) });
         }
         return new { cases = reports, caseCount = reports.Count };

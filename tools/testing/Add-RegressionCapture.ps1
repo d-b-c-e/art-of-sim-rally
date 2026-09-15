@@ -6,7 +6,7 @@ if ($Name -notmatch '^[a-z0-9][a-z0-9-]{0,79}$') { throw 'Use a short lowercase 
 $Capture=[IO.Path]::GetFullPath($Capture); $Corpus=[IO.Path]::GetFullPath($Corpus)
 $receiptPath=Join-Path $Capture 'manifest.xml'
 $receipt=[xml](Get-Content -LiteralPath $receiptPath -Raw)
-if ($receipt.capture.origin -ne 'game' -or $receipt.capture.schema -notin @('2','3')) { throw 'Only a recorded schema-2/3 game capture can enter the regression corpus.' }
+if ($receipt.capture.origin -ne 'game' -or $receipt.capture.schema -notin @('2','3','4')) { throw 'Only a recorded schema-2/3/4 game capture can enter the regression corpus.' }
 $receiptHash=(Get-FileHash -LiteralPath $receiptPath).Hash
 & dotnet run --project (Join-Path $PSScriptRoot 'Replay/Replay.csproj') -c Release -- --replay $Capture
 if ($LASTEXITCODE -ne 0) { throw 'Capture failed replay; keep it as diagnostic evidence, not an approved regression case.' }
@@ -21,7 +21,8 @@ $destination=Join-Path $Corpus "cases/$Name"
 if (Test-Path -LiteralPath $destination) { throw 'Case directory already exists; evidence is never overwritten.' }
 New-Item -ItemType Directory -Path $destination | Out-Null
 $captureFiles=@('frames.csv','forces.csv','manifest.xml')
-if ($receipt.capture.schema -eq '3') { $captureFiles += 'signals.csv' }
+if ($receipt.capture.schema -in @('3','4')) { $captureFiles += 'signals.csv' }
+if ($receipt.capture.schema -eq '4') { $captureFiles += 'collisions.csv' }
 foreach ($file in $captureFiles) { Copy-Item -LiteralPath (Join-Path $Capture $file) -Destination $destination }
 if ((Get-FileHash -LiteralPath (Join-Path $destination 'manifest.xml')).Hash -ne $receiptHash) { throw 'Capture changed while copying; no case was added to the index.' }
 # Recheck the copied bytes, not only the source that was valid before copying.
@@ -30,7 +31,11 @@ if ($LASTEXITCODE -ne 0) { throw 'Copied capture failed validation; no case was 
 $index.cases=@($index.cases)+@([pscustomobject]@{id=$Name;path="cases/$Name";manifestSha256=$receiptHash})
 $temporary=Join-Path $Corpus ('index-'+[Guid]::NewGuid().ToString('N')+'.tmp')
 $index | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $temporary -Encoding UTF8
-if (Test-Path -LiteralPath $indexPath) { [IO.File]::Replace($temporary,$indexPath,$null) } else { [IO.File]::Move($temporary,$indexPath) }
+if (Test-Path -LiteralPath $indexPath) {
+    # PowerShell converts plain $null to an empty string for this string
+    # parameter; File.Replace then rejects the empty backup path.
+    [IO.File]::Replace($temporary,$indexPath,[NullString]::Value)
+} else { [IO.File]::Move($temporary,$indexPath) }
 Write-Output "Added $Name. Replay all cases with --corpus $indexPath"
 }
 finally { $lock.Dispose() }

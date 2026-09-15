@@ -1,6 +1,6 @@
 # User feedback and support follow-up
 
-**Current, 2026-09-14:** 0.2.5 is published/installed, including default-on wheel
+**Current, 2026-09-15:** 0.2.5 is published/installed, including default-on wheel
 landing vibration and clearer/scaling-aware settings help. The owner accepted
 the built-in SimHub comparison and observed clipping. Current setup answers
 are in [SETUP.md](SETUP.md) and [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
@@ -8,6 +8,13 @@ Dated reports and unsent drafts below preserve their original context; replace
 old version references before sending them. No new public reply was sent.
 
 ## Stronger crashes — owner request, 2026-09-14
+
+Follow-through 2026-09-15 UTC: owner drove several head-on impacts and at least
+one light side impact. Saved/verified 2,947 motion/force samples while paused;
+replay passes exactly. The largest head-on deceleration has almost no steering
+output, supporting an independent crash cue. Body-event capture is added in
+probe 0.2.5.4 for the next drive. SimHub receiver/output data was not captured.
+[Evidence and limits](reviews/2026-09-15-crash-capture.md).
 
 Owner requests more noticeable crashes in wheel FFB and motion telemetry, and
 confirmed **SimHub** drives the motion platform. Track under FR-2. Source review

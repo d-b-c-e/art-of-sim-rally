@@ -1,6 +1,6 @@
 # Roadmap
 
-Status reviewed 2026-09-14 UTC after the crash-feedback investigation.
+Status reviewed 2026-09-15 UTC after the first crash baseline.
 **0.2.5 is published with wheel landing vibration enabled by default at strength 5.**
 See [release evidence](reviews/2026-09-13-release-0.2.5.md) and
 [installed identity](LOCAL-DEPLOYMENT.md).
@@ -22,10 +22,14 @@ Remaining feature priorities:
 **Current focus: FR-2 crash feedback in wheel FFB and SimHub motion.** The game
 has a collision callback suitable for passive observation; 48 new synthetic
 crash scenarios pass through the production telemetry sampler and encoded UDP.
-No crash effect or motion change is implemented yet. Next: labelled collision
-capture, shared landing/crash periodic ownership, independent wheel crash
+The owner crash drive is preserved and replays exactly: a roughly 145→4 km/h
+head-on event produces almost zero steering output. Probe 0.2.5.4 now adds body
+collision observations; its live drive check is pending. No crash effect or
+motion change is implemented yet. Next: correlate collision entries with motion,
+shared landing/crash periodic ownership, independent wheel crash
 vibration and a measured SimHub input/output comparison. See
-[findings and validation sequence](research/2026-09-14-crash-feedback.md).
+[findings and validation sequence](research/2026-09-14-crash-feedback.md) and
+[drive evidence](reviews/2026-09-15-crash-capture.md).
 
 1. **RWD snapback/tankslap investigation (KI-6):** capture steering/slip recovery
    before deciding whether an optional damper is justified.

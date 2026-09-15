@@ -42,9 +42,20 @@ third-party binaries, nothing that would force the repo private.
 | `tools/installer/README.txt` | Standalone ZIP guide; packaging replaces `@RELEASE@`. Keep aligned with player docs; link online to files not in the archive. |
 | `tools/testing/Test-Installer.ps1` | Isolated real batch/Windows PowerShell installer checks; also included in Test-Rc. No game/hardware output. |
 
-## Status (2026-09-14) — do not overstate this
+## Status (2026-09-15) — do not overstate this
 
-**Crash feedback investigation:** owner confirmed SimHub for motion. Game
+**First crash baseline:** 2,947 owner-driven force/motion rows replay exactly;
+multiple sharp decelerations include a ~145→4 km/h event with nearly zero wheel
+steering force. Corpus now has landing and crash cases. Probe 0.2.5.4/schema 4
+adds bounded passive `PlayerCollider.OnCollisionEnter` observations, not a new
+wheel effect. CLR cannot prepare that game's Unity ECalls; gate the actual patch
+with `Run-UnityMono.py` and ProbeHooks' `collision` mode, keeping CLR checks for
+the other hooks. Live collision callbacks and SimHub input/output comparison
+remain pending. KI-34 fixes post-reset false landing analysis; KI-35 fixes corpus
+index replacement using `[NullString]::Value`. Full validation/deployment receipts:
+`docs/reviews/2026-09-15-crash-capture.md`. Shipping 0.2.5 remains unchanged.
+
+**Earlier crash investigation, 2026-09-14:** owner confirmed SimHub for motion. Game
 `PlayerCollider.OnCollisionEnter` provides a passive observation candidate;
 the wheel does not consume its controller rumble. Signals now passes 2,910
 assertions including 48 synthetic collision trajectories through sampler and

@@ -53,7 +53,8 @@ development capture/testing, not required player installation steps.
 
    The reply identifies a folder under
    `%LOCALAPPDATA%/ArtOfSimRally/dev-captures`. Keep its `manifest.xml`,
-   `frames.csv`, `forces.csv` and `signals.csv` together. After a save error, keep the game open,
+   `frames.csv`, `forces.csv`, `signals.csv` and schema 4's `collisions.csv`
+   together. After a save error, keep the game open,
    remain paused and retry Stop; the probe retains its buffers.
    **Wait for the Saved reply and verify the files before quitting.** The game's
    normal Quit forcibly kills its process instead of running Unity quit callbacks.
@@ -71,8 +72,9 @@ development capture/testing, not required player installation steps.
    Case names cannot overwrite existing evidence. Frame timing and native-call
    acceptance/rejection counts are reported when available; matching arithmetic
    does not establish physical torque delivery.
-   Schema 3 also reports contact/motion context and candidate landing/slide
-   events. See [DEVELOPMENT-CAPTURE.md](DEVELOPMENT-CAPTURE.md) for units,
+   Schema 3 adds wheel-contact/motion context; probe 0.2.5.4/schema 4 also records
+   body-collision entries. Older captures explicitly lack those events. See
+   [DEVELOPMENT-CAPTURE.md](DEVELOPMENT-CAPTURE.md) for units,
    reset/freshness limits and interpretation. Capture an ordinary jump and
    controlled slide with approximate event times; no effect tuning is required.
 6. **Remove the probe and check the shipped setup.** Close the game, then run:

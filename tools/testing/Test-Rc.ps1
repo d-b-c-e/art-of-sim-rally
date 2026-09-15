@@ -79,6 +79,10 @@ try {
     $result = Run 'probe-hooks' (Join-Path $root 'tests/ProbeHooks/bin/Release/net48/ProbeHooks.exe') @($root,'D:/Program Files (x86)/Steam/steamapps/common/artofrally')
     $hooks = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($hooks.status -eq 'passed' -and $hooks.assertions -gt 0) 'Probe hooks runner ran no assertions'
+    $result = Run 'collision-mono-hooks' 'python' @('tools/testing/Run-UnityMono.py','tests/ProbeHooks/bin/Release/net48/ProbeHooks.exe',$root,'D:/Program Files (x86)/Steam/steamapps/common/artofrally','collision')
+    $collisionLines = @($result | ForEach-Object { ([string]$_).TrimStart([char]0xfeff) } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    $collisionHooks = $collisionLines | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($collisionHooks.status -eq 'passed' -and $collisionHooks.runtime -eq 'Unity Mono' -and $collisionHooks.assertions -gt 0) 'Unity Mono collision patch failed'
     $null = Run 'runtime-build' 'dotnet' @('build','tests/RuntimeCompatibility/RuntimeCompatibility.csproj','-c','Release','--nologo','-warnaserror')
     $result = Run 'unity-mono-runtime' 'python' @('tools/testing/Run-UnityMono.py','tests/RuntimeCompatibility/bin/Release/net48/RuntimeCompatibility.exe')
     # Mono can emit a BOM-only line after the JSON when redirected streams close.
@@ -87,7 +91,7 @@ try {
         Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
     $runtime = $runtimeLines | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($runtime.status -eq 'passed' -and $runtime.runtime -eq 'Unity Mono' -and $runtime.assertions -gt 0) 'Actual Unity Mono compatibility checks failed'
-    Checkpoint 'dev-recorder' ($recorder.assertions+$hooks.assertions+$runtime.assertions)
+    Checkpoint 'dev-recorder' ($recorder.assertions+$hooks.assertions+$runtime.assertions+$collisionHooks.assertions)
     $result = Run 'replay' 'dotnet' @('run','--project','tools/testing/Replay/Replay.csproj','-c','Release','--','--replay',$recorder.syntheticCapture)
     $replay = $result | Select-Object -Last 1 | ConvertFrom-Json
     Checkpoint 'replay' $replay.assertions

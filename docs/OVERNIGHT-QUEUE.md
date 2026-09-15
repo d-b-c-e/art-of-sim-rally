@@ -1,12 +1,20 @@
 # Overnight investigation and implementation queue
 
-**Current, 2026-09-14:** 0.2.5 is published and installed with official toolkit
+**Current, 2026-09-15:** 0.2.5 is published and installed with official toolkit
 v0.13.0. Owner accepted wheel landing vibration and the built-in 30 Hz SimHub
 comparison. The helper was rejected and removed. Remaining work is in the
 [roadmap](ROADMAP.md); full hardware checks remain pending. The dated queue
 entries below preserve earlier states and do not describe the current install.
 
 ## Crash feedback follow-through — 2026-09-14
+
+2026-09-15 update: first owner crash baseline is preserved in the corpus. New
+probe 0.2.5.4 implements bounded body-collision capture with strict schema-4
+replay/promotion. Fixed false post-reset landing analysis (KI-34) and existing
+corpus append failure (KI-35). Next is the probe's live collision check, then
+shared periodic ownership and the independent wheel effect. No motion gain
+change is justified by the captured acceleration spikes. See
+[the follow-through](reviews/2026-09-15-crash-capture.md).
 
 FR-2 now explicitly includes wheel crash vibration and SimHub motion. Source
 investigation and 48 synthetic crash scenarios are complete; see the

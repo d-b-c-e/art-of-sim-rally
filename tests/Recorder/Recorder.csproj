@@ -3,6 +3,8 @@
   <ItemGroup>
     <Compile Include="../../tools/testing/Recorder/CaptureBuffer.cs" Link="CaptureBuffer.cs" />
     <Compile Include="../../tools/testing/Recorder/CaptureSession.cs" Link="CaptureSession.cs" />
+    <Compile Include="../../tools/testing/Recorder/CollisionSample.cs" Link="CollisionSample.cs" />
+    <Compile Include="../../tools/testing/Recorder/CollisionFormat.cs" Link="CollisionFormat.cs" />
     <Compile Include="../../tools/testing/Recorder/ControlServer.cs" Link="ControlServer.cs" />
     <Compile Include="../../tools/testing/Recorder/SubjectAccess.cs" Link="SubjectAccess.cs" />
     <Compile Include="../../tools/testing/Common/ArtifactHash.cs" Link="ArtifactHash.cs" />

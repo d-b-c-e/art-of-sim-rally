@@ -29,6 +29,7 @@ namespace ArtOfSimRally.Testing
     {
         private CaptureBuffer<FrameSample> frames;
         private CaptureBuffer<ForceSample> forces;
+        private CaptureBuffer<CollisionSample> collisions;
         private XElement metadata;
         private string directory;
         private int epoch, lastEpoch;
@@ -40,21 +41,29 @@ namespace ArtOfSimRally.Testing
         public string Status { get; private set; } = "Idle";
         public string SavedDirectory { get; private set; }
         public string Describe => Status + "; frames=" + (frames?.Count ?? 0) + "; forces=" + (forces?.Count ?? 0) +
-            "; incomplete=" + (failure != null || (frames?.Truncated ?? false) || (forces?.Truncated ?? false));
+            "; collisions=" + (collisions?.Count ?? 0) +
+            "; incomplete=" + (failure != null || (frames?.Truncated ?? false) || (forces?.Truncated ?? false) || (collisions?.Truncated ?? false));
 
         public bool Start(bool driving, XElement identity, string root, int frameCapacity = 250000, int forceCapacity = 90000)
         {
             if (Pending || driving) { Status = "Pause before starting; finish any pending capture first."; return false; }
             directory = Path.Combine(Path.GetFullPath(root), DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N"));
             metadata = new XElement(identity);
-            metadata.SetAttributeValue("schema", 3);
+            metadata.SetAttributeValue("schema", 4);
             metadata.SetAttributeValue("startedUtc", DateTime.UtcNow.ToString("O"));
             frames = new CaptureBuffer<FrameSample>(frameCapacity);
             forces = new CaptureBuffer<ForceSample>(forceCapacity);
+            collisions = new CaptureBuffer<CollisionSample>(CollisionFormat.Capacity);
             epoch = lastEpoch = deliveryAttempts = deliveryFailures = 0; lastOutput = 0; failure = null;
             SavedDirectory = null; Active = true; Status = "Recording"; return true;
         }
         public void Frame(FrameSample sample) { if (Active) frames.Add(sample); }
+        public void Collision(CollisionSample sample)
+        {
+            if (!Active) return;
+            sample.Epoch = epoch; sample.LastForceRow = forces.Count - 1;
+            collisions.Add(sample);
+        }
         public void Reset() { if (Active) epoch++; }
         public void Incomplete(string reason) { if (Active) failure = reason; }
         // A broken observation must never throw into the game's physics loop.
@@ -129,16 +138,23 @@ namespace ArtOfSimRally.Testing
                             F(s.TravelFL), F(s.TravelFR), F(s.TravelRL), F(s.TravelRR)));
                     }
                 }
+                var collisionPath = Path.Combine(directory, "collisions.csv");
+                using (var writer = new StreamWriter(collisionPath))
+                {
+                    writer.WriteLine(CollisionFormat.Header);
+                    for (int i = 0; i < collisions.Count; i++) collisions.Items[i].Write(writer, i);
+                }
                 var receipt = new XElement(metadata);
-                receipt.SetAttributeValue("complete", !frames.Truncated && !forces.Truncated && failure == null);
+                receipt.SetAttributeValue("complete", !frames.Truncated && !forces.Truncated && !collisions.Truncated && failure == null);
                 receipt.SetAttributeValue("endedUtc", DateTime.UtcNow.ToString("O"));
                 receipt.Add(new XElement("frames", new XAttribute("count", frames.Count), ArtifactHash.FileHash(framePath)),
                     new XElement("forces", new XAttribute("count", forces.Count), ArtifactHash.FileHash(forcePath)),
                     new XElement("signals", new XAttribute("count", forces.Count), ArtifactHash.FileHash(signalPath)),
+                    new XElement("collisions", new XAttribute("count", collisions.Count), ArtifactHash.FileHash(collisionPath)),
                     new XElement("delivery", new XAttribute("attempts", deliveryAttempts), new XAttribute("rejected", deliveryFailures)),
                     new XElement("error", failure ?? ""));
                 new XDocument(receipt).Save(Path.Combine(directory, "manifest.xml"));
-                SavedDirectory = directory; Status = "Saved: " + directory; frames = null; forces = null; return true;
+                SavedDirectory = directory; Status = "Saved: " + directory; frames = null; forces = null; collisions = null; return true;
             }
             catch (Exception ex) { Status = "Save failed; retry while paused: " + ex.Message; return false; }
         }
