@@ -405,6 +405,13 @@ Fanatec setup still needs confirmation. See [ROADMAP.md](ROADMAP.md).
 
 ### KI-4 — Force scaling is tuned for one wheel
 
+2026-09-14: owner accepted landing vibration and the built-in shaker comparison
+for 0.2.5; wheel landing vibration now defaults on at strength 5. The new request
+is stronger crashes in wheel FFB and **SimHub motion** (FR-2). Source/UDP tests
+are complete, but a labelled crash capture and motion comparison remain pending.
+See [crash findings](research/2026-09-14-crash-feedback.md). This does not resolve
+per-wheel tuning or the complete hardware matrix.
+
 2026-09-12: the development landing-vibration candidate adds an independent
 effect strength (default off), without retuning steering. It does not establish
 per-wheel defaults or resolve the requested road/crash effects. First RC8 owner

@@ -1,6 +1,6 @@
 # Roadmap
 
-Status reviewed 2026-09-13 UTC after owner RC8 acceptance and publication.
+Status reviewed 2026-09-14 UTC after the crash-feedback investigation.
 **0.2.5 is published with wheel landing vibration enabled by default at strength 5.**
 See [release evidence](reviews/2026-09-13-release-0.2.5.md) and
 [installed identity](LOCAL-DEPLOYMENT.md).
@@ -18,6 +18,14 @@ the full hardware matrix remains incomplete.
 See [implementation, limits and A/B drive](LANDING-EFFECTS.md).
 
 Remaining feature priorities:
+
+**Current focus: FR-2 crash feedback in wheel FFB and SimHub motion.** The game
+has a collision callback suitable for passive observation; 48 new synthetic
+crash scenarios pass through the production telemetry sampler and encoded UDP.
+No crash effect or motion change is implemented yet. Next: labelled collision
+capture, shared landing/crash periodic ownership, independent wheel crash
+vibration and a measured SimHub input/output comparison. See
+[findings and validation sequence](research/2026-09-14-crash-feedback.md).
 
 1. **RWD snapback/tankslap investigation (KI-6):** capture steering/slip recovery
    before deciding whether an optional damper is justified.

@@ -42,7 +42,17 @@ third-party binaries, nothing that would force the repo private.
 | `tools/installer/README.txt` | Standalone ZIP guide; packaging replaces `@RELEASE@`. Keep aligned with player docs; link online to files not in the archive. |
 | `tools/testing/Test-Installer.ps1` | Isolated real batch/Windows PowerShell installer checks; also included in Test-Rc. No game/hardware output. |
 
-## Status (2026-09-13) — do not overstate this
+## Status (2026-09-14) — do not overstate this
+
+**Crash feedback investigation:** owner confirmed SimHub for motion. Game
+`PlayerCollider.OnCollisionEnter` provides a passive observation candidate;
+the wheel does not consume its controller rumble. Signals now passes 2,910
+assertions including 48 synthetic collision trajectories through sampler and
+encoded UDP. No crash feature/probe extension is implemented; no profile or
+installed payload changed. Need labelled body collisions and SimHub input/output
+comparison. Coordinate periodic ownership before adding a second wheel effect:
+landing currently calls `ReleasePeriodics()` for its sole slot. Read
+`docs/research/2026-09-14-crash-feedback.md`; do not treat this as a live crash test.
 
 **0.2.5 is published and installed.** All 16 final local gates passed; the
 published ZIP/checksum and installed payloads match. Release source/tag is

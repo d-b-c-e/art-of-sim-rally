@@ -18,6 +18,8 @@
   [local deployment](LOCAL-DEPLOYMENT.md).
 - [Developer capture](DEVELOPMENT-CAPTURE.md) and [test drives](TEST-DRIVE.md):
   the optional recorder is separate from the released mod.
+- [Crash feedback investigation](research/2026-09-14-crash-feedback.md): wheel
+  effect prerequisites, SimHub motion signals and the next capture plan.
 
 ## Technical references and history
 

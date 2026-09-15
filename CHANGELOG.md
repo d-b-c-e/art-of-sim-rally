@@ -7,6 +7,12 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Offline telemetry regressions for front/side collision trajectories at multiple
+  sample rates and headings, including reset suppression. Crash feedback remains
+  under investigation; this does not add a wheel effect or alter motion signals.
+
 ### Changed
 
 - Shorter install/first-drive README and dedicated setup/build guides, including

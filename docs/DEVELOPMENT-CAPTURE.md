@@ -104,6 +104,11 @@ evidence merely because they exercise the game-origin protocol.
 
 ## Next attended capture
 
+For the owner's new crash-feedback request, the next probe extension is body
+collision observation. **This is planned, not present in schema 3.** Wheel
+contact flags alone cannot label crashes. Preserve existing capture/replay
+compatibility and follow the [collision study and capture sequence](research/2026-09-14-crash-feedback.md).
+
 Keep the existing force tune. Capture ordinary road, a jump/landing and a
 controlled slide, noting car/stage and approximate event times. Compare those
 notes/video with candidate rows and signal freshness before choosing an effect

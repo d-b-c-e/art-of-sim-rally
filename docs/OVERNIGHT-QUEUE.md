@@ -1,10 +1,21 @@
 # Overnight investigation and implementation queue
 
-**Current, 2026-09-13:** 0.2.5 is published and installed with official toolkit
+**Current, 2026-09-14:** 0.2.5 is published and installed with official toolkit
 v0.13.0. Owner accepted wheel landing vibration and the built-in 30 Hz SimHub
 comparison. The helper was rejected and removed. Remaining work is in the
 [roadmap](ROADMAP.md); full hardware checks remain pending. The dated queue
 entries below preserve earlier states and do not describe the current install.
+
+## Crash feedback follow-through — 2026-09-14
+
+FR-2 now explicitly includes wheel crash vibration and SimHub motion. Source
+investigation and 48 synthetic crash scenarios are complete; see the
+[crash study](research/2026-09-14-crash-feedback.md). Queue the separate probe's
+collision observations and a labelled front/side-impact drive before choosing
+thresholds. Coordinate periodic-effect ownership before adding crash output:
+the landing adapter currently releases all periodic slots. Compare SimHub raw
+inputs with effect/platform output before retuning motion. No crash feature is
+installed and no new hardware result is claimed.
 
 ## Landing follow-through — 2026-09-12
 

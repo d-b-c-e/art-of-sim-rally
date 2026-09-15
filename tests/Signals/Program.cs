@@ -5,7 +5,7 @@ using Dbce.Wheel.Telemetry;
 using System.Net;
 using System.Net.Sockets;
 
-static class Program
+static partial class Program
 {
     static int assertions;
     static void Check(bool ok, string message) { assertions++; if (!ok) throw new Exception(message); }
@@ -54,7 +54,7 @@ static class Program
         Vector(history.Acceleration(new Vector3(),new Vector3(20,0,0),1),0,0,0,"spawn moving");
         Vector(history.Acceleration(new Vector3(2,0,0),new Vector3(21,0,0),1.1f),10,0,0,"acceleration");
         Vector(history.Acceleration(new Vector3(4.1f,0,0),new Vector3(21,0,0),1.2f),0,0,0,"constant speed");
-        Vector(history.Acceleration(new Vector3(4.2f,0,0),new Vector3(1,0,0),1.3f),-200,0,0,"real collision preserved");
+        Vector(history.Acceleration(new Vector3(4.2f,0,0),new Vector3(1,0,0),1.3f),-200,0,0,"synthetic collision preserved");
         Vector(history.Acceleration(new Vector3(100,0,0),new Vector3(50,0,0),1.4f),0,0,0,"teleport");
         Vector(history.Acceleration(new Vector3(105,0,0),new Vector3(50,0,0),1.5f),0,0,0,"post teleport baseline");
         Vector(history.Acceleration(new Vector3(106,0,0),new Vector3(10,0,0),2),0,0,0,"long gap");
@@ -73,7 +73,7 @@ static class Program
     }
     static int Main()
     {
-        try { Travel(); Projection(); Motion(); PacketLoopback(); Console.WriteLine(JsonSerializer.Serialize(new{status="passed",assertions,scope="actual sampling math and encoded UDP; no Unity drive or motion hardware"})); return 0; }
+        try { Travel(); Projection(); Motion(); PacketLoopback(); CrashTelemetry(); Console.WriteLine(JsonSerializer.Serialize(new{status="passed",assertions,crashScenarios,scope="actual sampling math and encoded UDP; synthetic crash scenarios, no Unity drive or motion hardware"})); return 0; }
         catch(Exception ex) { Console.Error.WriteLine(ex); return 1; }
     }
     static void PacketLoopback()
