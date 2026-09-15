@@ -1,5 +1,11 @@
 # Crash feedback investigation — 2026-09-14
 
+**Follow-through 2026-09-15:** the owner crash baseline is preserved; probe
+0.2.5.4 now implements body-collision recording and is installed after all local
+gates. The first baseline used the older schema-3 probe. See
+[new evidence, developer fixes and remaining live checks](../reviews/2026-09-15-crash-capture.md).
+The original investigation below records what was known before that drive.
+
 The owner wants more noticeable crashes in both wheel FFB and the motion
 platform, and confirmed the platform uses **SimHub**. This extends FR-2.
 The wheel has no dedicated crash effect yet. A useful collision callback exists

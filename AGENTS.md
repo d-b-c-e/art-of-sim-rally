@@ -54,6 +54,9 @@ the other hooks. Live collision callbacks and SimHub input/output comparison
 remain pending. KI-34 fixes post-reset false landing analysis; KI-35 fixes corpus
 index replacement using `[NullString]::Value`. Full validation/deployment receipts:
 `docs/reviews/2026-09-15-crash-capture.md`. Shipping 0.2.5 remains unchanged.
+All 16 rc.11 local gates passed; exact probe 0.2.5.4 installed with old-probe
+backup and 13 game/mod/settings hashes preserved. Game closed, no recording.
+The rc.11 ZIP was packaging validation only and was not deployed or published.
 
 **Earlier crash investigation, 2026-09-14:** owner confirmed SimHub for motion. Game
 `PlayerCollider.OnCollisionEnter` provides a passive observation candidate;

@@ -97,9 +97,23 @@ Two developer defects found and fixed:
 
 ## Validation and next step
 
-Targeted recorder tests (74 assertions), collision protocol tests, signal tests,
-CLR hook checks and actual-Mono collision attachment pass. Full local RC gate
-and the exact probe deployment receipt are recorded below when complete.
+**All 16 local gates passed**, including 43 Python tests, 74 recorder assertions,
+18 CLR hook assertions, 4 actual-Mono collision-attachment assertions and both
+real corpus cases (215,926 replay assertions). The known Norway jump still
+produces exactly one production landing at row 4230 (9,044 landing assertions).
+
+- [Automated gate](../../results/rc-0.2.5-rc.11-104bedc73e144db98e651c4c22d27263/automated.json),
+  completed 2026-09-15 04:47 UTC, source
+  `fb9f069da00b6ba46c7f52be6c94acbf73a42340`.
+- Packaging validation only: `0.2.5-rc.11`, ZIP SHA-256
+  `416BCB78C21E64092D5E19D9ACC45A47BC122B5507AF971C755B28F7B23D57F1`.
+  This ZIP is not deployed or published; production game behavior did not change.
+- **Separate probe 0.2.5.4 installed**, exact gated DLL SHA-256
+  `4FBACE0242834376CEA8903AAA0A08C86D3A6EBA83E63AF0659BD92518916EE7`.
+  [Installation receipt and old-probe backup](../../results/crash-probe-install-0a257bd79c1e403882130196c3d7421d/receipt.json).
+  All 13 preserved game/mod/settings files match their before hashes. Game was
+  closed; no game was launched and no recorder is running. SimHub was not edited.
+- All 86 checked local document links resolved before the receipt additions.
 
 The next short drive can establish live collision ordering and correlate these
 values with the motion spikes. Then implement an independent wheel crash cue

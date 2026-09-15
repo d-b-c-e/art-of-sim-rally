@@ -21,6 +21,22 @@ The accepted built-in SimHub profile and gains are unchanged.
 - Official toolkit v0.13.0 replaces the local pin with byte-identical RC8 binaries. No SimHub helper or recorder is shipped.
 - [Owner acceptance and release limits](reviews/2026-09-13-release-0.2.5.md): overall RC8 acceptance authorizes publication; full attended matrix and a separate final-artifact drive remain unverified.
 
+## Crash recorder update — 2026-09-15 UTC
+
+The separately installed developer probe is now **0.2.5.4/schema 4**, ready to
+observe body collisions during the next explicitly started recording. Stable
+0.2.5 and the installed settings remain unchanged. No recorder is shipped in the
+release package; nothing is recording and the game is closed.
+
+- Probe SHA-256: `4FBACE0242834376CEA8903AAA0A08C86D3A6EBA83E63AF0659BD92518916EE7`.
+- [Install receipt and 0.2.5.3 backup](../results/crash-probe-install-0a257bd79c1e403882130196c3d7421d/receipt.json):
+  exact gated DLL/manifest installed, 13 game/mod/settings hashes preserved.
+- [All 16 local gates](../results/rc-0.2.5-rc.11-104bedc73e144db98e651c4c22d27263/automated.json),
+  including both real drive cases and actual-Mono collision hook attachment.
+- The local rc.11 ZIP is packaging validation only, not a changed game build to
+  deploy. No public release or SimHub profile change.
+- [Crash baseline, fixes and live-test limits](reviews/2026-09-15-crash-capture.md).
+
 ## Documentation/installer audit — no game deployment
 
 The 2026-09-13 audit validates revised installer/readme packaging as local
