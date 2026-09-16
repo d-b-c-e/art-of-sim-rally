@@ -95,6 +95,10 @@ including the same single landing at row 4230 and zero allocation in the warmed
 timing observer, 19 replay protocol tests and warnings-as-errors solution build.
 Full candidate validation and exact installation identity are recorded in
 [LOCAL-DEPLOYMENT](../LOCAL-DEPLOYMENT.md), after the source is frozen.
+The first full attempt correctly stopped at the consumer's pinned native-version
+assertion (600). After reviewing the logging-only source delta and unchanged
+41-export API, the expected version/diagnostic text was updated to 601/0.6.1;
+the API-binding assertions remain intact. That failed run is retained separately.
 
 ## Next attended comparison
 

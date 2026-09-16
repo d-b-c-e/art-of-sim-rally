@@ -159,10 +159,11 @@ static class Program
         Check(NativeDiagnostics.Describe("UnityForceFeedback.dll").Contains("not loaded"), "inspection loaded native DLL");
         Check(WheelFfbNative.Load(directory, "UnityForceFeedback.dll"), WheelFfbNative.LastError);
         Check(!WheelFfbNative.Ready, "binding unexpectedly acquired a device");
-        Check(WheelFfbNative.Version == 600, "native component changed; review candidate ABI");
+        // 0.6.1 changes force-trace policy only; the 41-export burst ABI is unchanged.
+        Check(WheelFfbNative.Version == 601, "native component changed; review candidate ABI");
         Check(WheelFfbNative.SupportsPeriodicBursts, "finite periodic burst API is unavailable");
         string description = NativeDiagnostics.Describe("UnityForceFeedback.dll");
-        Check(description.Contains("0.6.0"), "native version decoding");
+        Check(description.Contains("0.6.1"), "native version decoding");
         Check(description.Contains(NativeDiagnostics.FileHash(source)), "mapped DLL hash");
         Check(description.Contains(alias), "mapped DLL path");
         Check(NativeDiagnostics.Describe("kernel32.dll").Contains("export missing"), "missing-export fallback");
