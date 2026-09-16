@@ -1,6 +1,6 @@
 # Roadmap
 
-Status reviewed 2026-09-15 UTC after the first crash baseline.
+Status reviewed 2026-09-16 after crash candidate implementation.
 **0.2.5 is published with wheel landing vibration enabled by default at strength 5.**
 See [release evidence](reviews/2026-09-13-release-0.2.5.md) and
 [installed identity](LOCAL-DEPLOYMENT.md).
@@ -24,10 +24,11 @@ has a collision callback suitable for passive observation; 48 new synthetic
 crash scenarios pass through the production telemetry sampler and encoded UDP.
 The owner crash drive is preserved and replays exactly: a roughly 145→4 km/h
 head-on event produces almost zero steering output. Probe 0.2.5.4 now adds body
-collision observations; its live drive check is pending. No crash effect or
-motion change is implemented yet. Next: correlate collision entries with motion,
-shared landing/crash periodic ownership, independent wheel crash
-vibration and a measured SimHub input/output comparison. See
+collision observations; its live drive check is pending. The 0.2.6 candidate
+implements independent opt-in wheel crash vibration and shared landing/crash
+periodic ownership. [Candidate and test plan](CRASH-EFFECTS.md).
+Next: correlate live collision entries, evaluate wheel timing/feel and compare
+SimHub input/output. No motion signal/profile change is justified yet. See
 [findings and validation sequence](research/2026-09-14-crash-feedback.md) and
 [drive evidence](reviews/2026-09-15-crash-capture.md).
 
@@ -45,12 +46,18 @@ vibration and a measured SimHub input/output comparison. See
    separate Nexus camera-mod combination still need scoped testing.
 5. **Performance:** diagnose reported hitches with evidence; move UDP sending to
    a bounded worker only if measurement justifies that transport change.
+   New 0.2.5 Haapajarvi first-five-second report awaits its support file (KI-5).
 6. **Distribution/tooling:** Nexus packaging and richer regression captures;
    full deterministic Unity input playback remains a separate design effort.
 
 Already implemented: camera-key remapping, direct analog handbrake input,
 strict USB identity/recovery, diagnostics, lifecycle fixes and font scaling.
 These are validation/support work rather than missing features.
+
+**Landing timing/strength:** investigate the Haapajarvi slightly-early report
+(KI-36) before changing first-contact timing. The requested optional 30–40 wheel
+strength is queued; retain the accepted default 5/cap 20 meanwhile. The owner's
+ButtKicker clipping is a separate device/output observation.
 
 The four post-0.2.4 [overnight items](OVERNIGHT-QUEUE.md) are implemented with
 offline coverage: USB identity/idle recovery, retained diagnostic summaries,

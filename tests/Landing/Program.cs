@@ -95,9 +95,9 @@ static class Program
     {
         foreach(string interrupt in new[]{"none","pause","focus","disable","ffb-off","not-ready","restart","missing-body","missing-wheel","car-change","wall-gap"})
         {
-            LandingController.Shutdown();Mod.Enabled=true;Mod.Settings=new();FfbNative.Ready=true;
+            ImpactController.Shutdown();Mod.Enabled=true;Mod.Settings=new();FfbNative.Ready=true;
             UnityEngine.Application.isFocused=true;GameState.IsRestarting=false;GameState.IsDriving=false;
-            LandingController.Tick();GameState.IsDriving=true;
+            ImpactController.Tick();GameState.IsDriving=true;
             int before=Native.Plays;var car=new CarDynamics();
             for(int i=0;i<75;i++)
             {
@@ -119,7 +119,7 @@ static class Program
                     if(interrupt=="missing-body")car=new CarDynamics{body=null};
                     if(interrupt=="missing-wheel")car.axles.rearAxle.rightWheel=null;
                 }
-                LandingController.Tick();LandingController.Observe(car);
+                ImpactController.Tick();LandingController.Observe(car);
                 if(i==49)
                 {
                     GameState.IsDriving=true;GameState.IsRestarting=false;UnityEngine.Application.isFocused=true;
@@ -131,7 +131,7 @@ static class Program
             Check(Native.Plays-before==(interrupt=="none"?1:0),"game lifecycle triggered stale/missing cue: "+interrupt);
         }
         // Interrupt an already active burst, not just its detector history.
-        LandingController.Shutdown();
+        ImpactController.Shutdown();
         var output=new Output();var feedback=new LandingFeedback(output);feedback.Prepare(true,true,true);feedback.Trigger(1,5,0);
         feedback.Shutdown();Check(output.Stops==1&&output.Releases==1,"shutdown left active effect");
     }
@@ -159,7 +159,7 @@ static class Program
     }
     static int Main(string[] args)
     {
-        try{Detector();Delivery();GameIntegration();object capture=args.Length==1?Capture(args[0]):null;
+        try{Detector();Delivery();GameIntegration();assertions+=CrashTests.Run();object capture=args.Length==1?Capture(args[0]):null;
             Console.WriteLine(JsonSerializer.Serialize(new{status="passed",assertions,capture}));return 0;}
         catch(Exception e){Console.Error.WriteLine(e);return 1;}
     }

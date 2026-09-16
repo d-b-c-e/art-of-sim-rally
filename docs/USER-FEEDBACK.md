@@ -1,11 +1,53 @@
 # User feedback and support follow-up
 
-**Current, 2026-09-15:** 0.2.5 is published/installed, including default-on wheel
+**Current, 2026-09-16:** 0.2.5 is published, including default-on wheel
 landing vibration and clearer/scaling-aware settings help. The owner accepted
 the built-in SimHub comparison and observed clipping. Current setup answers
 are in [SETUP.md](SETUP.md) and [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 Dated reports and unsent drafts below preserve their original context; replace
 old version references before sending them. No new public reply was sent.
+
+## 0.2.5 T300/TSS follow-up — received 2026-09-16
+
+Reporter says steering feels better than ever, different cars feel distinct,
+and the handbrake now works perfectly. Remaining questions/reports:
+
+- Finland Haapajarvi landing vibration at 20 feels just before visible touchdown
+  (KI-36). Requests a 30–40 option and crash vibration.
+- Slight stutter in the first five seconds on that track, uncertain whether the
+  unmodified game also does it (KI-5). Desktop log created but not received.
+- Asks analog versus digital handbrake and how to send the file; offers a donation.
+
+Keep these scoped to the reported build/track. Successful handbrake operation
+does not yet establish axis selection or intermediate travel. The saved Norway
+jump shows contact one physics step before recorded compression, a useful lead
+for KI-36, not a diagnosis of this report. Owner subsequently authorized crash
+implementation; the optional 0.2.6 candidate is documented in
+[CRASH-EFFECTS](CRASH-EFFECTS.md). SimHub motion changes require input/output evidence.
+
+**Unsent reply draft:**
+
+Really glad 0.2.5 feels good, and great to hear the handbrake is working!
+
+1. The landing effect currently starts at the first wheel contact. That may
+   explain the slightly early feel; I've logged it for investigation. A short
+   clip would help compare it with visible touchdown. I've also built a separate
+   crash-vibration candidate for testing; it isn't in the public download yet.
+   I've noted the request for more landing strength too.
+2. Please open https://github.com/d-b-c-e/art-of-sim-rally/issues/new and drag your
+   Desktop support .txt into the description. Include the car and whether the
+   early stutter repeats after restarting Haapajarvi. That gives me something
+   concrete to check before attributing it to the mod. Attachments there are public.
+3. If you've assigned the TSS **axis** in Wheel input (direct), it is analog:
+   partial pulls pass values between 0 and 1 into the game's existing handbrake
+   calculation. A button binding is on/off. Check the live Handbrake value at
+   half pull to confirm which you're using.
+
+And thank you for the kind offer!
+
+Attachment instructions checked against
+[GitHub's documentation](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files).
+No PayPal address has been provided for inclusion in a reply.
 
 ## Stronger crashes — owner request, 2026-09-14
 

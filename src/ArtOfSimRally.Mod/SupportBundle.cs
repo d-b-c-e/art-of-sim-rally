@@ -56,7 +56,7 @@ namespace ArtOfSimRally.Mod
                 var sb = new StringBuilder();
                 WriteHeader(sb);
                 WriteSettings(sb);
-                LandingController.AppendSupport(sb);
+                ImpactController.AppendSupport(sb);
                 Main.WriteLoadedMods(sb);
                 FrameHealth.Current.Append(sb);
                 FrameHealthPersistence.AppendPrevious(sb);

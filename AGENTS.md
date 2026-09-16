@@ -42,7 +42,21 @@ third-party binaries, nothing that would force the repo private.
 | `tools/installer/README.txt` | Standalone ZIP guide; packaging replaces `@RELEASE@`. Keep aligned with player docs; link online to files not in the archive. |
 | `tools/testing/Test-Installer.ps1` | Isolated real batch/Windows PowerShell installer checks; also included in Test-Rc. No game/hardware output. |
 
-## Status (2026-09-15) — do not overstate this
+## Status (2026-09-16) — do not overstate this
+
+**0.2.6 crash candidate:** owner authorized implementing a wheel cue using the
+saved crash baseline. `CrashController` passively observes active-player body
+contacts; `CrashSignal` uses contact-normal speed with provisional thresholds.
+`ImpactController`/`ImpactMixer` exclusively own one finite periodic slot shared
+with landing (strongest wins; crash wins ties). Never independently release native
+periodics from either feature. Crash defaults off/strength 5/cap 20. Landing
+detector/strength, steering curve and motion telemetry remain unchanged. Live
+schema-4 collision/feel and SimHub input/output comparisons are pending. Read
+`docs/CRASH-EFFECTS.md`, `docs/reviews/2026-09-16-feedback-crash-candidate.md` and
+the current `docs/LOCAL-DEPLOYMENT.md` receipt for validation/deployment status.
+Public stable remains 0.2.5. New reporter landing timing is KI-36; mild Haapajarvi
+startup hitch extends KI-5. TSS works per reporter, but proportional axis travel
+is not specifically confirmed. No reporter support file received or reply sent.
 
 **First crash baseline:** 2,947 owner-driven force/motion rows replay exactly;
 multiple sharp decelerations include a ~145→4 km/h event with nearly zero wheel

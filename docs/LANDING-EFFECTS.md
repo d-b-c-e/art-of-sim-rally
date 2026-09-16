@@ -4,6 +4,11 @@ For the controls, see [steering force and landing vibration](SETUP.md#steering-f
 For a ButtKicker, use [SimHub setup](SETUP.md#simhub-and-buttkicker); the wheel
 landing setting does not control it.
 
+0.2.6 candidate: landing detection, waveform and strength are unchanged, but
+landing now shares a single native periodic effect with optional
+[crash vibration](CRASH-EFFECTS.md); the stronger cue wins instead of stacking.
+The Haapajarvi early-timing report is tracked as KI-36 in [known issues](KNOWN-ISSUES.md).
+
 Implemented on 2026-09-12 and accepted for the 0.2.5 release by the owner.
 It defaults **on at strength 5** for new settings and older files without landing
 fields. Explicit saved opt-outs and custom strengths are preserved. It requires

@@ -34,11 +34,11 @@ namespace ArtOfSimRally.Mod
                 Shutdown(); Status = enabled ? "Waiting for wheel force feedback" : "Off"; return;
             }
             if (_slot >= 0 || _attempted) return;
-            Status = "Pause to prepare landing vibration";
+            Status = "Pause to prepare impact vibration";
             if (!idle) return;
             _attempted = true;
             _slot = _output.Create(Frequency, DurationMs);
-            Status = _slot >= 0 ? "Ready" : "Vibration setup unavailable; toggle Landing vibration to retry or create a support file";
+            Status = _slot >= 0 ? "Ready" : "Vibration setup unavailable; toggle both vibration features off, then on to retry or create a support file";
         }
 
         public bool Trigger(float intensity, float strengthPercent, double now)
@@ -53,14 +53,14 @@ namespace ArtOfSimRally.Mod
             if (accepted)
             {
                 Accepted++; _active = true; _endsAt = now + DurationMs / 1000.0;
-                Status = "Ready (last landing accepted by wheel driver)";
+                Status = "Ready (last impact accepted by wheel driver)";
             }
             else
             {
                 Rejected++; Stop();
                 // Do not retry this event on a recovered device: it is stale.
                 _output.Release(); _slot = -1;
-                Status = "Wheel rejected landing vibration; toggle Landing vibration while paused to retry";
+                Status = "Wheel rejected impact vibration; toggle both vibration features off, then on while paused to retry";
             }
             return accepted;
         }
@@ -75,7 +75,7 @@ namespace ArtOfSimRally.Mod
             if (_active && _slot >= 0 && !_output.Stop(_slot))
             {
                 _output.Release(); _slot = -1;
-                Status = "Vibration stop failed; toggle Landing vibration while paused to retry";
+                Status = "Vibration stop failed; toggle both vibration features off, then on while paused to retry";
             }
             _active = false;
         }

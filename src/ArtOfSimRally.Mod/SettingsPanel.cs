@@ -131,6 +131,17 @@ namespace ArtOfSimRally.Mod
                     GUILayout.Label("      " + LandingController.Status, Wrap);
                 }
 
+                cfg.CrashEffectsEnabled = Toggle(cfg.CrashEffectsEnabled, "Crash vibration (experimental)",
+                    "A short wheel vibration for body impacts. Off by default while testing. Enable while paused; " +
+                    "does not change steering, physics or SimHub telemetry. Landing and crash vibrations do not stack.");
+                if (cfg.CrashEffectsEnabled)
+                {
+                    cfg.CrashStrength = Slider(cfg.CrashStrength, 0f, 20f, "Crash strength",
+                        "Maximum vibration as a percentage of the wheel's nominal force. Start at 5; " +
+                        "glancing impacts use less than head-on impacts. Zero disables the vibration.");
+                    GUILayout.Label("      " + CrashController.Status, Wrap);
+                }
+
                 cfg.DiagnosticLogging = Toggle(cfg.DiagnosticLogging, "Log detail for support",
                     "Enable before a short reproduction, then pause and create a support file in this session. " +
                     "Adds force traces and aggregate frame-hitch counts; switch off afterward. " +

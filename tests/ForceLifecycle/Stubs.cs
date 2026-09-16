@@ -30,6 +30,8 @@ namespace ArtOfSimRally.Mod
         public static void Observe(CarDynamics car) { Observations++; }
         public static void Reset() { Resets++; }
     }
+    internal static class CrashController { public static void Track(CarDynamics car) { } }
+    internal static class ImpactController { public static void Reset() => LandingController.Reset(); }
     internal static class FfbNative
     {
         public static bool Ready=true;

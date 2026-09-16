@@ -9,13 +9,16 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Experimental wheel crash vibration with its own strength control, off by default.
+  It uses body contact direction to distinguish head-on hits from glancing scrapes.
+  Landing and crash cues share one bounded finite effect; physical tuning is pending.
 - Separate developer probe records body collisions, including relative motion,
   impulse and contact direction, with validated schema-4 replay and legacy capture
   support. This is developer instrumentation, not a new wheel or motion effect.
 
 - Offline telemetry regressions for front/side collision trajectories at multiple
   sample rates and headings, including reset suppression. Crash feedback remains
-  under investigation; this does not add a wheel effect or alter motion signals.
+  under investigation for motion; telemetry signals remain unchanged.
 
 ### Changed
 

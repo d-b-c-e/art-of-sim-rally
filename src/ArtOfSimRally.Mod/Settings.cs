@@ -89,6 +89,10 @@ namespace ArtOfSimRally.Mod
         public bool LandingEffectsEnabled = true;
         public float LandingStrength = 5f;
 
+        // Experimental until an attended collision/feel comparison is complete.
+        public bool CrashEffectsEnabled = false;
+        public float CrashStrength = 5f;
+
         public bool DiagnosticLogging = false;
 
         // Set by the device picker in the settings panel, not drawn directly.

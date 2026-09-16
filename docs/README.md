@@ -11,6 +11,9 @@
 
 ## Development and validation
 
+- [Crash vibration candidate](CRASH-EFFECTS.md): optional wheel effect and short
+  attended comparison; not in the 0.2.5 public download.
+
 - [Building](BUILDING.md): local prerequisites and commands.
 - [Known issues](KNOWN-ISSUES.md): defects and hardware cases awaiting confirmation.
 - [Roadmap](ROADMAP.md) and [investigation queue](OVERNIGHT-QUEUE.md).

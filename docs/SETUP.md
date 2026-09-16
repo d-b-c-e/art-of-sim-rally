@@ -108,6 +108,11 @@ Steering force fades in between 3 and 12 km/h. Landing vibration requires wheel
 sine-effect support; if unsupported, steering can still work. Small hops may not
 trigger it. [Details and limitations](LANDING-EFFECTS.md).
 
+**0.2.6 candidate only:** [Crash vibration (experimental)](CRASH-EFFECTS.md)
+is off by default, with independent strength 5 and maximum 20. Enable while
+paused for testing. Landing and crash vibrations share one effect and do not
+stack. The public 0.2.5 download does not include this setting.
+
 Leave **Disable steering limiter on car spawn (legacy)** off. It is not a live
 override of the game's assist slider; use the game's assist settings instead.
 

@@ -3,6 +3,10 @@
 For tuning instructions, see [the setup guide](SETUP.md#steering-force-and-landing-vibration).
 The technical history below explains how the current force curve was established.
 
+The 0.2.6 candidate adds opt-in [crash vibration](CRASH-EFFECTS.md), with one
+shared finite output for landing/crash cues. Steering arithmetic is unchanged;
+live collision timing and feel still need testing.
+
 Version 0.2.5: [landing vibration](LANDING-EFFECTS.md) uses a separate finite
 hardware sine effect with its own strength. It defaults on at strength 5;
 saved opt-outs and custom strengths are preserved. The owner accepted RC8 wheel

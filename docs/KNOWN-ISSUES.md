@@ -21,6 +21,17 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-36 — Landing vibration may precede visible touchdown on Haapajarvi
+
+**Unverified timing; reported 2026-09-16 on 0.2.5.** T300/TSS reporter uses
+landing strength 20 and feels it slightly early on Finland Haapajarvi. No
+support file/video received yet. Current detector fires at first wheel contact;
+the saved Norway drive shows that flag one physics step before compression.
+That is a lead, not proof of this reporter's timing or a calibrated delay.
+Request original support file, car/direction and a short landing clip. Preserve
+the accepted waveform and timing until contact/load/render timing is correlated.
+See [findings](reviews/2026-09-16-feedback-crash-candidate.md).
+
 Release note 2026-09-13: owner accepted RC8 and authorized 0.2.5 with default-on
 wheel landing vibration. The built-in SimHub thud felt better; amplifier CLIP was
 observed. This overall acceptance does not resolve the individual unverified
@@ -303,6 +314,10 @@ Attended persistence remains pending. The fix ships in 0.2.4; 0.2.3 is unchanged
 
 ### KI-13 — TSS handbrake assignment is not discoverable through stock controls
 
+2026-09-16 follow-up: the same reporter says the handbrake works perfectly on
+0.2.5. Assignment is no longer reported blocked on that rig; axis versus button
+and partial travel were not specified, so analog hardware confirmation remains.
+
 **Setup; user report, TSS validation pending.** T300 RS GT + TSS user can assign
 shifts but not handbrake in the game's controls UI. Mod version was not supplied.
 The mod's direct-input panel already supports a Handbrake axis: it normalizes to
@@ -453,6 +468,11 @@ independent effect gains rather than merely a third retune on one rig's opinion.
 ---
 
 ### KI-5 — Stage start stutters and briefly locks up for 10–15 seconds
+
+2026-09-16: the 0.2.5 reporter now describes a slight hitch within the first five
+seconds on Finland Haapajarvi, unsure whether it occurs without the mod. Keep
+this milder report separate from the original duration/severity. Support file
+created but not received; no new diagnosis or resolution claimed.
 
 **Major; plausible contributor fixed, reported symptom unverified.** A Reddit
 user first noticed this with 0.2.2. It is not established whether it occurs on

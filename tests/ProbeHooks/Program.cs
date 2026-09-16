@@ -38,6 +38,13 @@ internal static class Program
                 var collisionPatches = recorder.GetField("patches", Static).GetValue(null);
                 var collisionMethods = ((System.Collections.IEnumerable)collisionPatches.GetType().GetMethod("GetPatchedMethods").Invoke(collisionPatches, null)).Cast<MethodBase>();
                 Check(collisionMethods.Any(method => method.DeclaringType.Name == "PlayerCollider" && method.Name == "OnCollisionEnter"), "collision patch missing");
+                var shippingCrash = Activator.CreateInstance(collisionPatches.GetType(), new object[] { "AOSR.ShippingCrashTest" });
+                var crashProcessor = shippingCrash.GetType().GetMethod("CreateClassProcessor").Invoke(shippingCrash,
+                    new object[] { mod.GetType("ArtOfSimRally.Mod.CrashController", true) });
+                crashProcessor.GetType().GetMethod("Patch").Invoke(crashProcessor, null);
+                var shippingCrashMethods = ((System.Collections.IEnumerable)shippingCrash.GetType().GetMethod("GetPatchedMethods").Invoke(shippingCrash, null)).Cast<MethodBase>();
+                Check(shippingCrashMethods.Any(method => method.DeclaringType.Name == "PlayerCollider" && method.Name == "OnCollisionEnter"), "shipping collision patch missing alongside probe");
+                shippingCrash.GetType().GetMethod("UnpatchAll").Invoke(shippingCrash, new object[] { "AOSR.ShippingCrashTest" });
                 var nativeType = force.GetType("Dbce.Wheel.Ffb.WheelFfbNative", true);
                 Check(!(bool)nativeType.GetProperty("Ready").GetValue(null), "unexpected hardware initialization");
                 collisionPatches.GetType().GetMethod("UnpatchAll").Invoke(collisionPatches, new object[] { "ArtOfSimRally.DevRecorder" });
