@@ -64,6 +64,23 @@ static class Program
         for(int i=1000;i<101000;i++) h.Observe(true,true,3+i*.016);
         long allocated=GC.GetAllocatedBytesForCurrentThread()-before; Check(allocated==0,"hot path allocated "+allocated);
         var summary=new StringBuilder(); h.Append(summary); Check(summary.ToString().Contains("not stage identifiers"),"segment scope omitted");
+        h=new FrameHealth();h.Observe(true,true,0);double now=0;
+        for(int i=1;i<=2000;i++)
+        {
+            now+=.01;
+            if(i==100)now+=.03;
+            if(i==600)now+=.06;
+            if(i==1600)now+=.12;
+            h.Observe(true,true,now);
+        }
+        Check(h.FirstFive.Over33Ms==1&&h.FirstFive.Over50Ms==0&&h.FirstFive.Over100Ms==0,"small first-five-second hitch was invisible");
+        Check(h.NextTen.Over33Ms==1&&h.NextTen.Over50Ms==1&&h.NextTen.Over100Ms==0,"middle window threshold counters");
+        Check(h.Later.Over33Ms==1&&h.Later.Over50Ms==1&&h.Later.Over100Ms==1,"late window threshold counters");
+        Check(h.FirstFive.Frames+h.NextTen.Frames+h.Later.Frames==h.Frames&&h.EarlyHitches==0&&h.LaterHitches==1,"detailed counters disagree with legacy totals");
+        h.Observe(true,false,now+1);h.Observe(true,true,now+100);h.Observe(true,true,now+100.07);
+        Check(h.FirstFive.Over50Ms==1&&h.FirstFive.Over100Ms==0,"pause gap counted or resume window not restarted");
+        h.Observe(false,false,now+101);h.Observe(true,true,now+102);
+        Check(h.FirstFive.Frames==0&&h.NextTen.Frames==0&&h.Later.Frames==0,"old detailed counters survive a new diagnostic window");
     }
     static int Main()
     {

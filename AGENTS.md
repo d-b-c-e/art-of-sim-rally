@@ -44,6 +44,19 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-16) — do not overstate this
 
+**Landing/startup investigation:** first-contact raycasts, visual wheel movement
+and the game's all-wheel landing cue are distinct. The saved Norway jump has
+first contact 16.67 ms before compression/all-wheel contact; no Haapajarvi
+support file or clip is available. Landing timing/gain remain unchanged.
+KI-37 removes confirmed default per-force synchronous native log writes via
+upstream local candidate `82c789117f115034a074bcb93133fefc8b955e35.clean`
+(managed 0.13.1/native 0.6.1, unpublished). Full toolkit sources/tests are upstream;
+no consumer native fork. Support now records first-5s/next-10s/later interval
+counts at 33/50/100 ms and last landing contact/compression timing. No per-frame
+disk writes or shipping recorder. See
+`docs/reviews/2026-09-16-landing-startup-investigation.md` and the latest deployment
+receipt; no reporter-specific diagnosis or attended sign-off is implied.
+
 **0.2.6 crash candidate:** owner authorized implementing a wheel cue using the
 saved crash baseline. `CrashController` passively observes active-player body
 contacts; `CrashSignal` uses contact-normal speed with provisional thresholds.
@@ -286,7 +299,11 @@ is **not** `Mz` any more — see "Findings" below and docs/FORCE-FEEDBACK.md.
   `C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\`.
   `cl.exe` is not on PATH.
 - The native DLL logs to `%LOCALAPPDATA%\ArtOfSimRally\ffb.log` **by default** —
-  logging is on unless `DBCE_FFB_LOG=0`. The old `AOSR_FFB_LOG=1` variable no
+  startup/lifecycle/errors remain on unless `DBCE_FFB_LOG=0`. The current local
+  toolkit candidate requires `DBCE_FFB_TRACE_FORCE=1` inherited before game launch
+  for per-update force samples (cached once). Published 0.2.5 still logs those
+  samples by default. This is separate from the mod's DiagnosticLogging checkbox.
+  The old `AOSR_FFB_LOG=1` variable no
   longer exists; anything still telling you to set it is stale.
 - `vcvars64.bat` prints `'vswhere.exe' is not recognized` on this machine. That
   comes from inside Microsoft's script and is harmless; only a non-zero exit

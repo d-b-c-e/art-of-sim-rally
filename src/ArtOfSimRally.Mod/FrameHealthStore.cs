@@ -57,12 +57,15 @@ namespace ArtOfSimRally.Mod
             try
             {
                 if (utc.Kind != DateTimeKind.Utc || utc < _started) throw new InvalidDataException("Session clock moved backwards");
-                var xml = new XElement("frameHealth", new XAttribute("schema", 1),
+                var xml = new XElement("frameHealth", new XAttribute("schema", 2),
                     new XAttribute("session", _session), new XAttribute("build", _identity),
                     new XAttribute("startedUtc", _started.ToString("o")), new XAttribute("capturedUtc", utc.ToString("o")),
                     new XAttribute("boundary", shutdown ? "exit" : "idle"),
                     new XAttribute("frames", health.Frames), new XAttribute("earlyHitches", health.EarlyHitches),
                     new XAttribute("laterHitches", health.LaterHitches), new XAttribute("maximumMs", health.MaximumMs));
+                WriteWindow(xml,"first5",health.FirstFive);
+                WriteWindow(xml,"next10",health.NextTen);
+                WriteWindow(xml,"later",health.Later);
                 string content = xml.ToString(SaveOptions.DisableFormatting);
                 if (Encoding.UTF8.GetByteCount(content) > MaxBytes) throw new InvalidDataException("Snapshot exceeds size limit");
                 Directory.CreateDirectory(Path.GetDirectoryName(_path));
@@ -77,7 +80,8 @@ namespace ArtOfSimRally.Mod
 
         private static void Validate(XElement x, DateTime now)
         {
-            if (x.Name != "frameHealth" || (int?)x.Attribute("schema") != 1 || x.HasElements || !string.IsNullOrWhiteSpace(x.Value))
+            int? schema=(int?)x.Attribute("schema");
+            if (x.Name != "frameHealth" || (schema != 1 && schema != 2) || x.HasElements || !string.IsNullOrWhiteSpace(x.Value))
                 throw new InvalidDataException("Unknown diagnostic format");
             if (!Guid.TryParse((string)x.Attribute("session"), out var session) || session == Guid.Empty ||
                 string.IsNullOrEmpty((string)x.Attribute("build")) || ((string)x.Attribute("build")).Length > 256)
@@ -96,6 +100,34 @@ namespace ArtOfSimRally.Mod
             if (frames <= 0 || early < 0 || later < 0 || early > frames || later > frames - early ||
                 double.IsNaN(maximum) || double.IsInfinity(maximum) || maximum < 0)
                 throw new InvalidDataException("Invalid frame counters");
+            if (schema==2)
+            {
+                var first=ReadWindow(x,"first5"); var next=ReadWindow(x,"next10"); var late=ReadWindow(x,"later");
+                if (first.Frames>frames || next.Frames>frames-first.Frames || late.Frames!=frames-first.Frames-next.Frames ||
+                    first.Over100Ms>early || next.Over100Ms!=early-first.Over100Ms || late.Over100Ms!=later ||
+                    maximum!=Math.Max(first.MaximumMs,Math.Max(next.MaximumMs,late.MaximumMs)))
+                    throw new InvalidDataException("Window counters disagree with session totals");
+            }
+        }
+
+        private static void WriteWindow(XElement x,string prefix,FrameHealth.Window w)
+        {
+            x.Add(new XAttribute(prefix+"Frames",w.Frames),new XAttribute(prefix+"MaximumMs",w.MaximumMs),
+                new XAttribute(prefix+"Over33Ms",w.Over33Ms),new XAttribute(prefix+"Over50Ms",w.Over50Ms),
+                new XAttribute(prefix+"Over100Ms",w.Over100Ms));
+        }
+        private static FrameHealth.Window ReadWindow(XElement x,string prefix)
+        {
+            var w=new FrameHealth.Window { Frames=(long?)x.Attribute(prefix+"Frames")??-1,
+                MaximumMs=(double?)x.Attribute(prefix+"MaximumMs")??double.NaN,
+                Over33Ms=(long?)x.Attribute(prefix+"Over33Ms")??-1, Over50Ms=(long?)x.Attribute(prefix+"Over50Ms")??-1,
+                Over100Ms=(long?)x.Attribute(prefix+"Over100Ms")??-1 };
+            if (w.Frames<0 || w.Over100Ms<0 || w.Over50Ms<w.Over100Ms || w.Over33Ms<w.Over50Ms || w.Frames<w.Over33Ms ||
+                double.IsNaN(w.MaximumMs) || double.IsInfinity(w.MaximumMs) || w.MaximumMs<0 ||
+                (w.Frames==0 && w.MaximumMs!=0) || (w.Over100Ms>0 && w.MaximumMs<100) ||
+                (w.Over50Ms>0 && w.MaximumMs<50) || (w.Over33Ms>0 && w.MaximumMs<1000.0/30))
+                throw new InvalidDataException("Invalid detailed frame counters");
+            return w;
         }
 
         internal void AppendPrevious(StringBuilder output)
@@ -103,8 +135,12 @@ namespace ArtOfSimRally.Mod
             output.AppendLine("--- previous session frame health ---");
             output.AppendLine(_previousStatus);
             if (_previous != null)
+            {
                 foreach (var attribute in _previous.Attributes())
                     output.AppendLine(attribute.Name + ": " + attribute.Value);
+                if ((int?)_previous.Attribute("schema")==1)
+                    output.AppendLine("Legacy snapshot: 33/50ms and first-five-second counts were not recorded.");
+            }
             if (LastError != null) output.AppendLine("Current snapshot retention: " + LastError);
             output.AppendLine("Aggregates do not identify a stutter cause. No per-frame timeline is retained.");
             output.AppendLine();

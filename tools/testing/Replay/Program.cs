@@ -70,6 +70,7 @@ static class Program
             forceRows.Add(p);
         }
         var timings = new List<float>(); var first15 = new List<float>(); var later = new List<float>();
+        var intervalHealth = new FrameHealth();
         int previousFrame = -1; float previousTime = -1, segmentStart = -1; bool wasDriving = false;
         foreach (string line in frames.Skip(1))
         {
@@ -79,6 +80,7 @@ static class Program
             Check((previousFrame == -1 || p[0] == previousFrame + 1) && p[1] >= previousTime, "missing/nonmonotonic frames");
             Check((p[3] == 0 || p[3] == 1) && (p[4] == 0 || p[4] == 1), "invalid frame flags");
             previousFrame = (int)p[0]; previousTime = p[1];
+            intervalHealth.Observe(true, p[3] == 1, p[1]);
             if (p[3] == 1)
             {
                 if (!wasDriving) segmentStart = p[1];
@@ -113,12 +115,20 @@ static class Program
             first15Seconds = new { frames = first15.Count, maxFrameMs = first15.Count == 0 ? 0 : first15.Max(), hitchesOver100Ms = first15.Count(t => t > 100) },
             after15Seconds = new { frames = later.Count, maxFrameMs = later.Count == 0 ? 0 : later.Max(), hitchesOver100Ms = later.Count(t => t > 100) },
             hitchesOver100Ms = timings.Count(t => t > 100),
+            frameIntervalWindows = new {
+                first5 = Window(intervalHealth.FirstFive), next10 = Window(intervalHealth.NextTen), later = Window(intervalHealth.Later),
+                scope = "Realtime timestamp intervals between consecutive driving frames; excludes entry/resume intervals. Capture lacks focus/stage IDs; segment starts are not necessarily cold stage starts. Counts overlap and depend on frame cap."
+            },
             nativeDelivery = new { attempted, rejected, physicalTorqueVerified = false },
-            periodicDelivery = new { observed = false, reason = "Separate landing sine bursts are not in the steering CSV; inspect support event counters and attended results." },
+            periodicDelivery = new { observed = false, reason = "Separate landing/crash sine bursts are not in the steering CSV; inspect support event counters and attended results." },
             scope = "steering force arithmetic and timing evidence; no game or hardware playback"
         };
     }
 
+    static object Window(FrameHealth.Window window) => new {
+        frames = window.Frames, maximumMs = window.MaximumMs,
+        atLeast33Ms = window.Over33Ms, atLeast50Ms = window.Over50Ms, atLeast100Ms = window.Over100Ms
+    };
 
     static int Main(string[] args)
     {

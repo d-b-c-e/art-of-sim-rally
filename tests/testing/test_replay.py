@@ -67,6 +67,21 @@ class ReplayTests(unittest.TestCase):
         self.assertFalse(result["stateful"])
         self.assertFalse(result["signals"]["available"])
 
+    def test_frame_windows_exclude_entry_and_pause_gaps(self):
+        samples = [(0, 0), (10, 1), (10.04, 1), (10.06, 1), (20, 0), (40, 1), (40.07, 1)]
+        self.frames = [self.frames[0]] + [
+            f"{100+i},{time},0.016,{driving},0,0,0,0,0,0"
+            for i, (time, driving) in enumerate(samples)]
+        self.write()
+        windows = self.run_replay()["detail"]["frameIntervalWindows"]
+        self.assertEqual(windows["first5"]["frames"], 3)
+        self.assertAlmostEqual(windows["first5"]["maximumMs"], 70, delta=.01)
+        self.assertEqual(windows["first5"]["atLeast33Ms"], 2)
+        self.assertEqual(windows["first5"]["atLeast50Ms"], 1)
+        self.assertEqual(windows["first5"]["atLeast100Ms"], 0)
+        self.assertEqual(windows["next10"]["frames"], 0)
+        self.assertEqual(windows["later"]["frames"], 0)
+
     def test_missing_frame_rejected(self):
         self.frames[2] = self.frames[2].replace("101,", "102,", 1); self.write()
         self.assertIn("missing/nonmonotonic frames", self.run_replay(expected=1))

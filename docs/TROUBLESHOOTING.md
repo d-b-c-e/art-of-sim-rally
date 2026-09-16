@@ -55,6 +55,22 @@ now waits for you to pause; file reading/writing can itself stall the main threa
 Recent log windows are explicitly bounded/truncated, and the bundle lists loaded
 mods plus cached input values. Export soon after the event to retain useful tails.
 
+The **0.2.6 test candidate** additionally counts 33/50/100 ms intervals in the
+first five seconds, next ten seconds and later driving. Counts overlap and depend
+on your frame cap; a 30 fps cap naturally produces many 33 ms frames. These are
+clues to when a slowdown occurred, not a diagnosis. For early landing reports,
+the same support toggle adds last-event contact/compression timing. A short video
+is still needed to compare with visible touchdown. Enable support logging before
+the run, reproduce once, then pause and export before quitting.
+
+The candidate's native toolkit no longer traces every steering-force update by
+default; initialization and errors are still logged. Advanced native tracing
+requires `DBCE_FFB_TRACE_FORCE=1` in the game process environment before launch;
+it is separate from **Log detail for support**, and is not needed for this normal
+support procedure. It adds synchronous disk I/O, so leave it off for performance
+comparisons. Restart to change it; an already-running Steam client does not inherit
+variables set in another shell. `DBCE_FFB_LOG=0` remains the master native-log switch.
+
 ## Fanatec wheels (CSL DD, DD Pro, ClubSport DD, GT DD; PC and compatibility modes)
 
 Fanatec bases present to Windows as **two devices with the same name**,

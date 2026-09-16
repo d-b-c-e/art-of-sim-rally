@@ -8,6 +8,11 @@ landing setting does not control it.
 landing now shares a single native periodic effect with optional
 [crash vibration](CRASH-EFFECTS.md); the stronger cue wins instead of stacking.
 The Haapajarvi early-timing report is tracked as KI-36 in [known issues](KNOWN-ISSUES.md).
+With **Log detail for support** enabled, the candidate retains one landing's
+first-contact mask, compression fraction and time to compression/all-wheel contact.
+This adds no delay or force change. The saved Norway jump shows a 16.67 ms gap;
+it does not establish the reported track's visual timing. See the
+[investigation and comparison plan](reviews/2026-09-16-landing-startup-investigation.md).
 
 Implemented on 2026-09-12 and accepted for the 0.2.5 release by the owner.
 It defaults **on at strength 5** for new settings and older files without landing

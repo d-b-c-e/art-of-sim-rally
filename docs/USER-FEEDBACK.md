@@ -27,12 +27,18 @@ for KI-36, not a diagnosis of this report. Owner subsequently authorized crash
 implementation; the optional 0.2.6 candidate is documented in
 [CRASH-EFFECTS](CRASH-EFFECTS.md). SimHub motion changes require input/output evidence.
 
+Investigation update: the game separates raycast contact, wheel rendering and its
+own all-wheel landing cue. One saved jump shows a 16.67 ms gap, but the reported
+track remains unobserved. A local toolkit fix removes default per-force disk writes;
+support now measures smaller frame spikes and contact/compression timing. No landing
+delay or gain change, no proven startup-stutter resolution, no public update yet.
+
 **Unsent reply draft:**
 
 Really glad 0.2.5 feels good, and great to hear the handbrake is working!
 
 1. The landing effect currently starts at the first wheel contact. That may
-   explain the slightly early feel; I've logged it for investigation. A short
+   explain the slightly early feel; I'm checking contact versus visual timing. A short
    clip would help compare it with visible touchdown. I've also built a separate
    crash-vibration candidate for testing; it isn't in the public download yet.
    I've noted the request for more landing strength too.
@@ -40,6 +46,8 @@ Really glad 0.2.5 feels good, and great to hear the handbrake is working!
    Desktop support .txt into the description. Include the car and whether the
    early stutter repeats after restarting Haapajarvi. That gives me something
    concrete to check before attributing it to the mod. Attachments there are public.
+   I've also removed some unnecessary force-logging disk writes in a test build,
+   though I haven't confirmed whether those caused your hitch.
 3. If you've assigned the TSS **axis** in Wheel input (direct), it is analog:
    partial pulls pass values between 0 and 1 into the game's existing handbrake
    calculation. A button binding is on/off. Check the live Handbrake value at

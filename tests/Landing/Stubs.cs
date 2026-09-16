@@ -42,7 +42,7 @@ public class PlayerCollider
 }
 public class EventManager { public PlayerManager playerManager=new(); }
 public class PlayerManager { public UnityEngine.Rigidbody playerRigidBody; }
-public class Wheel { public bool onGroundDown=true; }
+public class Wheel { public bool onGroundDown=true; public float compression,suspensionTravel=.25f; }
 public class Axle { public Wheel leftWheel=new(),rightWheel=new(); }
 public class Axles { public Axle frontAxle=new(),rearAxle=new(); }
 public class CarDynamics

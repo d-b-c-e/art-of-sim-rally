@@ -8,6 +8,17 @@ Nothing in this document is inferred from forum posts. Where something is
 Re-deriving these costs an hour of assembly spelunking, so treat this file as
 the source of truth and don't repeat the work.
 
+## Landing timing addendum — 2026-09-16
+
+Build 17584229 updates wheel contact in `Wheel.FixedUpdate` (raycast length
+`suspensionTravel + radiusLoaded`) and visible wheel movement separately in
+`Wheel.Update`/`CalcWheelMovement`. `PlayerVibrator.UpdateAirborne` waits for
+`CarDynamics.AllWheelsOnGround()` for the stock landing cue. These observations
+do not establish visual timing or wheel-driver latency. The saved Norway jump
+has first contact 16.67 ms before recorded compression/all-wheel contact;
+the T300/Haapajarvi early report remains unconfirmed. See the
+[investigation](reviews/2026-09-16-landing-startup-investigation.md).
+
 ## Menu quit addendum — 2026-09-10 local time
 
 **2026-09-11 follow-up:** production now intercepts menu Quit too, so output

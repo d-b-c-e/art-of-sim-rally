@@ -20,6 +20,15 @@ Haapajarvi support file and short landing clip for KI-5/KI-36. Investigate
 first-contact versus suspension-load timing before changing landing delay or
 raising the cap to 30–40. Reply is drafted in USER-FEEDBACK; nothing sent.
 
+Investigation now confirms default native per-force disk writes (KI-37), removed
+in the local toolkit candidate. Frame counters now detect smaller intervals and
+separate the first five seconds; one last landing's contact/compression timing is
+available in support. Both owner captures replay, with no first-five-second hitch
+and unchanged landing detection. Next: cold/restart Haapajarvi comparison, reporter
+file/video, and wheel smoke on the candidate. Public toolkit repin and attended
+checks remain prerequisites to publication. See the
+[evidence and test sequence](reviews/2026-09-16-landing-startup-investigation.md).
+
 ## Crash feedback follow-through — 2026-09-14
 
 2026-09-15 update: first owner crash baseline is preserved in the corpus. New

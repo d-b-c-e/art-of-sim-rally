@@ -53,6 +53,7 @@ namespace ArtOfSimRally.Mod
             text.AppendLine("One shared finite effect; strongest cue wins. Driver acceptance is not measured wheel motion.");
             text.AppendLine("Steering capture does not record the separate periodic output.");
             text.AppendLine();
+            LandingController.AppendSupport(text);
         }
     }
 }

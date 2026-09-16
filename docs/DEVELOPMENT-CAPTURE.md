@@ -5,6 +5,13 @@ The removable developer probe 0.2.5.4 now writes schema 4. Install and control i
 installed by the release package. The replay executable runs without Unity, the
 game or a wheel, and never emits hardware force.
 
+Replay also reports `frameIntervalWindows`: realtime intervals between consecutive
+driving frames, split into first 5s/next 10s/later, with nested >=33.33/50/100 ms
+counts. It excludes entry/resume gaps, using the production aggregate policy.
+Unlike live frame health, old captures lack focus/stage identifiers; a segment
+is not necessarily a cold start. Existing `delta_s` timing summaries remain
+unchanged. Compare frame caps and avoid treating a threshold count as a cause.
+
 **First saved drive, 2026-09-10:** [one owner-reported jump matches one detected
 landing](reviews/2026-09-10-first-jump-capture.md). All 8,974 motion rows are
 available/aligned with no detected discontinuities. KI-31's one-unit conversion

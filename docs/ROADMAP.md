@@ -1,6 +1,6 @@
 # Roadmap
 
-Status reviewed 2026-09-16 after crash candidate implementation.
+Status reviewed 2026-09-16 after crash implementation and landing/startup investigation.
 **0.2.5 is published with wheel landing vibration enabled by default at strength 5.**
 See [release evidence](reviews/2026-09-13-release-0.2.5.md) and
 [installed identity](LOCAL-DEPLOYMENT.md).
@@ -48,6 +48,9 @@ SimHub input/output. No motion signal/profile change is justified yet. See
 5. **Performance:** diagnose reported hitches with evidence; move UDP sending to
    a bounded worker only if measurement justifies that transport change.
    New 0.2.5 Haapajarvi first-five-second report awaits its support file (KI-5).
+   Local candidate removes per-update native force logging by default (KI-37);
+   finer frame counters and landing timing diagnostics are implemented. Verify
+   cold/restart behavior before claiming the reported hitch fixed.
 6. **Distribution/tooling:** Nexus packaging and richer regression captures;
    full deterministic Unity input playback remains a separate design effort.
 
@@ -59,6 +62,9 @@ These are validation/support work rather than missing features.
 (KI-36) before changing first-contact timing. The requested optional 30–40 wheel
 strength is queued; retain the accepted default 5/cap 20 meanwhile. The owner's
 ButtKicker clipping is a separate device/output observation.
+Physics contact, rendered wheel position and the stock game's all-wheel cue are
+different signals; the saved jump's 16.67 ms gap is a lead, not an automatic delay.
+See [investigation](reviews/2026-09-16-landing-startup-investigation.md).
 
 The four post-0.2.4 [overnight items](OVERNIGHT-QUEUE.md) are implemented with
 offline coverage: USB identity/idle recovery, retained diagnostic summaries,

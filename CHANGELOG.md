@@ -9,6 +9,11 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Support diagnostics count 33/50/100 ms driving intervals separately for the
+  first five seconds, next ten seconds and later driving. Prior-session summaries
+  retain these counts; old summaries remain readable.
+- Last-landing diagnostics compare first contact with suspension compression
+  and all-wheel contact, without changing when the vibration starts.
 - Experimental wheel crash vibration with its own strength control, off by default.
   It uses body contact direction to distinguish head-on hits from glancing scrapes.
   Landing and crash cues share one bounded finite effect; physical tuning is pending.
@@ -29,6 +34,9 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Native toolkit candidate stops writing every changing steering-force sample
+  to disk by default. Startup, lifecycle and error logs remain available.
+  This removes avoidable driving I/O; the reported startup hitch is not yet reproduced.
 - Developer analysis no longer reports a landing from an airborne spawn/reset.
 - Developer corpus tool can append a second recording without losing the existing index.
 - Uninstaller can remove the mod after Unity Mod Manager has been removed.

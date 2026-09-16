@@ -136,30 +136,53 @@ static class Program
         feedback.Shutdown();Check(output.Stops==1&&output.Releases==1,"shutdown left active effect");
     }
     static string Hash(string p)=>Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(p)));
+    static void TimingDiagnostics()
+    {
+        var t=new LandingTiming(); t.Start(1,8,0);
+        Check(t.Pending&&t.CompressionDelayMs<0&&t.AllWheelsDelayMs<0,"ray contact claimed compression/all-wheel timing");
+        Check(t.Observe(1.02,15,.3f)&&Math.Abs(t.CompressionDelayMs-20)<.001&&Math.Abs(t.AllWheelsDelayMs-20)<.001,"timing did not observe following sample");
+        t.Start(2,15,.2f); Check(!t.Pending&&t.CompressionDelayMs==0&&t.AllWheelsDelayMs==0,"immediate compression should not be delayed");
+        t.Start(3,8,0);t.Observe(3.05,8,0);t.Observe(3.1,0,.5f);t.Observe(3.15,8,0);t.Observe(3.21,8,.5f);
+        Check(!t.Pending&&t.CompressionDelayMs<0&&t.AllWheelsDelayMs<0,"stale/airborne compression accepted or observation unbounded");
+        foreach(double bad in new[]{double.NaN,double.PositiveInfinity,3.9,4.2})
+        {t.Start(4,8,0);t.Observe(bad,15,.5f);Check(!t.Pending&&t.CompressionDelayMs<0,"invalid/discontinuous clock fabricated timing");}
+        t.Start(5,8,0);t.Cancel();Check(t.Available&&!t.Pending&&t.Status.Contains("Interrupted"),"reset lost distinction between missing and zero delay");
+        Check(LandingTiming.Ratio(false,1,1)==0&&LandingTiming.Ratio(true,1,0)==0&&LandingTiming.Ratio(true,float.NaN,1)==0,"invalid compression used");
+        for(int i=0;i<1000;i++){t.Start(i,8,0);t.Observe(i+.02,15,.5f);}
+        long before=GC.GetAllocatedBytesForCurrentThread();
+        for(int i=1000;i<11000;i++){t.Start(i,8,0);t.Observe(i+.02,15,.5f);}
+        Check(GC.GetAllocatedBytesForCurrentThread()==before,"landing diagnostic sampling allocates");
+    }
     static object Capture(string folder)
     {
         string path=Path.Combine(folder,"signals.csv");var manifest=XDocument.Load(Path.Combine(folder,"manifest.xml"));
         Check(string.Equals(Hash(path),manifest.Root.Element("signals")?.Value,StringComparison.OrdinalIgnoreCase),"capture signals hash changed");
         var rows=File.ReadAllLines(path);string[] header=rows[0].Split(',');
-        var d=new LandingSignal();int events=0,first=-1,epoch=-1;float peak=0;
+        var d=new LandingSignal();var timing=new LandingTiming();int events=0,first=-1,epoch=-1;float peak=0;
         for(int row=1;row<rows.Length;row++)
         {
             string[] c=rows[row].Split(',');float F(string name)=>float.Parse(c[Array.IndexOf(header,name)],CultureInfo.InvariantCulture);
-            int nextEpoch=(int)F("epoch");if(nextEpoch!=epoch){d.Reset();epoch=nextEpoch;}
-            if(F("valid")==0){d.Reset();continue;}
+            int nextEpoch=(int)F("epoch");if(nextEpoch!=epoch){d.Reset();timing.Cancel();epoch=nextEpoch;}
+            if(F("valid")==0){d.Reset();timing.Cancel();continue;}
             float qx=F("qx"),qz=F("qz");
             float result=d.Observe(new LandingSample{Time=F("physics_time_s"),Contacts=(int)F("contact_mask"),
                 X=F("px_m"),Y=F("py_m"),Z=F("pz_m"),Vx=F("vx_mps"),Vy=F("vy_mps"),Vz=F("vz_mps"),UpY=1-2*(qx*qx+qz*qz)});
             Check(result>=0&&result<=1,"capture produced invalid cue");
-            if(result>0){events++;first=row-1;peak=Math.Max(peak,result);}
+            float compression=0;int mask=(int)F("contact_mask");int bit=1;
+            foreach(string wheel in new[]{"fl","fr","rl","rr"})
+            {compression=Math.Max(compression,LandingTiming.Ratio((mask&bit)!=0,F("compression_"+wheel+"_m"),F("travel_"+wheel+"_m")));bit<<=1;}
+            if(d.Discontinuous)timing.Cancel();
+            timing.Observe(F("physics_time_s"),mask,compression);
+            if(result>0){events++;first=row-1;peak=Math.Max(peak,result);timing.Start(F("physics_time_s"),mask,compression);}
         }
         Check(events==1&&first==4230,"recorded drive must match owner's one landing at row 4230");
         Check(peak==1,"recorded 10m/s descent should reach configured cue maximum");
-        return new{events,firstContactRow=first,peakCue=peak,signalsSha256=Hash(path),nativeOutput=false};
+        Check(timing.ContactMask==8&&timing.CompressionAtContact==0&&timing.CompressionDelayMs>16&&timing.CompressionDelayMs<18&&timing.AllWheelsDelayMs==timing.CompressionDelayMs,"recorded contact/load timing changed");
+        return new{events,firstContactRow=first,peakCue=peak,compressionDelayMs=timing.CompressionDelayMs,allWheelsDelayMs=timing.AllWheelsDelayMs,signalsSha256=Hash(path),nativeOutput=false};
     }
     static int Main(string[] args)
     {
-        try{Detector();Delivery();GameIntegration();assertions+=CrashTests.Run();object capture=args.Length==1?Capture(args[0]):null;
+        try{Detector();Delivery();GameIntegration();TimingDiagnostics();assertions+=CrashTests.Run();object capture=args.Length==1?Capture(args[0]):null;
             Console.WriteLine(JsonSerializer.Serialize(new{status="passed",assertions,capture}));return 0;}
         catch(Exception e){Console.Error.WriteLine(e);return 1;}
     }

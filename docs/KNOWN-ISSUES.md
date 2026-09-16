@@ -21,6 +21,19 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-37 — Native force tracing performs synchronous driving I/O by default
+
+**Confirmed implementation overhead; candidate fix, hardware retest pending.**
+Official toolkit v0.13.0 logs each changing `SetDeviceForcesXY` value through
+open/write/close on the calling physics thread, independent of the mod's support
+logging checkbox. Upstream local candidate `82c7891` (native 0.6.1) gates only
+routine force samples behind `DBCE_FFB_TRACE_FORCE=1`; lifecycle/errors remain.
+Both architectures pass production-adapter fake-output tests with identical
+force values, directions, flags and repeated-value delivery. No wheel was
+attached during upstream smoke; this is not a live FFB or stutter verification.
+The consumer's local pin is unpublished and cannot be used for a final release.
+See [investigation and evidence](reviews/2026-09-16-landing-startup-investigation.md).
+
 ### KI-36 — Landing vibration may precede visible touchdown on Haapajarvi
 
 **Unverified timing; reported 2026-09-16 on 0.2.5.** T300/TSS reporter uses
@@ -30,7 +43,13 @@ the saved Norway drive shows that flag one physics step before compression.
 That is a lead, not proof of this reporter's timing or a calibrated delay.
 Request original support file, car/direction and a short landing clip. Preserve
 the accepted waveform and timing until contact/load/render timing is correlated.
-See [findings](reviews/2026-09-16-feedback-crash-candidate.md).
+2026-09-16 investigation: game wheel contact is a physics raycast, visible wheel
+position is updated separately, and the game's own landing cue waits for all
+wheels. The Norway difference is 16.67 ms; it is not a prescribed correction.
+Candidate support diagnostics retain the last detector event's mask, compression
+fraction and time to compression/all-wheel contact. These are physics proxies,
+not video or measured actuator timing. Detection and output are unchanged.
+See [findings and reproduction plan](reviews/2026-09-16-landing-startup-investigation.md).
 
 Release note 2026-09-13: owner accepted RC8 and authorized 0.2.5 with default-on
 wheel landing vibration. The built-in SimHub thud felt better; amplifier CLIP was
@@ -473,6 +492,13 @@ independent effect gains rather than merely a third retune on one rig's opinion.
 seconds on Finland Haapajarvi, unsure whether it occurs without the mod. Keep
 this milder report separate from the original duration/severity. Support file
 created but not received; no new diagnosis or resolution claimed.
+
+Local investigation found KI-37's synchronous force trace; its candidate fix
+removes avoidable I/O without establishing this report's cause. Both saved
+owner drives have first-five-second intervals below 25 ms. One later 86 ms
+interval was missed by the old 100 ms hitch threshold. New diagnostics split
+first 5s/next 10s/later and count 33/50/100 ms intervals; cold stage, restart and
+mod-disabled comparisons on the reported track remain pending.
 
 **Major; plausible contributor fixed, reported symptom unverified.** A Reddit
 user first noticed this with 0.2.2. It is not established whether it occurs on

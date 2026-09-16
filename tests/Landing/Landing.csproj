@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../src/ArtOfSimRally.Mod/LandingSignal.cs" Link="LandingSignal.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/LandingTiming.cs" Link="LandingTiming.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/LandingFeedback.cs" Link="LandingFeedback.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/LandingController.cs" Link="LandingController.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/ImpactMixer.cs" Link="ImpactMixer.cs" />

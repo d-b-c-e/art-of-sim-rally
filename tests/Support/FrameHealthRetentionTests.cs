@@ -40,13 +40,20 @@ static class FrameHealthRetentionTests
         Check(File.ReadAllText(path)==valid,"disabled session changed retained snapshot");
         Check(Summary(new FrameHealthStore(path,"later-build",start.AddDays(31))).Contains("unavailable"),"stale snapshot accepted");
         foreach(string corrupt in new[] {"broken XML",new string('x',FrameHealthStore.MaxBytes+1),
-            valid.Replace("schema=\"1\"","schema=\"99\""), valid.Replace("frames=\"2\"","frames=\"-1\""),
+            valid.Replace("schema=\"2\"","schema=\"99\""), valid.Replace("frames=\"2\"","frames=\"-1\""),
+            valid.Replace("first5Frames=\"2\"","first5Frames=\"1\""),valid.Replace("first5Over33Ms=\"2\"","first5Over33Ms=\"0\""),
             valid.Replace("maximumMs=\"300\"","maximumMs=\"NaN\""),
             "<!DOCTYPE frameHealth [<!ENTITY x SYSTEM 'file:///must-not-be-read'>]><frameHealth>&x;</frameHealth>"})
         {
             File.WriteAllText(path,corrupt);
             Check(Summary(new FrameHealthStore(path,"new-build",start.AddHours(1))).Contains("unavailable"),"corrupt snapshot accepted: "+corrupt[..Math.Min(70,corrupt.Length)]);
         }
+        File.WriteAllText(path,valid);
+        Check(previous.Contains("schema: 2")&&previous.Contains("first5Over50Ms: 2"),"new lower-threshold data not retained");
+        var legacy=XElement.Parse(valid);legacy.SetAttributeValue("schema",1);
+        foreach(var a in legacy.Attributes().Where(a=>a.Name.LocalName.StartsWith("first5")||a.Name.LocalName.StartsWith("next10")||a.Name.LocalName.StartsWith("later")&&a.Name.LocalName!="laterHitches").ToArray())a.Remove();
+        File.WriteAllText(path,legacy.ToString());
+        Check(Summary(new FrameHealthStore(path,"new",start.AddHours(1))).Contains("Legacy snapshot"),"schema-1 history no longer readable");
         File.WriteAllText(path,valid);
         var fresh=new FrameHealthStore(path,"next-build",start.AddHours(1));
         health.Observe(true,true,0); health.Observe(true,true,.1);
