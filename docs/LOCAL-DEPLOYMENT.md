@@ -6,10 +6,32 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed stable — 0.2.5
+## Installed candidate — 0.2.6-rc.1
+
+Installed **2026-09-16 20:06 UTC**, with the game closed, after all 16 local gates.
+Optional crash vibration defaults **off**, strength 5/cap 20. Owner settings are
+byte-identical, including landing enabled/20. Public stable remains 0.2.5.
+
+- Identity: `0.2.6-rc.1+2e32256f99514db9a01f72888698726d31f4b2b9.clean`.
+- ZIP SHA-256: `23131C59FEB11409D42C8379B6B5360FA15FCB36CBFA9C2C239868D2B1660AB3`.
+- [All 16 local gates](../results/rc-0.2.6-rc.1-4036497765f24657a723521a0dfe365f/automated.json):
+  both real corpus cases, unchanged single landing, crash/overlap lifecycle,
+  actual Unity Mono shipping/probe hooks, packaging and installer checks passed.
+- [Installation receipt and 0.2.5 backup](../results/crash-rc1-install-12724d6ddcfa4bdb9a13d4cabff440ec/receipt.json):
+  six mod payloads and the second native copy match the exact package. Settings,
+  game assembly, UMM parameters and all separate probe files are preserved.
+- Developer probe remains 0.2.5.4, SHA-256
+  `4FBACE0242834376CEA8903AAA0A08C86D3A6EBA83E63AF0659BD92518916EE7`.
+  Toolkit remains v0.13.0/native 0.6.0. No game launched, no recording started.
+- Steam/Stream Deck target and SimHub profile/gains unchanged. UMM shows numeric
+  **0.2.6**; build/support identify **0.2.6-rc.1**.
+- [Crash test plan](CRASH-EFFECTS.md); live contact detection, timing, feel and
+  SimHub input/output comparison remain pending. No public publication.
+
+## Previous installed stable — 0.2.5
 
 **[0.2.5 is published](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.5)
-and installed as of 2026-09-13 03:57 UTC.** Wheel landing vibration defaults on
+and was installed on 2026-09-13 03:57 UTC.** Wheel landing vibration defaults on
 at strength 5; existing saved settings, including the owner's enabled/20, remain.
 The accepted built-in SimHub profile and gains are unchanged.
 

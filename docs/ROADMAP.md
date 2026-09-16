@@ -27,6 +27,7 @@ head-on event produces almost zero steering output. Probe 0.2.5.4 now adds body
 collision observations; its live drive check is pending. The 0.2.6 candidate
 implements independent opt-in wheel crash vibration and shared landing/crash
 periodic ownership. [Candidate and test plan](CRASH-EFFECTS.md).
+All 16 local gates passed; the exact 0.2.6-rc.1 is installed with settings kept.
 Next: correlate live collision entries, evaluate wheel timing/feel and compare
 SimHub input/output. No motion signal/profile change is justified yet. See
 [findings and validation sequence](research/2026-09-14-crash-feedback.md) and

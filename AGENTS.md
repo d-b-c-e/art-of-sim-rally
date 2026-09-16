@@ -57,6 +57,10 @@ the current `docs/LOCAL-DEPLOYMENT.md` receipt for validation/deployment status.
 Public stable remains 0.2.5. New reporter landing timing is KI-36; mild Haapajarvi
 startup hitch extends KI-5. TSS works per reporter, but proportional axis travel
 is not specifically confirmed. No reporter support file received or reply sent.
+All 16 local gates passed for **0.2.6-rc.1**, source
+`2e32256f99514db9a01f72888698726d31f4b2b9`; exact package installed 20:06 UTC.
+Settings/probe preserved, landing on/20, crash off/5. UMM shows 0.2.6; support
+shows rc.1. Game closed, no recording or SimHub changes. Attended tests pending.
 
 **First crash baseline:** 2,947 owner-driven force/motion rows replay exactly;
 multiple sharp decelerations include a ~145→4 km/h event with nearly zero wheel

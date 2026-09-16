@@ -1,8 +1,8 @@
 # 0.2.5 feedback and crash candidate — 2026-09-16
 
 The owner supplied a further T300/TSS reporter message and authorized progressing
-crash response using the saved evidence. Source work targets 0.2.6-rc.1; public
-stable remains 0.2.5. Exact gate/deployment receipts follow validation.
+crash response using the saved evidence. **0.2.6-rc.1 is installed for testing**;
+public stable remains 0.2.5. No attended acceptance is claimed.
 
 ## Feedback findings
 
@@ -48,3 +48,25 @@ Landing executable and full RC gate. The attended checklist now explicitly
 covers crash off/on, negative controls, overlap, saved options and the reported
 Finland startup hitch. New/legacy settings default crashes off at strength 5;
 landing saved values remain unchanged.
+
+## Validation and deployment receipts
+
+- Source: `2e32256f99514db9a01f72888698726d31f4b2b9`, clean.
+- [Full local gate](../../results/rc-0.2.6-rc.1-4036497765f24657a723521a0dfe365f/automated.json)
+  passed all 16 checks at 20:05 UTC. Includes 43 Python gate tests, 184 standalone
+  landing/crash assertions, 9,161 with the real landing case, 450,090 consumer
+  assertions and 5 actual-Mono collision-hook assertions. Both real corpus cases
+  pass; the recorded landing remains one event at row 4230.
+- Exact ZIP: `ArtOfSimRally-0.2.6-rc.1.zip`, SHA-256
+  `23131C59FEB11409D42C8379B6B5360FA15FCB36CBFA9C2C239868D2B1660AB3`.
+- [Deployment receipt / stable backup](../../results/crash-rc1-install-12724d6ddcfa4bdb9a13d4cabff440ec/receipt.json),
+  20:06 UTC: six payloads plus native plugin verified; six preserved files include
+  settings, game assembly, UMM parameters and three existing probe files.
+  Settings SHA-256 `3819C39EABB5B7FE151E08547251F18285812664F5B5256DF4FE512A02E307B1`.
+- Game closed throughout; no launch/recording, SimHub change or public release.
+  Installed crash default off/5; saved landing on/20 preserved. Stream Deck still
+  targets the same Steam installation. UMM numeric version is 0.2.6; exact build
+  identity includes rc.1 and the source commit above.
+- The [attended checklist](../../results/rc-0.2.6-rc.1-4036497765f24657a723521a0dfe365f/manual.json)
+  remains pending. In particular no real callback/normal-speed calibration or
+  physical crash effect result has been obtained with this candidate.
