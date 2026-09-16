@@ -6,7 +6,39 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.6-rc.1
+## Installed candidate — 0.2.6-rc.2
+
+Installed **2026-09-16 21:24 UTC**, with the game closed, after all 16 local gates.
+Removes default per-force native disk tracing and adds smaller-hitch/last-landing
+diagnostics. Landing timing/gain, steering arithmetic, telemetry and crash policy
+are unchanged. Settings are byte-identical, landing on/20 and crash off/default 5.
+
+- Identity: `0.2.6-rc.2+6f7302595b25e8196e67af2591cf5a15780c82c0.clean`.
+- ZIP SHA-256: `4DC58A75A5417629FF42748AA34C50C3AE7BBEA976DF793F1DF4E5E16EA10AD0`.
+- [All 16 local gates](../results/rc-0.2.6-rc.2-272c0b582dc449df8ce4a0bb348b388b/automated.json):
+  native binding/version checks, arithmetic/lifecycle, actual Unity Mono hooks,
+  both recorded corpus cases, unchanged single landing, support persistence,
+  replay protocol, package and installer checks passed.
+- [Installation receipt and RC1 backup](../results/timing-rc2-install-a56c9d50a03048b4bd4f72a2d60fdfad/receipt.json):
+  all six payloads and the second native copy match the package. Settings, game
+  assembly, UMM parameters and every separate probe file are preserved.
+- Toolkit is **local/unpublished** `82c789117f115034a074bcb93133fefc8b955e35.clean`,
+  managed 0.13.1/native 0.6.1. Final release is blocked until official repin.
+  Native SHA-256: `FE85A1ECEC10E84134EA14F8362683293894BE8D485076F8CB38CA22AE9FF2F0`.
+- Separate probe remains 0.2.5.4. No game launch, recording, physical force test,
+  SimHub/profile adjustment or public publication. UMM shows **0.2.6**;
+  support/build metadata identifies **0.2.6-rc.2**.
+- [Investigation and attended comparison](reviews/2026-09-16-landing-startup-investigation.md).
+  Haapajarvi startup/early landing are not reproduced; normal FFB with the new
+  native candidate and full attended matrix remain pending. Public stable is 0.2.5.
+
+Build/evidence originated in isolated `E:/Source/art-of-sim-rally-timing`.
+Exact package, gate logs and deployment backup/receipt were also copied into
+the main checkout's ignored `dist`/`results`; copied package hash was verified.
+The prior failed version-guard run is retained as
+`results/rc-0.2.6-rc.2-00bbd090d8b54c91a383120dd60c53c6`.
+
+## Previous candidate — 0.2.6-rc.1
 
 Installed **2026-09-16 20:06 UTC**, with the game closed, after all 16 local gates.
 Optional crash vibration defaults **off**, strength 5/cap 20. Owner settings are

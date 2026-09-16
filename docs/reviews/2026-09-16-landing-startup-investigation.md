@@ -100,6 +100,13 @@ assertion (600). After reviewing the logging-only source delta and unchanged
 41-export API, the expected version/diagnostic text was updated to 601/0.6.1;
 the API-binding assertions remain intact. That failed run is retained separately.
 
+The rerun passed **all 16 gates**, including both original corpus cases (215,926
+replay assertions), 9,173 recorded-landing assertions and actual Unity Mono hook
+checks. Source `6f7302595b25e8196e67af2591cf5a15780c82c0` produced the clean
+0.2.6-rc.2 artifact. Installed 21:24 UTC with settings/probe preserved and the game
+closed; exact ZIP/native hashes and backup are in the deployment receipt linked
+above. This provides no new drive/physical FFB or reporter-specific acceptance.
+
 ## Next attended comparison
 
 1. Use the same car, Haapajarvi direction, frame cap, mods and wheel settings.

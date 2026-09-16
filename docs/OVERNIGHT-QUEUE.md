@@ -10,7 +10,8 @@ entries below preserve earlier states and do not describe the current install.
 
 Owner authorized progressing crash response from the saved baseline. Independent
 opt-in wheel crash vibration and shared finite-effect ownership are implemented
-for 0.2.6-rc.1. All 16 local gates passed and the exact package is installed with
+for 0.2.6-rc.1 and retained in installed rc.2 with timing/logging improvements.
+All 16 local gates passed and the exact rc.2 package is installed with
 settings/probe preserved. Next, run the
 [front/side/off-on comparison](CRASH-EFFECTS.md). Schema-4 live collision geometry
 and SimHub input/output comparison remain pending; no motion gain change.
