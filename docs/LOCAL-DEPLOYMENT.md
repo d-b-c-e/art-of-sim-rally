@@ -6,7 +6,34 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.6-rc.2
+## Installed candidate — 0.2.6-rc.3
+
+Installed **2026-09-17 03:23 UTC** (2026-09-16 local), with the game closed, after
+all 16 local gates. Both wheel-impact sliders now extend to 40%. Existing values
+retain their output, so the owner's landing on/20 is unchanged. Crash stays
+off/default 5. Telemetry boosting is explicitly deferred; no SimHub gains changed.
+
+- Identity: `0.2.6-rc.3+b85c27a735eac7f55661cd84e9f39b0a20d17f7f.clean`.
+- ZIP SHA-256: `E1C784BC889A720D3C621EF88E258ECEE10471D8665A65C4287293277C18BE15`.
+- [All 16 gates](../results/rc-0.2.6-rc.3-d692d149e51b4b70bcb0c4bc561298e6/automated.json)
+  passed, including both real corpus cases and 9,248 landing/crash assertions.
+  Increased output limits, overlap ownership, stop behavior and settings roundtrip
+  have offline coverage; actual stronger wheel feel remains untested.
+- [Installation receipt and RC2 backup](../results/strength-rc3-install-d28b515512a34942a5c10c168023dc3b/receipt.json):
+  six mod payloads and the second native copy match the exact package. Settings,
+  game assembly, UMM parameters and separate probe files remain byte-identical.
+- Settings SHA-256: `3819C39EABB5B7FE151E08547251F18285812664F5B5256DF4FE512A02E307B1`.
+  Toolkit remains the same local/unpublished native 0.6.1 candidate; probe remains
+  0.2.5.4. No game launch or recording. Public stable is still 0.2.5.
+- UMM shows **0.2.6**; support/build metadata identifies **0.2.6-rc.3**.
+  [Change and test notes](reviews/2026-09-16-stronger-impact-effects.md).
+  Public release still needs official toolkit repin and attended checks.
+
+Built in `E:/Source/art-of-sim-rally-timing`; exact ZIP/checksum, gate evidence and
+deployment backup/receipt were also copied to the main checkout's ignored
+`dist`/`results`, with copied artifact hashes verified.
+
+## Previous candidate — 0.2.6-rc.2
 
 Installed **2026-09-16 21:24 UTC**, with the game closed, after all 16 local gates.
 Removes default per-force native disk tracing and adds smaller-hitch/last-landing

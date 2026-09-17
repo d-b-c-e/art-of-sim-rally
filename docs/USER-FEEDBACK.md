@@ -6,7 +6,7 @@ the built-in SimHub comparison and observed clipping. Current setup answers
 are in [SETUP.md](SETUP.md) and [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 Dated reports and unsent drafts below preserve their original context; replace
 old version references before sending them. No new public reply was sent.
-Owner's installed build is now 0.2.6-rc.2 with experimental crashes off; this
+Owner's installed build is now 0.2.6-rc.3 with experimental crashes off; this
 reporter's feedback and the public download remain 0.2.5.
 
 ## 0.2.5 T300/TSS follow-up — received 2026-09-16
@@ -34,7 +34,7 @@ support now measures smaller frame spikes and contact/compression timing. No lan
 delay or gain change, no proven startup-stutter resolution, no public update yet.
 
 Subsequent owner-authorized strength update: both wheel-impact sliders now extend
-to 40% in the next local candidate, with existing values and default 5 unchanged.
+to 40% in installed local candidate rc.3, with existing values and default 5 unchanged.
 This implements the requested 30–40 option without changing landing timing or
 SimHub signals. Stronger-range wheel feel remains untested; public 0.2.5 is unchanged.
 

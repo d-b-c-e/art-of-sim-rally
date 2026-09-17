@@ -37,6 +37,13 @@ defaults/opt-out checks. Offline output is fake-device evidence, not wheel feel.
 See [LOCAL-DEPLOYMENT](../LOCAL-DEPLOYMENT.md) for the full candidate gate and exact
 installation receipt. No public release or attended acceptance is implied.
 
+All 16 full local gates passed for clean source
+`b85c27a735eac7f55661cd84e9f39b0a20d17f7f`. Exact RC3 installed with the game closed
+at **2026-09-17 03:23 UTC** (09-16 local); six mod payloads and the second native
+copy match. Settings, game assembly, UMM parameters and probe files are preserved.
+ZIP SHA-256: `E1C784BC889A720D3C621EF88E258ECEE10471D8665A65C4287293277C18BE15`.
+Previous RC2 is backed up. No physical wheel test or recording started.
+
 For an attended test, leave the owner's landing20 initially and confirm familiar
 feel. A wheel with spare output range can compare 25/30/40 on the same jump.
 For crashes, enable while paused, begin at5 and increase gradually as needed;

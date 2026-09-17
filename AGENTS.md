@@ -57,6 +57,10 @@ describe prior artifacts, including RC2 and public 0.2.5.
 Owner clarified motion telemetry was the priority, then tabled telemetry boosting
 and chose wheel-range testing/feedback first. Do not silently extend this work
 to motion gain changes; no telemetry multiplier or SimHub profile edit is included.
+All 16 local gates passed for **0.2.6-rc.3**, source
+`b85c27a735eac7f55661cd84e9f39b0a20d17f7f`; exact package installed
+2026-09-17 03:23 UTC (09-16 local) with game closed. Settings/probe preserved,
+landing on/20, crash off/default 5, no recording. RC3 supersedes RC2 below.
 
 **Landing/startup investigation:** first-contact raycasts, visual wheel movement
 and the game's all-wheel landing cue are distinct. The saved Norway jump has
@@ -70,7 +74,7 @@ counts at 33/50/100 ms and last landing contact/compression timing. No per-frame
 disk writes or shipping recorder. See
 `docs/reviews/2026-09-16-landing-startup-investigation.md` and the latest deployment
 receipt; no reporter-specific diagnosis or attended sign-off is implied.
-All 16 gates passed for **0.2.6-rc.2**, source
+Prior candidate: all 16 gates passed for **0.2.6-rc.2**, source
 `6f7302595b25e8196e67af2591cf5a15780c82c0`; exact package installed 21:24 UTC.
 Settings and probe preserved, game closed, no recording or SimHub change.
 Final publication requires official toolkit repin plus attended checks.

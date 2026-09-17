@@ -10,8 +10,9 @@ entries below preserve earlier states and do not describe the current install.
 
 Owner authorized progressing crash response from the saved baseline. Independent
 opt-in wheel crash vibration and shared finite-effect ownership are implemented
-for 0.2.6-rc.1 and retained in installed rc.2 with timing/logging improvements.
-All 16 local gates passed and the exact rc.2 package is installed with
+for 0.2.6-rc.1 and retained in installed rc.3 with timing/logging improvements
+and 0–40% wheel impact controls.
+All 16 local gates passed and the exact rc.3 package is installed with
 settings/probe preserved. Next, run the
 [front/side/off-on comparison](CRASH-EFFECTS.md). Schema-4 live collision geometry
 and SimHub input/output comparison remain pending; no motion gain change.
@@ -20,7 +21,7 @@ Reporter confirms good steering and working handbrake on 0.2.5. Request the
 Haapajarvi support file and short landing clip for KI-5/KI-36. Investigate
 first-contact versus suspension-load timing before changing landing delay or
 changing the detector. Owner authorized stronger wheel effects separately:
-the next candidate extends both impact sliders to 40%, preserving existing output
+installed rc.3 extends both impact sliders to 40%, preserving existing output
 and default 5. Compare 20/30/40 as appropriate for the wheel; stronger-range
 acceptance remains pending. Reply is drafted in USER-FEEDBACK; nothing sent.
 Owner subsequently tabled motion-telemetry boosting: finish the wheel range and
