@@ -125,9 +125,9 @@ namespace ArtOfSimRally.Mod
                     "steering Strength and Smoothing keep their current behavior.");
                 if (cfg.LandingEffectsEnabled)
                 {
-                    cfg.LandingStrength = Slider(cfg.LandingStrength, 0f, 20f, "Landing strength",
+                    cfg.LandingStrength = Slider(cfg.LandingStrength, 0f, LandingFeedback.MaximumStrengthPercent, "Landing strength",
                         "Maximum vibration as a percentage of the wheel's nominal force, independent of steering Strength. " +
-                        "Start at 5; smaller landings use less. Zero disables the vibration.");
+                        "Range 0-40. Start at 5 and increase gradually; smaller landings use less. Zero disables the vibration.");
                     GUILayout.Label("      " + LandingController.Status, Wrap);
                 }
 
@@ -136,9 +136,9 @@ namespace ArtOfSimRally.Mod
                     "does not change steering, physics or SimHub telemetry. Landing and crash vibrations do not stack.");
                 if (cfg.CrashEffectsEnabled)
                 {
-                    cfg.CrashStrength = Slider(cfg.CrashStrength, 0f, 20f, "Crash strength",
+                    cfg.CrashStrength = Slider(cfg.CrashStrength, 0f, LandingFeedback.MaximumStrengthPercent, "Crash strength",
                         "Maximum vibration as a percentage of the wheel's nominal force. Start at 5; " +
-                        "glancing impacts use less than head-on impacts. Zero disables the vibration.");
+                        "range 0-40. Increase gradually; glancing impacts use less than head-on impacts. Zero disables the vibration.");
                     GUILayout.Label("      " + CrashController.Status, Wrap);
                 }
 

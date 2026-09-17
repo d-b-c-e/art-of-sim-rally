@@ -133,7 +133,7 @@ static class Program
             var optedOut=(Settings)serializer.Deserialize(optedOutXml)!;
             Check(!optedOut.LandingEffectsEnabled && optedOut.LandingStrength==3.5f,"saved opt-out and strength survive upgrade");
         }
-        var changed=new Settings { Strength=26, Smoothing=.2f, BonnetHeight=2.345f, LandingEffectsEnabled=true, LandingStrength=3.5f, CrashEffectsEnabled=true, CrashStrength=7.5f };
+        var changed=new Settings { Strength=26, Smoothing=.2f, BonnetHeight=2.345f, LandingEffectsEnabled=true, LandingStrength=40f, CrashEffectsEnabled=true, CrashStrength=30f };
         var pending=new DeferredSave(); pending.MarkDirty();
         using(var locked=File.Open(path,FileMode.Open,FileAccess.ReadWrite,FileShare.None))
             Check(!pending.Flush(0,false,false,()=>{ SettingsPersistence.Write(changed,path); return true; }) && pending.Pending,"locked file reported success");
@@ -144,8 +144,8 @@ static class Program
         {
             var restored=(Settings)new XmlSerializer(typeof(Settings)).Deserialize(input)!;
             Check(restored.Strength==26 && restored.Smoothing==.2f && restored.BonnetHeight==2.345f,"UMM-compatible settings roundtrip changed values");
-            Check(restored.LandingEffectsEnabled && restored.LandingStrength==3.5f,"landing settings did not persist");
-            Check(restored.CrashEffectsEnabled && restored.CrashStrength==7.5f,"crash settings did not persist");
+            Check(restored.LandingEffectsEnabled && restored.LandingStrength==40f,"extended landing settings did not persist");
+            Check(restored.CrashEffectsEnabled && restored.CrashStrength==30f,"extended crash settings did not persist");
         }
     }
 

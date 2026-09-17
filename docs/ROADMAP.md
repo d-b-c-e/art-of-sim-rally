@@ -62,8 +62,13 @@ These are validation/support work rather than missing features.
 
 **Landing timing/strength:** investigate the Haapajarvi slightly-early report
 (KI-36) before changing first-contact timing. The requested optional 30–40 wheel
-strength is queued; retain the accepted default 5/cap 20 meanwhile. The owner's
-ButtKicker clipping is a separate device/output observation.
+strength is now implemented for the 0.2.6 candidate: both impact sliders allow
+0–40%, with default 5 and existing values preserved. Physical comparison of the
+stronger range remains pending. The owner's ButtKicker clipping is a separate
+device/output observation and does not establish another rig's wheel limit.
+Owner clarified motion-rig telemetry was the primary interest, then explicitly
+tabled telemetry boosting on 2026-09-16: put the wheel range through testing
+first and wait for feedback. Keep motion telemetry/profile gains unchanged.
 Physics contact, rendered wheel position and the stock game's all-wheel cue are
 different signals; the saved jump's 16.67 ms gap is a lead, not an automatic delay.
 See [investigation](reviews/2026-09-16-landing-startup-investigation.md).

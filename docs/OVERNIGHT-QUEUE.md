@@ -19,7 +19,12 @@ and SimHub input/output comparison remain pending; no motion gain change.
 Reporter confirms good steering and working handbrake on 0.2.5. Request the
 Haapajarvi support file and short landing clip for KI-5/KI-36. Investigate
 first-contact versus suspension-load timing before changing landing delay or
-raising the cap to 30–40. Reply is drafted in USER-FEEDBACK; nothing sent.
+changing the detector. Owner authorized stronger wheel effects separately:
+the next candidate extends both impact sliders to 40%, preserving existing output
+and default 5. Compare 20/30/40 as appropriate for the wheel; stronger-range
+acceptance remains pending. Reply is drafted in USER-FEEDBACK; nothing sent.
+Owner subsequently tabled motion-telemetry boosting: finish the wheel range and
+wait for feedback. Do not add a motion multiplier or tune rig gains in this change.
 
 Investigation now confirms default native per-force disk writes (KI-37), removed
 in the local toolkit candidate. Frame counters now detect smaller intervals and

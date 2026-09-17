@@ -77,7 +77,7 @@ static class Program
         f.Prepare(true,true,true);Check(o.Creates==1&&o.Hz==25&&o.Duration==120,"incorrect finite burst");
         Check(f.Trigger(1,5,1)&&o.Magnitude==.05f,"low strength not forwarded");
         f.Tick(1.10);Check(o.Stops==0,"burst stopped early");f.Tick(1.121);Check(o.Stops==1,"burst did not stop");
-        Check(f.Trigger(100,100,2)&&o.Magnitude==.2f,"malformed tune exceeded cap");
+        Check(f.Trigger(100,100,2)&&o.Magnitude==.4f,"malformed tune exceeded cap");
         f.Prepare(false,true,false);Check(o.Stops==2&&o.Releases==1,"disable left burst alive");
         f.Prepare(true,false,true);Check(o.Creates==1,"missing device created effect");
         f.Prepare(true,true,true);Check(o.Creates==2,"reinitialisation didn't rebuild slot");
@@ -90,12 +90,25 @@ static class Program
         o=new Output{FailCreate=true};f=new LandingFeedback(o);
         for(int i=0;i<100;i++)f.Prepare(true,true,true);
         Check(o.Creates==1&&!f.Available,"unsupported wheel retried every frame");
+
+        o=new Output();f=new LandingFeedback(o);f.Prepare(true,true,true);
+        foreach(var tune in new[]{(1f,5f,.05f),(1f,20f,.2f),(1f,30f,.3f),(1f,40f,.4f),
+            (.5f,40f,.2f),(1f,float.MaxValue,.4f),(float.MaxValue,40f,.4f)})
+        {
+            Check(f.Trigger(tune.Item1,tune.Item2,10)&&o.Magnitude==tune.Item3,"extended strength or legacy output incorrect");
+            Check(f.LastMagnitude==o.Magnitude,"reported and delivered amplitudes differ");
+        }
+        count=o.Plays;
+        foreach(float bad in new[]{float.NaN,float.PositiveInfinity,float.NegativeInfinity,-1,0})
+            Check(!f.Trigger(1,bad,11)&&o.Plays==count,"invalid strength sent to wheel");
+        f.Tick(10.121);Check(o.Stops==1,"maximum-strength cue did not stop");
     }
     static void GameIntegration()
     {
+        foreach(float strength in new[]{5f,20f,30f,40f})
         foreach(string interrupt in new[]{"none","pause","focus","disable","ffb-off","not-ready","restart","missing-body","missing-wheel","car-change","wall-gap"})
         {
-            ImpactController.Shutdown();Mod.Enabled=true;Mod.Settings=new();FfbNative.Ready=true;
+            ImpactController.Shutdown();Mod.Enabled=true;Mod.Settings=new(){LandingStrength=strength};FfbNative.Ready=true;
             UnityEngine.Application.isFocused=true;GameState.IsRestarting=false;GameState.IsDriving=false;
             ImpactController.Tick();GameState.IsDriving=true;
             int before=Native.Plays;var car=new CarDynamics();
@@ -129,6 +142,7 @@ static class Program
                 }
             }
             Check(Native.Plays-before==(interrupt=="none"?1:0),"game lifecycle triggered stale/missing cue: "+interrupt);
+            if(interrupt=="none")Check(Math.Abs(Native.LastMagnitude-strength/100f*(4.5f/8.5f))<.000001f,"landing controller lost configured strength");
         }
         // Interrupt an already active burst, not just its detector history.
         ImpactController.Shutdown();

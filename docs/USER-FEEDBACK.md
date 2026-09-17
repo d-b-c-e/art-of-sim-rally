@@ -33,6 +33,11 @@ track remains unobserved. A local toolkit fix removes default per-force disk wri
 support now measures smaller frame spikes and contact/compression timing. No landing
 delay or gain change, no proven startup-stutter resolution, no public update yet.
 
+Subsequent owner-authorized strength update: both wheel-impact sliders now extend
+to 40% in the next local candidate, with existing values and default 5 unchanged.
+This implements the requested 30–40 option without changing landing timing or
+SimHub signals. Stronger-range wheel feel remains untested; public 0.2.5 is unchanged.
+
 **Unsent reply draft:**
 
 Really glad 0.2.5 feels good, and great to hear the handbrake is working!
@@ -41,7 +46,8 @@ Really glad 0.2.5 feels good, and great to hear the handbrake is working!
    explain the slightly early feel; I'm checking contact versus visual timing. A short
    clip would help compare it with visible touchdown. I've also built a separate
    crash-vibration candidate for testing; it isn't in the public download yet.
-   I've noted the request for more landing strength too.
+   The test candidate also allows landing and crash strengths up to 40;
+   your current 20 keeps its output, and higher values add headroom for your wheel.
 2. Please open https://github.com/d-b-c-e/art-of-sim-rally/issues/new and drag your
    Desktop support .txt into the description. Include the car and whether the
    early stutter repeats after restarting Haapajarvi. That gives me something

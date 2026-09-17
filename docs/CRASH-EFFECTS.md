@@ -7,7 +7,7 @@ Physical detection, timing and feel still need an attended test.
 
 Pause, open Ctrl+F10 → **Force feedback → Crash vibration (experimental)**,
 and start with **Crash strength 5**. Strength is independent of steering and
-landing strength, with a hard cap of 20% of nominal wheel force. The effect
+landing strength, with a hard cap of 40% of nominal wheel force. The effect
 requires the same sine support as landing vibration. Existing saved controls,
 landing settings and steering strength are preserved. No SimHub helper is needed.
 
@@ -30,9 +30,12 @@ landing settings and steering strength are preserved. No SimHub helper is needed
   Disabling/resetting one feature cannot stop a cue currently owned by the other.
   All output stops for pause, focus loss, finish/replay, device loss or shutdown.
 
-The 20% cap bounds periodic output, not combined steering torque plus vibration.
-Keep ordinary steering settings unchanged during the comparison. This candidate
-does not raise the requested landing cap to 30–40 or change its accepted waveform.
+The 40% cap bounds periodic output, not combined steering torque plus vibration.
+Both impact sliders now allow 0–40. Existing values keep their output: 20 is still
+20%, and 40 requests twice the previous maximum. Defaults remain 5, and crashes
+remain opt-in. Keep ordinary steering settings unchanged during the comparison;
+increase impact strength gradually. The waveform and detection timing are unchanged.
+Higher physical output remains subject to the wheel/driver's limits and needs testing.
 
 ## Evidence and limits
 

@@ -51,6 +51,7 @@ namespace ArtOfSimRally.Mod
                 text.AppendLine($"Last requested magnitude: {c.Magnitude:F4}; sine {LandingFeedback.Frequency} Hz; duration {LandingFeedback.DurationMs} ms");
             }
             text.AppendLine("One shared finite effect; strongest cue wins. Driver acceptance is not measured wheel motion.");
+            text.AppendLine($"Strength scale: percent of nominal wheel force; maximum {LandingFeedback.MaximumStrengthPercent}. Separate from steering and SimHub gains.");
             text.AppendLine("Steering capture does not record the separate periodic output.");
             text.AppendLine();
             LandingController.AppendSupport(text);

@@ -15,6 +15,9 @@ namespace ArtOfSimRally.Mod
     internal sealed class LandingFeedback
     {
         public const int Frequency = 25, DurationMs = 120;
+        // Shared by the panel, overlap arbitration and final device submission.
+        // The scale remains percent of nominal force: existing values keep their output.
+        public const float MaximumStrengthPercent = 40f;
         private readonly ILandingOutput _output;
         private int _slot = -1;
         private bool _attempted, _active;
@@ -46,8 +49,8 @@ namespace ArtOfSimRally.Mod
             if (_slot < 0 || !Finite(intensity) || !Finite(strengthPercent) || !Finite(now) || now < 0 ||
                 intensity <= 0 || strengthPercent <= 0) return false;
             // Separate from steering Strength/Smoothing. Even malformed saved
-            // values cannot ask for more than 20% of the device's nominal force.
-            float magnitude = Math.Min(1f, intensity) * Math.Min(20f, strengthPercent) / 100f;
+            // values cannot ask for more than 40% of the device's nominal force.
+            float magnitude = MagnitudeFor(intensity, strengthPercent);
             Events++; LastMagnitude = magnitude;
             bool accepted = _output.Play(_slot, magnitude, Frequency);
             if (accepted)
@@ -87,6 +90,9 @@ namespace ArtOfSimRally.Mod
             _slot = -1; _attempted = false;
             Status = "Off";
         }
+        // Callers validate finite, positive inputs before evaluating this mapping.
+        internal static float MagnitudeFor(float intensity, float strengthPercent)
+            => Math.Min(1f, intensity) * Math.Min(MaximumStrengthPercent, strengthPercent) / 100f;
         private static bool Finite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);
     }
 }

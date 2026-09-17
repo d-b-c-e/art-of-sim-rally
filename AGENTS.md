@@ -44,6 +44,20 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-16) — do not overstate this
 
+**Stronger impacts authorized:** the 0.2.6 candidate extends both landing and
+crash strength from 0–20 to **0–40%** of nominal wheel force. One shared constant
+and amplitude mapping serve UI limits, overlap arbitration and final output.
+No rescaling/migration: valid existing values keep their force, including the
+owner's landing 20; defaults stay 5 and crash stays off. Waveform, detection,
+steering and telemetry are unchanged. This implements the reporter's optional
+30–40 request; physical stronger-range acceptance remains pending. Read
+`docs/reviews/2026-09-16-stronger-impact-effects.md` and the latest deployment
+receipt for the validated/installed candidate. Earlier cap-20 entries below
+describe prior artifacts, including RC2 and public 0.2.5.
+Owner clarified motion telemetry was the priority, then tabled telemetry boosting
+and chose wheel-range testing/feedback first. Do not silently extend this work
+to motion gain changes; no telemetry multiplier or SimHub profile edit is included.
+
 **Landing/startup investigation:** first-contact raycasts, visual wheel movement
 and the game's all-wheel landing cue are distinct. The saved Norway jump has
 first contact 16.67 ms before compression/all-wheel contact; no Haapajarvi

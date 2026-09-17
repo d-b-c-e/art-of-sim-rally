@@ -39,7 +39,7 @@ namespace ArtOfSimRally.Mod
             Tick(now);
             if (!Available(kind) || !Finite(intensity) || !Finite(strength) || !Finite(now) ||
                 now < 0 || intensity <= 0 || strength <= 0) return ImpactResult.Unavailable;
-            float magnitude = Math.Min(1f, intensity) * Math.Min(20f, strength) / 100f;
+            float magnitude = LandingFeedback.MagnitudeFor(intensity, strength);
             var counts = Counts(kind); counts.Events++; counts.Magnitude = magnitude;
             // Strongest wins; crash wins a tie. A suppressed cue is dropped,
             // never delayed until after the physical event has passed.

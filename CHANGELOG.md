@@ -27,6 +27,9 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Landing and crash wheel vibration now allow strengths up to 40%, twice the
+  previous ceiling. Existing values keep their output and defaults stay at 5.
+  The two effects still share one finite vibration without adding together.
 - Shorter install/first-drive README and dedicated setup/build guides, including
   separate USB handbrakes, updates/removal, SimHub and support-file instructions.
 - Standalone release readme with usable online links and current 0.2.5 defaults.

@@ -61,15 +61,17 @@ while force feedback sets up.
   sequential mode, then click set for each gear/shift and move the lever.
   Clear game bindings if the same lever also accelerates, brakes or shifts twice.
 
-* Landing vibration: on by default at strength 5 (maximum 20), independently of
+* Landing vibration: on by default at strength 5 (maximum 40), independently of
   steering. Existing saved choices are kept. Requires wheel sine-effect support.
 
 * Crash vibration (experimental): off by default. Enable while paused and start
-  at Crash strength 5 (maximum 20). It adds a brief wheel cue for body impacts;
+  at Crash strength 5 (maximum 40). It adds a brief wheel cue for body impacts;
   landing and crash vibrations do not stack. Steering and telemetry are unchanged.
   Physical tuning is still being tested. See the candidate guide:
   https://github.com/d-b-c-e/art-of-sim-rally/blob/main/docs/CRASH-EFFECTS.md
-  This controls the wheel, not the ButtKicker. Small hops may not trigger it.
+  Both strength controls are percentages of nominal wheel force. Existing 20
+  stays 20%; 40 allows twice the previous maximum. Increase gradually as needed.
+  These controls affect the wheel; tune the ButtKicker separately in SimHub.
 
 * Leave Disable steering limiter on car spawn (legacy) off; use the game's own
   assist settings. That checkbox does not temporarily replace its assist slider.

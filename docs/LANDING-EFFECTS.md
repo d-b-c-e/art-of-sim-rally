@@ -4,8 +4,9 @@ For the controls, see [steering force and landing vibration](SETUP.md#steering-f
 For a ButtKicker, use [SimHub setup](SETUP.md#simhub-and-buttkicker); the wheel
 landing setting does not control it.
 
-0.2.6 candidate: landing detection, waveform and strength are unchanged, but
-landing now shares a single native periodic effect with optional
+0.2.6 candidate: landing detection and waveform are unchanged. Strength now ranges
+from 0 to **40%**; existing saved values retain their output, including 20 = 20%.
+The default stays 5. Landing shares a single native periodic effect with optional
 [crash vibration](CRASH-EFFECTS.md); the stronger cue wins instead of stacking.
 The Haapajarvi early-timing report is tracked as KI-36 in [known issues](KNOWN-ISSUES.md).
 With **Log detail for support** enabled, the candidate retains one landing's
@@ -40,7 +41,7 @@ The native single-axis setup follows Microsoft's
 [DirectInput effect-direction contract](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ee417536(v=vs.85)).
 
 **Landing strength** sets the maximum vibration magnitude independently of the
-existing steering **Strength** and **Smoothing**. Default 5, range 0..20 percent
+existing steering **Strength** and **Smoothing**. Default 5, range 0..40 percent
 of nominal device force; the driver's overall gain still applies. Zero disables
 it. Steering arithmetic, telemetry packets and game physics are unchanged.
 Independent effects are added by the driver; strong cornering can consume its

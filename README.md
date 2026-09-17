@@ -90,7 +90,9 @@ checks are in [KNOWN-ISSUES.md](docs/KNOWN-ISSUES.md).
 ## Development
 
 The 0.2.6 candidate adds optional [crash vibration](docs/CRASH-EFFECTS.md),
-currently awaiting wheel testing. The public download remains 0.2.5.
+and extends landing/crash strength to **40%**. Existing strengths keep their
+output; defaults remain 5. The stronger range awaits wheel testing.
+The public download remains 0.2.5.
 
 [Build instructions](docs/BUILDING.md) · [Documentation index](docs/README.md) ·
 [Roadmap](docs/ROADMAP.md) · [Release procedure](docs/RELEASING.md)
