@@ -1,14 +1,15 @@
-# Crash vibration — 0.2.6 candidate
+# Crash kick — 0.2.6 candidate
 
 **Experimental, off by default; not in the published 0.2.5 download.** The saved
 owner drive shows head-on deceleration with almost no steering force. The new
 wheel cue addresses that missing response without changing the steering curve.
-Physical detection, timing and feel still need an attended test.
+The RC3 drive produced 13 accepted crash commands, but the owner felt no distinct
+cue (KI-38). The next candidate changes the waveform; its feel still needs testing.
 
-Pause, open Ctrl+F10 → **Force feedback → Crash vibration (experimental)**,
+Pause, open Ctrl+F10 → **Force feedback → Crash kick (experimental)**,
 and start with **Crash strength 5**. Strength is independent of steering and
 landing strength, with a hard cap of 40% of nominal wheel force. The effect
-requires the same sine support as landing vibration. Existing saved controls,
+requires sine phase/envelope support and exact driver parameter readback. Existing saved controls,
 landing settings and steering strength are preserved. No SimHub helper is needed.
 
 ## What the candidate does
@@ -22,7 +23,11 @@ landing settings and steering strength are preserved. No SimHub helper is needed
 - Ignores Road-tagged and predominantly vertical contacts, requires recent
   continuous player motion, and disarms across pause, reset, teleport, stale
   sampling, car change or focus loss. At most eight contacts are inspected.
-- Uses a finite 25 Hz, 120 ms vibration. Repeated contacts are suppressed for
+- Requests a finite 6.25 Hz, 120 ms sine starting at its positive peak, fading
+  to zero across the entire lifetime: a quick kick followed by a smaller opposite
+  rebound. This is a generic impact cue, not collision-derived steering torque.
+  Landing retains its 25 Hz, 120 ms, phase-zero sine without an envelope.
+  Repeated contacts are suppressed for
   350 ms; a stronger contact within the initial 120 ms may replace the first.
   It can restart that finite burst, but cannot create sustained scrape vibration.
 - Shares **one** native effect with landing vibration. Strongest magnitude wins;
@@ -34,8 +39,21 @@ The 40% cap bounds periodic output, not combined steering torque plus vibration.
 Both impact sliders now allow 0–40. Existing values keep their output: 20 is still
 20%, and 40 requests twice the previous maximum. Defaults remain 5, and crashes
 remain opt-in. Keep ordinary steering settings unchanged during the comparison;
-increase impact strength gradually. The waveform and detection timing are unchanged.
+increase impact strength gradually. Detection timing is unchanged; crash shape differs
+from RC3 even at the same strength. Wheelbase global game FFB gain scales this too.
 Higher physical output remains subject to the wheel/driver's limits and needs testing.
+
+Shaped requests are checked by reading the driver parameters back before starting.
+An unsupported, adjusted or failed request disables crash output until crash is
+toggled off/on while paused. The slot remains available for legacy landings;
+there is no silent fallback to the old vibration and no retry of a stale impact.
+The native layer stops the effect after 120 ms even if Unity stalls.
+
+Support retains the last delivery, native call duration, managed stop reason and
+elapsed time after playback returned for each effect. Detail logging adds one
+start/reject and one stop record per submitted cue, including immediate steering
+output. Timing is command evidence, not measured motor motion. The managed
+expiry starts after playback returns, avoiding truncation by a slow native call.
 
 ## Evidence and limits
 
@@ -62,12 +80,14 @@ views first, as described in the [motion investigation](research/2026-09-14-cras
 
 ## Short attended comparison
 
-1. With crash vibration **off**, verify ordinary steering and one jump still feel
+1. With crash kick **off**, verify ordinary steering and one jump still feel
    as before. Note stage/car. Drive one front impact and one glancing side impact.
-2. Pause, enable crash vibration at **5**, then repeat. The front impact should
-   have a brief distinct cue; the side hit should be weaker. Increase gradually
+2. Pause, enable crash kick at **5**, then repeat. The front impact should
+   have a distinct kick/rebound; the side hit should be weaker. Increase gradually
    only after checking the low setting. Ordinary braking and restarts should not
    trigger it. A landing/body contact should not double the vibration.
+   For comparison with the old RC3 buzz, keep Pit House and mod strength fixed.
+   Existing saved strength is preserved, not reset to 5 by installation.
 3. Check pause/focus loss, finish, disabling either feature, and quit. Save the
    support file while paused; it reports separate event, accepted/rejected and
    overlap-suppressed counters. Confirm settings survive relaunch.
@@ -78,3 +98,4 @@ views first, as described in the [motion investigation](research/2026-09-14-cras
 
 See [local deployment](LOCAL-DEPLOYMENT.md) for the exact installed candidate and
 validation receipt. No public release or attended sign-off is implied.
+See [RC3 evidence and shaped-candidate review](reviews/2026-09-17-crash-kick.md).

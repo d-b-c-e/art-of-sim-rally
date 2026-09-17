@@ -56,7 +56,8 @@ namespace ArtOfSimRally.Mod
     internal static class Main { public static Settings Settings=new(); public static bool Enabled=true; }
     internal static class GameState { public static bool IsDriving,IsRestarting; public static EventManager ExistingManager=new(); }
     internal static class FfbNative { public static bool Ready=true; }
-    internal static class ModLog { public static void Info(string s) { } public static void Warning(string s) { } }
+    internal static class FfbController { internal static float CurrentForce => .25f; }
+    internal static class ModLog { public static readonly List<string> Messages=new(); public static void Info(string s) { Messages.Add(s); } public static void Warning(string s) { Messages.Add(s); } }
 }
 namespace Dbce.Wheel.Ffb
 {
@@ -64,8 +65,10 @@ namespace Dbce.Wheel.Ffb
     {
         public static int Creates,Plays,Stops,Releases;
         public static float LastMagnitude;
+        public static string LastError => "Fake driver rejection";
         public static int CreatePeriodicBurst(int hz,int duration) { Creates++;return 0; }
         public static bool PlayPeriodicBurst(int slot,float magnitude,float hz) { Plays++;LastMagnitude=magnitude;return true; }
+        public static bool PlayShapedPeriodicBurst(int slot,float magnitude,float hz,int phase,int fadeMs) { Plays++;LastMagnitude=magnitude;return true; }
         public static bool StopPeriodicBurst(int slot) { Stops++;return true; }
         public static void ReleasePeriodics() { Releases++; }
     }

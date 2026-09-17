@@ -21,6 +21,22 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-38 — Accepted RC3 crash commands have no distinct felt effect
+
+**Owner-confirmed feel failure; shaped candidate awaits retest (2026-09-17 UTC).**
+RC3 logs contain 13 accepted crash cues, six at full configured intensity and
+about 19.5% nominal amplitude. Owner felt no distinct crash effect. This is not
+explained by confusing Pit House global gain with the mod's steering-only gain.
+Existing output was three identical 25 Hz cycles over 120 ms; waveform and early
+stop timing are leads, not a proven driver diagnosis. No landing cues occurred.
+
+Candidate replaces only crash shape with a 6.25 Hz/120 ms peak-start sine and
+full-lifetime fade, using the upstream shaped-burst API. Peak limits, collision
+detection, steering and motion signals remain unchanged. Managed expiry now starts
+after native Play returns; per-event timing/reason diagnostics distinguish
+expiry, replacement and lifecycle cancellation. Parameter readback cannot prove
+physical waveform. See [evidence and test plan](reviews/2026-09-17-crash-kick.md).
+
 ### KI-37 — Native force tracing performs synchronous driving I/O by default
 
 **Confirmed implementation overhead; candidate fix, hardware retest pending.**

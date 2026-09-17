@@ -6,8 +6,10 @@ the built-in SimHub comparison and observed clipping. Current setup answers
 are in [SETUP.md](SETUP.md) and [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 Dated reports and unsent drafts below preserve their original context; replace
 old version references before sending them. No new public reply was sent.
-Owner's installed build is now 0.2.6-rc.3 with experimental crashes off; this
-reporter's feedback and the public download remain 0.2.5.
+Owner tested 0.2.6-rc.3 with crashes on/19.52381 and reported no distinct crash
+effect. Its 13 accepted commands motivate the new shaped kick (KI-38); see
+[review](reviews/2026-09-17-crash-kick.md) and [current installation](LOCAL-DEPLOYMENT.md).
+The reporter's feedback and public download remain 0.2.5.
 
 ## 0.2.5 T300/TSS follow-up — received 2026-09-16
 

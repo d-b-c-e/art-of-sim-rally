@@ -41,6 +41,7 @@ namespace ArtOfSimRally.Mod
         // outside the game.
 
         private static float _smoothed;
+        internal static float CurrentForce => _smoothed;
         private static float _peakMz;
         private static float _peakSpeedKmh;
         private static float _nextDiagnostic;

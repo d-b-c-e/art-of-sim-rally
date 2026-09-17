@@ -646,6 +646,11 @@
             not proof of physical output. Zero stops. Failed events must not be queued/retried.
             Every positive magnitude maps to at least one device unit; no 5% change gate.</summary>
         </member>
+        <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.PlayShapedPeriodicBurst(System.Int32,System.Single,System.Single,System.Int32,System.Int32)">
+            <summary>Finite sine with explicit phase and a fade to zero over the final fadeMs.
+            True means exact API parameter readback and start accepted, not physical verification.
+            Missing optional export returns false; failed events must not be retried.</summary>
+        </member>
         <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.StopPeriodicBurst(System.Int32)">
             <summary>Stop a valid burst slot, including an already stopped slot. Retains the slot.
             ReleasePeriodics frees all continuous and burst slots. May stop while FFB is not Ready.</summary>

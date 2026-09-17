@@ -28,12 +28,12 @@ namespace ArtOfSimRally.Mod
             float now = Time.realtimeSinceStartup;
             if (!Finite(now) || now < 0) { Reset(); return; }
             if (_lastRealtime >= 0 && (now < _lastRealtime || now - _lastRealtime > .25f))
-            { Signal.Reset(); ImpactController.Stop(ImpactKind.Crash); }
+            { Signal.Reset(); ImpactController.Stop(ImpactKind.Crash, "crash-sample-gap"); }
             _lastRealtime = now;
             if (_body == null) { Reset(); return; }
             var p = _body.position; var v = _body.velocity;
             Signal.Track(new LandingSample { Time = Time.fixedTime, X = p.x, Y = p.y, Z = p.z, Vx = v.x, Vy = v.y, Vz = v.z });
-            if (Signal.Discontinuous) ImpactController.Stop(ImpactKind.Crash);
+            if (Signal.Discontinuous) ImpactController.Stop(ImpactKind.Crash, "crash-motion-discontinuity");
         }
 
         // Observe before the original, which can finish the stage. Never call
@@ -75,7 +75,8 @@ namespace ArtOfSimRally.Mod
                 var result = ImpactController.Trigger(ImpactKind.Crash, intensity, Main.Settings.CrashStrength, now);
                 if (Main.Settings.DiagnosticLogging)
                     ModLog.Info($"Crash FFB normalSpeed={Signal.LastNormalSpeed:F2}m/s intensity={intensity:F3} " +
-                        $"magnitude={ImpactController.Magnitude(ImpactKind.Crash):F4} duration={LandingFeedback.DurationMs}ms result={result}");
+                        $"magnitude={ImpactController.Magnitude(ImpactKind.Crash):F4} duration={LandingFeedback.DurationMs}ms " +
+                        $"shape=kick-rebound frequency={LandingFeedback.CrashFrequency}Hz phase=90deg fade=120ms result={result}");
             }
             catch (Exception ex)
             {

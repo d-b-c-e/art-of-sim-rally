@@ -61,6 +61,8 @@ static class CrashTests
         public int Creates,Plays,Stops,Releases;public float Magnitude;public bool FailPlay,FailStop;
         public int Create(int hz,int ms){Creates++;Check(hz==25&&ms==120,"shared burst changed waveform");return 4;}
         public bool Play(int slot,float magnitude,float hz){Plays++;Magnitude=magnitude;return !FailPlay;}
+        public bool PlayShaped(int slot,float magnitude,float hz,int phase,int fadeMs)
+        { Check(hz==6.25f&&phase==9000&&fadeMs==120,"wrong kick waveform");return Play(slot,magnitude,hz); }
         public bool Stop(int slot){Stops++;return !FailStop;}
         public void Release(){Releases++;}
     }

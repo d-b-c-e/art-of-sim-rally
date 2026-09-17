@@ -37,7 +37,7 @@ namespace ArtOfSimRally.Mod
                 Vx = v.x, Vy = v.y, Vz = v.z, UpY = up.y,
                 Contacts = mask
             });
-            if (Signal.Discontinuous) ImpactController.Stop(ImpactKind.Landing);
+            if (Signal.Discontinuous) ImpactController.Stop(ImpactKind.Landing, "landing-motion-discontinuity");
             bool diagnostics=Main.Settings.DiagnosticLogging;
             float compression=0;
             if (!diagnostics || Signal.Discontinuous) Timing.Cancel();

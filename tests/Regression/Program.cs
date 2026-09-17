@@ -159,11 +159,12 @@ static class Program
         Check(NativeDiagnostics.Describe("UnityForceFeedback.dll").Contains("not loaded"), "inspection loaded native DLL");
         Check(WheelFfbNative.Load(directory, "UnityForceFeedback.dll"), WheelFfbNative.LastError);
         Check(!WheelFfbNative.Ready, "binding unexpectedly acquired a device");
-        // 0.6.1 changes force-trace policy only; the 41-export burst ABI is unchanged.
-        Check(WheelFfbNative.Version == 601, "native component changed; review candidate ABI");
+        // 0.7.0 adds shaped finite bursts, retaining the previous 41 exports.
+        Check(WheelFfbNative.Version == 700, "native component changed; review candidate ABI");
         Check(WheelFfbNative.SupportsPeriodicBursts, "finite periodic burst API is unavailable");
+        Check(WheelFfbNative.SupportsShapedPeriodicBursts, "shaped finite burst API is unavailable");
         string description = NativeDiagnostics.Describe("UnityForceFeedback.dll");
-        Check(description.Contains("0.6.1"), "native version decoding");
+        Check(description.Contains("0.7.0"), "native version decoding");
         Check(description.Contains(NativeDiagnostics.FileHash(source)), "mapped DLL hash");
         Check(description.Contains(alias), "mapped DLL path");
         Check(NativeDiagnostics.Describe("kernel32.dll").Contains("export missing"), "missing-export fallback");
@@ -175,7 +176,7 @@ static class Program
             Check(fields.Length >= 38, "native binding scan is empty/incomplete");
             foreach (var field in fields)
             {
-                string export = field.Name switch { "_createBurst" => "CreatePeriodicBurst", "_playBurst" => "PlayPeriodicBurst", "_stopBurst" => "StopPeriodicBurst", _ => field.Name };
+                string export = field.Name switch { "_createBurst" => "CreatePeriodicBurst", "_playBurst" => "PlayPeriodicBurst", "_playShapedBurst" => "PlayShapedPeriodicBurst", "_stopBurst" => "StopPeriodicBurst", _ => field.Name };
                 Check(field.GetValue(null)!=null && NativeLibrary.TryGetExport(module, export, out _), "Missing binding/export " + export);
             }
         }

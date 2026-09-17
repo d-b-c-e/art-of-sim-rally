@@ -131,14 +131,14 @@ namespace ArtOfSimRally.Mod
                     GUILayout.Label("      " + LandingController.Status, Wrap);
                 }
 
-                cfg.CrashEffectsEnabled = Toggle(cfg.CrashEffectsEnabled, "Crash vibration (experimental)",
-                    "A short wheel vibration for body impacts. Off by default while testing. Enable while paused; " +
-                    "does not change steering, physics or SimHub telemetry. Landing and crash vibrations do not stack.");
+                cfg.CrashEffectsEnabled = Toggle(cfg.CrashEffectsEnabled, "Crash kick (experimental)",
+                    "A brief kick and fading rebound for body impacts. Off by default while testing. Enable while paused. " +
+                    "Requires wheel support for shaped effects. Landing and crash effects do not stack; SimHub telemetry is unchanged.");
                 if (cfg.CrashEffectsEnabled)
                 {
                     cfg.CrashStrength = Slider(cfg.CrashStrength, 0f, LandingFeedback.MaximumStrengthPercent, "Crash strength",
-                        "Maximum vibration as a percentage of the wheel's nominal force. Start at 5; " +
-                        "range 0-40. Increase gradually; glancing impacts use less than head-on impacts. Zero disables the vibration.");
+                        "Peak kick as a percentage of the wheel's nominal force. Start at 5; " +
+                        "range 0-40. Glancing impacts use less than head-on impacts. Zero disables the kick. Your wheelbase's game FFB gain also scales this effect.");
                     GUILayout.Label("      " + CrashController.Status, Wrap);
                 }
 

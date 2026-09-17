@@ -13,24 +13,39 @@ namespace ArtOfSimRally.Mod
         {
             public int Events, Accepted, Rejected, Suppressed;
             public float Magnitude;
+            public bool HasDelivery;
+            public ImpactDelivery Delivery;
+            public int EarlyStops;
         }
         private readonly LandingFeedback _feedback;
         private readonly Counters[] _counts = { new Counters(), new Counters() };
         private bool _landing, _crash;
         private ImpactKind? _active;
-        private double _endsAt;
         private float _magnitude;
+        private bool _retryCrash;
+        private readonly Action<ImpactDelivery> _observe;
 
-        public ImpactMixer(ILandingOutput output) { _feedback = new LandingFeedback(output); }
+        public ImpactMixer(ILandingOutput output, Func<double> clock = null, Action<ImpactDelivery> observe = null)
+        { _observe = observe; _feedback = new LandingFeedback(output, clock, OnDelivery); }
+        private void OnDelivery(ImpactDelivery delivery)
+        {
+            if (delivery.Kind == ImpactKind.Crash && delivery.Action != "stop") _retryCrash = false;
+            var counts = Counts(delivery.Kind); counts.HasDelivery = true; counts.Delivery = delivery;
+            if (delivery.Action == "stop" && delivery.ElapsedMs >= 0 && delivery.ElapsedMs < LandingFeedback.DurationMs)
+                counts.EarlyStops++;
+            _observe?.Invoke(delivery);
+        }
         private bool Enabled(ImpactKind kind) => kind == ImpactKind.Landing ? _landing : _crash;
-        public bool Available(ImpactKind kind) => Enabled(kind) && _feedback.Available;
-        public string Status(ImpactKind kind) => Enabled(kind) ? _feedback.Status : "Off";
+        public bool Available(ImpactKind kind) => Enabled(kind) && (kind == ImpactKind.Crash ? _feedback.CrashAvailable : _feedback.Available);
+        public string Status(ImpactKind kind) => Enabled(kind) ? (kind == ImpactKind.Crash ? _feedback.CrashStatus : _feedback.Status) : "Off";
         public Counters Counts(ImpactKind kind) => _counts[(int)kind];
 
         public void Prepare(bool landing, bool crash, bool ready, bool idle)
         {
             _landing = landing; _crash = crash;
-            if (_active.HasValue && !Enabled(_active.Value)) Stop();
+            if (!crash) _retryCrash = true;
+            else if (idle && _retryCrash) { _feedback.RetryCrash(); _retryCrash = false; }
+            if (_active.HasValue && !Enabled(_active.Value)) Stop("feature-disabled");
             _feedback.Prepare(landing || crash, ready, idle);
             if (!ready || (!landing && !crash)) _active = null;
         }
@@ -46,20 +61,18 @@ namespace ArtOfSimRally.Mod
             if (_active.HasValue && (magnitude < _magnitude ||
                 (magnitude == _magnitude && (kind == ImpactKind.Landing || _active == kind))))
             { counts.Suppressed++; return ImpactResult.Suppressed; }
-            bool accepted = _feedback.Trigger(intensity, strength, now);
+            bool accepted = _feedback.Trigger(kind, intensity, strength, now);
             if (!accepted) { counts.Rejected++; _active = null; return ImpactResult.Rejected; }
             counts.Accepted++; _active = kind; _magnitude = magnitude;
-            _endsAt = now + LandingFeedback.DurationMs / 1000.0;
             return ImpactResult.Accepted;
         }
         public void Tick(double now)
         {
             _feedback.Tick(now);
-            if (!Finite(now) || now >= _endsAt || now < _endsAt - LandingFeedback.DurationMs / 1000.0)
-                _active = null;
+            if (!_feedback.Active) _active = null;
         }
-        public void Stop(ImpactKind kind) { if (_active == kind) Stop(); }
-        public void Stop() { _feedback.Stop(); _active = null; }
+        public void Stop(ImpactKind kind, string reason = "detector-reset") { if (_active == kind) Stop(reason); }
+        public void Stop(string reason = "reset") { _feedback.Stop(reason); _active = null; }
         public void Shutdown() { _feedback.Shutdown(); _active = null; _landing = _crash = false; }
         private static bool Finite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);
     }

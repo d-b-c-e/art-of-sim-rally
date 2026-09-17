@@ -1,6 +1,6 @@
 # Roadmap
 
-Status reviewed 2026-09-16 after crash implementation and landing/startup investigation.
+Status reviewed 2026-09-17 UTC after the RC3 crash-feel failure and shaped-kick implementation.
 **0.2.5 is published with wheel landing vibration enabled by default at strength 5.**
 See [release evidence](reviews/2026-09-13-release-0.2.5.md) and
 [installed identity](LOCAL-DEPLOYMENT.md).
@@ -25,13 +25,15 @@ crash scenarios pass through the production telemetry sampler and encoded UDP.
 The owner crash drive is preserved and replays exactly: a roughly 145→4 km/h
 head-on event produces almost zero steering output. Probe 0.2.5.4 now adds body
 collision observations; its live drive check is pending. The 0.2.6 candidate
-implements independent opt-in wheel crash vibration and shared landing/crash
+implements an independent opt-in wheel crash effect and shared landing/crash
 periodic ownership. [Candidate and test plan](CRASH-EFFECTS.md).
-All 16 local gates passed; installed 0.2.6-rc.3 also includes the native logging
-correction, timing diagnostics and 0–40% wheel impact range, with settings kept. Its local toolkit pin
-must be replaced by the official release before final publication.
-Next: correlate live collision entries, evaluate wheel timing/feel and compare
-SimHub input/output. No motion signal/profile change is justified yet. See
+RC3 passed all 16 local gates but its owner drive produced no distinct crash cue
+despite 13 accepted commands (KI-38). The next candidate replaces the rapid sine
+with a kick/fading rebound at the same peak, plus playback timing diagnostics.
+See [implementation and evidence](reviews/2026-09-17-crash-kick.md) and the latest
+[gate/install receipt](LOCAL-DEPLOYMENT.md). Next: retest crash feel and ordinary
+landing/steering/lifecycle behavior. Local toolkit pins require official release
+before publication. SimHub motion amplification remains explicitly deferred. See
 [findings and validation sequence](research/2026-09-14-crash-feedback.md) and
 [drive evidence](reviews/2026-09-15-crash-capture.md).
 

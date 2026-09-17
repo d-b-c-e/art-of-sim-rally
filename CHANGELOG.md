@@ -27,6 +27,9 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Experimental crash output now requests a sharp kick with a smaller fading
+  rebound, replacing its rapid vibration at the same peak strength. Landings keep
+  their waveform. Unsupported crash shaping preserves landing availability.
 - Landing and crash wheel vibration now allow strengths up to 40%, twice the
   previous ceiling. Existing values keep their output and defaults stay at 5.
   The two effects still share one finite vibration without adding together.
@@ -37,6 +40,8 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Slow native impact calls no longer consume the managed burst lifetime.
+  Support records call latency and stop reasons to diagnose early interruption.
 - Native toolkit candidate stops writing every changing steering-force sample
   to disk by default. Startup, lifecycle and error logs remain available.
   This removes avoidable driving I/O; the reported startup hitch is not yet reproduced.

@@ -1,6 +1,6 @@
 # Overnight investigation and implementation queue
 
-**Current, 2026-09-16:** 0.2.5 is published with official toolkit
+**Current, 2026-09-17 UTC:** 0.2.5 is published with official toolkit
 v0.13.0. Owner accepted wheel landing vibration and the built-in 30 Hz SimHub
 comparison. The helper was rejected and removed. Remaining work is in the
 [roadmap](ROADMAP.md); full hardware checks remain pending. The dated queue
@@ -8,12 +8,12 @@ entries below preserve earlier states and do not describe the current install.
 
 ## Current follow-through — crash candidate and 0.2.5 feedback
 
-Owner authorized progressing crash response from the saved baseline. Independent
-opt-in wheel crash vibration and shared finite-effect ownership are implemented
-for 0.2.6-rc.1 and retained in installed rc.3 with timing/logging improvements
-and 0–40% wheel impact controls.
-All 16 local gates passed and the exact rc.3 package is installed with
-settings/probe preserved. Next, run the
+Owner's RC3 test found no distinct crash effect despite 13 accepted cues (KI-38).
+Authorized follow-through replaces the rapid vibration with a shaped kick/rebound
+at the same peak, retaining shared ownership and 0–40% controls. Playback timing
+and stop reasons are now observable. See the latest
+[gate/install receipt](LOCAL-DEPLOYMENT.md) and [candidate review](reviews/2026-09-17-crash-kick.md).
+Next, run the
 [front/side/off-on comparison](CRASH-EFFECTS.md). Schema-4 live collision geometry
 and SimHub input/output comparison remain pending; no motion gain change.
 
@@ -21,7 +21,7 @@ Reporter confirms good steering and working handbrake on 0.2.5. Request the
 Haapajarvi support file and short landing clip for KI-5/KI-36. Investigate
 first-contact versus suspension-load timing before changing landing delay or
 changing the detector. Owner authorized stronger wheel effects separately:
-installed rc.3 extends both impact sliders to 40%, preserving existing output
+RC3 extended both impact sliders to 40%, preserving existing peak output
 and default 5. Compare 20/30/40 as appropriate for the wheel; stronger-range
 acceptance remains pending. Reply is drafted in USER-FEEDBACK; nothing sent.
 Owner subsequently tabled motion-telemetry boosting: finish the wheel range and

@@ -66,6 +66,7 @@ static class Program
         public int Creates,Plays,Stops,Releases,Hz,Duration; public bool FailCreate,FailPlay,FailStop;public float Magnitude;
         public int Create(int hz,int duration){Creates++;Hz=hz;Duration=duration;return FailCreate?-1:2;}
         public bool Play(int slot,float magnitude,float hz){Plays++;Magnitude=magnitude;return !FailPlay;}
+        public bool PlayShaped(int slot,float magnitude,float hz,int phase,int fadeMs) => Play(slot,magnitude,hz);
         public bool Stop(int slot){Stops++;return !FailStop;}
         public void Release(){Releases++;}
     }
@@ -196,7 +197,8 @@ static class Program
     }
     static int Main(string[] args)
     {
-        try{Detector();Delivery();GameIntegration();TimingDiagnostics();assertions+=CrashTests.Run();object capture=args.Length==1?Capture(args[0]):null;
+        try{ImpactController.MonotonicNow=()=>UnityEngine.Time.realtimeSinceStartup;
+            Detector();Delivery();GameIntegration();TimingDiagnostics();assertions+=CrashTests.Run();assertions+=ImpactPlaybackTests.Run();object capture=args.Length==1?Capture(args[0]):null;
             Console.WriteLine(JsonSerializer.Serialize(new{status="passed",assertions,capture}));return 0;}
         catch(Exception e){Console.Error.WriteLine(e);return 1;}
     }

@@ -42,9 +42,22 @@ third-party binaries, nothing that would force the repo private.
 | `tools/installer/README.txt` | Standalone ZIP guide; packaging replaces `@RELEASE@`. Keep aligned with player docs; link online to files not in the archive. |
 | `tools/testing/Test-Installer.ps1` | Isolated real batch/Windows PowerShell installer checks; also included in Test-Rc. No game/hardware output. |
 
-## Status (2026-09-16) — do not overstate this
+## Status (2026-09-17 UTC) — do not overstate this
 
-**Stronger impacts authorized:** the 0.2.6 candidate extends both landing and
+**Crash kick implementation (KI-38):** RC3 owner drive produced 13 accepted
+crash cues at up to .1952, but no distinct felt effect. Saved crashes are now
+**on/19.52381**, landing on/20; preserve these newer settings. Candidate uses
+upstream shaped finite sine: 6.25 Hz, phase 90 degrees, full 120 ms fade, same peak
+strength. Landing waveform/detection, steering, physics and telemetry stay fixed.
+Driver parameter readback is required for shaping; rejection latches crashes
+unavailable until off/on while paused, preserving the slot for legacy landings.
+Managed expiry uses monotonic time after native Play returns; support logs
+latency, stop reasons and elapsed command time. This is not actuator measurement.
+Read `docs/reviews/2026-09-17-crash-kick.md` and the latest deployment receipt
+for exact gate/install status. Physical kick acceptance and official repin remain
+pending. Earlier paragraphs describe previous artifacts and settings.
+
+**RC3 stronger impacts:** the 0.2.6 candidate extends both landing and
 crash strength from 0–20 to **0–40%** of nominal wheel force. One shared constant
 and amplitude mapping serve UI limits, overlap arbitration and final output.
 No rescaling/migration: valid existing values keep their force, including the
