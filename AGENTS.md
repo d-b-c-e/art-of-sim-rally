@@ -54,6 +54,14 @@ measurement. Single-axis direction0 is explicitly documented by Microsoft;
 no source-level axis/cancellation defect was found. KI-38 remains open; next is
 an attended standalone comparison of finite constant versus periodic effects.
 Read `docs/reviews/2026-09-17-rc4-crash-feel.md`. No new game payload deployed.
+Developer-only A/B/C diagnostic is now built from upstream clean `7d9c8f6`;
+both architecture builds/fake checks passed. Frozen owner x64 copy is
+`results/attended-effects-7d9c8f6/attended_effects.exe`, with Desktop shortcut
+**Art of Sim Rally - wheel effect test**. The agent has not launched it or
+applied force. Owner clicks Find wheels/select/Connect, then finite 120 ms
+A/B/C effects starting at 5%; logs live under `%LOCALAPPDATA%\DbceWheel`.
+UI/real-driver/physical results remain pending; API PLAYING does not establish
+physical torque. Exact hash/receipt in review.
 
 **Crash kick installed (KI-38):** RC3 owner drive produced 13 accepted
 crash cues at up to .1952, but no distinct felt effect. Saved crashes are now

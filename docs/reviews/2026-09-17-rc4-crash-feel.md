@@ -65,3 +65,47 @@ or change production routing merely because API calls succeeded.
 RC4 remains installed unchanged, public stable remains 0.2.5, and KI-38 remains
 open. A new waveform, alternate path or driver setting requires evidence from
 that comparison and its own regression/attended checks.
+
+## Standalone diagnostic ready, physical test pending
+
+Toolkit branch `codex/attended-effect-comparison` is frozen at
+`7d9c8f694ca35f5f92fff2a4a3cd93ad7e086286`, pushed on that branch without
+an Actions run, merge or release. It compiles the unchanged RC4
+adapter source into a separate developer executable. Only the diagnostic's
+six files differ from `c319b02`; shipping native, managed and profile sources
+are unchanged. Both x64/x86 builds, policy/dispatch/finite-constant fake tests
+and frozen production burst/focus/watchdog fake tests passed. Embedded source
+identity, architecture and hashes were verified. These are offline checks;
+the agent has not launched either UI or acquired/applied hardware output.
+
+The owner copy is `results/attended-effects-7d9c8f6/attended_effects.exe`, x64
+SHA-256 `25169077DC3EE9FBFEBD791547A01392E858288FEB2C544E446CA44CF6E39B2E`.
+The Desktop shortcut **Art of Sim Rally - wheel effect test** targets that exact
+copy. The folder also preserves the README, build/test logs, upstream manifest
+and [copy receipt](../../results/attended-effects-7d9c8f6/consumer-receipt.json).
+No game payload or setting was changed, and no game RC gate was rerun for this
+developer-only addition.
+
+With games closed, the owner opens the tool, clicks **Find wheels**, selects
+the MOZA R12, and clicks **Connect selected wheel**. At the initial **5%**, click
+A (finite constant pulse), B (crash sine alone), then C (same sine during zero
+steering updates), noting which can be felt. Every click is a separate 120 ms
+request with a one-second cooldown; 10% and 20% are optional manual choices.
+**STOP / Disconnect**, closing, or losing focus stops and disconnects. No
+automatic playback, reconnect, retry or gain escalation occurs. A/B/C match
+peak and duration, not impulse or waveform. Device acquisition temporarily
+disables autocenter and restores its original value on cleanup, including an
+initialization failure; no Pit House profile or global gain is written.
+
+Logs save under `%LOCALAPPDATA%\DbceWheel\attended-effects-*.log`. They record
+identity, axes/directions/gain, effect echo, raw query results and timing, and
+PLAYING status before/after C's updates. Late status queries cannot dispatch a
+zero update after the test window or count it as concurrent playback evidence.
+No updates fitting inside the window makes that comparison inconclusive.
+Disk writes occur only when idle, with a bounded active-test memory buffer.
+Parameter echo and PLAYING remain API observations, not measured torque.
+
+If A is felt and B is not, investigate periodic rendering/routing next. If B
+works but C does not, compare playback status and update timing. Neither result
+alone proves an axis, firmware, filter or mixing defect. Visual UI behavior,
+real-driver property support and all physical feel results remain pending.

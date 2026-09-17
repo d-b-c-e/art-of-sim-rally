@@ -81,6 +81,12 @@ views first, as described in the [motion investigation](research/2026-09-14-cras
 
 ## Short attended comparison
 
+**RC4 follow-up:** normal steering worked, but the owner felt none of three
+accepted full-intensity crash cues. The next check is the standalone A/B/C
+effect diagnostic in the [RC4 investigation](reviews/2026-09-17-rc4-crash-feel.md),
+before another stage drive. The sequence below remains the eventual in-game
+acceptance check once the missing effect is understood.
+
 1. With crash kick **off**, verify ordinary steering and one jump still feel
    as before. Note stage/car. Drive one front impact and one glancing side impact.
 2. Pause, enable crash kick at **5**, then repeat. The front impact should
