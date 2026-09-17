@@ -5,13 +5,16 @@ owner drive shows head-on deceleration with almost no steering force. The new
 wheel cue addresses that missing response without changing the steering curve.
 RC3 and shaped RC4 both failed the owner's feel test (KI-38). RC4 accepted three
 full-intensity commands with no early managed stops, but no felt crash effect;
-ordinary steering worked. [Current investigation](reviews/2026-09-17-rc4-crash-feel.md).
+ordinary steering worked. The owner preferred the standalone constant pulse
+(method A) at 40%, but requested more strength. The next candidate uses that
+route. [Current investigation](reviews/2026-09-17-constant-crash.md).
 
 Pause, open Ctrl+F10 → **Force feedback → Crash kick (experimental)**,
-and start with **Crash strength 5**. Strength is independent of steering and
-landing strength, with a hard cap of 40% of nominal wheel force. The effect
-requires sine phase/envelope support and exact driver parameter readback. Existing saved controls,
-landing settings and steering strength are preserved. No SimHub helper is needed.
+and choose **Crash strength**. New settings default to **50**, with a **0–100**
+range independent of steering and landing strength. Existing saved strengths
+are preserved; select 50 manually when comparing with the new default.
+The pulse requires the toolkit's finite constant-force support. Landing settings
+and steering strength are preserved. No SimHub helper is needed.
 
 ## What the candidate does
 
@@ -24,30 +27,33 @@ landing settings and steering strength are preserved. No SimHub helper is needed
 - Ignores Road-tagged and predominantly vertical contacts, requires recent
   continuous player motion, and disarms across pause, reset, teleport, stale
   sampling, car change or focus loss. At most eight contacts are inspected.
-- Requests a finite 6.25 Hz, 120 ms sine starting at its positive peak, fading
-  to zero across the entire lifetime: a quick kick followed by a smaller opposite
-  rebound. This is a generic impact cue, not collision-derived steering torque.
+- Requests a finite **120 ms constant-force pulse** in the positive X direction,
+  followed by release. This matches method A from the owner's standalone test.
+  It is a generic jolt, not collision-derived steering torque or a directional
+  simulation of the car's impact.
   Landing retains its 25 Hz, 120 ms, phase-zero sine without an envelope.
   Repeated contacts are suppressed for
   350 ms; a stronger contact within the initial 120 ms may replace the first.
   It can restart that finite burst, but cannot create sustained scrape vibration.
-- Shares **one** native effect with landing vibration. Strongest magnitude wins;
-  crash wins a tie. A suppressed cue is discarded, never queued for later.
+- Allows **one active impact** at a time, using separate cached constant and sine
+  handles. Strongest magnitude wins; crash wins a tie. The previous effect must
+  stop before its replacement starts. A suppressed cue is discarded, never queued for later.
   Disabling/resetting one feature cannot stop a cue currently owned by the other.
   All output stops for pause, focus loss, finish/replay, device loss or shutdown.
 
-The 40% cap bounds periodic output, not combined steering torque plus vibration.
-Both impact sliders now allow 0–40. Existing values keep their output: 20 is still
-20%, and 40 requests twice the previous maximum. Defaults remain 5, and crashes
-remain opt-in. Keep ordinary steering settings unchanged during the comparison;
-increase impact strength gradually. Detection timing is unchanged; crash shape differs
-from RC3 even at the same strength. Wheelbase global game FFB gain scales this too.
-Higher physical output remains subject to the wheel/driver's limits and needs testing.
+Crash strength 100 requests full nominal force for that effect. It does not
+guarantee unused headroom: steering and the crash pulse may saturate together,
+and the wheelbase's global gain/filters still apply. Existing numbers retain their
+nominal amplitude, but the constant waveform differs from the old crash sine.
+Landing stays at default 5, range 0–40, with unchanged detection and waveform.
+Crashes remain opt-in. Keep other tuning fixed while comparing 50, then higher
+values if needed; physical response above the owner's 40% test is unverified.
 
-Shaped requests are checked by reading the driver parameters back before starting.
+Finite duration is checked by reading the driver parameter back before starting.
 An unsupported, adjusted or failed request disables crash output until crash is
-toggled off/on while paused. The slot remains available for legacy landings;
-there is no silent fallback to the old vibration and no retry of a stale impact.
+toggled off/on while paused. The separate landing handle remains usable.
+There is no silent fallback to the
+old vibration and no retry of a stale impact.
 The native layer stops the effect after 120 ms even if Unity stalls.
 
 Support retains the last delivery, native call duration, managed stop reason and
@@ -81,20 +87,19 @@ views first, as described in the [motion investigation](research/2026-09-14-cras
 
 ## Short attended comparison
 
-**RC4 follow-up:** normal steering worked, but the owner felt none of three
-accepted full-intensity crash cues. The next check is the standalone A/B/C
-effect diagnostic in the [RC4 investigation](reviews/2026-09-17-rc4-crash-feel.md),
-before another stage drive. The sequence below remains the eventual in-game
-acceptance check once the missing effect is understood.
+**Current acceptance limit:** the owner preferred the standalone constant pulse
+at 40%, but has not accepted the stronger range or its in-game integration.
+The Desktop tester now starts at 50 and offers manual choices through 100.
+See [candidate evidence and deployment](reviews/2026-09-17-constant-crash.md).
 
 1. With crash kick **off**, verify ordinary steering and one jump still feel
    as before. Note stage/car. Drive one front impact and one glancing side impact.
-2. Pause, enable crash kick at **5**, then repeat. The front impact should
-   have a distinct kick/rebound; the side hit should be weaker. Increase gradually
-   only after checking the low setting. Ordinary braking and restarts should not
+2. Pause, enable crash kick and choose a suitable strength; **50** is the new
+   default. The front impact should have a distinct short push/release; the side
+   hit should be weaker. Increase gradually if needed. Ordinary braking and restarts should not
    trigger it. A landing/body contact should not double the vibration.
-   For comparison with the old RC3 buzz, keep Pit House and mod strength fixed.
-   Existing saved strength is preserved, not reset to 5 by installation.
+   Keep Pit House and other settings fixed. Existing saved strength is preserved,
+   not reset to 50 by installation.
 3. Check pause/focus loss, finish, disabling either feature, and quit. Save the
    support file while paused; it reports separate event, accepted/rejected and
    overlap-suppressed counters. Confirm settings survive relaunch.

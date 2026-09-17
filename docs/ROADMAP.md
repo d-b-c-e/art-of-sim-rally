@@ -1,6 +1,6 @@
 # Roadmap
 
-Status reviewed 2026-09-17 UTC after the RC3 crash-feel failure and shaped-kick implementation.
+Status reviewed 2026-09-17 UTC after the standalone crash-effect comparisons.
 **0.2.5 is published with wheel landing vibration enabled by default at strength 5.**
 See [release evidence](reviews/2026-09-13-release-0.2.5.md) and
 [installed identity](LOCAL-DEPLOYMENT.md).
@@ -26,15 +26,19 @@ The owner crash drive is preserved and replays exactly: a roughly 145→4 km/h
 head-on event produces almost zero steering output. Probe 0.2.5.4 now adds body
 collision observations; its live drive check is pending. The 0.2.6 candidate
 implements an independent opt-in wheel crash effect and shared landing/crash
-periodic ownership. [Candidate and test plan](CRASH-EFFECTS.md).
+impact ownership. [Candidate and test plan](CRASH-EFFECTS.md).
 RC3 passed all 16 local gates but its owner drive produced no distinct crash cue
 despite 13 accepted commands (KI-38). RC4 replaced the rapid sine
 with a kick/fading rebound at the same peak, plus playback timing diagnostics.
 That RC4 retest also failed: three shape-accepted cues, zero early managed stops,
-no felt kick, normal steering intact. The next step is an attended standalone
-finite-effect comparison to isolate periodic rendering/mixing (KI-38), with no
-new gain increase or claim of an identified driver bug.
-See [implementation and evidence](reviews/2026-09-17-crash-kick.md) and the latest
+no felt kick, normal steering intact. In the standalone comparison, only the
+constant pulse was noticeable at 20%; the owner preferred it at 40% but wanted
+more strength. Authorized follow-through uses a finite constant crash pulse,
+new-settings default50/range0–100; landing stays default5/range0–40. API status
+does not prove physical output, and the stronger range remains unaccepted.
+Findings and the generic finite constant API are contributed upstream for other
+consumers; their tunes are not automatically changed.
+See [implementation and evidence](reviews/2026-09-17-constant-crash.md) and the latest
 [gate/install receipt](LOCAL-DEPLOYMENT.md). Next: retest crash feel and ordinary
 landing/steering/lifecycle behavior. Local toolkit pins require official release
 before publication. SimHub motion amplification remains explicitly deferred. See

@@ -3,8 +3,10 @@
 For tuning instructions, see [the setup guide](SETUP.md#steering-force-and-landing-vibration).
 The technical history below explains how the current force curve was established.
 
-The 0.2.6 candidate adds opt-in [crash vibration](CRASH-EFFECTS.md), with one
-shared finite output for landing/crash cues. Steering arithmetic is unchanged;
+The 0.2.6 candidate adds an opt-in [constant-force crash jolt](CRASH-EFFECTS.md),
+with one active impact at a time across cached sine and constant handles.
+Crash strength defaults to 50 for new settings, range 0–100; landing stays 5/0–40.
+Steering arithmetic is unchanged;
 live collision timing and feel still need testing.
 
 Version 0.2.5: [landing vibration](LANDING-EFFECTS.md) uses a separate finite

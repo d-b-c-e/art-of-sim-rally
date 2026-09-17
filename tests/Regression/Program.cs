@@ -120,20 +120,26 @@ static class Program
         SettingsPersistence.Write(original,path);
         string before=File.ReadAllText(path);
         Check(new Settings().LandingEffectsEnabled && new Settings().LandingStrength==5f,"new settings use the default landing vibration");
-        Check(!new Settings().CrashEffectsEnabled && new Settings().CrashStrength==5f,"experimental crash effect must default off");
+        Check(!new Settings().CrashEffectsEnabled && new Settings().CrashStrength==50f,"experimental crash effect must default off at strength50");
         var serializer=new XmlSerializer(typeof(Settings));
         using(var legacyXml=new StringReader("<Settings><Strength>15</Strength></Settings>"))
         {
             var legacy=(Settings)serializer.Deserialize(legacyXml)!;
             Check(legacy.LandingEffectsEnabled && legacy.LandingStrength==5f && legacy.Strength==15,"pre-feature settings inherit landing defaults without altering steering");
-            Check(!legacy.CrashEffectsEnabled && legacy.CrashStrength==5f,"upgrading silently enabled experimental crashes");
+            Check(!legacy.CrashEffectsEnabled && legacy.CrashStrength==50f,"upgrading silently enabled experimental crashes or lost new default");
         }
         using(var optedOutXml=new StringReader("<Settings><LandingEffectsEnabled>false</LandingEffectsEnabled><LandingStrength>3.5</LandingStrength></Settings>"))
         {
             var optedOut=(Settings)serializer.Deserialize(optedOutXml)!;
             Check(!optedOut.LandingEffectsEnabled && optedOut.LandingStrength==3.5f,"saved opt-out and strength survive upgrade");
         }
-        var changed=new Settings { Strength=26, Smoothing=.2f, BonnetHeight=2.345f, LandingEffectsEnabled=true, LandingStrength=40f, CrashEffectsEnabled=true, CrashStrength=30f };
+        foreach(string savedStrength in new[]{"0","19.52381","40","100"})
+        using(var savedCrash=new StringReader("<Settings><CrashEffectsEnabled>true</CrashEffectsEnabled><CrashStrength>"+savedStrength+"</CrashStrength></Settings>"))
+        {
+            var saved=(Settings)serializer.Deserialize(savedCrash)!;
+            Check(saved.CrashEffectsEnabled && saved.CrashStrength==float.Parse(savedStrength,System.Globalization.CultureInfo.InvariantCulture),"new default overwrote a saved crash tune");
+        }
+        var changed=new Settings { Strength=26, Smoothing=.2f, BonnetHeight=2.345f, LandingEffectsEnabled=true, LandingStrength=40f, CrashEffectsEnabled=true, CrashStrength=100f };
         var pending=new DeferredSave(); pending.MarkDirty();
         using(var locked=File.Open(path,FileMode.Open,FileAccess.ReadWrite,FileShare.None))
             Check(!pending.Flush(0,false,false,()=>{ SettingsPersistence.Write(changed,path); return true; }) && pending.Pending,"locked file reported success");
@@ -145,7 +151,7 @@ static class Program
             var restored=(Settings)new XmlSerializer(typeof(Settings)).Deserialize(input)!;
             Check(restored.Strength==26 && restored.Smoothing==.2f && restored.BonnetHeight==2.345f,"UMM-compatible settings roundtrip changed values");
             Check(restored.LandingEffectsEnabled && restored.LandingStrength==40f,"extended landing settings did not persist");
-            Check(restored.CrashEffectsEnabled && restored.CrashStrength==30f,"extended crash settings did not persist");
+            Check(restored.CrashEffectsEnabled && restored.CrashStrength==100f,"extended crash settings did not persist");
         }
     }
 
@@ -159,12 +165,13 @@ static class Program
         Check(NativeDiagnostics.Describe("UnityForceFeedback.dll").Contains("not loaded"), "inspection loaded native DLL");
         Check(WheelFfbNative.Load(directory, "UnityForceFeedback.dll"), WheelFfbNative.LastError);
         Check(!WheelFfbNative.Ready, "binding unexpectedly acquired a device");
-        // 0.7.0 adds shaped finite bursts, retaining the previous 41 exports.
-        Check(WheelFfbNative.Version == 700, "native component changed; review candidate ABI");
+        // 0.8.0 adds finite constant pulses without removing prior exports.
+        Check(WheelFfbNative.Version == 800, "native component changed; review candidate ABI");
         Check(WheelFfbNative.SupportsPeriodicBursts, "finite periodic burst API is unavailable");
         Check(WheelFfbNative.SupportsShapedPeriodicBursts, "shaped finite burst API is unavailable");
+        Check(WheelFfbNative.SupportsConstantBursts, "finite constant burst API is unavailable");
         string description = NativeDiagnostics.Describe("UnityForceFeedback.dll");
-        Check(description.Contains("0.7.0"), "native version decoding");
+        Check(description.Contains("0.8.0"), "native version decoding");
         Check(description.Contains(NativeDiagnostics.FileHash(source)), "mapped DLL hash");
         Check(description.Contains(alias), "mapped DLL path");
         Check(NativeDiagnostics.Describe("kernel32.dll").Contains("export missing"), "missing-export fallback");
@@ -176,7 +183,12 @@ static class Program
             Check(fields.Length >= 38, "native binding scan is empty/incomplete");
             foreach (var field in fields)
             {
-                string export = field.Name switch { "_createBurst" => "CreatePeriodicBurst", "_playBurst" => "PlayPeriodicBurst", "_playShapedBurst" => "PlayShapedPeriodicBurst", "_stopBurst" => "StopPeriodicBurst", _ => field.Name };
+                string export = field.Name switch {
+                    "_createBurst" => "CreatePeriodicBurst", "_playBurst" => "PlayPeriodicBurst",
+                    "_playShapedBurst" => "PlayShapedPeriodicBurst", "_stopBurst" => "StopPeriodicBurst",
+                    "_createConstantBurst" => "CreateConstantBurst", "_playConstantBurst" => "PlayConstantBurst",
+                    "_stopConstantBurst" => "StopConstantBurst", "_releaseConstantBursts" => "ReleaseConstantBursts",
+                    _ => field.Name };
                 Check(field.GetValue(null)!=null && NativeLibrary.TryGetExport(module, export, out _), "Missing binding/export " + export);
             }
         }

@@ -637,6 +637,13 @@
         <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.UpdatePeriodic(System.Int32,System.Single,System.Single)">
             <summary>Envelope update; safe to call every frame (unchanged envelopes never reach the driver).</summary>
         </member>
+        <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.CreateConstantBurst(System.Int32)">
+            <summary>Allocate an idle independent constant slot, duration 1..500 ms. Native 0.8.0.</summary>
+        </member>
+        <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.PlayConstantBurst(System.Int32,System.Single)">
+            <summary>One finite signed constant pulse [-1,1]. Zero stops. Never stops steering.
+            Acceptance is not measured torque or combined-output headroom. Do not retry stale events.</summary>
+        </member>
         <member name="M:Dbce.Wheel.Ffb.WheelFfbNative.CreatePeriodicBurst(System.Int32,System.Int32)">
             <summary>Create an idle sine burst (1..100 Hz, 1..500 ms), or -1 on failure.
             Shares four slots with continuous periodics. Requires native component 0.6.0.</summary>

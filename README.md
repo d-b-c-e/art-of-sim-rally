@@ -89,9 +89,10 @@ checks are in [KNOWN-ISSUES.md](docs/KNOWN-ISSUES.md).
 
 ## Development
 
-The 0.2.6 candidate adds an optional [crash kick and rebound](docs/CRASH-EFFECTS.md),
-and extends landing/crash strength to **40%**. Existing strengths keep their
-peak amplitude; defaults remain 5. Missing crash feel is still under investigation.
+The 0.2.6 candidate adds an optional [constant-force crash jolt](docs/CRASH-EFFECTS.md),
+with a new-settings strength of **50** and range **0–100**. Landing strength stays
+at default 5, range 0–40. Saved strengths are preserved. In-game crash feel still
+needs testing; a higher nominal setting does not guarantee unused wheel headroom.
 The public download remains 0.2.5.
 
 [Build instructions](docs/BUILDING.md) · [Documentation index](docs/README.md) ·

@@ -59,11 +59,9 @@ static class CrashTests
     sealed class Output:ILandingOutput
     {
         public int Creates,Plays,Stops,Releases;public float Magnitude;public bool FailPlay,FailStop;
-        public int Create(int hz,int ms){Creates++;Check(hz==25&&ms==120,"shared burst changed waveform");return 4;}
-        public bool Play(int slot,float magnitude,float hz){Plays++;Magnitude=magnitude;return !FailPlay;}
-        public bool PlayShaped(int slot,float magnitude,float hz,int phase,int fadeMs)
-        { Check(hz==6.25f&&phase==9000&&fadeMs==120,"wrong kick waveform");return Play(slot,magnitude,hz); }
-        public bool Stop(int slot){Stops++;return !FailStop;}
+        public int Create(ImpactKind kind,int hz,int ms){Creates++;Check(hz==(kind==ImpactKind.Landing?25:0)&&ms==120,"impact type/duration changed");return 4;}
+        public bool Play(ImpactKind kind,int slot,float magnitude,float hz){Plays++;Magnitude=magnitude;return !FailPlay;}
+        public bool Stop(ImpactKind kind,int slot){Stops++;return !FailStop;}
         public void Release(){Releases++;}
     }
     static void Mixing()
@@ -76,10 +74,11 @@ static class CrashTests
             Check(m.Trigger(first,1,10,1)==ImpactResult.Accepted,"first cue missing");
             var result=m.Trigger(second,1,10,1.01);
             Check(result==(crashFirst?ImpactResult.Suppressed:ImpactResult.Accepted),"crash did not win equal-strength overlap");
-            Check(o.Creates==1&&o.Magnitude==.1f,"overlap allocated second effect or summed amplitude");
-            m.Prepare(false,true,true,true);Check(o.Stops==0&&o.Releases==0,"disabling landing killed crash");
-            m.Stop(ImpactKind.Landing);Check(o.Stops==0,"landing reset killed crash");
-            m.Tick(1.14);Check(o.Stops==1,"finite shared effect did not stop");
+            Check(o.Creates==2&&o.Magnitude==.1f,"impact handle cache or amplitude incorrect");
+            int stopped=o.Stops;Check(stopped==(crashFirst?0:1),"replacement did not stop previous effect");
+            m.Prepare(false,true,true,true);Check(o.Stops==stopped&&o.Releases==0,"disabling landing killed crash");
+            m.Stop(ImpactKind.Landing);Check(o.Stops==stopped,"landing reset killed crash");
+            m.Tick(1.14);Check(o.Stops==stopped+1,"finite impact did not stop");
             int plays=o.Plays;m.Tick(2);Check(o.Plays==plays,"suppressed event replayed later");
             m.Prepare(false,false,true,true);Check(o.Releases==1,"last owner leaked slot");
         }
@@ -90,7 +89,7 @@ static class CrashTests
         mixer.Prepare(true,false,true,true);Check(output.Stops==0,"disabling crash killed landing");
         mixer.Prepare(false,false,true,true);Check(output.Stops==1&&output.Releases==1,"disable left periodic output");
         mixer.Prepare(false,true,true,true);mixer.Trigger(ImpactKind.Crash,100,100,1);
-        Check(output.Magnitude==.4f,"shared malformed settings exceeded 40% cap");
+        Check(output.Magnitude==1f,"crash strength failed to reach or exceeded nominal 100% cap");
         mixer.Prepare(false,true,false,true);Check(!mixer.Available(ImpactKind.Crash)&&output.Stops==2,"device loss failed to stop");
         mixer.Prepare(false,true,true,true);output.FailPlay=true;
         Check(mixer.Trigger(ImpactKind.Crash,1,5,2)==ImpactResult.Rejected,"rejection not reported");
@@ -107,9 +106,9 @@ static class CrashTests
         Check(mixer.Trigger(ImpactKind.Crash,1,40,10.02)==ImpactResult.Accepted&&output.Magnitude==.4f,"40% crash did not replace weaker landing");
         Check(mixer.Trigger(ImpactKind.Landing,1,35,10.03)==ImpactResult.Suppressed,"weaker landing replaced stronger crash");
         Check(mixer.Trigger(ImpactKind.Landing,100,100,10.04)==ImpactResult.Suppressed,"capped landing defeated crash tie priority");
-        Check(output.Creates==1&&output.Plays==2&&output.Magnitude==.4f,"strong effects stacked or allocated a second slot");
+        Check(output.Creates==2&&output.Plays==2&&output.Magnitude==.4f,"strong effects stacked or allocated during playback");
         Check(mixer.Counts(ImpactKind.Crash).Magnitude==output.Magnitude,"mixer and device strength disagree");
-        mixer.Tick(10.141);Check(output.Stops==1,"strong mixed effect did not stop");
+        mixer.Tick(10.141);Check(output.Stops==2,"strong mixed effect did not stop old and new outputs");
         mixer.Tick(11);Check(output.Plays==2,"suppressed strong cue replayed later");mixer.Shutdown();
     }
     static readonly MethodInfo CollisionHook=typeof(CrashController).GetMethod("BeforeCollision",BindingFlags.NonPublic|BindingFlags.Static);
@@ -151,7 +150,7 @@ static class CrashTests
             Check(Native.Plays-before==(interruption=="none"?1:0),"collision gate failed: "+interruption);
             if(interruption=="none")
             {
-                Check(Native.LastMagnitude==.05f,"configured default crash strength lost");
+                Check(Native.LastMagnitude==.5f,"configured default crash strength lost");
                 int stops=Native.Stops;GameState.IsDriving=false;ImpactController.Tick();
                 Check(Native.Stops==stops+1,"pause failed to stop active crash");
             }
@@ -161,9 +160,9 @@ static class CrashTests
         Check(many.Reads==8,"unbounded contact work");
         foreach(string stop in new[]{"pause","focus","mod-off","ffb-off","device","restart","crash-off","shutdown"})
         {
-            var car=SetUp();Mod.Settings.CrashStrength=40;
+            var car=SetUp();Mod.Settings.CrashStrength=100;
             CollisionHook.Invoke(null,new object[]{new PlayerCollider{body=car.body},Hit()});int stops=Native.Stops;
-            Check(Native.LastMagnitude==.4f,"crash controller lost extended strength");
+            Check(Native.LastMagnitude==1f,"crash controller lost extended strength");
             if(stop=="pause")GameState.IsDriving=false;
             if(stop=="focus")Application.isFocused=false;
             if(stop=="mod-off")Mod.Enabled=false;

@@ -76,7 +76,7 @@ namespace ArtOfSimRally.Mod
                 if (Main.Settings.DiagnosticLogging)
                     ModLog.Info($"Crash FFB normalSpeed={Signal.LastNormalSpeed:F2}m/s intensity={intensity:F3} " +
                         $"magnitude={ImpactController.Magnitude(ImpactKind.Crash):F4} duration={LandingFeedback.DurationMs}ms " +
-                        $"shape=kick-rebound frequency={LandingFeedback.CrashFrequency}Hz phase=90deg fade=120ms result={result}");
+                        $"shape=constant-pulse direction=positive-X duration=120ms result={result}");
             }
             catch (Exception ex)
             {

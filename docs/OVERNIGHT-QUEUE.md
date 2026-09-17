@@ -11,14 +11,21 @@ entries below preserve earlier states and do not describe the current install.
 Owner's RC3 test found no distinct crash effect despite 13 accepted cues (KI-38).
 The subsequent shaped RC4 test also failed: three full-intensity cues with no
 early managed cancellation, but no felt effect; ordinary steering worked.
-Prioritize the standalone attended constant/periodic comparison before retuning.
-Authorized follow-through replaces the rapid vibration with a shaped kick/rebound
-at the same peak, retaining shared ownership and 0–40% controls. Playback timing
-and stop reasons are now observable. See the latest
-[gate/install receipt](LOCAL-DEPLOYMENT.md) and [candidate review](reviews/2026-09-17-crash-kick.md).
+The completed standalone comparison favored the constant pulse (A) at 40%,
+though still too weak. Owner requested default50/range0–100 and contribution
+of findings to the shared toolkit. The next candidate uses a finite constant
+crash pulse while preserving landing5/0–40 and one active impact. Playback timing
+and stop reasons remain observable. See the latest
+[gate/install receipt](LOCAL-DEPLOYMENT.md) and [candidate review](reviews/2026-09-17-constant-crash.md).
 Next, run the
 [front/side/off-on comparison](CRASH-EFFECTS.md). Schema-4 live collision geometry
 and SimHub input/output comparison remain pending; no motion gain change.
+
+Queued separately: toolkit UX coordinator requested the UX-1 Simple/Advanced
+rollout (guidance `a84bebab5ec2abdcd5140b9c63c139ccff86a7d3`) on 2026-09-17.
+Preserve this crash candidate and owner tunes; scope UI work in a separate
+change after the in-flight force implementation. This entry records the request,
+not completed UX adoption. No unattended physical tests or public release.
 
 Reporter confirms good steering and working handbrake on 0.2.5. Request the
 Haapajarvi support file and short landing clip for KI-5/KI-36. Investigate

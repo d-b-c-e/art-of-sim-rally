@@ -5,8 +5,8 @@ namespace ArtOfSimRally.Mod
     internal enum ImpactKind { Landing, Crash }
     internal enum ImpactResult { Unavailable, Suppressed, Accepted, Rejected }
 
-    // Both cues own the SAME finite native effect. Never sum their amplitudes
-    // or let one feature release a slot still used by the other.
+    // One logical active impact owns either a finite sine or constant effect.
+    // Never play both together or let one feature reset the other's cue.
     internal sealed class ImpactMixer
     {
         internal sealed class Counters
@@ -46,7 +46,7 @@ namespace ArtOfSimRally.Mod
             if (!crash) _retryCrash = true;
             else if (idle && _retryCrash) { _feedback.RetryCrash(); _retryCrash = false; }
             if (_active.HasValue && !Enabled(_active.Value)) Stop("feature-disabled");
-            _feedback.Prepare(landing || crash, ready, idle);
+            _feedback.Prepare(landing, crash, ready, idle);
             if (!ready || (!landing && !crash)) _active = null;
         }
         public ImpactResult Trigger(ImpactKind kind, float intensity, float strength, double now)
@@ -54,7 +54,7 @@ namespace ArtOfSimRally.Mod
             Tick(now);
             if (!Available(kind) || !Finite(intensity) || !Finite(strength) || !Finite(now) ||
                 now < 0 || intensity <= 0 || strength <= 0) return ImpactResult.Unavailable;
-            float magnitude = LandingFeedback.MagnitudeFor(intensity, strength);
+            float magnitude = LandingFeedback.MagnitudeFor(kind, intensity, strength);
             var counts = Counts(kind); counts.Events++; counts.Magnitude = magnitude;
             // Strongest wins; crash wins a tie. A suppressed cue is dropped,
             // never delayed until after the physical event has passed.

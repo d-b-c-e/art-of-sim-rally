@@ -30,7 +30,7 @@ explained by confusing Pit House global gain with the mod's steering-only gain.
 Existing output was three identical 25 Hz cycles over 120 ms; waveform and early
 stop timing are leads, not a proven driver diagnosis. No landing cues occurred.
 
-Candidate replaces only crash shape with a 6.25 Hz/120 ms peak-start sine and
+RC4 replaced only crash shape with a 6.25 Hz/120 ms peak-start sine and
 full-lifetime fade, using the upstream shaped-burst API. Peak limits, collision
 detection, steering and motion signals remain unchanged. Managed expiry now starts
 after native Play returns; per-event timing/reason diagnostics distinguish
@@ -60,6 +60,13 @@ Owner only faintly felt A at 20%, and requested more range. Optional
 30/40% tester choices are installed via `38bbfa7`, with the same waveforms/durations and 5%
 starting setting. API gain/status readbacks do not establish motor torque or
 Pit House settings; the underlying crash response remains unaccepted.
+
+The subsequent four-request 40% comparison favored constant pulse A, still too
+weak for the owner. Owner requests a constant crash jolt, default50/range0–100,
+and sharing the findings in the toolkit. The tester now offers that range;
+the next game candidate uses a finite constant pulse with independent cached
+handles and one active impact. Landing stays default5/range0–40. No stronger
+physical or in-game acceptance yet. See [follow-through](reviews/2026-09-17-constant-crash.md).
 
 ### KI-37 — Native force tracing performs synchronous driving I/O by default
 

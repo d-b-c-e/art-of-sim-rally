@@ -91,7 +91,7 @@ namespace ArtOfSimRally.Mod
 
         // Experimental until an attended collision/feel comparison is complete.
         public bool CrashEffectsEnabled = false;
-        public float CrashStrength = 5f;
+        public float CrashStrength = 50f;
 
         public bool DiagnosticLogging = false;
 

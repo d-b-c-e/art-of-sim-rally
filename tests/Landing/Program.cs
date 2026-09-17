@@ -64,10 +64,9 @@ static class Program
     sealed class Output:ILandingOutput
     {
         public int Creates,Plays,Stops,Releases,Hz,Duration; public bool FailCreate,FailPlay,FailStop;public float Magnitude;
-        public int Create(int hz,int duration){Creates++;Hz=hz;Duration=duration;return FailCreate?-1:2;}
-        public bool Play(int slot,float magnitude,float hz){Plays++;Magnitude=magnitude;return !FailPlay;}
-        public bool PlayShaped(int slot,float magnitude,float hz,int phase,int fadeMs) => Play(slot,magnitude,hz);
-        public bool Stop(int slot){Stops++;return !FailStop;}
+        public int Create(ImpactKind kind,int hz,int duration){Creates++;Hz=hz;Duration=duration;return FailCreate?-1:2;}
+        public bool Play(ImpactKind kind,int slot,float magnitude,float hz){Plays++;Magnitude=magnitude;return !FailPlay;}
+        public bool Stop(ImpactKind kind,int slot){Stops++;return !FailStop;}
         public void Release(){Releases++;}
     }
     static void Delivery()
@@ -102,7 +101,7 @@ static class Program
         count=o.Plays;
         foreach(float bad in new[]{float.NaN,float.PositiveInfinity,float.NegativeInfinity,-1,0})
             Check(!f.Trigger(1,bad,11)&&o.Plays==count,"invalid strength sent to wheel");
-        f.Tick(10.121);Check(o.Stops==1,"maximum-strength cue did not stop");
+        int stops=o.Stops;f.Tick(10.121);Check(o.Stops==stops+1,"maximum-strength cue did not stop");
     }
     static void GameIntegration()
     {

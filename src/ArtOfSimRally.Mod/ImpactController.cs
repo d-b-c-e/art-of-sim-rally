@@ -10,13 +10,14 @@ namespace ArtOfSimRally.Mod
     {
         private sealed class ToolkitOutput : ILandingOutput
         {
-            public int Create(int hz, int milliseconds) => WheelFfbNative.CreatePeriodicBurst(hz, milliseconds);
-            public bool Play(int slot, float magnitude, float hz) => WheelFfbNative.PlayPeriodicBurst(slot, magnitude, hz);
-            public bool PlayShaped(int slot, float magnitude, float hz, int phase, int fadeMs)
-                => WheelFfbNative.PlayShapedPeriodicBurst(slot, magnitude, hz, phase, fadeMs);
-            public bool Stop(int slot) => WheelFfbNative.StopPeriodicBurst(slot);
-            // The mixer is the sole owner of periodic resources.
-            public void Release() => WheelFfbNative.ReleasePeriodics();
+            public int Create(ImpactKind kind, int hz, int milliseconds) => kind == ImpactKind.Crash
+                ? WheelFfbNative.CreateConstantBurst(milliseconds) : WheelFfbNative.CreatePeriodicBurst(hz, milliseconds);
+            public bool Play(ImpactKind kind, int slot, float magnitude, float hz) => kind == ImpactKind.Crash
+                ? WheelFfbNative.PlayConstantBurst(slot, magnitude) : WheelFfbNative.PlayPeriodicBurst(slot, magnitude, hz);
+            public bool Stop(ImpactKind kind, int slot) => kind == ImpactKind.Crash
+                ? WheelFfbNative.StopConstantBurst(slot) : WheelFfbNative.StopPeriodicBurst(slot);
+            // The mixer is the sole owner of both impact effect families.
+            public void Release() { WheelFfbNative.ReleaseConstantBursts(); WheelFfbNative.ReleasePeriodics(); }
         }
         internal static Func<double> MonotonicNow = () => Stopwatch.GetTimestamp() / (double)Stopwatch.Frequency;
         private static readonly ImpactMixer Mixer = new ImpactMixer(new ToolkitOutput(), () => MonotonicNow(), LogDelivery);
@@ -65,16 +66,16 @@ namespace ArtOfSimRally.Mod
                 text.AppendLine("=== " + kind + " vibration ===");
                 text.AppendLine("Status: " + (kind == ImpactKind.Crash ? CrashController.Status : Status(kind)));
                 text.AppendLine($"Session events: {c.Events}; driver accepted: {c.Accepted}; rejected: {c.Rejected}; overlap suppressed: {c.Suppressed}");
-                string waveform = kind == ImpactKind.Crash ? $"kick/rebound sine {LandingFeedback.CrashFrequency} Hz; phase 90 degrees; fade to zero over {LandingFeedback.DurationMs} ms"
+                string waveform = kind == ImpactKind.Crash ? "constant-force pulse; fixed positive X direction; no envelope"
                     : $"sine {LandingFeedback.Frequency} Hz; phase zero; no envelope";
                 text.AppendLine($"Last requested magnitude: {c.Magnitude:F4}; {waveform}; duration {LandingFeedback.DurationMs} ms");
                 if (c.HasDelivery)
                     text.AppendLine($"Last delivery: {c.Delivery.Action}/{c.Delivery.Reason}; native play call {c.Delivery.PlayLatencyMs:F2} ms; elapsed after return {c.Delivery.ElapsedMs:F2} ms; stops before 120 ms: {c.EarlyStops} (includes intended interrupts/replacements)");
             }
-            text.AppendLine("One shared finite effect; strongest cue wins. Driver acceptance is not measured wheel motion.");
-            text.AppendLine("Crash requests require exact driver parameter readback; rejection disables crashes until toggled off/on while paused, preserving landing availability.");
-            text.AppendLine($"Strength scale: percent of nominal wheel force; maximum {LandingFeedback.MaximumStrengthPercent}. Separate from steering and SimHub gains.");
-            text.AppendLine("Steering capture does not record the separate periodic output.");
+            text.AppendLine("One active impact; separate cached sine/constant handles; strongest cue wins and stops the old effect before replacement. Driver acceptance is not measured wheel motion.");
+            text.AppendLine("Crash requests require exact finite-duration readback; rejection disables crashes until toggled off/on while paused, preserving landing availability.");
+            text.AppendLine($"Strength scale: percent of nominal wheel force; landing maximum {LandingFeedback.MaximumStrengthPercent}; crash maximum {LandingFeedback.MaximumCrashStrengthPercent}, new-settings default {LandingFeedback.DefaultCrashStrengthPercent}. Separate from steering and SimHub gains.");
+            text.AppendLine("Nominal caps do not guarantee headroom when steering and impacts mix. Steering capture does not record either separate impact output.");
             text.AppendLine();
             LandingController.AppendSupport(text);
         }

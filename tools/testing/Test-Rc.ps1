@@ -156,10 +156,11 @@ try {
     $source = (Get-ChildItem -LiteralPath (Join-Path $root 'src/ArtOfSimRally.Mod') -Filter '*.cs' | Get-Content -Raw) -join "`n"
     Assert ($source -notmatch '\[DllImport\((?:Dll|"UnityForceFeedback"|"WheelFfb")') 'Duplicate native binding returned to the consumer'
     Assert ($exports -match '\bSetStrictDeviceSelection\b') 'Strict GUID selection export missing'
-    foreach ($name in @('CreatePeriodicBurst','PlayPeriodicBurst','StopPeriodicBurst')) {
-        Assert ($exports -match "\b$name\b") "Finite landing effect export missing: $name"
+    foreach ($name in @('CreatePeriodicBurst','PlayPeriodicBurst','StopPeriodicBurst',
+        'CreateConstantBurst','PlayConstantBurst','StopConstantBurst','ReleaseConstantBursts')) {
+        Assert ($exports -match "\b$name\b") "Finite impact effect export missing: $name"
     }
-    Checkpoint 'native-exports' 43
+    Checkpoint 'native-exports' 47
 
     $null = Run 'package' $shell @('-NoProfile','-File','tools/package/package.ps1','-Version',$Version)
     $zip = Join-Path $root "dist/ArtOfSimRally-$Version.zip"

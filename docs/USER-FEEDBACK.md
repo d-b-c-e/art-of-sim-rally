@@ -15,6 +15,13 @@ worked. The support file confirms three full-intensity shaped commands and zero
 early managed stops. See [analysis](reviews/2026-09-17-rc4-crash-feel.md); do not
 describe the changed waveform as a successful physical fix.
 
+Owner subsequently completed standalone A/B/C tests. Only constant pulse A
+was faintly felt at 20%; at 40% A was preferred but still too weak. Owner requests
+crash default50/range0–100 and sharing the findings upstream. The next candidate
+uses a finite constant pulse; the updated Desktop tester already offers those
+levels. No 50–100% physical acceptance is recorded. See the
+[constant-pulse follow-through](reviews/2026-09-17-constant-crash.md).
+
 ## 0.2.5 T300/TSS follow-up — received 2026-09-16
 
 Reporter says steering feels better than ever, different cars feel distinct,

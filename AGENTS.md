@@ -44,6 +44,20 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-17 UTC) — do not overstate this
 
+**Constant crash candidate:** owner preferred standalone method A at 40%, still
+too weak, and requested default50/range0–100. Crash now uses a positive-X 120 ms
+finite constant pulse; landing stays default5/range0–40, 25 Hz. Crash stays
+opt-in and saved strengths are preserved. One logical impact owns separate
+cached constant/sine handles: stop the old handle before replacement; never
+repurpose ordinary steering. Toolkit source/knowledge contribution is pushed at
+`358add53af220eb95bf606e240b230e23a6ea197`, local package0.15.0/native0.8.0.
+Consumer pins these exact artifacts; full RC gates and deployment are pending.
+The tester is now `d6fac19`, default50 with manual choices through100. Desktop
+shortcut updated, read-only preflight passed; no agent hardware/UI execution.
+The runtime creates idle effects then sets magnitude, unlike diagnostic A's
+creation at magnitude: physical equivalence still needs an attended check.
+See `docs/reviews/2026-09-17-constant-crash.md`. KI-38 remains open.
+
 **RC4 attended crash test failed:** owner felt no effect at roughly 20 while
 normal steering/cornering FFB worked. Support file `art-of-sim-rally-support-20260916-230204.txt`
 matches the installed RC4/native700 exactly. Three unique .1952 commands passed
@@ -53,8 +67,8 @@ Do not blame gain, claim shaped physical output, or treat API echo as a hardware
 measurement. Single-axis direction0 is explicitly documented by Microsoft;
 no source-level axis/cancellation defect was found. KI-38 remains open. The
 first standalone A/B/C comparison below found only a faint constant pulse.
-Read `docs/reviews/2026-09-17-rc4-crash-feel.md`. No new game payload deployed.
-Developer-only A/B/C diagnostic is now built from upstream clean `38bbfa7`;
+Read `docs/reviews/2026-09-17-rc4-crash-feel.md`. RC4 is the previous waveform.
+The preceding developer-only A/B/C diagnostic was built from upstream clean `38bbfa7`;
 both architecture builds/fake checks passed. Frozen owner x64 copy is
 `results/attended-effects-38bbfa7/attended_effects.exe`, with Desktop shortcut
 **Art of Sim Rally - wheel effect test**. The first tester falsely blocked
@@ -62,10 +76,10 @@ BorderlessGaming.exe; exact game-name matching fixes that. Read-only preflight
 now passes while that utility remains running. The agent has not opened the
 UI or acquired/applied force. Owner ran eight A/B/C requests at 5/20%; all were
 accepted/PLAYING and C retained PLAYING through six zero updates. Owner only
-faintly felt A at 20% and requested more range. Manual 30/40% choices are now
-available, retaining default5, finite120ms and the same waveforms/axes. Close
-the old tester and reopen the shortcut for those options. Stronger physical
-results remain pending; API PLAYING does not establish torque. Logs live under
+faintly felt A at 20% and requested more range. That version added manual30/40,
+retaining default5, finite120ms and the same waveforms/axes. The later40%
+comparison and current50–100 tester are recorded above. API PLAYING does not
+establish torque. Logs live under
 `%LOCALAPPDATA%\DbceWheel`; exact hashes, receipts and limitations in review.
 
 **Crash kick installed (KI-38):** RC3 owner drive produced 13 accepted

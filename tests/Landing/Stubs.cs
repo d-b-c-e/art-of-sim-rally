@@ -52,7 +52,7 @@ public class CarDynamics
 }
 namespace ArtOfSimRally.Mod
 {
-    internal class Settings { public bool ForceFeedbackEnabled=true,LandingEffectsEnabled=true,DiagnosticLogging=true,CrashEffectsEnabled; public float LandingStrength=5,CrashStrength=5; }
+    internal class Settings { public bool ForceFeedbackEnabled=true,LandingEffectsEnabled=true,DiagnosticLogging=true,CrashEffectsEnabled; public float LandingStrength=5,CrashStrength=50; }
     internal static class Main { public static Settings Settings=new(); public static bool Enabled=true; }
     internal static class GameState { public static bool IsDriving,IsRestarting; public static EventManager ExistingManager=new(); }
     internal static class FfbNative { public static bool Ready=true; }
@@ -68,7 +68,10 @@ namespace Dbce.Wheel.Ffb
         public static string LastError => "Fake driver rejection";
         public static int CreatePeriodicBurst(int hz,int duration) { Creates++;return 0; }
         public static bool PlayPeriodicBurst(int slot,float magnitude,float hz) { Plays++;LastMagnitude=magnitude;return true; }
-        public static bool PlayShapedPeriodicBurst(int slot,float magnitude,float hz,int phase,int fadeMs) { Plays++;LastMagnitude=magnitude;return true; }
+        public static int CreateConstantBurst(int duration) { Creates++;return 0; }
+        public static bool PlayConstantBurst(int slot,float magnitude) { Plays++;LastMagnitude=magnitude;return true; }
+        public static bool StopConstantBurst(int slot) { Stops++;return true; }
+        public static void ReleaseConstantBursts() { }
         public static bool StopPeriodicBurst(int slot) { Stops++;return true; }
         public static void ReleasePeriodics() { Releases++; }
     }
