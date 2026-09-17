@@ -11,7 +11,10 @@ publication and attended sign-off remain separate.
 Installed **2026-09-17 03:57 UTC** (09-16 local) with the game closed after all
 16 local gates. Crashes now request a peak-start kick and fading rebound at the
 same configured amplitude. Landing requests, steering and telemetry are unchanged.
-The new physical feel remains untested; RC3's failed crash-feel result is KI-38.
+**Attended follow-up failed:** owner felt no crash effect at about 20 in RC4,
+while normal steering worked. Three shape-accepted commands completed without
+early managed stops. KI-38 remains open; RC4 is not release-ready.
+[Support analysis](reviews/2026-09-17-rc4-crash-feel.md).
 
 - Identity: `0.2.6-rc.4+91cedd8307010c796efe79590661368a52b56d27.clean`.
 - ZIP SHA-256: `39643F929A680027937B195F2B18623DC69C289229A65C1AE27AE7AD0078F2BA`.

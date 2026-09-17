@@ -91,7 +91,7 @@ checks are in [KNOWN-ISSUES.md](docs/KNOWN-ISSUES.md).
 
 The 0.2.6 candidate adds an optional [crash kick and rebound](docs/CRASH-EFFECTS.md),
 and extends landing/crash strength to **40%**. Existing strengths keep their
-peak amplitude; defaults remain 5. Crash shape and stronger-range feel await wheel testing.
+peak amplitude; defaults remain 5. Missing crash feel is still under investigation.
 The public download remains 0.2.5.
 
 [Build instructions](docs/BUILDING.md) · [Documentation index](docs/README.md) ·

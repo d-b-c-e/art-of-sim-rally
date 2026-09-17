@@ -1,5 +1,10 @@
 # Crash kick candidate — 2026-09-17 UTC
 
+**Subsequent owner test failed:** RC4 produced three accepted shaped cues with
+zero early managed stops, but no felt crash response; normal steering worked.
+See [the support analysis and next diagnostic](2026-09-17-rc4-crash-feel.md).
+The implementation/gate record below is retained; it is not physical acceptance.
+
 ## RC3 attended result
 
 Owner drove the exact installed RC3 on 2026-09-17 03:29–03:33 UTC and reported

@@ -44,6 +44,17 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-17 UTC) — do not overstate this
 
+**RC4 attended crash test failed:** owner felt no effect at roughly 20 while
+normal steering/cornering FFB worked. Support file `art-of-sim-rally-support-20260916-230204.txt`
+matches the installed RC4/native700 exactly. Three unique .1952 commands passed
+shape readback; Play calls took 2.48–4.83 ms and managed expiry stopped them
+124.52–131.80 ms after return, zero early stops. First cue steering was -.0071.
+Do not blame gain, claim shaped physical output, or treat API echo as a hardware
+measurement. Single-axis direction0 is explicitly documented by Microsoft;
+no source-level axis/cancellation defect was found. KI-38 remains open; next is
+an attended standalone comparison of finite constant versus periodic effects.
+Read `docs/reviews/2026-09-17-rc4-crash-feel.md`. No new game payload deployed.
+
 **Crash kick installed (KI-38):** RC3 owner drive produced 13 accepted
 crash cues at up to .1952, but no distinct felt effect. Saved crashes are now
 **on/19.52381**, landing on/20; preserve these newer settings. Candidate uses
@@ -61,7 +72,8 @@ All 16 local gates passed for **0.2.6-rc.4**, clean source
 2026-09-17 03:57 UTC with game closed and settings/probe preserved. Two real
 corpus cases and 9,342 landing/crash assertions pass. Toolkit local pin is
 `c319b0258b11d1f07492a48dbc110d3e50c14dfd.clean` (0.14.0/native 0.7.0),
-not a published toolkit release. No game launch or recorded/physical test.
+not a published toolkit release. The installation did not launch the game;
+the later owner test failed as recorded above.
 
 **RC3 stronger impacts:** the 0.2.6 candidate extends both landing and
 crash strength from 0–20 to **0–40%** of nominal wheel force. One shared constant

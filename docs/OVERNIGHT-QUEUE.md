@@ -9,6 +9,9 @@ entries below preserve earlier states and do not describe the current install.
 ## Current follow-through — crash candidate and 0.2.5 feedback
 
 Owner's RC3 test found no distinct crash effect despite 13 accepted cues (KI-38).
+The subsequent shaped RC4 test also failed: three full-intensity cues with no
+early managed cancellation, but no felt effect; ordinary steering worked.
+Prioritize the standalone attended constant/periodic comparison before retuning.
 Authorized follow-through replaces the rapid vibration with a shaped kick/rebound
 at the same peak, retaining shared ownership and 0–40% controls. Playback timing
 and stop reasons are now observable. See the latest

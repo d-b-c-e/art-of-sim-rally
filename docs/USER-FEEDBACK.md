@@ -10,6 +10,10 @@ Owner tested 0.2.6-rc.3 with crashes on/19.52381 and reported no distinct crash
 effect. Its 13 accepted commands motivate the new shaped kick (KI-38); see
 [review](reviews/2026-09-17-crash-kick.md) and [current installation](LOCAL-DEPLOYMENT.md).
 The reporter's feedback and public download remain 0.2.5.
+Owner's next RC4 test likewise felt no crash output at about 20; normal steering
+worked. The support file confirms three full-intensity shaped commands and zero
+early managed stops. See [analysis](reviews/2026-09-17-rc4-crash-feel.md); do not
+describe the changed waveform as a successful physical fix.
 
 ## 0.2.5 T300/TSS follow-up — received 2026-09-16
 

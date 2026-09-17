@@ -21,9 +21,9 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
-### KI-38 — Accepted RC3 crash commands have no distinct felt effect
+### KI-38 — Accepted RC3/RC4 crash commands have no distinct felt effect
 
-**Owner-confirmed feel failure; shaped candidate awaits retest (2026-09-17 UTC).**
+**Owner-confirmed feel failure in RC3 and shaped RC4 (2026-09-17 UTC).**
 RC3 logs contain 13 accepted crash cues, six at full configured intensity and
 about 19.5% nominal amplitude. Owner felt no distinct crash effect. This is not
 explained by confusing Pit House global gain with the mod's steering-only gain.
@@ -36,6 +36,17 @@ detection, steering and motion signals remain unchanged. Managed expiry now star
 after native Play returns; per-event timing/reason diagnostics distinguish
 expiry, replacement and lifecycle cancellation. Parameter readback cannot prove
 physical waveform. See [evidence and test plan](reviews/2026-09-17-crash-kick.md).
+
+RC4's original support file and UMM log contain three unique full-intensity
+head-on cues at .1952, all accepted with exact requested-shape readback. Managed
+stops occurred 124.52–131.80 ms after Play returned, with zero early stops.
+Owner again felt nothing and explicitly confirmed normal steering FFB worked.
+The first cue began with steering -.0071, so steering saturation cannot explain
+every absent cue. The support file repeats log tails; do not double-count them.
+Single-axis Cartesian direction zero is Microsoft's documented setup, not a
+proven zero-force defect. Native PLAYING status and physical output are still
+unmeasured. Next is an attended standalone finite-effect comparison, not another
+gain change. [RC4 evidence](reviews/2026-09-17-rc4-crash-feel.md).
 
 ### KI-37 — Native force tracing performs synchronous driving I/O by default
 

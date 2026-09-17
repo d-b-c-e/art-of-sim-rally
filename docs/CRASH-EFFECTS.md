@@ -3,8 +3,9 @@
 **Experimental, off by default; not in the published 0.2.5 download.** The saved
 owner drive shows head-on deceleration with almost no steering force. The new
 wheel cue addresses that missing response without changing the steering curve.
-The RC3 drive produced 13 accepted crash commands, but the owner felt no distinct
-cue (KI-38). The next candidate changes the waveform; its feel still needs testing.
+RC3 and shaped RC4 both failed the owner's feel test (KI-38). RC4 accepted three
+full-intensity commands with no early managed stops, but no felt crash effect;
+ordinary steering worked. [Current investigation](reviews/2026-09-17-rc4-crash-feel.md).
 
 Pause, open Ctrl+F10 → **Force feedback → Crash kick (experimental)**,
 and start with **Crash strength 5**. Strength is independent of steering and

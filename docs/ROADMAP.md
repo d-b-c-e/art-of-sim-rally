@@ -28,8 +28,12 @@ collision observations; its live drive check is pending. The 0.2.6 candidate
 implements an independent opt-in wheel crash effect and shared landing/crash
 periodic ownership. [Candidate and test plan](CRASH-EFFECTS.md).
 RC3 passed all 16 local gates but its owner drive produced no distinct crash cue
-despite 13 accepted commands (KI-38). The next candidate replaces the rapid sine
+despite 13 accepted commands (KI-38). RC4 replaced the rapid sine
 with a kick/fading rebound at the same peak, plus playback timing diagnostics.
+That RC4 retest also failed: three shape-accepted cues, zero early managed stops,
+no felt kick, normal steering intact. The next step is an attended standalone
+finite-effect comparison to isolate periodic rendering/mixing (KI-38), with no
+new gain increase or claim of an identified driver bug.
 See [implementation and evidence](reviews/2026-09-17-crash-kick.md) and the latest
 [gate/install receipt](LOCAL-DEPLOYMENT.md). Next: retest crash feel and ordinary
 landing/steering/lifecycle behavior. Local toolkit pins require official release
