@@ -44,15 +44,22 @@ Owner again felt nothing and explicitly confirmed normal steering FFB worked.
 The first cue began with steering -.0071, so steering saturation cannot explain
 every absent cue. The support file repeats log tails; do not double-count them.
 Single-axis Cartesian direction zero is Microsoft's documented setup, not a
-proven zero-force defect. Native PLAYING status and physical output are still
-unmeasured. Next is an attended standalone finite-effect comparison, not another
-gain change. [RC4 evidence](reviews/2026-09-17-rc4-crash-feel.md).
+proven zero-force defect. In-game native PLAYING status and physical output were
+unmeasured, leading to the standalone comparison below.
+[RC4 evidence](reviews/2026-09-17-rc4-crash-feel.md).
 
 The first standalone tester falsely blocked BorderlessGaming.exe as a game,
 so the owner's A/B/C attempt never reached acquisition. Developer-tool fix
 `2066351` uses exact game names and displays the blocker name/PID; its read-only
 preflight passes with Borderless Gaming still running. The Desktop shortcut is
 updated. This unblocks the diagnostic, not the underlying crash-feel failure.
+
+The first completed A/B/C test recorded eight accepted/PLAYING requests at
+5% and 20%; both C tests retained PLAYING through three zero-steering updates.
+Owner only faintly felt A at 20%, and requested more range. Optional
+30/40% tester choices are installed via `38bbfa7`, with the same waveforms/durations and 5%
+starting setting. API gain/status readbacks do not establish motor torque or
+Pit House settings; the underlying crash response remains unaccepted.
 
 ### KI-37 — Native force tracing performs synchronous driving I/O by default
 

@@ -51,19 +51,22 @@ shape readback; Play calls took 2.48–4.83 ms and managed expiry stopped them
 124.52–131.80 ms after return, zero early stops. First cue steering was -.0071.
 Do not blame gain, claim shaped physical output, or treat API echo as a hardware
 measurement. Single-axis direction0 is explicitly documented by Microsoft;
-no source-level axis/cancellation defect was found. KI-38 remains open; next is
-an attended standalone comparison of finite constant versus periodic effects.
+no source-level axis/cancellation defect was found. KI-38 remains open. The
+first standalone A/B/C comparison below found only a faint constant pulse.
 Read `docs/reviews/2026-09-17-rc4-crash-feel.md`. No new game payload deployed.
-Developer-only A/B/C diagnostic is now built from upstream clean `2066351`;
+Developer-only A/B/C diagnostic is now built from upstream clean `38bbfa7`;
 both architecture builds/fake checks passed. Frozen owner x64 copy is
-`results/attended-effects-2066351/attended_effects.exe`, with Desktop shortcut
+`results/attended-effects-38bbfa7/attended_effects.exe`, with Desktop shortcut
 **Art of Sim Rally - wheel effect test**. The first tester falsely blocked
 BorderlessGaming.exe; exact game-name matching fixes that. Read-only preflight
 now passes while that utility remains running. The agent has not opened the
-UI or acquired/applied force. Owner clicks Find wheels/select/Connect, then finite 120 ms
-A/B/C effects starting at 5%; logs live under `%LOCALAPPDATA%\DbceWheel`.
-UI/real-driver/physical results remain pending; API PLAYING does not establish
-physical torque. Exact hash/receipt in review.
+UI or acquired/applied force. Owner ran eight A/B/C requests at 5/20%; all were
+accepted/PLAYING and C retained PLAYING through six zero updates. Owner only
+faintly felt A at 20% and requested more range. Manual 30/40% choices are now
+available, retaining default5, finite120ms and the same waveforms/axes. Close
+the old tester and reopen the shortcut for those options. Stronger physical
+results remain pending; API PLAYING does not establish torque. Logs live under
+`%LOCALAPPDATA%\DbceWheel`; exact hashes, receipts and limitations in review.
 
 **Crash kick installed (KI-38):** RC3 owner drive produced 13 accepted
 crash cues at up to .1952, but no distinct felt effect. Saved crashes are now

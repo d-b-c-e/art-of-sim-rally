@@ -139,3 +139,46 @@ The [update receipt](../../results/attended-effects-2066351/consumer-receipt.jso
 records the source, binary hash, current processes and preflight result.
 The owner can reopen the same shortcut and retry; physical A/B/C results and
 crash acceptance remain pending. Installed game payload/settings are unchanged.
+
+## First physical A/B/C comparison
+
+Owner report: only A at 20% was remotely noticeable, and still too weak.
+The owner explicitly requested a tester range above 20%. The saved
+`attended-effects-20260916-233426-52356.log` contains A/B/C once each at 5%,
+A/B/C once each at 20%, then two more A requests at 20%: eight requests total.
+Every play returned S_OK and immediately reported PLAYING. Each C request made
+three zero-steering updates within its test window; all six post-update status
+reads retained PLAYING. B was also weak without any steering updates. These
+observations do not support API-visible cancellation by the zero updates as
+the explanation for this run. They do not measure physical periodic output.
+
+Device FFGAIN and per-effect gain read back 10000. This is DirectInput evidence,
+not a readback of Pit House's current motor/filter settings. The separate device
+state query returned E_FAIL (`0x80004005`) on every test; its returned flags are
+not evidence of actuator state. The focus-loss cleanup recorded successful
+restoration of original autocenter value 1. The agent did not apply force.
+Original log snapshot, SHA-256 and parsed requests are preserved in
+`results/attended-effects-first-comparison-20260917/receipt.json`.
+
+The updated comparison adds owner-selected 30% and 40% choices to the diagnostic,
+retaining its 5% initial setting, 120 ms effects, waveforms, axes, one-second
+cooldown and explicit clicks. This changes the tester's range only. It neither
+rescales existing settings nor implements a new crash effect in the game.
+
+Upstream clean `38bbfa77f5b3f3aa6049bd9c815ef9398d353a3b` centralizes the five
+levels and cap across UI, logging, policy, dispatch and finite-constant output.
+Both architectures pass the existing tests plus all five exact output levels
+and rejection above 4000 native units before any output. Native shipping code
+is unchanged; the development branch was pushed without Actions or a release.
+
+Desktop shortcut updated at 04:39 UTC to the verified x64 copy
+`results/attended-effects-38bbfa7/attended_effects.exe`, SHA-256
+`B38CBB387D5A3EDC43CD4E2FBFB71E422613616AA0D427AF179D3D205C16424A`.
+The copied executable's read-only preflight returned clear/exit 0. Previous
+artifacts and shortcut were preserved. The older UI, PID 52356, was still
+open and was not terminated; the owner must close it and reopen the shortcut
+to see 30/40%. No agent GUI launch, acquisition or output occurred, and game
+payload/settings remain unchanged. The
+[range-update receipt](../../results/attended-effects-38bbfa7/consumer-receipt.json)
+preserves identity and preflight evidence. Owner stronger-range results are
+pending; crash acceptance has not passed.
