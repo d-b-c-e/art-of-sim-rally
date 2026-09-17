@@ -109,18 +109,18 @@ sine-effect support; if unsupported, steering can still work. Small hops may not
 trigger it. [Details and limitations](LANDING-EFFECTS.md).
 
 **0.2.6 candidate only:** [Crash kick (experimental)](CRASH-EFFECTS.md)
-is off by default, with independent strength 5 and maximum 40. Enable while
-paused for testing. It requests a quick kick with a smaller fading rebound;
-the new shape needs wheel testing. Landing and crash effects share one slot and
-do not stack. A wheel that rejects shaped effects can still use landing vibration.
+is off by default, with independent strength **50** and range **0–100**. Enable
+while paused for testing. It requests a short constant-force push, then releases;
+the new effect needs wheel testing. Landing and crash effects do not stack.
+A wheel that rejects constant crash effects can still use landing vibration.
 The public 0.2.5 download does not include this setting.
 
-The candidate's landing and crash sliders both cover **0–40%** of nominal wheel
-force. Existing values are not rescaled: 20 still requests 20%, while 40 allows
-twice the previous maximum for a full-intensity event. Start at your existing
-comfortable setting and increase gradually if needed. These controls affect
-wheel effects; the wheelbase driver's global game FFB gain scales them too.
-SimHub motion and ButtKicker gains are separate.
+Landing remains strength **5**, range **0–40**. Both controls are percentages of
+nominal wheel force: saved values are preserved, so select 50 manually to compare
+the new crash default. Increase gradually if needed. A setting of 100 requests
+full nominal force but does not guarantee headroom alongside steering. These
+controls affect wheel effects; the wheelbase driver's global game FFB gain scales
+them too. SimHub motion and ButtKicker gains are separate.
 
 Leave **Disable steering limiter on car spawn (legacy)** off. It is not a live
 override of the game's assist slider; use the game's assist settings instead.

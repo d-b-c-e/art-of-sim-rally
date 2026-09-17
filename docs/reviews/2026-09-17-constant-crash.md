@@ -88,3 +88,10 @@ smoke harnesses were compiled only. The handoff receipt is
 Toolkit ZIP SHA-256: `1676B31AFBB2273B23140D042BC311F1F523240E2661D2C61E7932F74DCFF6F6`.
 Vendored native SHA-256: `A07DDF7E10ADBD016DB204324D5E035B951E21A7D8DD373405C91257EB7AD288`.
 Managed FFB SHA-256: `6FC2BE9197D846A477C84E81D39DD420B324BD4B79B30CD54BB78567E270A72B`.
+
+All16 local gates passed for preliminary `0.2.6-rc.5`, source `c4d1a14`, including
+both real corpus cases and9,503 landing/crash assertions. That package was not
+installed: the final documentation cross-check found old5/40 crash instructions
+in SETUP and the packaged README. These are corrected before building RC6;
+the runtime and toolkit pin are unchanged. RC5 evidence is retained under
+`results/rc-0.2.6-rc.5-66f35eacabf64e729d339647307700e0`.

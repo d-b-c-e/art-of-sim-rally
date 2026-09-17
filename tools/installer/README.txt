@@ -64,13 +64,14 @@ while force feedback sets up.
 * Landing vibration: on by default at strength 5 (maximum 40), independently of
   steering. Existing saved choices are kept. Requires wheel sine-effect support.
 
-* Crash vibration (experimental): off by default. Enable while paused and start
-  at Crash strength 5 (maximum 40). It adds a brief wheel cue for body impacts;
+* Crash kick (experimental): off by default, strength 50 (range 0-100). Enable
+  while paused. It adds a short constant-force push/release for body impacts;
   landing and crash vibrations do not stack. Steering and telemetry are unchanged.
   Physical tuning is still being tested. See the candidate guide:
   https://github.com/d-b-c-e/art-of-sim-rally/blob/main/docs/CRASH-EFFECTS.md
-  Both strength controls are percentages of nominal wheel force. Existing 20
-  stays 20%; 40 allows twice the previous maximum. Increase gradually as needed.
+  Both strength controls are percentages of nominal wheel force. Saved values
+  are kept: select 50 manually to compare the new crash default. Increase gradually
+  as needed; 100 requests full nominal force but may saturate alongside steering.
   These controls affect the wheel; tune the ButtKicker separately in SimHub.
 
 * Leave Disable steering limiter on car spawn (legacy) off; use the game's own
