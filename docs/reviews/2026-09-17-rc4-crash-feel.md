@@ -68,7 +68,7 @@ that comparison and its own regression/attended checks.
 
 ## Standalone diagnostic ready, physical test pending
 
-Toolkit branch `codex/attended-effect-comparison` is frozen at
+The initial diagnostic on toolkit branch `codex/attended-effect-comparison` was frozen at
 `7d9c8f694ca35f5f92fff2a4a3cd93ad7e086286`, pushed on that branch without
 an Actions run, merge or release. It compiles the unchanged RC4
 adapter source into a separate developer executable. Only the diagnostic's
@@ -78,10 +78,10 @@ and frozen production burst/focus/watchdog fake tests passed. Embedded source
 identity, architecture and hashes were verified. These are offline checks;
 the agent has not launched either UI or acquired/applied hardware output.
 
-The owner copy is `results/attended-effects-7d9c8f6/attended_effects.exe`, x64
+The initial owner copy was `results/attended-effects-7d9c8f6/attended_effects.exe`, x64
 SHA-256 `25169077DC3EE9FBFEBD791547A01392E858288FEB2C544E446CA44CF6E39B2E`.
-The Desktop shortcut **Art of Sim Rally - wheel effect test** targets that exact
-copy. The folder also preserves the README, build/test logs, upstream manifest
+The Desktop shortcut **Art of Sim Rally - wheel effect test** originally targeted
+that copy, superseded by the guard fix below. The folder preserves the README, build/test logs, upstream manifest
 and [copy receipt](../../results/attended-effects-7d9c8f6/consumer-receipt.json).
 No game payload or setting was changed, and no game RC gate was rerun for this
 developer-only addition.
@@ -109,3 +109,33 @@ If A is felt and B is not, investigate periodic rendering/routing next. If B
 works but C does not, compare playback status and update timing. Neither result
 alone proves an axis, firmware, filter or mixing defect. Visual UI behavior,
 real-driver property support and all physical feel results remain pending.
+
+## First diagnostic attempt: utility falsely blocked
+
+The owner's `attended-effects-20260916-232509-56192.log` shows successful
+MOZA R12 enumeration, then two Connect attempts blocked by
+`BorderlessGaming.exe` (PID 5364). No acquisition or effect test occurred.
+The old guard incorrectly treated any accessible executable under Steam/Epic
+installation paths as a game. This is a diagnostic guard defect, not evidence
+about the missing wheel effect. The original log and hash are preserved in
+`results/attended-effects-borderless-20260917/receipt.json`.
+
+Fixed in upstream `2066351ebbfee79688966dbb5bfa3767a7a517c4`, pushed on the
+same development branch with no Actions run. The guard now matches explicit
+game executable basenames, case-insensitively, and shows a blocking process's
+name/PID in the UI. Helpers and launchers do not match; incomplete process
+enumeration still blocks with its error. Both architecture builds and regression
+checks passed, including the reported utility, known games, helpers and failed
+enumeration. Production adapter and finite-effect policy are unchanged.
+
+The updated Desktop shortcut targets
+`results/attended-effects-2066351/attended_effects.exe`, SHA-256
+`6377C680FB21EBDB8A14FA8298ADE1894C16C87623A6FA628F43DBEFAEEB87B0`.
+Copied files were hash-verified, and the prior shortcut/executable retained.
+The exact owner copy's `--check-games` preflight returned exit 0, `blocked=0`,
+while BorderlessGaming.exe PID 5364 remained running. That command returns
+before any UI or DirectInput initialization. No wheel output was applied.
+The [update receipt](../../results/attended-effects-2066351/consumer-receipt.json)
+records the source, binary hash, current processes and preflight result.
+The owner can reopen the same shortcut and retry; physical A/B/C results and
+crash acceptance remain pending. Installed game payload/settings are unchanged.

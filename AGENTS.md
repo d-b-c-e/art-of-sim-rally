@@ -54,11 +54,13 @@ measurement. Single-axis direction0 is explicitly documented by Microsoft;
 no source-level axis/cancellation defect was found. KI-38 remains open; next is
 an attended standalone comparison of finite constant versus periodic effects.
 Read `docs/reviews/2026-09-17-rc4-crash-feel.md`. No new game payload deployed.
-Developer-only A/B/C diagnostic is now built from upstream clean `7d9c8f6`;
+Developer-only A/B/C diagnostic is now built from upstream clean `2066351`;
 both architecture builds/fake checks passed. Frozen owner x64 copy is
-`results/attended-effects-7d9c8f6/attended_effects.exe`, with Desktop shortcut
-**Art of Sim Rally - wheel effect test**. The agent has not launched it or
-applied force. Owner clicks Find wheels/select/Connect, then finite 120 ms
+`results/attended-effects-2066351/attended_effects.exe`, with Desktop shortcut
+**Art of Sim Rally - wheel effect test**. The first tester falsely blocked
+BorderlessGaming.exe; exact game-name matching fixes that. Read-only preflight
+now passes while that utility remains running. The agent has not opened the
+UI or acquired/applied force. Owner clicks Find wheels/select/Connect, then finite 120 ms
 A/B/C effects starting at 5%; logs live under `%LOCALAPPDATA%\DbceWheel`.
 UI/real-driver/physical results remain pending; API PLAYING does not establish
 physical torque. Exact hash/receipt in review.

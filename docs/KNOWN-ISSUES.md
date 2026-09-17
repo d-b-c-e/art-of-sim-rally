@@ -48,6 +48,12 @@ proven zero-force defect. Native PLAYING status and physical output are still
 unmeasured. Next is an attended standalone finite-effect comparison, not another
 gain change. [RC4 evidence](reviews/2026-09-17-rc4-crash-feel.md).
 
+The first standalone tester falsely blocked BorderlessGaming.exe as a game,
+so the owner's A/B/C attempt never reached acquisition. Developer-tool fix
+`2066351` uses exact game names and displays the blocker name/PID; its read-only
+preflight passes with Borderless Gaming still running. The Desktop shortcut is
+updated. This unblocks the diagnostic, not the underlying crash-feel failure.
+
 ### KI-37 — Native force tracing performs synchronous driving I/O by default
 
 **Confirmed implementation overhead; candidate fix, hardware retest pending.**
