@@ -64,9 +64,10 @@ Pit House settings; the underlying crash response remains unaccepted.
 The subsequent four-request 40% comparison favored constant pulse A, still too
 weak for the owner. Owner requests a constant crash jolt, default50/range0–100,
 and sharing the findings in the toolkit. The tester now offers that range;
-the next game candidate uses a finite constant pulse with independent cached
+installed RC6 uses a finite constant pulse with independent cached
 handles and one active impact. Landing stays default5/range0–40. No stronger
-physical or in-game acceptance yet. See [follow-through](reviews/2026-09-17-constant-crash.md).
+physical or in-game acceptance yet. All 16 local gates pass; saved strength19.52381
+is preserved. See [follow-through](reviews/2026-09-17-constant-crash.md).
 
 ### KI-37 — Native force tracing performs synchronous driving I/O by default
 

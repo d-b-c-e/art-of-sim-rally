@@ -70,15 +70,15 @@ one owner for overlapping impact cues. Other games need their own event signals
 and attended tuning; this does not silently retune or migrate them.
 
 Candidate packaging, exact toolkit pin, complete local gates and deployment
-are recorded in [LOCAL-DEPLOYMENT](../LOCAL-DEPLOYMENT.md) when complete.
+are recorded in [LOCAL-DEPLOYMENT](../LOCAL-DEPLOYMENT.md).
 No test here constitutes physical acceptance or authorizes public publication.
 
 The upstream contribution is pushed on `codex/finite-constant-bursts`, source
 `358add53af220eb95bf606e240b230e23a6ea197`. Reusable findings live in
 [knowledge/FFB-IMPACTS.md](https://github.com/d-b-c-e/dbce-wheel-mod-toolkit/blob/358add53af220eb95bf606e240b230e23a6ea197/knowledge/FFB-IMPACTS.md);
 the optional API contract is `docs/CONSTANT-BURSTS.md` in that same revision.
-Local package0.15.0/native0.8.0 has46 exports; it is not an official release.
-Upstream reports121 managed assertions,24 sync checks,104+9+8+8 binding checks
+Local package 0.15.0/native 0.8.0 has 46 exports; it is not an official release.
+Upstream reports 121 managed assertions, 24 sync checks, 104+9+8+8 binding checks
 per runtime and both architecture native fake-effect suites. These include
 ordinary zero/nonzero steering updates preserving the constant effect, exact
 finite-duration rejection, repeated restart and lifecycle release. Hardware
@@ -89,9 +89,20 @@ Toolkit ZIP SHA-256: `1676B31AFBB2273B23140D042BC311F1F523240E2661D2C61E7932F74D
 Vendored native SHA-256: `A07DDF7E10ADBD016DB204324D5E035B951E21A7D8DD373405C91257EB7AD288`.
 Managed FFB SHA-256: `6FC2BE9197D846A477C84E81D39DD420B324BD4B79B30CD54BB78567E270A72B`.
 
-All16 local gates passed for preliminary `0.2.6-rc.5`, source `c4d1a14`, including
-both real corpus cases and9,503 landing/crash assertions. That package was not
-installed: the final documentation cross-check found old5/40 crash instructions
+All 16 local gates passed for preliminary `0.2.6-rc.5`, source `c4d1a14`, including
+both real corpus cases and 9,503 landing/crash assertions. That package was not
+installed: the final documentation cross-check found old 5/40 crash instructions
 in SETUP and the packaged README. These are corrected before building RC6;
 the runtime and toolkit pin are unchanged. RC5 evidence is retained under
 `results/rc-0.2.6-rc.5-66f35eacabf64e729d339647307700e0`.
+
+All 16 local gates also passed for **0.2.6-rc.6**, clean source
+`1cd7814ac20c647f176c57925875e6af47858e91`. Exact artifact installed at 05:05 UTC;
+all six payloads and the second native copy match, with RC4 backup retained.
+Settings, game assembly, UMM parameters and probe files remain byte-identical.
+Owner crash stays on/19.52381 and landing on/20. The game remained closed;
+no recording or physical output was started. Public stable remains 0.2.5.
+The immutable artifact and gate/install receipt links are in LOCAL-DEPLOYMENT.
+The earlier standalone focused-capture command used a nonexistent local path;
+the RC gates use the real main-checkout corpus index and both pass. No capture
+bytes were changed, and no failed command was counted as a test pass.

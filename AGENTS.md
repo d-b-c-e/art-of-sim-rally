@@ -51,7 +51,13 @@ opt-in and saved strengths are preserved. One logical impact owns separate
 cached constant/sine handles: stop the old handle before replacement; never
 repurpose ordinary steering. Toolkit source/knowledge contribution is pushed at
 `358add53af220eb95bf606e240b230e23a6ea197`, local package0.15.0/native0.8.0.
-Consumer pins these exact artifacts; full RC gates and deployment are pending.
+Consumer pins these exact artifacts. All 16 gates passed for **0.2.6-rc.6**,
+source `1cd7814ac20c647f176c57925875e6af47858e91`; exact package installed
+2026-09-17 05:05 UTC. Both real captures pass; the single landing stays at row4230.
+Settings/probe preserved: crash on/19.52381, landing on/20. Select crash50
+manually to compare the new default. Game closed; no physical force test or
+public release. See `docs/LOCAL-DEPLOYMENT.md` for hashes and backup receipt.
+Preliminary RC5 was not installed; RC6 corrects its stale packaged instructions.
 The tester is now `d6fac19`, default50 with manual choices through100. Desktop
 shortcut updated, read-only preflight passed; no agent hardware/UI execution.
 The runtime creates idle effects then sets magnitude, unlike diagnostic A's

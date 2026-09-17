@@ -33,11 +33,13 @@ with a kick/fading rebound at the same peak, plus playback timing diagnostics.
 That RC4 retest also failed: three shape-accepted cues, zero early managed stops,
 no felt kick, normal steering intact. In the standalone comparison, only the
 constant pulse was noticeable at 20%; the owner preferred it at 40% but wanted
-more strength. Authorized follow-through uses a finite constant crash pulse,
+more strength. Installed RC6 uses a finite constant crash pulse,
 new-settings default50/range0–100; landing stays default5/range0–40. API status
 does not prove physical output, and the stronger range remains unaccepted.
 Findings and the generic finite constant API are contributed upstream for other
 consumers; their tunes are not automatically changed.
+All 16 local gates pass, including both recorded corpus cases; saved owner
+strengths are preserved. Public release and stronger physical acceptance remain pending.
 See [implementation and evidence](reviews/2026-09-17-constant-crash.md) and the latest
 [gate/install receipt](LOCAL-DEPLOYMENT.md). Next: retest crash feel and ordinary
 landing/steering/lifecycle behavior. Local toolkit pins require official release

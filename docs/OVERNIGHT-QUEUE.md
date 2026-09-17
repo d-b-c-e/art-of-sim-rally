@@ -13,9 +13,10 @@ The subsequent shaped RC4 test also failed: three full-intensity cues with no
 early managed cancellation, but no felt effect; ordinary steering worked.
 The completed standalone comparison favored the constant pulse (A) at 40%,
 though still too weak. Owner requested default50/range0–100 and contribution
-of findings to the shared toolkit. The next candidate uses a finite constant
+of findings to the shared toolkit. Installed RC6 uses a finite constant
 crash pulse while preserving landing5/0–40 and one active impact. Playback timing
-and stop reasons remain observable. See the latest
+and stop reasons remain observable. All 16 local gates pass; upstream API/tests
+and findings are pushed at `358add5`. Stronger feel is still unaccepted. See the latest
 [gate/install receipt](LOCAL-DEPLOYMENT.md) and [candidate review](reviews/2026-09-17-constant-crash.md).
 Next, run the
 [front/side/off-on comparison](CRASH-EFFECTS.md). Schema-4 live collision geometry

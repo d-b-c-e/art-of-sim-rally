@@ -6,7 +6,40 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.6-rc.4
+## Installed candidate — 0.2.6-rc.6
+
+Installed **2026-09-17 05:05 UTC** with the game closed after all 16 local
+gates. Crashes use method A's finite constant-force push/release, with a
+new-settings default of 50 and range 0–100. Landing stays default 5/range 0–40.
+The stronger in-game effect still needs an attended test; KI-38 remains open.
+
+- Identity: `0.2.6-rc.6+1cd7814ac20c647f176c57925875e6af47858e91.clean`.
+- ZIP SHA-256: `0FDAE9D3822F69F3F83212BD4B1FEFDBE356528C899CD2CC057930B90D352335`.
+- [All 16 gates](../results/rc-0.2.6-rc.6-dea9d3926a274f2f923aed528a1140e8/automated.json)
+  passed, including both recorded drives, 9,503 landing/crash assertions,
+  actual Unity Mono hooks and real installer entrypoints. The saved jump still
+  has one landing at row 4230. These checks do not apply physical wheel force.
+- [Installation receipt and RC4 backup](../results/constant-crash-rc6-install-4c471c524bbc43d083915f16aee51942/receipt.json):
+  all six mod payloads and the second native copy match the package. Settings,
+  game assembly, UMM parameters and separate probe files are byte-identical.
+- Preserved settings: **crash on/19.52381, landing on/20**. Select crash strength
+  **50** manually for comparison; installation does not overwrite a saved tune.
+  Settings SHA-256: `C373DA18429788ACDFEF7A032496981BDCC5571D7285543B249769846E5876EF`.
+- Toolkit pin: `local+358add53af220eb95bf606e240b230e23a6ea197.clean`, unpublished
+  package 0.15.0/native 0.8.0. Native SHA-256:
+  `A07DDF7E10ADBD016DB204324D5E035B951E21A7D8DD373405C91257EB7AD288`.
+  The native API, tests and reusable findings are pushed upstream. Probe stays
+  0.2.5.4; no game launch, recording, Pit House or SimHub change.
+- UMM displays **0.2.6**; support/build metadata identifies **0.2.6-rc.6**.
+  [Implementation, upstream contribution and testing limits](reviews/2026-09-17-constant-crash.md).
+  Public stable is 0.2.5. Official toolkit repin and attended checks remain.
+
+Built in `E:/Source/art-of-sim-rally-timing`; exact ZIP/checksum, gate evidence,
+backup and receipt are also retained in the main checkout's ignored `dist`/`results`.
+Preliminary RC5 passed all gates but was not installed: its packaged guide still
+described the old effect. RC6 corrects those instructions with the same runtime.
+
+## Previous candidate — 0.2.6-rc.4
 
 Installed **2026-09-17 03:57 UTC** (09-16 local) with the game closed after all
 16 local gates. Crashes now request a peak-start kick and fading rebound at the
