@@ -67,5 +67,14 @@ pause/focus loss and quit. Compare at fixed wheelbase/mod gains, starting low
 because onset differs. Save support while paused. The prior recording need not
 be repeated solely to validate this waveform comparison.
 
+RC4 completed all 16 local gates from clean source
+`91cedd8307010c796efe79590661368a52b56d27`, including two real corpus cases and
+9,342 landing/crash assertions. Exact ZIP SHA-256:
+`39643F929A680027937B195F2B18623DC69C289229A65C1AE27AE7AD0078F2BA`.
+Installed 2026-09-17 03:57 UTC with prior RC3 backed up; payload and preserved-file
+hashes verified. Crash on/19.52381 and landing on/20 survive. No game launch or
+recording, no wheel output, no SimHub change. Consumer source and toolkit shaping
+remain separate repositories, with the exact toolkit artifacts vendored here.
+
 Public stable remains 0.2.5. Public toolkit repin and attended checks remain
 prerequisites to publication; no release is authorized by this implementation.

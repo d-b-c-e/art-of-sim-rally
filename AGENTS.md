@@ -44,7 +44,7 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-17 UTC) — do not overstate this
 
-**Crash kick implementation (KI-38):** RC3 owner drive produced 13 accepted
+**Crash kick installed (KI-38):** RC3 owner drive produced 13 accepted
 crash cues at up to .1952, but no distinct felt effect. Saved crashes are now
 **on/19.52381**, landing on/20; preserve these newer settings. Candidate uses
 upstream shaped finite sine: 6.25 Hz, phase 90 degrees, full 120 ms fade, same peak
@@ -56,6 +56,12 @@ latency, stop reasons and elapsed command time. This is not actuator measurement
 Read `docs/reviews/2026-09-17-crash-kick.md` and the latest deployment receipt
 for exact gate/install status. Physical kick acceptance and official repin remain
 pending. Earlier paragraphs describe previous artifacts and settings.
+All 16 local gates passed for **0.2.6-rc.4**, clean source
+`91cedd8307010c796efe79590661368a52b56d27`; exact package installed at
+2026-09-17 03:57 UTC with game closed and settings/probe preserved. Two real
+corpus cases and 9,342 landing/crash assertions pass. Toolkit local pin is
+`c319b0258b11d1f07492a48dbc110d3e50c14dfd.clean` (0.14.0/native 0.7.0),
+not a published toolkit release. No game launch or recorded/physical test.
 
 **RC3 stronger impacts:** the 0.2.6 candidate extends both landing and
 crash strength from 0–20 to **0–40%** of nominal wheel force. One shared constant

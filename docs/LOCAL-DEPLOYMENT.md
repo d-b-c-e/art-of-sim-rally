@@ -6,7 +6,37 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.6-rc.3
+## Installed candidate — 0.2.6-rc.4
+
+Installed **2026-09-17 03:57 UTC** (09-16 local) with the game closed after all
+16 local gates. Crashes now request a peak-start kick and fading rebound at the
+same configured amplitude. Landing requests, steering and telemetry are unchanged.
+The new physical feel remains untested; RC3's failed crash-feel result is KI-38.
+
+- Identity: `0.2.6-rc.4+91cedd8307010c796efe79590661368a52b56d27.clean`.
+- ZIP SHA-256: `39643F929A680027937B195F2B18623DC69C289229A65C1AE27AE7AD0078F2BA`.
+- [All 16 gates](../results/rc-0.2.6-rc.4-b232db3bfe2346e7b200c2059258a9a3/automated.json)
+  passed, including both real corpus cases, 9,342 landing/crash assertions,
+  Unity Mono checks and real installer entrypoints. No physical wheel output.
+- [Installation receipt and RC3 backup](../results/crash-kick-rc4-install-87c17f07d71242bba8ddc5faf1cbb770/receipt.json):
+  all six mod payloads and the second native plugin copy match the exact package.
+  Settings, game assembly, UMM parameters and separate probe files are byte-identical.
+- Preserved owner settings: **crash on/19.52381, landing on/20**. Settings SHA-256:
+  `C373DA18429788ACDFEF7A032496981BDCC5571D7285543B249769846E5876EF`.
+  These supersede RC3's earlier installation-time crash off/5 values.
+- Toolkit pin: `local+c319b0258b11d1f07492a48dbc110d3e50c14dfd.clean`, unpublished
+  package 0.14.0/native 0.7.0. Native SHA-256:
+  `BCA81756B5FD920802D51C111AB55D5ED7F7219FCEA40588A65707A89D226EA4`.
+  Probe stays 0.2.5.4. No game launch, recording, Pit House or SimHub change.
+- UMM displays **0.2.6**; support/build metadata identifies **0.2.6-rc.4**.
+  [Candidate behavior, evidence and test plan](reviews/2026-09-17-crash-kick.md).
+  Public stable remains 0.2.5; official toolkit repin and attended checks remain.
+
+Built in `E:/Source/art-of-sim-rally-timing`; the exact ZIP/checksum, gate evidence
+and installation backup/receipt are also retained in the main checkout's ignored
+`dist`/`results`, with copied artifact hashes verified.
+
+## Previous candidate — 0.2.6-rc.3
 
 Installed **2026-09-17 03:23 UTC** (2026-09-16 local), with the game closed, after
 all 16 local gates. Both wheel-impact sliders now extend to 40%. Existing values
