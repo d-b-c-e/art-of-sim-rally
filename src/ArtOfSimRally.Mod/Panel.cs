@@ -157,20 +157,7 @@ namespace ArtOfSimRally.Mod
         private static void GearRow(Settings cfg, int gear)
         {
             int button = gear == -1 ? cfg.GearReverseButton : cfg.GearButton(gear);
-            bool waiting = _bindingGear == gear;
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(20);
-            GUILayout.Label(GearLabel(gear), SettingsPresentation.Width(70));
-            GUILayout.Label(waiting ? "Press a button" : (button >= 0 ? "Button " + (button + 1) : "Not bound"),
-                            SettingsPresentation.Width(90));
-            if (GUILayout.Button(waiting ? "Cancel" : "Bind", SettingsPresentation.Width(70)))
-            { _bindingGear = waiting ? int.MinValue : gear; _bindingUntil = Time.realtimeSinceStartup + 10; }
-            if (button >= 0 && GUILayout.Button("Clear", SettingsPresentation.Width(60)))
-            {
-                SaveShifterButton(cfg, gear, -1);
-            }
-            GUILayout.EndHorizontal();
+            BindingRow(cfg, gear, GearLabel(gear), button);
         }
 
         // Sequential rows are bound the same way but stored separately, and use
@@ -183,20 +170,28 @@ namespace ArtOfSimRally.Mod
         {
             int id = isUp ? BindUp : BindDown;
             int button = isUp ? cfg.ShiftUpButton : cfg.ShiftDownButton;
-            bool waiting = _bindingGear == id;
+            BindingRow(cfg, id, isUp ? "Shift up" : "Shift down", button);
+        }
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Space(20);
-            GUILayout.Label(isUp ? "Shift up" : "Shift down", SettingsPresentation.Width(90));
-            GUILayout.Label(waiting ? "Press a button" : (button >= 0 ? "Button " + (button + 1) : "Not bound"),
-                            SettingsPresentation.Width(90));
-            if (GUILayout.Button(waiting ? "Cancel" : "Bind", SettingsPresentation.Width(70)))
+        private static void BindingRow(Settings cfg, int id, string label, int button)
+        {
+            bool waiting = _bindingGear == id;
+            bool stack = SettingsPresentation.StackRows;
+            string value = waiting ? "Press a button" : button >= 0 ? "Button " + (button + 1) : "Not bound";
+            if (stack) GUILayout.Label(label + ": " + value, Wrap);
+            else
+            {
+                GUILayout.BeginHorizontal(); GUILayout.Space(20);
+                GUILayout.Label(label, SettingsPresentation.Width(90));
+                GUILayout.Label(value, SettingsPresentation.Width(90));
+            }
+            if (GUILayout.Button(waiting ? "Cancel" : "Bind", stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(70)))
             { _bindingGear = waiting ? int.MinValue : id; _bindingUntil = Time.realtimeSinceStartup + 10; }
-            if (button >= 0 && GUILayout.Button("Clear", SettingsPresentation.Width(60)))
+            if (button >= 0 && GUILayout.Button("Clear", stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(60)))
             {
                 SaveShifterButton(cfg, id, -1);
             }
-            GUILayout.EndHorizontal();
+            if (!stack) GUILayout.EndHorizontal();
         }
 
         private static bool SaveShifterButton(Settings cfg, int gear, int button)

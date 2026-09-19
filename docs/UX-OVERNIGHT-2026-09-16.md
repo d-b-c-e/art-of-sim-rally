@@ -29,6 +29,16 @@ WheelInput checks each resolved device's read status before contributing values;
 existing failed-read/disconnect fixtures cover handbrake and shortcut paths.
 The new shared-primary wording is not a substitute for the full physical matrix.
 
+Guidance revision `94dc3a1288359049eb887f6edaabb16005fc999c` additionally makes
+the actual host content bounds, reachable Stop/Close, direct shortcut guards,
+queued pointer cancellation and first-use screens explicit. RC10 passed narrow
+live keyboard isolation/recovery but overflowed the default4K host. RC11 fixes
+host-bound widths and page wrapping without changing UMM preferences; all16
+offline gates pass, with deployment/rendered retest pending review. See
+[RC10 evidence and RC11 correction](reviews/2026-09-19-rc10-ui-smoke.md).
+This does not close UX-03's720p/custom-scale, first-use, wheel/pad or held-input
+matrix. The binary pin remains358add5, independently of documentation revisions.
+
 ## Implemented scope
 
 - Persisted Simple/Advanced and six pages: Setup, Controls, FFB, Cameras,

@@ -50,11 +50,8 @@ namespace ArtOfSimRally.Mod
                 ? devices[selected]
                 : "(none selected)";
 
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button((open ? "▼  " : "▶  ") + current, SettingsPresentation.Width(320)))
+            if (GUILayout.Button((open ? "▼  " : "▶  ") + current))
                 _openId = open ? null : id;
-            GUILayout.Label(open ? "pick one" : "", wrap);
-            GUILayout.EndHorizontal();
 
             if (!open) return -1;
 
@@ -63,7 +60,7 @@ namespace ArtOfSimRally.Mod
             {
                 bool isCurrent = i == selected;
                 string text = (isCurrent ? "•  " : "    ") + devices[i];
-                if (GUILayout.Button(text, SettingsPresentation.Width(320)))
+                if (GUILayout.Button(text))
                 {
                     chosen = i;
                     _openId = null;

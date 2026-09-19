@@ -167,6 +167,16 @@ static class Program
         Check(SettingsDisplayPolicy.PageColumns(890,2)==3,"4K default host did not wrap page buttons");
         Check(SettingsDisplayPolicy.PageColumns(890,1)==6,"ordinary host unnecessarily wrapped pages");
         Check(SettingsDisplayPolicy.PageColumns(200,5)==1,"narrow high-scale page grid invalid");
+        foreach(float s in new[]{.5f,1f,1.5f,2f,3f,4f,5f})
+        foreach(float host in new[]{960f,1280f,1920f})
+        {
+            float body=SettingsDisplayPolicy.Width(3840,s,host)-30*s;
+            bool stack=SettingsDisplayPolicy.StackRows(body,s);
+            Check(stack || 310*s+20+40 <= body,"compact binding actions escape body at "+s+"x/"+host);
+        }
+        Check(SettingsDisplayPolicy.StackRows(770,4),"960px/4x bound sequential row not stacked");
+        Check(SettingsDisplayPolicy.StackRows(740,5),"960px/5x camera/dropdown row not stacked");
+        Check(!SettingsDisplayPolicy.StackRows(830,2),"default4K binding rows unnecessarily stacked");
         var c=new Settings{SettingsFollowHostScale=true};Check(Read(Xml(c)).SettingsFollowHostScale,"display preference not persisted");
     }
 }

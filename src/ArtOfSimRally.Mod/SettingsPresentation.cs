@@ -22,6 +22,7 @@ namespace ArtOfSimRally.Mod
         internal static float Scale { get; private set; } = 1;
         internal static float ContentWidth { get; private set; } = 890;
         internal static float BodyWidth => Math.Max(160, ContentWidth - 30 * Scale);
+        internal static bool StackRows => SettingsDisplayPolicy.StackRows(BodyWidth, Scale);
         internal static GUILayoutOption Width(float value) => GUILayout.Width(Math.Min(value * Scale, BodyWidth));
         internal static float PageHeight => SettingsDisplayPolicy.PageHeight(Screen.height, Scale, WindowSize.y);
         internal SettingsPresentation()

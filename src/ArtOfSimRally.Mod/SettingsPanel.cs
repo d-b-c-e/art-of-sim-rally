@@ -165,13 +165,14 @@ namespace ArtOfSimRally.Mod
             if (!WheelInput.IsButtonChannel(channel) && WheelInput.IsBound(channel))
                 Help(WheelInput.CalibrationDescription(channel));
             bool enabled = GUI.enabled; GUI.enabled = enabled && !Editing;
-            GUILayout.BeginHorizontal();
+            bool stack = SettingsPresentation.StackRows;
+            if (!stack) GUILayout.BeginHorizontal();
             if (GUILayout.Button("Bind")) WheelInput.BeginCalibration(channel);
             GUI.enabled = enabled && !Editing && WheelInput.IsBound(channel);
             if (!WheelInput.IsButtonChannel(channel) && GUILayout.Button("Calibrate")) WheelInput.BeginCalibration(channel);
             if (GUILayout.Button("Clear"))
             { if (WheelInput.Clear(channel) && channel == WheelInput.Channel.Steer && FfbSelection.FollowsSteering(c)) Main.SelectForceDevice(); }
-            GUILayout.EndHorizontal(); GUI.enabled = enabled;
+            if (!stack) GUILayout.EndHorizontal(); GUI.enabled = enabled;
             if (WheelInput.Assigning == channel) CalibrationEditor(c);
         }
         private static void CalibrationEditor(Settings c)
@@ -187,7 +188,8 @@ namespace ArtOfSimRally.Mod
                         pending.Deadzone = Slider(pending.Deadzone, 0, .1f, 0, "Deadzone", 100, "%");
                     }
                 }
-                GUILayout.BeginHorizontal(); bool enabled = GUI.enabled;
+                bool stack = SettingsPresentation.StackRows;
+                if (!stack) GUILayout.BeginHorizontal(); bool enabled = GUI.enabled;
                 GUI.enabled = enabled && WheelInput.CanSaveCalibration;
                 if (GUILayout.Button(pending != null && pending.IsButton ? "Save binding" : "Save calibration"))
                 {
@@ -196,7 +198,7 @@ namespace ArtOfSimRally.Mod
                 }
                 GUI.enabled = enabled;
                 if (GUILayout.Button("Cancel")) WheelInput.CancelAssign();
-                GUILayout.EndHorizontal();
+                if (!stack) GUILayout.EndHorizontal();
 
         }
         private static void Bar(WheelInput.Channel channel, string label)
@@ -266,13 +268,14 @@ namespace ArtOfSimRally.Mod
                 for (int i = 0; i < CameraKeys.Bindings.Length; i++)
                 {
                     var binding = CameraKeys.Bindings[i];
-                    GUILayout.BeginHorizontal();
+                    bool stack = SettingsPresentation.StackRows;
+                    if (!stack) GUILayout.BeginHorizontal();
                     GUILayout.Label(binding.Label + ": " + CameraKeys.Name(binding.Get(c)), _wrap);
                     bool old = GUI.enabled; GUI.enabled = old && (!Editing || CameraKeys.Listening == i);
-                    if (GUILayout.Button(CameraKeys.Listening == i ? "Cancel" : "Bind", SettingsPresentation.Width(80)))
+                    if (GUILayout.Button(CameraKeys.Listening == i ? "Cancel" : "Bind", stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(80)))
                     { if (CameraKeys.Listening == i) CameraKeys.Cancel(); else CameraKeys.Begin(i); }
-                    if (GUILayout.Button("Clear", SettingsPresentation.Width(70))) CameraKeys.Clear(c, i);
-                    GUI.enabled = old; GUILayout.EndHorizontal();
+                    if (GUILayout.Button("Clear", stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(70))) CameraKeys.Clear(c, i);
+                    GUI.enabled = old; if (!stack) GUILayout.EndHorizontal();
                     Axis(c, WheelInput.CameraChannel(i), binding.Label + " (button)");
                 }
                 bool enabled = GUI.enabled; GUI.enabled = enabled && !Editing;
@@ -346,19 +349,21 @@ namespace ArtOfSimRally.Mod
         }
         private static bool Toggle(bool value, string label)
         {
-            GUILayout.BeginHorizontal(); GUILayout.Label(label + ": " + (value ? "On" : "Off"), _wrap);
-            int result = GUILayout.Toolbar(value ? 1 : 0, new[] { "Off", "On" }, SettingsPresentation.Width(110));
-            GUILayout.EndHorizontal(); return result == 1;
+            bool stack = SettingsPresentation.StackRows;
+            if (!stack) GUILayout.BeginHorizontal(); GUILayout.Label(label + ": " + (value ? "On" : "Off"), _wrap);
+            int result = GUILayout.Toolbar(value ? 1 : 0, new[] { "Off", "On" }, stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(110));
+            if (!stack) GUILayout.EndHorizontal(); return result == 1;
         }
         private static float Slider(float value, float min, float max, float normal, string label, float scale, string unit)
         {
             GUILayout.Label(label + ": " + (value * scale).ToString("0.##") + unit, _wrap);
-            GUILayout.BeginHorizontal();
+            bool stack = SettingsPresentation.StackRows;
+            if (!stack) GUILayout.BeginHorizontal();
             bool changed = GUI.changed; GUI.changed = false;
             float result = GUILayout.HorizontalSlider(value, min, max);
             bool moved = GUI.changed; GUI.changed |= changed;
-            if (GUILayout.Button("Default", SettingsPresentation.Width(80))) { result = normal; moved = true; GUI.changed = true; }
-            GUILayout.EndHorizontal(); return moved ? result : value;
+            if (GUILayout.Button("Default", stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(80))) { result = normal; moved = true; GUI.changed = true; }
+            if (!stack) GUILayout.EndHorizontal(); return moved ? result : value;
         }
         private static void Help(string text) { if (!string.IsNullOrEmpty(text)) GUILayout.Label(text, _help); }
     }

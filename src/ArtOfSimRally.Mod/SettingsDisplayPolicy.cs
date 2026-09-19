@@ -19,5 +19,10 @@ namespace ArtOfSimRally.Mod
                 (hostHeight > 0 ? hostHeight : Math.Min(720, screenHeight)) - 180 - 175 * scale)));
         internal static int PageColumns(float width, float scale)
             => Math.Max(1, Math.Min(6, (int)(width / (140 * scale))));
+        // The widest compact binding row needs 310 scaled pixels, plus its
+        // spacer, style margins and label breathing room. Decide for the row,
+        // not each child: individually capped widths can still overflow in sum.
+        internal static bool StackRows(float bodyWidth, float scale)
+            => bodyWidth < 380 * scale + 20;
     }
 }
