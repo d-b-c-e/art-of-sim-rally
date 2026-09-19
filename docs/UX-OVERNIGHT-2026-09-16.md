@@ -228,3 +228,8 @@ and force/settings evidence. No live slot is granted. With an allocated slot:
 
 Record exact source/package hashes and attended observations. Preserve failures;
 do not infer a passed hardware matrix from an offline gate or prior RC6 drive.
+
+RC10 successor: reviewed native dispatch/release guards and scoped text scaling
+passed all16 local gates at clean2ab6fb5 and were installed20:10:28UTC.
+See [current deployment](LOCAL-DEPLOYMENT.md) for exact receipt. The RC9 failure
+remains recorded; successor live recheck and the full hardware matrix are pending.

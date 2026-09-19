@@ -1,6 +1,6 @@
 # Settings candidate: short test guide
 
-This guide applies to the **installed 0.2.6-rc.9 Simple/Advanced candidate**,
+This guide applies to the **installed 0.2.6-rc.10 Simple/Advanced candidate**,
 not the public 0.2.5 download. It replaced RC6 after all 16 local gates on
 2026-09-19; see [Local deployment](LOCAL-DEPLOYMENT.md) for the exact identity,
 backup and receipt.
@@ -9,7 +9,8 @@ gaps. The usual installer still preserves Settings.xml; start any attended
 comparison with an extra backup of that file.
 
 **RC9 smoke found a blocker:** navigation/Escape can reach the game menu behind
-the panel, and default4K text is too small. A replacement is in progress; see
+the panel, and default4K text is too small. RC10 contains the reviewed fixes
+and passed all16 local gates, but still needs a live recheck; see
 [the recorded failure and retest](reviews/2026-09-19-rc9-ui-smoke.md).
 
 ## Open and stop
@@ -109,6 +110,11 @@ work still waits for pause. “Sending” does not confirm receiver delivery.
 problem, use **Advanced → Help → Log detail for support**, reproduce briefly,
 pause, create the support file, then turn detail off. No file is uploaded.
 The recorder remains a separate development probe and is not in the release.
+
+**Settings text size:** Auto enlarges this mod's content with screen resolution
+when UMM uses its default1x scale. A custom UMM scale takes priority. Choose
+**Use UMM scale** to follow the host exactly, including1x. The surrounding UMM
+window retains its saved dimensions and own text; resize it in UMM Settings.
 
 ## Attended acceptance still required
 

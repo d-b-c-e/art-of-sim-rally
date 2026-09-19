@@ -26,7 +26,8 @@ Severity is about the effect on driving, not on how annoying it looks:
 **Confirmed in RC9, 2026-09-19.** Down changed the stock main-menu selection
 behind the open settings panel. Escape cancelled a camera binding but also
 opened the game's Quit confirmation. The default-scale4K text was too small.
-Successor dispatch/release guards and scoped content scaling are under review;
+RC10 dispatch/release guards and scoped content scaling are reviewed, passed
+all16 gates and installed; live recheck is pending and
 offline checks alone do not close this issue. Exact evidence, restored settings
 and the required retest are in [the smoke review](reviews/2026-09-19-rc9-ui-smoke.md).
 

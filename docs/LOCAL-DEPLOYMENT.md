@@ -6,7 +6,32 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.6-rc.9
+## Installed candidate — 0.2.6-rc.10
+
+Installed **2026-09-19 20:10:28 UTC**, game closed, after all16 local gates.
+This replaces RC9's confirmed menu leakage and small4K content with reviewed
+dispatch/held-release guards and scoped Auto/UMM text scaling. Runtime retest
+is pending; this is not a public release or complete UX-1 acceptance.
+
+- Identity: `0.2.6-rc.10+2ab6fb5f27be570693ebe856b48259456f55007f.clean`.
+- ZIP SHA-256: `F4A46410F5B8F9CD82121C8B183BC161E2788BB47E6F0A1BFF222FC7AD89B9E6`.
+- [Complete gate](../results/rc-0.2.6-rc.10-49b815102d9e4f43962f90e1eb0f4d04/automated.json),
+  SHA-256 `96B492FFDACB6CCA3BB42B0AE1A404F94ADFFA2AEC8E4B8CD34D490E422B617F`.
+- [Install receipt and RC9 backup](../results/ux-0.2.6-rc.10-install-073c05f30a374727b3a29ac3ac50046a/receipt.json).
+  All six mod payloads and second native DLL match; settings, UMM preferences,
+  game assembly and separate probe are byte-identical. Crash on19.52381,
+  landing on20; settings SHA `C373DA18429788ACDFEF7A032496981BDCC5571D7285543B249769846E5876EF`.
+- 96 settings checks, actual Unity Mono hook attachment, two real captures and
+  9,507 landing/crash assertions pass. Saved landing remains row4230. Toolkit
+  358add5/native0.8.0 and probe0.2.5.4 unchanged; no recording or force test.
+- Exact artifacts, gate/failed-first-gate and installation evidence are copied
+  and hash-verified in main's ignored dist/results. Public stable remains0.2.5.
+
+Before the next drive, explicitly select **F6 → FFB → Use steering wheel** or
+reselect the MOZA: the saved old name/index has no FFB GUID. Installation does
+not guess an output device. See [RC9 failure and successor review](reviews/2026-09-19-rc9-ui-smoke.md).
+
+## Previous candidate — 0.2.6-rc.9
 
 Installed **2026-09-19 19:31 UTC** with the game closed after all 16 local gates.
 RC9 aligns the installer's completion text with the new F6/FFB/Controls/Help
