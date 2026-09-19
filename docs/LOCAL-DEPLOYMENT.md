@@ -29,8 +29,16 @@ and hardware matrix remains pending. No public release.
 - [RC12 smoke and restoration receipt](../results/ux-rc12-smoke-d24e3e71d58f498699f4eba1ea8c28f7/receipt.json):
   readable header/all six page buttons and five Simple page tops fit the default
   4K host; Escape closes only the panel and subsequent native Quit works.
-  Cameras, Advanced, scrolling and binding cancellation remain pending. Normal
-  exit and all16 protected hashes restored at20:51:49.521UTC; no output or recording.
+  Normal exit and all16 protected hashes restored at20:51:49.521UTC; no output
+  or recording. The remaining camera check followed in a second run.
+- [RC12 camera cancellation and restoration receipt](../results/ux-rc12-smoke-74c19cbf1bf5462ead1dad05bbdaff67/receipt.json):
+  Cameras and nested scrolling fit; Bind→Escape at8.218s canceled the active edit
+  without closing the panel or activating native Quit. Advanced Cameras top
+  was observed. Normal exit and all16 protected hashes restored at21:05:25.672UTC.
+  Comparison of original/after-smoke XML found only the intentional temporary
+  FFB/telemetry Off changes; bindings and force strengths were unchanged. Both
+  original files are restored byte-for-byte. Full Advanced/scale/input coverage
+  remains pending; no output, driving or recording occurred.
 
 Before driving, choose **F6 → FFB → Use steering wheel** or reselect the MOZA;
 the saved old name/index lacks an FFB GUID. The installer preserves that choice.

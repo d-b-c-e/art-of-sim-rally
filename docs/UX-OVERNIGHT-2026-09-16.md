@@ -42,10 +42,11 @@ matrix. The binary pin remains358add5, independently of documentation revisions.
 Current successor **RC12** passed all16 gates and was installed20:35:39UTC.
 Independent review closed its aggregate row overflow at clean `cbcf76c5`;126
 settings checks cover the default host and large custom scales. RC11 remained
-validation-only. A limited default4K run passed readable header/all six page
-buttons, five Simple page tops and Escape/native Quit recovery. Cameras,
-Advanced, nested scrolling and Bind→Escape remain pending. Normal exit/exact
-restoration completed20:51:49UTC. Exact identity and preserved files are in
+validation-only. Limited default4K runs passed readable header/all six page
+buttons, all six Simple page tops, camera nested scrolling, timed Bind→Escape
+cancellation and native Quit recovery. Advanced Cameras top was observed;
+the full Advanced/scale/input matrix remains pending. Latest normal exit/exact
+restoration completed21:05:25UTC. Exact identity and preserved files are in
 [LOCAL-DEPLOYMENT](LOCAL-DEPLOYMENT.md); the linked smoke review scopes each
 observation. Historical RC8–10 evidence below is not full layout acceptance.
 
@@ -146,9 +147,9 @@ real runtime patch attachment. It does not mean a player operated the UI.
 | Panel/focus suppression | Production force/input/impact/shifter fixtures; physical stop and held-input behavior pending |
 | UMM route and cancel-first hook | Route tested against a host fixture; actual UMM ToggleWindow hook attaches/unpatches under game's Unity Mono without executing UI |
 | FFB recovery behavior | Existing steering smoothing remains; no dedicated time-based post-panel ramp added. UX-05 says normal suspension *may* resume with a ramp; retain RC6 force arithmetic. At smoothing0 return is immediate after gates, explicitly not a ramp claim |
-| Camera bindings | Keyboard and USB direction/reset/release fixtures, reserved keys/timeout, batch-reset conflict and locked-file rollback; RC9 edit cancellation worked but Escape leaked to native Quit; KI-40 successor retest pending |
+| Camera bindings | Keyboard and USB direction/reset/release fixtures, reserved keys/timeout, batch-reset conflict and locked-file rollback; RC12 timed Escape canceled the active keyboard bind while keeping the panel open and native menu unchanged; physical USB checks pending |
 | Connection draft | Production atomic policy fixtures plus existing telemetry loopback tests; actual receiver/UI comparison pending |
-| Font scale, 720p/4K, sticky header, keyboard focus | RC9 rendered at4K and failed readability; scoped successor Auto/host scaling needs4K/720p retest |
+| Font scale, 720p/4K, sticky header, keyboard focus | RC12 limited default4K header/page/scroll checks pass; full Advanced,720p/custom-scale and physical input checks remain pending |
 | Game/UMM binding integration | Mod/camera USB binding complete in source. Game actions use native ControlsRemapper via guarded panel route. Independent route fixtures cover driving/edit/intro/inactive/missing/ambiguous guards; actual navigation remains untested |
 | Calibration ergonomics | **Partial:** captured full-travel transaction and one phase of instructions; no dedicated step-by-step wizard |
 | Camera scoped reset | Reset this view and runtime reset share one method; offline scope checks preserve the other mount/shortcuts/tunes |

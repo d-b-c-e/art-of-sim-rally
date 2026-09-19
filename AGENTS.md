@@ -12,9 +12,10 @@
 `cbcf76c5d6401dd8a0c511acfe7ded201df6a99d`, all16 gates passed, installed
 2026-09-19 20:35:39UTC. Default4K content fits the actual UMM host; page buttons
 wrap and large-scale binding rows stack. Narrow independent source review is
-closed. Limited4K smoke passed header/page buttons, five Simple page tops and
-Escape/native Quit recovery; Cameras, Advanced, scrolling and Bind→Escape remain
-pending. Normal exit/exact restoration completed20:51:49UTC. RC11 was validated
+closed. Limited4K smoke passed header/page buttons, all six Simple page tops,
+camera nested scrolling, timed Bind→Escape cancellation and native Quit recovery.
+Advanced Cameras top was observed; the full Advanced/scale/input matrix remains
+pending. Latest normal exit/exact restoration completed21:05:25UTC. RC11 was validated
 but not installed.
 Exact artifacts/backups/hashes: `docs/LOCAL-DEPLOYMENT.md`. Owner settings,
 toolkit358add5 and probe0.2.5.4 retained; no force test or public release.
@@ -24,7 +25,7 @@ toolkit358add5 and probe0.2.5.4 retained; no force test or public release.
 2026-09-19 20:10:28UTC. It fixes the confirmed RC9 stock-menu dispatch leak and
 adds scoped automatic4K text scaling. Live Down/Return/Escape isolation and
 native recovery passed; scaled content overflowed the default960px UMM host.
-Responsive-width correction is in progress; see `docs/reviews/2026-09-19-rc10-ui-smoke.md`.
+RC12 corrects that width overflow; see `docs/reviews/2026-09-19-rc10-ui-smoke.md`.
 The independent source review's missing replay24/25 release case is fixed.
 Exact artifacts/backups/hashes: `docs/LOCAL-DEPLOYMENT.md`. Settings, toolkit
 358add5 and probe0.2.5.4 retained; no force test/public release. Earlier RC9
