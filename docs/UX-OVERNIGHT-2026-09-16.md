@@ -17,6 +17,18 @@ save-before-effective/batch-reset clarifications,
 The consumer's **native/managed binary pin stays `358add5`** (local toolkit
 0.15.0/native 0.8.0); this UI work does not publish or repin the toolkit.
 
+Coordinator revision `12df6b325d770625baffd75b2d2eb74f1fcd0a8c` clarifies UX-03 stock-menu pointer/submit/navigation
+isolation and release of all keyboard/wheel/pad/Settings controls before handoff,
+plus UX-04 neutralization of all roles sharing a disconnected primary device.
+The shipped UMM builds a full-screen raycast-blocking canvas, which is source
+evidence for pointer interception only. This is not a claim that the game's
+cached/native keyboard navigation is suppressed or held-input handoff passes.
+Add native-menu baseline/overlay comparisons to the allocated smoke; keyboard,
+wheel and pad release aggregation remains an explicit acceptance gap until tested.
+WheelInput checks each resolved device's read status before contributing values;
+existing failed-read/disconnect fixtures cover handbrake and shortcut paths.
+The new shared-primary wording is not a substitute for the full physical matrix.
+
 ## Implemented scope
 
 - Persisted Simple/Advanced and six pages: Setup, Controls, FFB, Cameras,
