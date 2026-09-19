@@ -69,7 +69,7 @@ namespace ArtOfSimRally.Mod
             // FixedUpdate keeps running through the end-of-stage cutscene while
             // the game steers the car itself. Without this the wheel is dragged
             // to full lock and held there after crossing the line.
-            if (!GameState.IsDriving)
+            if (!GameState.IsDriving || Main.SettingsVisible || !Application.isFocused)
             {
                 ReleaseSample(__instance);
                 return;

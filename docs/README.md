@@ -11,6 +11,11 @@
 
 ## Development and validation
 
+- [Settings candidate guide](UX-SETTINGS-CANDIDATE.md) and
+  [UX-1 audit](UX-OVERNIGHT-2026-09-16.md): isolated Simple/Advanced work,
+  coverage and remaining acceptance; see LOCAL-DEPLOYMENT for installation.
+  These changes are not in the public download.
+
 - [Crash vibration candidate](CRASH-EFFECTS.md): optional wheel effect and short
   attended comparison; not in the 0.2.5 public download.
 

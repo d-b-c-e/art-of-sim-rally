@@ -17,7 +17,7 @@ namespace ArtOfSimRally.Mod
     /// <see cref="ModLog"/> and <see cref="Settings"/>, so supporting a second
     /// loader means adding a sibling of this file, not touching the patches.
     /// </remarks>
-    public static class Main
+    public static partial class Main
     {
         internal static Settings Settings { get; private set; }
         internal static bool Enabled { get; private set; }
@@ -35,6 +35,7 @@ namespace ArtOfSimRally.Mod
         private static Harmony _harmony;
         private static UnityModManager.ModEntry _modEntry;
         private static readonly FfbReconnect ForceReconnect = new FfbReconnect();
+        private static int _saveAttempts;
 
         /// <summary>Referenced by <c>EntryMethod</c> in Info.json.</summary>
         public static bool Load(UnityModManager.ModEntry modEntry)
@@ -61,12 +62,23 @@ namespace ArtOfSimRally.Mod
             // Before anything is applied: a marker from a launch where the
             // DirectInput switch left the keyboard dead turns that setting off.
             InputBackend.OnLoad();
+            if (SettingsMigration.NeedsHandbrakeSplit(Settings))
+            {
+                try
+                {
+                    string path = Path.Combine(modEntry.Path, "Settings.xml");
+                    if (File.Exists(path)) File.Copy(path, path + ".pre-ux-" + Guid.NewGuid().ToString("N") + ".bak");
+                    SettingsMigration.SplitHandbrake(Settings);
+                    MarkSettingsDirty();
+                }
+                catch (Exception ex) { ModLog.Warning("Handbrake migration deferred; original binding kept: " + ex.Message); }
+            }
             WheelInput.LoadBindings();
             FrameHealthPersistence.Initialize();
 
             modEntry.OnGUI       = OnGUI;
             modEntry.OnSaveGUI   = OnSaveGUI;
-            modEntry.OnHideGUI   = entry => CameraKeys.Cancel();
+            modEntry.OnHideGUI   = entry => { SettingsPanel.CancelPendingEdit(); CameraTuner.SuppressUntilRelease(); FlushUiSettings(true); };
             modEntry.OnToggle    = OnToggle;
             modEntry.OnUnload    = OnUnload;
 
@@ -128,7 +140,14 @@ namespace ArtOfSimRally.Mod
             return true;
         }
 
-        private static void OnGUI(UnityModManager.ModEntry modEntry) => SettingsPanel.Draw();
+        private static void OnGUI(UnityModManager.ModEntry modEntry)
+        {
+            bool changed = GUI.changed; GUI.changed = false;
+            int saves = _saveAttempts;
+            SettingsPanel.Draw();
+            if (GUI.changed && saves == _saveAttempts) MarkSettingsDirty();
+            GUI.changed |= changed;
+        }
 
         private static void OnSaveGUI(UnityModManager.ModEntry modEntry)
             => SaveSettings();
@@ -160,6 +179,11 @@ namespace ArtOfSimRally.Mod
             if (!ForceReconnect.TryBegin(Time.realtimeSinceStartup,
                 Enabled && Settings.ForceFeedbackEnabled, GameState.IsDriving,
                 WheelInput.Assigning.HasValue, FfbNative.FocusedGameWindow())) return;
+            if (!FfbSelection.TryTarget(Settings, out var targetName, out var targetIndex, out var targetGuid, out var reason))
+            {
+                FfbNative.Shutdown(); FfbNative.SelectionUnavailable(reason);
+                ForceReconnect.Cancel(); return;
+            }
             // Reader slots may share the old FFB handle. Reopen them after the
             // device switch, and release nonexclusive readers before acquiring FFB.
             WheelInput.Close();
@@ -167,7 +191,7 @@ namespace ArtOfSimRally.Mod
             try
             {
                 ForceReconnect.Complete(FfbNative.Reinitialise(_modEntry.Path,
-                    Settings.PreferredDevice, Settings.PreferredDeviceIndex, Settings.PreferredDeviceGuid));
+                    targetName, targetIndex, targetGuid));
                 if (!FfbNative.Ready && !ForceReconnect.Pending)
                     ModLog.Warning("FFB recovery exhausted. Pause and select the wheel again to retry.");
             }
@@ -185,15 +209,18 @@ namespace ArtOfSimRally.Mod
         /// <summary>Persists settings changed outside the panel, e.g. by the camera hotkeys.</summary>
         public static bool SaveSettings()
         {
+            _saveAttempts++;
             try
             {
                 if (Settings == null || _modEntry == null) return false;
                 Settings.Save(_modEntry);
+                _uiDirty = false; SettingsSaveStatus = "Saved";
                 return true;
             }
             catch (Exception ex)
             {
                 ModLog.Warning($"Could not save settings: {ex.Message}");
+                SettingsSaveStatus = "Could not save settings. Check the mod folder is writable; retry while paused.";
                 return false;
             }
         }

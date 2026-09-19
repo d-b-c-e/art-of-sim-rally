@@ -19,6 +19,14 @@ See [implementation, limits and A/B drive](LANDING-EFFECTS.md).
 
 Remaining feature priorities:
 
+**Settings UX adoption (KI-39):** Simple/Advanced pages, transactional calibration,
+USB mod/camera buttons, strict FFB follow/override, atomic connection drafts and
+support guidance are implemented in the local candidate. The owner authorized
+local integration/deployment on 2026-09-19. See the
+[inventory and test record](UX-OVERNIGHT-2026-09-16.md). Actual UMM layout/focus,
+game-binding navigation and wheel/device acceptance remain required; preserve
+the crash candidate's exact toolkit and tuning during this work.
+
 **Current focus: FR-2 crash feedback in wheel FFB and SimHub motion.** The game
 has a collision callback suitable for passive observation; 48 new synthetic
 crash scenarios pass through the production telemetry sampler and encoded UDP.

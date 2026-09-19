@@ -9,6 +9,15 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Simple/Advanced settings with Setup, Controls, FFB, Cameras, Telemetry and Help;
+  F6 entry, optional USB Settings/Stop FFB buttons, and F8 stop that retains Off.
+- Provisional axis calibration with Save/Cancel, explicit inversion/deadzone,
+  separate additive handbrake axis/button, and strict FFB follow-Steering selection.
+- Keyboard/USB camera adjustment bindings, scoped camera/FFB resets, atomic
+  telemetry connection drafts and a guarded route to the game's binding screen.
+- Offline fixtures for presentation/persistence, calibration write failure,
+  independent USB devices, reserved-key reset conflicts and settings output gates.
+
 - Support diagnostics count 33/50/100 ms driving intervals separately for the
   first five seconds, next ten seconds and later driving. Prior-session summaries
   retain these counts; old summaries remain readable.
@@ -27,12 +36,11 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Experimental crash output now requests a sharp kick with a smaller fading
-  rebound, replacing its rapid vibration at the same peak strength. Landings keep
-  their waveform. Unsupported crash shaping preserves landing availability.
-- Landing and crash wheel vibration now allow strengths up to 40%, twice the
-  previous ceiling. Existing values keep their output and defaults stay at 5.
-  The two effects still share one finite vibration without adding together.
+- Experimental crash output uses a finite 120ms constant-force push/release,
+  default50/range0–100, still opt-in. Landing stays a 25Hz/120ms sine,
+  default5/range0–40. Saved values keep their output; one impact owns the slot.
+  The prior shaped rebound candidate failed its attended test. Stronger constant
+  crash feel remains unaccepted; UI changes do not retune forces or telemetry.
 - Shorter install/first-drive README and dedicated setup/build guides, including
   separate USB handbrakes, updates/removal, SimHub and support-file instructions.
 - Standalone release readme with usable online links and current 0.2.5 defaults.
@@ -40,6 +48,11 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- Binding saves, clears and shortcut-default restores retain the previous
+  effective assignment if Settings.xml cannot be written. Failed calibration
+  remains provisional for retry/Cancel; device switches wait for successful save.
+- Settings/focus transitions suppress mod driving/force/camera input, and held
+  shifter buttons wait for release before reuse. Physical/UI verification pending.
 - Slow native impact calls no longer consume the managed burst lifetime.
   Support records call latency and stop reasons to diagnose early interruption.
 - Native toolkit candidate stops writing every changing steering-force sample

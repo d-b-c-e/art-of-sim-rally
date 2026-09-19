@@ -53,7 +53,7 @@ public class CarDynamics
 namespace ArtOfSimRally.Mod
 {
     internal class Settings { public bool ForceFeedbackEnabled=true,LandingEffectsEnabled=true,DiagnosticLogging=true,CrashEffectsEnabled; public float LandingStrength=5,CrashStrength=50; }
-    internal static class Main { public static Settings Settings=new(); public static bool Enabled=true; }
+    internal static class Main { public static Settings Settings=new(); public static bool Enabled=true, SettingsVisible; }
     internal static class GameState { public static bool IsDriving,IsRestarting; public static EventManager ExistingManager=new(); }
     internal static class FfbNative { public static bool Ready=true; }
     internal static class FfbController { internal static float CurrentForce => .25f; }

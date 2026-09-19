@@ -20,7 +20,7 @@ static class Program
     static void BoundOnlyHandbrake(float expected)
     {
         var values = CarInput();
-        Same((float)values[4], expected, "handbrake did not reach game input as analog float");
+        Same((float)values[4], Math.Max(.54f, expected), "handbrake did not preserve max of stock and analog input");
         Check((float)values[1] == .21f && (float)values[2] == .32f && (float)values[3] == -.43f &&
             (float)values[5] == .65f && (bool)values[6], "handbrake overwrote unbound channels");
     }
@@ -199,7 +199,7 @@ static class Program
         WheelInput.Flip(WheelInput.Channel.Handbrake); WheelInput.Clear(WheelInput.Channel.Handbrake);
         Check(Host.Saves==saves,"Flip/Clear wrote settings during driving");
         GameState.IsDriving=false; Clock.realtimeSinceStartup+=6; WheelInput.FlushLearnedRanges();
-        Check(Host.Saves==saves+1 && !File.ReadAllText(Host.Path).Contains("TSS fixture"),"latest binding edit not saved while idle");
+        Check(Host.Saves==saves+1 && File.ReadAllText(Host.Path).Contains("TSS fixture"),"drive-time clear changed saved binding instead of rejecting edit");
         Setup("TSS fixture|0|axis:2|0|65535"); Host.SaveSettings();
         string before=File.ReadAllText(Host.Path);
         using(File.Open(Host.Path,FileMode.Open,FileAccess.ReadWrite,FileShare.None))
@@ -220,7 +220,7 @@ static class Program
             else if (args.Contains("--reconnect-only")) DeviceRecovery();
             else if (args.Contains("--flip-only")) FlipPersistence();
             else if (args.Contains("--assign-only")) AssignmentReadFailure();
-            else { Travel(0, 65535); Travel(65535, 0); RangesAndAssignment(); Lifecycle(); FlipPersistence(); AssignmentReadFailure(); DeviceIdentity(); DeviceRecovery(); AssignmentResume(); BindingSaves(); assertions+=ShifterIdentityTests.Run(); }
+            else { Travel(0, 65535); Travel(65535, 0); RangesAndAssignment(); Lifecycle(); FlipPersistence(); AssignmentReadFailure(); DeviceIdentity(); DeviceRecovery(); AssignmentResume(); BindingSaves(); assertions+=ShifterIdentityTests.Run(); assertions+=CalibrationTests.Run(); }
             Console.WriteLine(JsonSerializer.Serialize(new { status = "passed", assertions })); return 0;
         }
         catch (Exception ex) { Console.Error.WriteLine(ex); return 1; }

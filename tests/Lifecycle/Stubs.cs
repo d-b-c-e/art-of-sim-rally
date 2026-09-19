@@ -95,6 +95,8 @@ namespace ArtOfSimRally.Mod
         public static Settings Settings = new Settings(); public static bool Enabled=true, OtherCameraModLoaded=false;
         public static void RecoverForceFeedback() => Calls.Log.Add("force-recover");
         public static void CancelForceRecovery() { }
+        public static bool SettingsVisible = false;
+        public static void TickSettingsUi() { }
     }
     internal static class GameState { public static bool IsDriving=false, IsPlayerView=true; }
     internal static class ModLog { public static void Info(string value) { } }

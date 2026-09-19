@@ -8,6 +8,10 @@ direct USB controls, bonnet/bumper cameras and telemetry for SimHub.
 [Setup guide](docs/SETUP.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Changelog](CHANGELOG.md)
 
+The isolated development branch has a new
+[Simple/Advanced settings candidate](docs/UX-SETTINGS-CANDIDATE.md).
+It is not in the download above; the instructions below describe public 0.2.5.
+
 ## Install
 
 For the **64-bit Windows game**. Tested on the Steam version; other stores are

@@ -32,6 +32,13 @@ static class Program
             }
             var active=Active(); GameState.IsDriving=false; Step(active);
             Check(FfbNative.Last==0 && active.forceFeedback==0,"pause left published game force stale");
+            active=Active(); ArtOfSimRally.Mod.Main.SettingsVisible=true; Step(active);
+            Check(FfbNative.Last==0 && active.forceFeedback==0,"settings panel left steering force active");
+            ArtOfSimRally.Mod.Main.SettingsVisible=false;
+            active=Active(); UnityEngine.Application.isFocused=false; Step(active);
+            Check(FfbNative.Last==0 && active.forceFeedback==0,"focus loss left steering force active");
+            UnityEngine.Application.isFocused=true;
+            GameState.IsDriving=false;
             int sends=FfbNative.Sends; Step(active); Check(FfbNative.Sends==sends,"parked force sent repeatedly");
             active=Active(); FfbNative.Ready=false; Step(active);
             active.axles.frontAxle.leftWheel.Fy=active.axles.frontAxle.rightWheel.Fy=0;

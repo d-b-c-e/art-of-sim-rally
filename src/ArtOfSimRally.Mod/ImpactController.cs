@@ -34,10 +34,10 @@ namespace ArtOfSimRally.Mod
             Main.Settings.ForceFeedbackEnabled && (kind == ImpactKind.Landing
                 ? Main.Settings.LandingEffectsEnabled && Main.Settings.LandingStrength > 0
                 : Main.Settings.CrashEffectsEnabled && Main.Settings.CrashStrength > 0);
-        public static bool Available(ImpactKind kind) => Enabled(kind) && Mixer.Available(kind);
+        public static bool Available(ImpactKind kind) => !Main.SettingsVisible && Enabled(kind) && Mixer.Available(kind);
         public static string Status(ImpactKind kind) => Enabled(kind) ? Mixer.Status(kind) : "Off";
         public static ImpactResult Trigger(ImpactKind kind, float intensity, float strength, double now)
-            => Mixer.Trigger(kind, intensity, strength, now);
+            => Main.SettingsVisible ? ImpactResult.Unavailable : Mixer.Trigger(kind, intensity, strength, now);
         public static float Magnitude(ImpactKind kind) => Mixer.Counts(kind).Magnitude;
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
@@ -45,7 +45,7 @@ namespace ArtOfSimRally.Mod
         {
             bool driving = GameState.IsDriving;
             string stop = !Main.Enabled ? "mod-disabled" : Main.Settings == null || !Main.Settings.ForceFeedbackEnabled ? "ffb-disabled" :
-                !FfbNative.Ready ? "device-unavailable" : !Application.isFocused ? "focus-lost" :
+                !FfbNative.Ready ? "device-unavailable" : Main.SettingsVisible ? "settings-open" : !Application.isFocused ? "focus-lost" :
                 GameState.IsRestarting ? "restart" : !driving ? "not-driving" :
                 (!Enabled(ImpactKind.Landing) && !Enabled(ImpactKind.Crash)) ? "impacts-disabled" : null;
             if (stop != null) Reset(stop);

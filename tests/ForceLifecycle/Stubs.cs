@@ -8,6 +8,7 @@ namespace UnityEngine
 {
     public static class Mathf { public static float Abs(float f) => Math.Abs(f); }
     public static class Time { public static float unscaledTime=0; }
+    public static class Application { public static bool isFocused=true; }
 }
 public class CarDynamics { public bool enableForceFeedback; public float forceFeedback, velo=20; public Axles axles=new(); }
 public class Axles { public Axle frontAxle=new(); }
@@ -21,7 +22,7 @@ namespace ArtOfSimRally.Mod
         public float FyReference=11500, GainFromStrength=.5f, Smoothing=.2f;
         public int Strength=50;
     }
-    internal static class Main { public static Settings Settings=new(); public static bool Enabled=true; }
+    internal static class Main { public static Settings Settings=new(); public static bool Enabled=true, SettingsVisible; }
     internal static class GameState { public static bool IsDriving=true; }
     internal static class ModLog { public static void Info(string text) { } }
     internal static class LandingController

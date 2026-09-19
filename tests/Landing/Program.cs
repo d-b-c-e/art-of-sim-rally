@@ -106,9 +106,9 @@ static class Program
     static void GameIntegration()
     {
         foreach(float strength in new[]{5f,20f,30f,40f})
-        foreach(string interrupt in new[]{"none","pause","focus","disable","ffb-off","not-ready","restart","missing-body","missing-wheel","car-change","wall-gap"})
+        foreach(string interrupt in new[]{"none","pause","settings","focus","disable","ffb-off","not-ready","restart","missing-body","missing-wheel","car-change","wall-gap"})
         {
-            ImpactController.Shutdown();Mod.Enabled=true;Mod.Settings=new(){LandingStrength=strength};FfbNative.Ready=true;
+            ImpactController.Shutdown();Mod.Enabled=true;Mod.SettingsVisible=false;Mod.Settings=new(){LandingStrength=strength};FfbNative.Ready=true;
             UnityEngine.Application.isFocused=true;GameState.IsRestarting=false;GameState.IsDriving=false;
             ImpactController.Tick();GameState.IsDriving=true;
             int before=Native.Plays;var car=new CarDynamics();
@@ -123,6 +123,7 @@ static class Program
                 if(i==49)
                 {
                     if(interrupt=="pause")GameState.IsDriving=false;
+                    if(interrupt=="settings")Mod.SettingsVisible=true;
                     if(interrupt=="focus")UnityEngine.Application.isFocused=false;
                     if(interrupt=="disable")Mod.Settings.LandingEffectsEnabled=false;
                     if(interrupt=="ffb-off")Mod.Settings.ForceFeedbackEnabled=false;
@@ -135,7 +136,7 @@ static class Program
                 ImpactController.Tick();LandingController.Observe(car);
                 if(i==49)
                 {
-                    GameState.IsDriving=true;GameState.IsRestarting=false;UnityEngine.Application.isFocused=true;
+                    GameState.IsDriving=true;GameState.IsRestarting=false;UnityEngine.Application.isFocused=true;Mod.SettingsVisible=false;
                     Mod.Settings.LandingEffectsEnabled=Mod.Settings.ForceFeedbackEnabled=true;FfbNative.Ready=true;
                     if(car.body==null)car.body=new();
                     car.axles.rearAxle.rightWheel??=new();

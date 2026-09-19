@@ -50,6 +50,7 @@ namespace ArtOfSimRally.Mod
 
         private void Update()
         {
+            Main.TickSettingsUi();
             ObserveFrameHealth();
             TelemetryPump.StopIfDisabled();
             if (!Main.Enabled)
@@ -67,7 +68,7 @@ namespace ArtOfSimRally.Mod
             // Independent of whether any game object is still ticking. The
             // FixedUpdate postfix normally gets here first; this exists for when
             // it cannot.
-            if (GameState.IsDriving)
+            if (GameState.IsDriving && !Main.SettingsVisible && Application.isFocused)
             {
                 ImpactController.Tick();
                 _wheelReleased = false;

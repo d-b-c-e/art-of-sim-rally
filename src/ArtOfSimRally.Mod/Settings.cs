@@ -20,6 +20,16 @@ namespace ArtOfSimRally.Mod
     /// </remarks>
     public class Settings : UnityModManager.ModSettings
     {
+        // Presentation only. Unknown/missing view values display Simple.
+        public string SettingsView = "Simple";
+        public int SettingsPage = 0;
+        public KeyCode SettingsKey = KeyCode.F6;
+        public string SettingsButtonBinding = "";
+        public string StopFfbButtonBinding = "";
+        // Same action order as CameraKeys.Bindings; separate from keyboard keys.
+        public string[] CameraButtonBindings = new string[11];
+        // Empty migrates existing explicit selections; a new config follows Steering.
+        public string FfbDeviceMode = "";
         // ---- Steering -------------------------------------------------------
 
         public bool DirectSteering = true;
@@ -47,6 +57,7 @@ namespace ArtOfSimRally.Mod
         public string BrakeBinding = "";
         public string ClutchBinding = "";
         public string HandbrakeBinding = "";
+        public string HandbrakeButtonBinding = "";
 
         // ---- Force feedback -------------------------------------------------
 
@@ -224,6 +235,31 @@ namespace ArtOfSimRally.Mod
         public string TelemetryHost = "127.0.0.1";
 
         public int TelemetryPort = 8000;
+
+        public void ResetCameraMount(bool bumper)
+        {
+            var defaults = new Settings();
+            if (bumper)
+            {
+                BumperHeight = defaults.BumperHeight; BumperForward = defaults.BumperForward;
+                BumperSide = defaults.BumperSide; BumperPitch = defaults.BumperPitch; BumperFOV = defaults.BumperFOV;
+            }
+            else
+            {
+                BonnetHeight = defaults.BonnetHeight; BonnetForward = defaults.BonnetForward;
+                BonnetSide = defaults.BonnetSide; BonnetPitch = defaults.BonnetPitch; BonnetFOV = defaults.BonnetFOV;
+            }
+        }
+
+        public void ResetFfbTuning()
+        {
+            var defaults = new Settings();
+            Strength = defaults.Strength; Smoothing = defaults.Smoothing; Invert = defaults.Invert;
+            FyReference = defaults.FyReference;
+            LandingEffectsEnabled = defaults.LandingEffectsEnabled; LandingStrength = defaults.LandingStrength;
+            CrashEffectsEnabled = defaults.CrashEffectsEnabled; CrashStrength = defaults.CrashStrength;
+            // Preserve the saved Off/On preference, device and all non-FFB settings.
+        }
 
         public override void Save(UnityModManager.ModEntry modEntry)
             => SettingsPersistence.Write(this, GetPath(modEntry));

@@ -1,5 +1,9 @@
 # Troubleshooting
 
+The isolated [Simple/Advanced candidate](UX-SETTINGS-CANDIDATE.md) uses new page
+names: controls in Controls, force settings in FFB, and support export in Help.
+The public 0.2.5 instructions below retain the released panel names.
+
 For initial setup, use the [setup guide](SETUP.md). If the mod loads, pause and
 collect a support file: Ctrl+F10 → *Devices and troubleshooting* →
 **Create support file on Desktop**. Attach it when reporting a problem.

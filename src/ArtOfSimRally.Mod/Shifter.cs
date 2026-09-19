@@ -185,6 +185,16 @@ namespace ArtOfSimRally.Mod
             for (int i = 0; i < n; i++)
                 if (_buttons[i] != 0) { PressedButton = i; break; }
 
+            if (Main.SettingsVisible || !Application.isFocused)
+            { _waitForRelease = true; return; }
+            // A press made in the panel must not become a gear change on close.
+            if (_waitForRelease)
+            {
+                if (PressedButton >= 0) return;
+                _waitForRelease = false;
+                Reset();
+                return;
+            }
             if (cfg.ShifterIsHPattern) UpdateHPattern(cfg, drivetrain, n);
             else UpdateSequential(cfg, drivetrain, n);
         }
@@ -275,6 +285,8 @@ namespace ArtOfSimRally.Mod
         }
 
         /// <summary>Clears shift state, e.g. between stages.</summary>
+        private static bool _waitForRelease;
+        internal static void SuppressUntilRelease() => _waitForRelease = true;
         public static void Reset()
         {
             _lastApplied = int.MinValue;

@@ -10,6 +10,7 @@
     <Compile Include="../../src/ArtOfSimRally.Mod/DeferredSave.cs" Link="DeferredSave.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/Settings.cs" Link="Settings.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/SettingsPersistence.cs" Link="SettingsPersistence.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/SettingsCommit.cs" Link="SettingsCommit.cs" />
     <!-- Actual KeyCode/Mathf/settings serialization; only input, clock and host are doubles. -->
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(GameDir)/artofrally_Data/Managed/UnityEngine.CoreModule.dll</HintPath></Reference>
     <Reference Include="UnityModManager"><HintPath>../../lib/umm/UnityModManager.dll</HintPath></Reference>

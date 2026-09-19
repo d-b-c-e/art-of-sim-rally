@@ -17,8 +17,7 @@ namespace ArtOfSimRally.Mod
     /// </remarks>
     internal static class Panel
     {
-        private static GUIStyle _wrap;
-        private static GUIStyle Wrap => _wrap ?? (_wrap = new GUIStyle(GUI.skin.label) { wordWrap = true });
+        private static GUIStyle Wrap => new GUIStyle(GUI.skin.label) { wordWrap = true };
 
         private static string[] _ffbDevices;
 
@@ -28,6 +27,10 @@ namespace ArtOfSimRally.Mod
         private static string[] _allLabels = new string[0];
         private static bool _allListed;
         private static int _bindingGear = int.MinValue;
+        private static float _bindingUntil;
+        private static string _bindingStatus = "", _ffbSelectionStatus = "";
+        internal static bool BindingActive => _bindingGear != int.MinValue;
+        internal static void CancelBinding() => _bindingGear = int.MinValue;
 
         /// <summary>Forces both device lists to be re-read.</summary>
         public static void Rescan()
@@ -40,40 +43,40 @@ namespace ArtOfSimRally.Mod
         public static void DrawWheelPicker()
         {
             var cfg = Main.Settings;
+            if (GameState.IsDriving) { GUILayout.Label("Pause before changing the FFB device.", Wrap); return; }
             if (!_ffbListed) { _ffbDevices = FfbNative.ListDevices(); _ffbLabels = FfbNative.ListDeviceLabels(_ffbDevices); _ffbListed = true; }
-
-            int chosen = DeviceDropdown.Draw(
-                "wheel", "Wheel", _ffbLabels, FfbNative.SelectedPosition(cfg),
-                "No force-feedback device found. Check the wheel is powered on and not held " +
-                "by another program.");
-
-            if (chosen >= 0)
+            bool follow = FfbSelection.FollowsSteering(cfg);
+            var steering = WheelInput.Binding.Parse(cfg.SteerBinding);
+            int position = follow ? 0 : FfbNative.SelectedPosition(cfg) + 1;
+            bool missing = !follow && position == 0;
+            var labels = new string[_ffbDevices.Length + 1 + (missing ? 1 : 0)];
+            labels[0] = "Use steering wheel — " + (steering?.Device ?? "Steering not bound");
+            for (int i = 0; i < _ffbDevices.Length; i++)
             {
-                cfg.PreferredDeviceIndex = chosen;
-                cfg.PreferredDevice = _ffbDevices[chosen];
-                cfg.PreferredDeviceGuid = FfbNative.DeviceGuid(chosen);
-                Main.SaveSettings();
-
-                // Switch immediately rather than at next launch. Trying each of two
-                // similarly named devices to see which one moves is the natural way
-                // to pick, and that needs the change to take effect now.
-                if (Main.ReopenForceFeedback())
-                    ModLog.Info("Now using " + _ffbDevices[chosen]);
-                else
-                    ModLog.Warning("Could not switch to " + _ffbDevices[chosen] +
-                                   "; a restart may be needed.");
+                string guid = FfbNative.DeviceGuid(i);
+                labels[i + 1] = _ffbDevices[i] + (guid.Length >= 6 ? " · " + guid.Substring(guid.Length - 6) : " (identity unavailable)");
             }
-
-            if (!string.IsNullOrEmpty(FfbNative.Status) && !FfbNative.Ready)
-                GUILayout.Label("      " + FfbNative.Status, Wrap);
-
-            if (_ffbDevices != null && _ffbDevices.Length > 1)
-                GUILayout.Label("      Two devices with the same name? Pick one and turn the " +
-                                "wheel - if nothing happens, choose the other.", Wrap);
+            if (missing) { position = labels.Length - 1; labels[position] = "Saved device disconnected/unverified — " + cfg.PreferredDevice; }
+            int chosen = DeviceDropdown.Draw("wheel", "FFB device", labels, position, "No devices found.");
+            if (chosen >= 0 && chosen <= _ffbDevices.Length)
+            {
+                string oldMode = cfg.FfbDeviceMode, oldName = cfg.PreferredDevice, oldGuid = cfg.PreferredDeviceGuid;
+                int oldIndex = cfg.PreferredDeviceIndex;
+                bool saved = SettingsCommit.TrySave(() => {
+                    cfg.FfbDeviceMode = chosen == 0 ? "steering" : "explicit";
+                    if (chosen > 0) { cfg.PreferredDeviceIndex = chosen - 1; cfg.PreferredDevice = _ffbDevices[chosen - 1]; cfg.PreferredDeviceGuid = FfbNative.DeviceGuid(chosen - 1); }
+                }, () => { cfg.FfbDeviceMode = oldMode; cfg.PreferredDevice = oldName; cfg.PreferredDeviceGuid = oldGuid; cfg.PreferredDeviceIndex = oldIndex; });
+                _ffbSelectionStatus = saved ? "Selection saved." : "Could not save. Previous FFB device kept; check Settings.xml is writable.";
+                if (saved) Main.SelectForceDevice();
+            }
+            GUILayout.Label(_ffbSelectionStatus, Wrap);
+            if (!FfbSelection.TryTarget(cfg, out _, out _, out _, out var reason)) GUILayout.Label(reason, Wrap);
+            if (GUILayout.Button("Refresh / retry connection")) { Rescan(); Main.SelectForceDevice(); }
         }
 
         public static void DrawShifterBinding(Settings cfg)
         {
+            if (BindingActive && Time.realtimeSinceStartup >= _bindingUntil) CancelBinding();
             if (GameState.IsDriving)
             {
                 GUILayout.Label("      Pause to change shifter devices or bindings.", Wrap);
@@ -88,12 +91,13 @@ namespace ArtOfSimRally.Mod
                 "shifter", "Shifter", _allLabels, Shifter.SelectedPosition(cfg), "No controllers found.");
             if (picked >= 0)
             {
-                cfg.ShifterDeviceIndex = picked;
-                cfg.ShifterDeviceName = _allDevices[picked];
-                cfg.ShifterDeviceGuid = Shifter.DeviceGuid(picked);
-                Shifter.Open(picked);
-                Main.SaveSettings();
+                int oldIndex = cfg.ShifterDeviceIndex; string oldName = cfg.ShifterDeviceName, oldGuid = cfg.ShifterDeviceGuid;
+                bool saved = SettingsCommit.TrySave(() => { cfg.ShifterDeviceIndex = picked; cfg.ShifterDeviceName = _allDevices[picked]; cfg.ShifterDeviceGuid = Shifter.DeviceGuid(picked); },
+                    () => { cfg.ShifterDeviceIndex = oldIndex; cfg.ShifterDeviceName = oldName; cfg.ShifterDeviceGuid = oldGuid; });
+                _bindingStatus = saved ? "Selection saved." : "Could not save. Previous shifter kept; check Settings.xml is writable.";
+                if (saved) Shifter.Open(picked);
             }
+            GUILayout.Label(_bindingStatus, Wrap);
 
             if (cfg.ShifterDeviceIndex < 0)
             {
@@ -114,17 +118,15 @@ namespace ArtOfSimRally.Mod
             Shifter.PollForBinding();
 
             GUILayout.Label(cfg.ShifterIsHPattern
-                ? "      Click Set, then move the lever into that gate."
-                : "      Click Set, then push the lever that way.", Wrap);
+                ? "      Click Bind, then move the lever into that gate."
+                : "      Click Bind, then push the lever that way.", Wrap);
 
             if (_bindingGear != int.MinValue)
             {
                 int pressed = Shifter.PressedButton;
                 if (pressed >= 0)
                 {
-                    if (_bindingGear == BindUp)        cfg.ShiftUpButton = pressed;
-                    else if (_bindingGear == BindDown) cfg.ShiftDownButton = pressed;
-                    else                               cfg.SetGearButton(_bindingGear, pressed);
+                    if (!SaveShifterButton(cfg, _bindingGear, pressed)) return;
 
                     ModLog.Info("Bound " +
                         (_bindingGear == BindUp ? "shift up"
@@ -132,7 +134,6 @@ namespace ArtOfSimRally.Mod
                          : GearLabel(_bindingGear)) + " to button " + pressed);
 
                     _bindingGear = int.MinValue;
-                    Main.SaveSettings();
                 }
             }
 
@@ -150,7 +151,7 @@ namespace ArtOfSimRally.Mod
             }
 
             GUILayout.Label("      Pressed now: " +
-                (Shifter.PressedButton >= 0 ? "button " + Shifter.PressedButton : "nothing"), Wrap);
+                (Shifter.PressedButton >= 0 ? "button " + (Shifter.PressedButton + 1) : "nothing"), Wrap);
         }
 
         private static void GearRow(Settings cfg, int gear)
@@ -161,14 +162,13 @@ namespace ArtOfSimRally.Mod
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
             GUILayout.Label(GearLabel(gear), GUILayout.Width(70));
-            GUILayout.Label(waiting ? "press it..." : (button >= 0 ? "button " + button : "-"),
+            GUILayout.Label(waiting ? "Press a button" : (button >= 0 ? "Button " + (button + 1) : "Not bound"),
                             GUILayout.Width(90));
-            if (GUILayout.Button(waiting ? "cancel" : "set", GUILayout.Width(70)))
-                _bindingGear = waiting ? int.MinValue : gear;
-            if (button >= 0 && GUILayout.Button("clear", GUILayout.Width(60)))
+            if (GUILayout.Button(waiting ? "Cancel" : "Bind", GUILayout.Width(70)))
+            { _bindingGear = waiting ? int.MinValue : gear; _bindingUntil = Time.realtimeSinceStartup + 10; }
+            if (button >= 0 && GUILayout.Button("Clear", GUILayout.Width(60)))
             {
-                cfg.SetGearButton(gear, -1);
-                Main.SaveSettings();
+                SaveShifterButton(cfg, gear, -1);
             }
             GUILayout.EndHorizontal();
         }
@@ -188,18 +188,25 @@ namespace ArtOfSimRally.Mod
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
             GUILayout.Label(isUp ? "Shift up" : "Shift down", GUILayout.Width(90));
-            GUILayout.Label(waiting ? "press it..." : (button >= 0 ? "button " + button : "-"),
+            GUILayout.Label(waiting ? "Press a button" : (button >= 0 ? "Button " + (button + 1) : "Not bound"),
                             GUILayout.Width(90));
-            if (GUILayout.Button(waiting ? "cancel" : "set", GUILayout.Width(70)))
-                _bindingGear = waiting ? int.MinValue : id;
-            if (button >= 0 && GUILayout.Button("clear", GUILayout.Width(60)))
+            if (GUILayout.Button(waiting ? "Cancel" : "Bind", GUILayout.Width(70)))
+            { _bindingGear = waiting ? int.MinValue : id; _bindingUntil = Time.realtimeSinceStartup + 10; }
+            if (button >= 0 && GUILayout.Button("Clear", GUILayout.Width(60)))
             {
-                if (isUp) cfg.ShiftUpButton = -1; else cfg.ShiftDownButton = -1;
-                Main.SaveSettings();
+                SaveShifterButton(cfg, id, -1);
             }
             GUILayout.EndHorizontal();
         }
 
+        private static bool SaveShifterButton(Settings cfg, int gear, int button)
+        {
+            int previous = gear == BindUp ? cfg.ShiftUpButton : gear == BindDown ? cfg.ShiftDownButton : gear == -1 ? cfg.GearReverseButton : cfg.GearButton(gear);
+            Action<int> set = value => { if (gear == BindUp) cfg.ShiftUpButton = value; else if (gear == BindDown) cfg.ShiftDownButton = value; else cfg.SetGearButton(gear, value); };
+            bool saved = SettingsCommit.TrySave(() => set(button), () => set(previous));
+            _bindingStatus = saved ? "Binding saved." : "Could not save. Previous binding kept; check Settings.xml is writable, then retry or Cancel.";
+            return saved;
+        }
         private static string GearLabel(int gear) => gear == -1 ? "Reverse" : "Gear " + gear;
 
         public static void DrawInputStatus()

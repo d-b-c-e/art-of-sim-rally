@@ -21,6 +21,23 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-39 — Settings UX runtime and layout acceptance is incomplete
+
+**Unverified, candidate 2026-09-19.** The Simple/Advanced implementation includes
+transactional calibration, additive USB handbrake, Settings/Stop/camera buttons,
+strict FFB following, and a guarded route to the game's controls panel. Source
+fixtures do not establish real UMM scrolling/focus, device behavior or physical
+stop/recovery. At 720p/high DPI, walk all pages and test fresh/legacy settings,
+calibration/cancellation, binding writes and USB reconnect. See the
+[adoption audit and exact pending checklist](UX-OVERNIGHT-2026-09-16.md).
+
+Review found and fixed two pre-deployment defects: failed binding writes became
+effective despite an unchanged file, and Restore numpad defaults could conflict
+with a rebound Settings key. Actual-source locked-file/retry/cancel fixtures
+and batch-reset preflight now cover both. These fixes are not evidence that
+the attended checklist has passed. Game action binding retains the native
+Rewired UI; Raw Input-unreadable devices need keyboard/pad for those actions.
+
 ### KI-38 — Accepted RC3/RC4 crash commands have no distinct felt effect
 
 **Owner-confirmed feel failure in RC3 and shaped RC4 (2026-09-17 UTC).**

@@ -7,7 +7,7 @@ namespace Dbce.Wheel.Ffb
         public sealed class DeviceInfo
         {
             public string Name = "TSS fixture"; public int Index = 0; public Guid? InstanceGuid;
-            public int[] StateAxes; public bool Connected = true, CannotOpen;
+            public int[] StateAxes; public byte[] StateButtons; public bool Connected = true, CannotOpen;
             public string Label => Name;
         }
         public static DeviceInfo[] Devices = { new DeviceInfo() };
@@ -33,7 +33,7 @@ namespace Dbce.Wheel.Ffb
             Reads++;
             if (ThrowRead) throw new IOException("fixture read failure");
             if (!ReadOk || !slots.TryGetValue(slot, out var device) || !device.Connected) return false;
-            Array.Copy(device.StateAxes ?? Axes, axes, Axes.Length); Array.Copy(Buttons, buttons, Buttons.Length);
+            Array.Copy(device.StateAxes ?? Axes, axes, Axes.Length); Array.Copy(device.StateButtons ?? Buttons, buttons, Buttons.Length);
             return true;
         }
         public static void CloseRead() { Closes++; slots.Clear(); }
@@ -66,6 +66,7 @@ public static class SettingsManager
 namespace ArtOfSimRally.Mod
 {
     internal static class Time { public static float realtimeSinceStartup = 100; }
+    internal static class Application { public static bool isFocused = true; }
     internal static class GameState
     {
         public static bool IsDriving = true;
@@ -74,7 +75,7 @@ namespace ArtOfSimRally.Mod
     internal static class Main
     {
         public static Settings Settings = new();
-        public static bool Enabled = true;
+        public static bool Enabled = true, SettingsVisible;
         public static string Path;
         public static int Saves;
         public static bool SaveSettings() { Saves++; SettingsPersistence.Write(Settings, Path); return true; }

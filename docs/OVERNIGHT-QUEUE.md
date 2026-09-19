@@ -22,11 +22,13 @@ Next, run the
 [front/side/off-on comparison](CRASH-EFFECTS.md). Schema-4 live collision geometry
 and SimHub input/output comparison remain pending; no motion gain change.
 
-Queued separately: toolkit UX coordinator requested the UX-1 Simple/Advanced
-rollout (guidance `a84bebab5ec2abdcd5140b9c63c139ccff86a7d3`) on 2026-09-17.
-Preserve this crash candidate and owner tunes; scope UI work in a separate
-change after the in-flight force implementation. This entry records the request,
-not completed UX adoption. No unattended physical tests or public release.
+UX follow-through, 2026-09-19: the coordinator-requested UX-1 Simple/Advanced
+work is implemented as an isolated candidate on `codex/ux-simple-advanced`.
+See its [inventory, evidence and remaining gaps](UX-OVERNIGHT-2026-09-16.md).
+The owner/coordinator authorized local integration/deployment on 2026-09-19 after
+full gates and backing up RC6. Owner tunes/toolkit358add5 stay intact. Attended
+UI/device checks and stronger crash acceptance remain open; no unattended
+physical tests or public release.
 
 Reporter confirms good steering and working handbrake on 0.2.5. Request the
 Haapajarvi support file and short landing clip for KI-5/KI-36. Investigate

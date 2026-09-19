@@ -54,7 +54,13 @@ try {
     $result = Run 'wheel-input' 'dotnet' @('run','--project','tests/WheelInput/WheelInput.csproj','-c','Release')
     $wheelInput = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($wheelInput.status -eq 'passed' -and $wheelInput.assertions -gt 0) 'Wheel input runner ran no assertions'
-    Checkpoint 'regression' ($regression.assertions+$wheelInput.assertions+$support.assertions)
+    $result = Run 'settings-ui' 'dotnet' @('run','--project','tests/SettingsUi/SettingsUi.csproj','-c','Release')
+    $settingsUi = $result | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($settingsUi.status -eq 'passed' -and $settingsUi.assertions -gt 0) 'Settings UI policy runner ran no assertions'
+    $result = Run 'game-bindings' 'dotnet' @('run','--project','tests/GameBindings/GameBindings.csproj','-c','Release')
+    $gameBindings = $result | Select-Object -Last 1 | ConvertFrom-Json
+    Assert ($gameBindings.status -eq 'passed' -and $gameBindings.assertions -gt 0) 'Game binding route runner ran no assertions'
+    Checkpoint 'regression' ($regression.assertions+$wheelInput.assertions+$support.assertions+$settingsUi.assertions+$gameBindings.assertions)
     $result = Run 'lifecycle' 'dotnet' @('run','--project','tests/Lifecycle/Lifecycle.csproj','-c','Release')
     $lifecycle = $result | Select-Object -Last 1 | ConvertFrom-Json
     Assert ($lifecycle.status -eq 'passed' -and $lifecycle.assertions -gt 0) 'Lifecycle runner ran no assertions'

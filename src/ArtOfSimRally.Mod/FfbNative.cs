@@ -22,6 +22,8 @@ namespace ArtOfSimRally.Mod
             return process == GetCurrentProcessId() ? window : IntPtr.Zero;
         }
         internal static void Waiting() => Status = "Waiting for a focused game window while paused or in menus.";
+        internal static void SelectionUnavailable(string reason) => Status = reason;
+        internal static void StopOutputs() { WheelFfbNative.Zero(); FfbController.Reset(); }
         public const int ForceMax = 10000;
         public static bool Ready => WheelFfbNative.Ready;
         public static string RequestedPath { get; private set; } = "(no preload requested)";
@@ -96,7 +98,7 @@ namespace ArtOfSimRally.Mod
                 if (!Guid.TryParse(settings.PreferredDeviceGuid, out Guid guid)) return -1;
                 return new DevicePreference { InstanceGuid = guid }.Choose(_devices);
             }
-            return settings.PreferredDeviceIndex;
+            return -1; // Legacy name/index is unverified, never display a different row as saved.
         }
 
         public static bool Reinitialise(string modDir, string name, int index, string guid = "")

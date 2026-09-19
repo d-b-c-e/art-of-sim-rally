@@ -37,6 +37,11 @@ static class Program
         CameraKeys.Begin(0); CameraKeys.Cancel();
         Check(CameraKeys.Listening == -1 && cfg.KeyUp == defaults[0], "cancel changed binding");
         CameraKeys.Begin(0);
+        foreach (var reserved in new[]{KeyCode.F8, KeyCode.F6, KeyCode.F10})
+            Check(CameraKeys.HandleKey(cfg,reserved,false) && CameraKeys.Listening==0 && cfg.KeyUp==defaults[0],"reserved key accepted");
+        Clock.unscaledTime+=11; CameraKeys.Tick();
+        Check(CameraKeys.Listening==-1 && cfg.KeyUp==defaults[0],"timeout changed old camera key");
+        CameraKeys.Begin(0);
         foreach (var key in new[] { KeyCode.None, KeyCode.LeftShift, KeyCode.RightControl, KeyCode.LeftAlt,
             KeyCode.AltGr, KeyCode.LeftCommand, KeyCode.RightWindows, KeyCode.Mouse0, KeyCode.JoystickButton0, (KeyCode)9999 })
             Check(CameraKeys.HandleKey(cfg, key, false) && CameraKeys.Listening == 0 && cfg.KeyUp == defaults[0], "invalid/modifier/device key accepted: " + key);
@@ -55,6 +60,24 @@ static class Program
         Check(Saved().KeyUp == KeyCode.None && cfg.KeyDown == KeyCode.W && CameraKeys.Name(cfg.KeyUp) == "Unbound", "clear changed other key or failed persistence");
         cfg.BonnetHeight = 9; CameraKeys.Reset(cfg);
         Check(CameraKeys.Bindings.Select(b => b.Get(cfg)).SequenceEqual(defaults) && cfg.BonnetHeight == 9, "reset keys also reset mount or missed binding");
+        CameraKeys.Clear(cfg,0);cfg.SettingsKey=KeyCode.Keypad8;
+        var beforeReset=CameraKeys.Bindings.Select(b=>b.Get(cfg)).ToArray();
+        CameraKeys.Reset(cfg);
+        Check(CameraKeys.Bindings.Select(b=>b.Get(cfg)).SequenceEqual(beforeReset)&&cfg.SettingsKey==KeyCode.Keypad8,
+            "batch reset introduced Settings-key conflict or partially changed keys");
+        cfg.SettingsKey=KeyCode.F6;
+        Host.SaveSettings();string beforeFile=File.ReadAllText(Host.Path);
+        using(File.Open(Host.Path,FileMode.Open,FileAccess.ReadWrite,FileShare.None))
+        {
+            CameraKeys.Begin(0);CameraKeys.HandleKey(cfg,KeyCode.U,false);
+            Check(CameraKeys.Listening==0&&cfg.KeyUp==KeyCode.None&&CameraKeys.Status.Contains("Could not save"),"failed rebind became effective");
+            CameraKeys.Cancel();CameraKeys.Clear(cfg,1);
+            Check(cfg.KeyDown==KeyCode.Keypad2,"failed Clear changed effective camera key");
+            CameraKeys.Reset(cfg);
+            Check(CameraKeys.Bindings.Select(b=>b.Get(cfg)).SequenceEqual(beforeReset),"failed reset changed effective camera keys");
+        }
+        Check(File.ReadAllText(Host.Path)==beforeFile,"failed binding writes changed stored file");
+        CameraKeys.Reset(cfg);Check(cfg.KeyUp==KeyCode.Keypad8&&Saved().KeyUp==KeyCode.Keypad8,"reset retry did not persist");
         for (int i = 0; i < CustomKeys.Length; i++) { CameraKeys.Begin(i); CameraKeys.HandleKey(cfg, CustomKeys[i], false); }
         cfg.BonnetCameraEnabled = false; cfg.BumperCameraEnabled = true;
         Check(CameraKeys.Available(cfg), "bumper-only setup cannot rebind");
@@ -161,13 +184,41 @@ static class Program
         CameraTuner.Flush(shutdown: true); Check(Host.Saves == 5, "double shutdown saved twice");
         GameState.IsDriving = false;
     }
+    static void UsbCameraButtons()
+    {
+        var cfg=Host.Settings;Keys.Release();WheelInput.Held.Clear();CameraTuner.Update(BonnetCamera.View.Bonnet);
+        foreach(bool bumper in new[]{false,true})
+        {
+            var view=bumper?BonnetCamera.View.Bumper:BonnetCamera.View.Bonnet;
+            int[] targets={0,0,1,1,2,2,3,3,4,4};int[] directions={1,-1,1,-1,-1,1,1,-1,1,-1};
+            for(int i=0;i<10;i++)
+            {
+                var before=MountValues(cfg,bumper);var other=MountValues(cfg,!bumper);
+                WheelInput.Held.Add(WheelInput.CameraChannel(i));CameraTuner.Update(view);WheelInput.Held.Clear();
+                var after=MountValues(cfg,bumper);
+                for(int f=0;f<5;f++)Check(Math.Abs(after[f]-before[f]-(f==targets[i]?directions[i]*Clock.unscaledDeltaTime*(i<6?cfg.TuneMoveSpeed:cfg.TuneAngleSpeed):0))<.00001f,"USB camera adjustment mapping wrong");
+                Check(MountValues(cfg,!bumper).SequenceEqual(other),"USB adjustment moved inactive mount");
+            }
+        }
+        float height=cfg.BonnetHeight;Host.SettingsVisible=true;WheelInput.Held.Add(WheelInput.Channel.CameraUp);CameraTuner.Update(BonnetCamera.View.Bonnet);
+        Host.SettingsVisible=false;CameraTuner.Update(BonnetCamera.View.Bonnet);Check(cfg.BonnetHeight==height,"captured/held USB camera button leaked through close");
+        WheelInput.Held.Clear();CameraTuner.Update(BonnetCamera.View.Bonnet);WheelInput.Held.Add(WheelInput.Channel.CameraUp);
+        CameraTuner.Update(BonnetCamera.View.Bonnet);Check(cfg.BonnetHeight>height,"released USB camera button never resumed");
+        height=cfg.BonnetHeight;ArtOfSimRally.Mod.Application.isFocused=false;CameraTuner.Update(BonnetCamera.View.Bonnet);
+        ArtOfSimRally.Mod.Application.isFocused=true;CameraTuner.Update(BonnetCamera.View.Bonnet);Check(cfg.BonnetHeight==height,"focus return used held camera button");
+        WheelInput.Held.Clear();CameraTuner.Update(BonnetCamera.View.Bonnet);
+        cfg.BumperHeight=1.8f;cfg.BonnetHeight=2.4f;
+        WheelInput.Pressed.Add(WheelInput.Channel.CameraReset);CameraTuner.ReadResetButton();CameraTuner.Update(BonnetCamera.View.Bonnet);
+        Check(cfg.BonnetHeight==.95f&&cfg.BumperHeight==1.8f,"USB reset scope wrong");
+        cfg.BonnetHeight=1.3f;CameraTuner.Update(BonnetCamera.View.Bonnet);Check(cfg.BonnetHeight==1.3f,"USB reset repeated from one edge");
+    }
     static int Main()
     {
         try
         {
             var directory = Path.GetFullPath(Path.Combine("results", "camera-tuning-" + Guid.NewGuid().ToString("N")));
             Directory.CreateDirectory(directory); Host.Path = Path.Combine(directory, "Settings.xml");
-            Saves(); Bindings(); KeyEffects();
+            Saves(); Bindings(); KeyEffects();UsbCameraButtons();
             Console.WriteLine(JsonSerializer.Serialize(new { status = "passed", assertions })); return 0;
         }
         catch (Exception ex) { Console.Error.WriteLine(ex); return 1; }

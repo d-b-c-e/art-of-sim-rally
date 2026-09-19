@@ -35,6 +35,13 @@ internal static class Program
             if (collisionOnly)
             {
                 Check(Type.GetType("Mono.Runtime") != null, "collision patch check requires Unity Mono");
+                var uiHarmony = Activator.CreateInstance(recorder.GetField("patches", Static).GetValue(null).GetType(), new object[] { "AOSR.SettingsUiTest" });
+                var uiProcessor = uiHarmony.GetType().GetMethod("CreateClassProcessor").Invoke(uiHarmony,
+                    new object[] { mod.GetType("ArtOfSimRally.Mod.SettingsCloseGuard", true) });
+                uiProcessor.GetType().GetMethod("Patch").Invoke(uiProcessor, null);
+                var uiMethods = ((System.Collections.IEnumerable)uiHarmony.GetType().GetMethod("GetPatchedMethods").Invoke(uiHarmony,null)).Cast<MethodBase>();
+                Check(uiMethods.Any(m=>m.Name=="ToggleWindow"),"UMM cancel-first hook failed");
+                uiHarmony.GetType().GetMethod("UnpatchAll").Invoke(uiHarmony,new object[]{"AOSR.SettingsUiTest"});
                 var collisionPatches = recorder.GetField("patches", Static).GetValue(null);
                 var collisionMethods = ((System.Collections.IEnumerable)collisionPatches.GetType().GetMethod("GetPatchedMethods").Invoke(collisionPatches, null)).Cast<MethodBase>();
                 Check(collisionMethods.Any(method => method.DeclaringType.Name == "PlayerCollider" && method.Name == "OnCollisionEnter"), "collision patch missing");

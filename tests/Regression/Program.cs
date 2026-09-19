@@ -93,7 +93,7 @@ static class Program
         settings.PreferredDeviceGuid="invalid";
         Check(FfbNative.SelectedPosition(settings)==-1,"invalid GUID fell back in picker");
         settings.PreferredDeviceGuid="";
-        Check(FfbNative.SelectedPosition(settings)==0,"legacy index no longer readable");
+        Check(FfbNative.SelectedPosition(settings)==-1,"legacy index shown as a verified device");
     }
 
     static void Saves()

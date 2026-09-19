@@ -3,6 +3,11 @@
 Start with the [four install steps](../README.md#install). This guide covers
 custom folders, controls and optional rig setup for **0.2.5**.
 
+For the isolated Simple/Advanced candidate, use its
+[settings guide](UX-SETTINGS-CANDIDATE.md). It has different panel paths and is
+not a public release. [Local deployment](LOCAL-DEPLOYMENT.md) identifies the
+owner's exact installed candidate.
+
 ## Check the installation
 
 Launch through Steam, press **Ctrl+F10**, and find **art of sim rally 0.2.5** in

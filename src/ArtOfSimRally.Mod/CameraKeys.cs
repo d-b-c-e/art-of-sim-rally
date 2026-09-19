@@ -30,19 +30,26 @@ namespace ArtOfSimRally.Mod
         };
 
         public static int Listening { get; private set; } = -1;
+        private static float _deadline;
         public static string Status { get; private set; } = "";
         public static bool Available(Settings cfg) => cfg != null && (cfg.BonnetCameraEnabled || cfg.BumperCameraEnabled);
+        internal static bool Held(int index) => Input.GetKey(Bindings[index].Get(Main.Settings)) ||
+            WheelInput.Value(WheelInput.CameraChannel(index)) > .5f;
+        internal static bool AnyButtonHeld { get { for (int i = 0; i < Bindings.Length; i++) if (WheelInput.Value(WheelInput.CameraChannel(i)) > .5f) return true; return false; } }
         public static string Name(KeyCode key) => key == KeyCode.None ? "Unbound" : key.ToString().Replace("Keypad", "Numpad ");
 
         public static void Begin(int index)
         {
             if (index < 0 || index >= Bindings.Length) throw new ArgumentOutOfRangeException(nameof(index));
             Listening = index;
+            _deadline = Time.unscaledTime + 10;
             Status = "Press one keyboard key for " + Bindings[index].Label + ". Escape cancels.";
             CameraTuner.SuppressUntilRelease();
         }
 
         public static void Cancel() { Listening = -1; Status = ""; }
+        public static void Tick()
+        { if (Listening >= 0 && Time.unscaledTime > _deadline) { Cancel(); Status = "Binding timed out. Previous key kept."; } }
 
         public static bool ModifierHeld() =>
             Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) ||
@@ -51,7 +58,7 @@ namespace ArtOfSimRally.Mod
             Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand) ||
             Input.GetKey(KeyCode.LeftWindows) || Input.GetKey(KeyCode.RightWindows);
 
-        private static bool IsKeyboardKey(KeyCode key)
+        internal static bool IsKeyboardKey(KeyCode key)
         {
             if (key <= KeyCode.None || key >= KeyCode.Mouse0 || !Enum.IsDefined(typeof(KeyCode), key)) return false;
             switch (key)
@@ -78,6 +85,8 @@ namespace ArtOfSimRally.Mod
                 Status = "Use one keyboard key without Shift, Ctrl, Alt or Windows/Command. Escape cancels.";
                 return true;
             }
+            if (key == KeyCode.F8 || key == cfg.SettingsKey || key == KeyCode.F10)
+            { Status = "That key is reserved for Settings or Stop FFB. Choose another key."; return true; }
             for (int i = 0; i < Bindings.Length; i++)
                 if (i != Listening && Bindings[i].Get(cfg) == key)
                 {
@@ -85,25 +94,38 @@ namespace ArtOfSimRally.Mod
                     return true;
                 }
             var binding = Bindings[Listening];
-            binding.Set(cfg, key);
+            var previous = binding.Get(cfg);
+            if (!SettingsCommit.TrySave(() => binding.Set(cfg, key), () => binding.Set(cfg, previous)))
+            { Status = "Could not save; previous key kept. Pause, check Settings.xml is writable, then retry or Cancel."; return true; }
             Listening = -1;
-            Status = binding.Label + " = " + Name(key) + ". Saves when idle.";
-            CameraTuner.MarkDirty();
+            Status = binding.Label + " = " + Name(key) + ". Saved.";
             return true;
         }
 
         public static void Clear(Settings cfg, int index)
         {
-            Bindings[index].Set(cfg, KeyCode.None);
-            Cancel(); CameraTuner.MarkDirty();
+            var binding = Bindings[index]; var previous = binding.Get(cfg);
+            if (!SettingsCommit.TrySave(() => binding.Set(cfg, KeyCode.None), () => binding.Set(cfg, previous)))
+            { Status = "Could not save; previous key kept. Pause and check Settings.xml is writable."; return; }
+            Cancel(); Status = "Binding cleared. Saved.";
         }
 
         public static void Reset(Settings cfg)
         {
             var defaults = new Settings();
-            foreach (var binding in Bindings) binding.Set(cfg, binding.Get(defaults));
-            Cancel(); CameraTuner.MarkDirty();
-            Status = "Numpad defaults restored. Saves when idle.";
+            // Validate the whole batch before changing any key. Settings may
+            // deliberately use a numpad key that the player previously cleared.
+            foreach (var binding in Bindings)
+            {
+                var key = binding.Get(defaults);
+                if (key == cfg.SettingsKey || key == KeyCode.F8 || key == KeyCode.F10)
+                { Cancel(); Status = "Defaults conflict with Settings/Stop FFB. Rebind that action first; camera keys kept."; return; }
+            }
+            var previous = Array.ConvertAll(Bindings, b => b.Get(cfg));
+            if (!SettingsCommit.TrySave(() => { foreach (var binding in Bindings) binding.Set(cfg, binding.Get(defaults)); },
+                () => { for (int i = 0; i < Bindings.Length; i++) Bindings[i].Set(cfg, previous[i]); }))
+            { Status = "Could not save; previous keys kept. Pause and check Settings.xml is writable."; return; }
+            Cancel(); Status = "Numpad defaults restored. Saved.";
         }
     }
 }

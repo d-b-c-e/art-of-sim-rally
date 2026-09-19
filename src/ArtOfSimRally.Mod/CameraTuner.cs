@@ -30,6 +30,8 @@ namespace ArtOfSimRally.Mod
         private static float _saveDueAt;
         private static readonly DeferredSave Save = new DeferredSave();
         private static bool _waitForRelease;
+        private static bool _resetButtonPressed;
+        internal static void ReadResetButton() => _resetButtonPressed = WheelInput.ShortcutPressed(WheelInput.Channel.CameraReset);
 
         public static void SuppressUntilRelease() => _waitForRelease = true;
 
@@ -55,10 +57,11 @@ namespace ArtOfSimRally.Mod
         /// </summary>
         public static void Update(BonnetCamera.View view)
         {
+            bool resetButton = _resetButtonPressed; _resetButtonPressed = false;
             var cfg = Main.Settings;
             if (!Main.Enabled || cfg == null || !cfg.CameraTuningKeys) return;
             if (view == BonnetCamera.View.None) return;
-            if (Main.SettingsVisible || CameraKeys.Listening >= 0 || CameraKeys.ModifierHeld())
+            if (Main.SettingsVisible || !Application.isFocused || CameraKeys.Listening >= 0 || CameraKeys.ModifierHeld())
             {
                 SuppressUntilRelease();
                 return;
@@ -67,7 +70,7 @@ namespace ArtOfSimRally.Mod
             // before it can adjust/reset a mount on the next LateUpdate.
             if (_waitForRelease)
             {
-                if (Input.anyKey) return;
+                if (Input.anyKey || CameraKeys.AnyButtonHeld) return;
                 _waitForRelease = false;
             }
 
@@ -82,54 +85,38 @@ namespace ArtOfSimRally.Mod
 
             if (bumper)
             {
-                changed |= Nudge(ref cfg.BumperHeight,  cfg.KeyUp,        cfg.KeyDown,     move);
-                changed |= Nudge(ref cfg.BumperForward, cfg.KeyForward,   cfg.KeyBack,     move);
-                changed |= Nudge(ref cfg.BumperSide,    cfg.KeyRight,     cfg.KeyLeft,     move);
-                changed |= Nudge(ref cfg.BumperPitch,   cfg.KeyPitchDown, cfg.KeyPitchUp,  ang);
-                changed |= Nudge(ref cfg.BumperFOV,     cfg.KeyFovUp,     cfg.KeyFovDown,  ang);
+                changed |= Nudge(ref cfg.BumperHeight, 0, 1, move);
+                changed |= Nudge(ref cfg.BumperForward, 2, 3, move);
+                changed |= Nudge(ref cfg.BumperSide, 5, 4, move);
+                changed |= Nudge(ref cfg.BumperPitch, 6, 7, ang);
+                changed |= Nudge(ref cfg.BumperFOV, 8, 9, ang);
             }
             else
             {
-                changed |= Nudge(ref cfg.BonnetHeight,  cfg.KeyUp,        cfg.KeyDown,     move);
-                changed |= Nudge(ref cfg.BonnetForward, cfg.KeyForward,   cfg.KeyBack,     move);
-                changed |= Nudge(ref cfg.BonnetSide,    cfg.KeyRight,     cfg.KeyLeft,     move);
-                changed |= Nudge(ref cfg.BonnetPitch,   cfg.KeyPitchDown, cfg.KeyPitchUp,  ang);
-                changed |= Nudge(ref cfg.BonnetFOV,     cfg.KeyFovUp,     cfg.KeyFovDown,  ang);
+                changed |= Nudge(ref cfg.BonnetHeight, 0, 1, move);
+                changed |= Nudge(ref cfg.BonnetForward, 2, 3, move);
+                changed |= Nudge(ref cfg.BonnetSide, 5, 4, move);
+                changed |= Nudge(ref cfg.BonnetPitch, 6, 7, ang);
+                changed |= Nudge(ref cfg.BonnetFOV, 8, 9, ang);
             }
 
-            if (Input.GetKeyDown(cfg.KeyReset))
+            if (Input.GetKeyDown(cfg.KeyReset) || resetButton)
             {
                 // A fresh instance carries the field initialisers, which are the
                 // single source of truth for defaults now that there is no config
                 // framework holding them separately.
-                var defaults = new Settings();
-                if (bumper)
-                {
-                    cfg.BumperHeight  = defaults.BumperHeight;
-                    cfg.BumperForward = defaults.BumperForward;
-                    cfg.BumperSide    = defaults.BumperSide;
-                    cfg.BumperPitch   = defaults.BumperPitch;
-                    cfg.BumperFOV     = defaults.BumperFOV;
-                }
-                else
-                {
-                    cfg.BonnetHeight  = defaults.BonnetHeight;
-                    cfg.BonnetForward = defaults.BonnetForward;
-                    cfg.BonnetSide    = defaults.BonnetSide;
-                    cfg.BonnetPitch   = defaults.BonnetPitch;
-                    cfg.BonnetFOV     = defaults.BonnetFOV;
-                }
+                cfg.ResetCameraMount(bumper);
                 changed = true;
             }
 
             if (changed) MarkDirty();
         }
 
-        private static bool Nudge(ref float value, KeyCode increase, KeyCode decrease, float step)
+        private static bool Nudge(ref float value, int increase, int decrease, float step)
         {
             float delta = 0f;
-            if (Input.GetKey(increase)) delta += step;
-            if (Input.GetKey(decrease)) delta -= step;
+            if (CameraKeys.Held(increase)) delta += step;
+            if (CameraKeys.Held(decrease)) delta -= step;
             if (delta == 0f) return false;
 
             value += delta;

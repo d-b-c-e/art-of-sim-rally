@@ -51,6 +51,15 @@ static class ShifterIdentityTests
         Shifter.Update(car); Check(car.Shifts==1,"H-pattern initial gate not applied");
         Shifter.Close(); Shifter.Open(0); Shifter.Update(car);
         Check(car.Shifts==2,"reopen retained previous shifter gate latch");
+        Host.SettingsVisible=true; Shifter.SuppressUntilRelease(); Shifter.Update(car);
+        Check(car.Shifts==2,"settings allowed gear change");
+        Host.SettingsVisible=false; Shifter.Update(car);
+        Check(car.Shifts==2,"held edit button shifted on close");
+        Array.Clear(Device.Buttons); Shifter.Update(car); Device.Buttons[2]=128; Shifter.Update(car);
+        Check(car.Shifts==3,"fresh press after panel close could not shift");
+        Application.isFocused=false; Shifter.Update(car); Application.isFocused=true; Shifter.Update(car);
+        Check(car.Shifts==3,"held button shifted on focus return");
+        Array.Clear(Device.Buttons); Shifter.Update(car);
         Shifter.Close(); GameState.IsDriving=true;
         int enumerations=Device.Enumerations;
         Check(!Shifter.Open(0) && Device.Enumerations==enumerations,"shifter discovery interrupted driving");

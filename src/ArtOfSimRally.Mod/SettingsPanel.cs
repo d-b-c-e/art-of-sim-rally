@@ -1,413 +1,354 @@
 using System;
-using Rewired;
 using UnityEngine;
 
 namespace ArtOfSimRally.Mod
 {
-    /// <summary>
-    /// The whole settings panel, drawn by hand.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// Unity Mod Manager's <c>[Draw]</c> attributes render every field as one flat
-    /// list in declaration order, with no headings and no grouping. With around
-    /// twenty settings that becomes a wall, and related things end up far apart -
-    /// the shifter's gear bindings sat so far below the shifter's own toggle that
-    /// enabling it looked like nothing happened.
-    /// </para>
-    /// <para>
-    /// Drawing it directly costs a little code and buys headings, collapsible
-    /// sections, each device picker sitting with the feature it belongs to, and
-    /// help text that is not squeezed into a tooltip UMM renders off the edge of
-    /// the panel.
-    /// </para>
-    /// </remarks>
     internal static class SettingsPanel
     {
-        private static bool _openSteering = true;
-        private static bool _openFfb = true;
-        private static bool _openCamera;
-        private static bool _openShifter;
-        private static bool _openWheelInput;
-        private static bool _openTelemetry;
-        private static bool _openTrouble;
-
-        private static GUIStyle _wrap;
-        private static GUIStyle _help;
-        private static GUIStyle Wrap => _wrap;
-
+        private static GUIStyle _wrap, _help;
+        private static Vector2 _scroll;
+        private static bool _shifter, _cameraKeys, _clutch, _settingsKey;
+        private static float _keyDeadline;
+        private static string _keyStatus = "";
+        private static int _mount;
+        private static readonly ConnectionEdit Connection = new ConnectionEdit();
+        internal static bool Editing => WheelInput.Assigning.HasValue || CameraKeys.Listening >= 0 ||
+            Panel.BindingActive || Connection.Editing || _settingsKey;
+        internal static bool CancelPendingEdit()
+        {
+            bool editing = Editing;
+            WheelInput.CancelAssign(); CameraKeys.Cancel(); Panel.CancelBinding(); Connection.Cancel(); _settingsKey = false;
+            DeviceDropdown.CloseAll();
+            return editing;
+        }
         public static void Draw()
         {
-            var cfg = Main.Settings;
-            if (cfg == null) return;
-
-            // UMM can replace its font when the user changes scale. Inherit the
-            // current skin each draw instead of pinning a pixel size or old font.
+            var c = Main.Settings;
+            if (c == null) return;
             _wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
             _help = new GUIStyle(_wrap);
-            _help.normal.textColor = new Color(0.65f, 0.65f, 0.65f);
-
-            var keyEvent = Event.current;
-            if (keyEvent.type == EventType.KeyDown && CameraKeys.HandleKey(cfg, keyEvent.keyCode,
-                    keyEvent.shift || keyEvent.control || keyEvent.alt || keyEvent.command))
-                keyEvent.Use();
-
-            DrawSteering(cfg);
-            DrawForceFeedback(cfg);
-            DrawShifter(cfg);
-            DrawWheelInput(cfg);
-            DrawCamera(cfg);
-            DrawTelemetry(cfg);
-            DrawTrouble(cfg);
-        }
-
-        // --- sections ---------------------------------------------------------
-
-        private static void DrawSteering(Settings cfg)
-        {
-            if (!Section("Steering", ref _openSteering)) return;
-
-            cfg.DirectSteering = Toggle(cfg.DirectSteering, "Direct steering",
-                "Removes the gamepad smoothing the game applies to wheels it does not recognise. " +
-                "This is the same behaviour a recognised wheel already gets.");
-
-            cfg.ZeroAxisDeadzone = Toggle(cfg.ZeroAxisDeadzone, "Remove hidden deadzone",
-                "The game's input library applies its own 10% deadzone to unrecognised wheels, " +
-                "separate from the one in the game's options and not shown anywhere.");
-
-            cfg.BindAnyDevice = Toggle(cfg.BindAnyDevice, "Bind whichever device you touch",
-                "The controls screen normally only binds the first controller.");
-
-            if (!string.IsNullOrEmpty(InputBackend.Status)) Help(InputBackend.Status);
-
-            cfg.GlyphTextFallback = Toggle(cfg.GlyphTextFallback, "Show button names when no icon exists",
-                "The game has no artwork for unrecognised wheels, so some bindings show an empty " +
-                "box. This puts the button name there instead, e.g. B12.");
-
-            GUILayout.Space(4);
-            cfg.DisableSteerAssist = Toggle(cfg.DisableSteerAssist, "Disable steering limiter on car spawn (legacy)",
-                "Requires Direct steering and a newly spawned car. This is not the game's numeric assist slider " +
-                "and does not set its saved value to zero. Unticking does not restore the current car: " +
-                "leave this off and use the game's own assist controls. CHANGES HOW THE CAR DRIVES.");
-
-            End();
-        }
-
-        private static void DrawForceFeedback(Settings cfg)
-        {
-            if (!Section("Force feedback", ref _openFfb)) return;
-
-            bool wasEnabled = cfg.ForceFeedbackEnabled;
-            cfg.ForceFeedbackEnabled = Toggle(cfg.ForceFeedbackEnabled, "Enabled", null);
-            if (wasEnabled != cfg.ForceFeedbackEnabled)
+            _help.normal.textColor = new Color(.72f, .72f, .72f);
+            HandleKey(c);
+            GUILayout.Label("Wheel settings", new GUIStyle(_wrap) { fontStyle = FontStyle.Bold });
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("View:", GUILayout.Width(45));
+            bool wasEnabled = GUI.enabled;
+            GUI.enabled = wasEnabled && !Editing;
+            bool advanced = SettingsViewPolicy.Advanced(c);
+            int view = GUILayout.Toolbar(advanced ? 1 : 0, new[] { "Simple", "Advanced" }, GUILayout.Width(210));
+            if (view != (advanced ? 1 : 0)) Select(c, view == 1, SettingsViewPolicy.Page(c));
+            GUI.enabled = wasEnabled;
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Stop FFB (F8)")) Main.StopFeedback();
+            if (GUILayout.Button("Close")) Main.CloseSettings();
+            GUILayout.EndHorizontal();
+            if (Editing) Help("Finish or cancel the current edit to change view.");
+            GUILayout.Label(Editing ? "Edit in progress — pending calibration/connection is not saved. " + Main.SettingsSaveStatus : Main.SettingsSaveStatus, _wrap);
+            if (!c.ForceFeedbackEnabled) Help("FFB off — choose On in FFB when ready.");
+            else if (!FfbNative.Ready) Help("FFB unavailable — " + FfbNative.Status);
+            GUI.enabled = wasEnabled && !Editing;
+            int page = GUILayout.Toolbar(SettingsViewPolicy.Page(c), SettingsViewPolicy.Pages);
+            if (page != SettingsViewPolicy.Page(c)) Select(c, advanced, page);
+            GUI.enabled = wasEnabled;
+            // UMM owns overall scale/cursor/focus. Header stays outside our page scroll.
+            float height = Math.Max(180, Math.Min(480, Screen.height * .45f));
+            _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.Height(height));
+            switch (SettingsViewPolicy.Page(c))
             {
-                FfbNative.SetForce(0);
-                FfbController.Reset();
-                if (cfg.ForceFeedbackEnabled && !FfbNative.Ready) Main.ReopenForceFeedback();
+                case 0: Setup(c); break;
+                case 1: Controls(c); break;
+                case 2: Feedback(c); break;
+                case 3: Cameras(c); break;
+                case 4: Telemetry(c); break;
+                case 5: Support(c); break;
             }
-
-            if (cfg.ForceFeedbackEnabled)
-            {
-                cfg.Strength = (int)Slider(cfg.Strength, 0, 100, "Strength",
-                    "How strong the wheel feels. 50 is the baseline.");
-
-                Panel.DrawWheelPicker();
-
-                cfg.Smoothing = Slider(cfg.Smoothing, 0f, 0.95f, "Smoothing",
-                    "Softens rapid force changes: 0 is unfiltered; higher values reduce rattle but soften " +
-                    "bumps and delay the response. 0.20 is the default. This filters wheel force, not steering input.", "F2");
-
-                cfg.Invert = Toggle(cfg.Invert, "Invert direction",
-                    "Turn on if the wheel pulls the wrong way.");
-
-                cfg.LandingEffectsEnabled = Toggle(cfg.LandingEffectsEnabled, "Landing vibration",
-                    "A short wheel vibration when landing from a jump. On by default at strength 5. Adjust while paused. Requires wheel sine-effect support; " +
-                    "steering Strength and Smoothing keep their current behavior.");
-                if (cfg.LandingEffectsEnabled)
-                {
-                    cfg.LandingStrength = Slider(cfg.LandingStrength, 0f, LandingFeedback.MaximumStrengthPercent, "Landing strength",
-                        "Maximum vibration as a percentage of the wheel's nominal force, independent of steering Strength. " +
-                        "Range 0-40. Start at 5 and increase gradually; smaller landings use less. Zero disables the vibration.");
-                    GUILayout.Label("      " + LandingController.Status, Wrap);
-                }
-
-                cfg.CrashEffectsEnabled = Toggle(cfg.CrashEffectsEnabled, "Crash kick (experimental)",
-                    "A brief constant-force jolt for body impacts. Off by default while testing. Enable while paused. " +
-                    "Landing and crash effects do not stack; SimHub telemetry is unchanged.");
-                if (cfg.CrashEffectsEnabled)
-                {
-                    cfg.CrashStrength = Slider(cfg.CrashStrength, 0f, LandingFeedback.MaximumCrashStrengthPercent, "Crash strength",
-                        "Peak jolt as a percentage of the wheel's nominal force. Default 50; range 0-100. " +
-                        "Glancing impacts use less than head-on impacts. Zero disables the jolt. Your wheelbase's game FFB gain also scales this effect; " +
-                        "steering and crash forces can saturate together, so a higher setting may not give a stronger jolt.");
-                    GUILayout.Label("      " + CrashController.Status, Wrap);
-                }
-
-                cfg.DiagnosticLogging = Toggle(cfg.DiagnosticLogging, "Log detail for support",
-                    "Enable before a short reproduction, then pause and create a support file in this session. " +
-                    "Adds force traces and aggregate frame-hitch counts; switch off afterward. " +
-                    "Normal errors are collected without this option.");
-            }
-
-            End();
+            GUILayout.EndScrollView();
         }
-
-        private static void DrawShifter(Settings cfg)
+        private static void Select(Settings c, bool advanced, int page)
         {
-            if (!Section("Shifter", ref _openShifter)) return;
-
-            cfg.ShifterEnabled = Toggle(cfg.ShifterEnabled, "Use a separate shifter",
-                "Reads a shifter directly, so it works even though the game's input system " +
-                "cannot see most of them.");
-
-            if (cfg.ShifterEnabled)
-            {
-                Panel.DrawShifterBinding(cfg);
-
-                if (!cfg.ShifterIsHPattern)
-                    cfg.SkipNeutral = Toggle(cfg.SkipNeutral, "Skip neutral",
-                        "Reverse to first in one press instead of stopping on neutral.");
-            }
-
-            End();
+            if (!SettingsViewPolicy.Select(c, advanced, page, Editing)) return;
+            _scroll = Vector2.zero; DeviceDropdown.CloseAll(); GUIUtility.keyboardControl = 0; Main.MarkSettingsDirty();
         }
-
-        private static void DrawWheelInput(Settings cfg)
+        private static void HandleKey(Settings c)
         {
-            if (!Section("Wheel input (direct)", ref _openWheelInput)) return;
-
-            bool was = cfg.WheelInputEnabled;
-            cfg.WheelInputEnabled = Toggle(cfg.WheelInputEnabled, "Read the wheel directly",
-                "Reads controls directly, including a handbrake on a separate USB device. Only assigned rows " +
-                "replace the game's bindings; leave working controls unassigned. Pause, release the control, " +
-                "press Assign on its row, then move it. Menus still use the keyboard or a pad.");
-            if (was && !cfg.WheelInputEnabled) WheelInput.CancelAssign();
-            if (!cfg.WheelInputEnabled) { End(); return; }
-
-            GUILayout.Label("      Reading: " + WheelInput.DeviceSummary, Wrap);
-            GUILayout.Label("Live values: steering -1 to 1; pedals and handbrake 0 to 1.", Wrap);
-            GUILayout.Space(4);
-
-            foreach (var ch in WheelInput.Channels)
+            if (_settingsKey && Time.unscaledTime > _keyDeadline)
+            { _settingsKey = false; _keyStatus = "Binding timed out. Previous Settings key kept."; }
+            var e = Event.current;
+            if (e.type != EventType.KeyDown) return;
+            if (e.keyCode == KeyCode.Escape && Editing)
+            { CancelPendingEdit(); Main.SuppressHostClose = true; e.Use(); return; }
+            if (CameraKeys.HandleKey(c, e.keyCode, e.shift || e.control || e.alt || e.command)) { e.Use(); return; }
+            if (!_settingsKey) return;
+            _keyStatus = "Use a single keyboard key; F8/F10 and camera adjustment keys are reserved.";
+            if (!e.shift && !e.control && !e.alt && !e.command && CameraKeys.IsKeyboardKey(e.keyCode) &&
+                e.keyCode != KeyCode.F8 && e.keyCode != KeyCode.F10 && !CameraKeys.ModifierHeld())
             {
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("  " + ch, GUILayout.Width(110));
-                GUILayout.Label(WheelInput.Describe(ch), GUILayout.Width(260));
-                GUILayout.Label(WheelInput.IsBound(ch) ? WheelInput.Value(ch).ToString("F2") : "-", GUILayout.Width(45));
-                bool assigning = WheelInput.Assigning == ch;
-                if (GUILayout.Button(assigning ? "Move it now... (cancel)" : "Assign", GUILayout.Width(170)))
+                bool conflict = false;
+                foreach (var key in CameraKeys.Bindings) if (key.Get(c) == e.keyCode) conflict = true;
+                if (!conflict)
                 {
-                    if (assigning) WheelInput.CancelAssign(); else WheelInput.BeginAssign(ch);
+                    var previous = c.SettingsKey;
+                    if (SettingsCommit.TrySave(() => c.SettingsKey = e.keyCode, () => c.SettingsKey = previous))
+                    { _settingsKey = false; _keyStatus = "Settings key saved."; }
+                    else _keyStatus = "Could not save. Previous Settings key kept; pause and check Settings.xml is writable.";
                 }
-                if (WheelInput.IsBound(ch) && GUILayout.Button("Flip", GUILayout.Width(50)))
-                    WheelInput.Flip(ch);
-                if (WheelInput.IsBound(ch) && GUILayout.Button("Clear", GUILayout.Width(60)))
-                    WheelInput.Clear(ch);
+            }
+            e.Use();
+        }
+        private static void Setup(Settings c)
+        {
+            GUILayout.Label("Connect → axes → buttons → check FFB → drive", _wrap);
+            Help("Pause before binding or calibrating. Keep working game controls; add separate devices here as needed.");
+            Bar(WheelInput.Channel.Steer, "Steering"); Bar(WheelInput.Channel.Throttle, "Throttle"); Bar(WheelInput.Channel.Brake, "Brake");
+            bool complete = c.WheelInputEnabled && WheelInput.IsBound(WheelInput.Channel.Steer) &&
+                WheelInput.IsBound(WheelInput.Channel.Throttle) && WheelInput.IsBound(WheelInput.Channel.Brake);
+            GUILayout.Label(complete ? "Axes assigned — verify the bars, desired buttons and FFB before driving." :
+                "Next: check steering and pedals. Bind any controls the game cannot read.", _wrap);
+            if (GUILayout.Button("Open Controls")) Select(c, SettingsViewPolicy.Advanced(c), 1);
+            if (GUILayout.Button("Check FFB")) Select(c, SettingsViewPolicy.Advanced(c), 2);
+            Help("Handbrake, shifter, cameras and telemetry are optional. Bars show device input, not measured car behavior.");
+        }
+        private static void Controls(Settings c)
+        {
+            bool active = Toggle(c.WheelInputEnabled, "Use assigned controls");
+            if (active != c.WheelInputEnabled) { c.WheelInputEnabled = active; if (!active) WheelInput.CancelAssign(); }
+            Help("Unbound controls keep the game's bindings. Release/centre before Bind; complete full travel and release before Save calibration.");
+            Axis(c, WheelInput.Channel.Steer, "Steering"); Axis(c, WheelInput.Channel.Throttle, "Throttle");
+            Axis(c, WheelInput.Channel.Brake, "Brake"); Axis(c, WheelInput.Channel.Handbrake, "Handbrake (axis)");
+            Axis(c, WheelInput.Channel.HandbrakeButton, "Handbrake (button)");
+            Help("Handbrake axis, button and game controls use the greater value; a held button contributes 100%.");
+            _clutch = GUILayout.Toggle(_clutch, "Clutch");
+            if (_clutch) Axis(c, WheelInput.Channel.Clutch, "Clutch");
+            if (!WheelInput.Assigning.HasValue) Help(WheelInput.Status);
+            _shifter = GUILayout.Toggle(_shifter, "Shifter bindings");
+            if (_shifter)
+            {
+                c.ShifterEnabled = Toggle(c.ShifterEnabled, "Separate shifter");
+                if (c.ShifterEnabled) Panel.DrawShifterBinding(c);
+                if (!c.ShifterIsHPattern) c.SkipNeutral = Toggle(c.SkipNeutral, "Skip neutral");
+            }
+            GUILayout.Label("Driving and menu buttons", _wrap);
+            Help("The game's binding screen owns Shift up/down, Change camera, held Look behind, Reset car, Pause and menu controls. It preserves keyboard/pad action maps. Settings/Stop FFB buttons below read USB devices directly.");
+            if (GUILayout.Button("Open game bindings")) GameBindings.Open();
+            Help(GameBindings.Status);
+            GUILayout.Label("Mod buttons", _wrap);
+            if (GUILayout.Button(_settingsKey ? "Press a Settings key (Esc cancels)" : "Settings: " + CameraKeys.Name(c.SettingsKey) + " — Bind"))
+            { if (!Editing) { _settingsKey = true; _keyStatus = "Press a key within 10 seconds. Escape cancels."; _keyDeadline = Time.unscaledTime + 10; } }
+            Help(_keyStatus);
+            Axis(c, WheelInput.Channel.SettingsButton, "Settings (button)");
+            Axis(c, WheelInput.Channel.StopFfbButton, "Stop FFB (button)");
+            Help("F8 always stops FFB. These optional device buttons work even with assigned driving controls Off. Release held buttons after reconnecting.");
+            if (!SettingsViewPolicy.Advanced(c) && SettingsViewPolicy.CustomControls(c) &&
+                GUILayout.Button("Custom control tuning active — Review in Advanced")) Select(c, true, 1);
+            if (SettingsViewPolicy.Advanced(c))
+            {
+                GUILayout.Label("Steering compatibility", _wrap);
+                c.DirectSteering = Toggle(c.DirectSteering, "Direct steering");
+                c.ZeroAxisDeadzone = Toggle(c.ZeroAxisDeadzone, "Remove hidden deadzone");
+                c.BindAnyDevice = Toggle(c.BindAnyDevice, "Bind whichever device you touch");
+                c.GlyphTextFallback = Toggle(c.GlyphTextFallback, "Show button names without icons");
+                c.DisableSteerAssist = Toggle(c.DisableSteerAssist, "Legacy steering limiter override");
+                Help("The legacy override affects car behavior on spawn, not the game's numeric assist setting. Keep Off and use the game's assist controls.");
+            }
+        }
+        private static void Axis(Settings c, WheelInput.Channel channel, string label)
+        {
+            GUILayout.Space(6); GUILayout.Label(label + ": " + WheelInput.Describe(channel), _wrap);
+            Bar(channel, "Device input");
+            if (!WheelInput.IsButtonChannel(channel) && WheelInput.IsBound(channel))
+                Help(WheelInput.CalibrationDescription(channel));
+            bool enabled = GUI.enabled; GUI.enabled = enabled && !Editing;
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Bind")) WheelInput.BeginCalibration(channel);
+            GUI.enabled = enabled && !Editing && WheelInput.IsBound(channel);
+            if (!WheelInput.IsButtonChannel(channel) && GUILayout.Button("Calibrate")) WheelInput.BeginCalibration(channel);
+            if (GUILayout.Button("Clear"))
+            { if (WheelInput.Clear(channel) && channel == WheelInput.Channel.Steer && FfbSelection.FollowsSteering(c)) Main.SelectForceDevice(); }
+            GUILayout.EndHorizontal(); GUI.enabled = enabled;
+            if (WheelInput.Assigning == channel) CalibrationEditor(c);
+        }
+        private static void CalibrationEditor(Settings c)
+        {
+                GUILayout.Label(WheelInput.Status, _wrap);
+                var pending = WheelInput.PendingCalibration;
+                if (pending != null)
+                {
+                    GUILayout.Label("Device input: " + (WheelInput.CalibrationValue * 100).ToString("F0") + "%", _wrap);
+                    if (!pending.IsButton)
+                    {
+                        pending.Inverted = Toggle(pending.Inverted, "Invert " + (WheelInput.Assigning == WheelInput.Channel.Handbrake ? "handbrake" : "axis"));
+                        pending.Deadzone = Slider(pending.Deadzone, 0, .1f, 0, "Deadzone", 100, "%");
+                    }
+                }
+                GUILayout.BeginHorizontal(); bool enabled = GUI.enabled;
+                GUI.enabled = enabled && WheelInput.CanSaveCalibration;
+                if (GUILayout.Button(pending != null && pending.IsButton ? "Save binding" : "Save calibration"))
+                {
+                    string previous = c.SteerBinding;
+                    if (WheelInput.SaveCalibration() && previous != c.SteerBinding && FfbSelection.FollowsSteering(c)) Main.SelectForceDevice();
+                }
+                GUI.enabled = enabled;
+                if (GUILayout.Button("Cancel")) WheelInput.CancelAssign();
                 GUILayout.EndHorizontal();
-            }
-            if (!string.IsNullOrEmpty(WheelInput.Status)) Help(WheelInput.Status);
 
-            End();
         }
-
-        private static void DrawCamera(Settings cfg)
+        private static void Bar(WheelInput.Channel channel, string label)
         {
-            if (!Section("Camera", ref _openCamera)) { CameraKeys.Cancel(); return; }
-            if (Main.OtherCameraModLoaded)
+            float value = WheelInput.Value(channel);
+            string text = !WheelInput.IsBound(channel) ? "Game controls / not bound here" : channel == WheelInput.Channel.Steer
+                ? Math.Abs(value) < .005f ? "Centre" : (value < 0 ? "Left " : "Right ") + (Math.Abs(value) * 100).ToString("F0") + "%"
+                : (value * 100).ToString("F0") + "%";
+            GUILayout.Label(label + ": " + text, _wrap);
+            if (!WheelInput.IsBound(channel)) return;
+            var rect = GUILayoutUtility.GetRect(20, 14, GUILayout.ExpandWidth(true));
+            var color = GUI.color;
+            GUI.color = new Color(.2f, .2f, .2f); GUI.DrawTexture(rect, Texture2D.whiteTexture);
+            var fill = rect;
+            bool steering = channel == WheelInput.Channel.Steer;
+            float travel = Math.Max(0, Math.Min(1, Math.Abs(value)));
+            fill.width *= steering ? travel * .5f : travel;
+            if (steering) fill.x += rect.width * .5f - (value < 0 ? fill.width : 0);
+            GUI.color = new Color(.3f, .75f, .65f); GUI.DrawTexture(fill, Texture2D.whiteTexture);
+            if (steering)
             {
-                CameraKeys.Cancel();
-                Help(BonnetCamera.ExternalCameraHelp);
-                End();
+                var centre = new Rect(rect.x + rect.width * .5f, rect.y, 1, rect.height);
+                GUI.color = Color.white; GUI.DrawTexture(centre, Texture2D.whiteTexture);
+            }
+            GUI.color = color;
+        }
+        private static void Feedback(Settings c)
+        {
+            bool enabled = Toggle(c.ForceFeedbackEnabled, "FFB");
+            if (enabled != c.ForceFeedbackEnabled) Main.SetFeedbackEnabled(enabled);
+            Panel.DrawWheelPicker();
+            c.Strength = (int)Slider(c.Strength, 0, 100, 50, "Strength", 1, "%");
+            Help(!c.ForceFeedbackEnabled ? "Off — choose On when ready." : !FfbNative.Ready ? FfbNative.Status :
+                "Inactive while settings are open. Feedback resumes through normal driving gates.");
+            if (!SettingsViewPolicy.Advanced(c))
+            {
+                if (SettingsViewPolicy.CustomFfb(c) && GUILayout.Button("Custom FFB tuning active — Review in Advanced")) Select(c, true, 2);
                 return;
             }
-
-            cfg.BonnetCameraEnabled = Toggle(cfg.BonnetCameraEnabled, "Bonnet camera",
-                "Adds a bonnet view to the game's normal view rotation - press your change-view " +
-                "button to cycle onto it. Bonnet, not cockpit: the cars have no interiors.");
-
-            if (cfg.BonnetCameraEnabled)
-            {
-                cfg.BonnetFOV    = Slider(cfg.BonnetFOV, 40f, 120f, "Bonnet field of view", null, "F0");
-                cfg.BonnetLean   = Slider(cfg.BonnetLean, 0f, 1f, "Lean in corners",
-                    "Sells the mounted feel, but is also the first thing to cause motion " +
-                    "sickness. 0 turns it off. Shared by both mounted views.", "F2");
-            }
-
-            cfg.BumperCameraEnabled = Toggle(cfg.BumperCameraEnabled, "Bumper camera",
-                "A second mounted view, lower and further forward, after the bonnet view in " +
-                "the rotation. Camera tuning keys adjust whichever of the two is on screen. " +
-                "Takes effect on the next stage.");
-
-            if (cfg.BumperCameraEnabled)
-                cfg.BumperFOV = Slider(cfg.BumperFOV, 40f, 120f, "Bumper field of view", null, "F0");
-
-            if (CameraKeys.Available(cfg))
-            {
-                cfg.CameraTuningKeys = Toggle(cfg.CameraTuningKeys, "Enable camera tuning keys",
-                    "Adjust the active bonnet or bumper view after closing this panel. Changes save " +
-                    "when paused or otherwise idle. These are separate from the game's ChangeCamera binding.");
-                if (cfg.CameraTuningKeys) DrawCameraKeys(cfg);
-                else CameraKeys.Cancel();
-            }
-            else CameraKeys.Cancel();
-
-            End();
+            c.Smoothing = Slider(c.Smoothing, 0, .95f, .2f, "Smoothing", 100, "%");
+            Help("Higher smoothing softens rapid force changes and delays their response.");
+            c.Invert = Toggle(c.Invert, "Invert force direction");
+            Help("Force reference: " + c.FyReference.ToString("0.##") + " N (legacy tuning; default 11500 N).");
+            if (c.FyReference != 11500f && GUILayout.Button("Restore default force reference")) { c.FyReference = 11500f; Main.MarkSettingsDirty(); }
+            c.LandingEffectsEnabled = Toggle(c.LandingEffectsEnabled, "Landing vibration");
+            c.LandingStrength = Slider(c.LandingStrength, 0, 40, 5, "Landing strength", 1, "%");
+            Help(LandingController.Status);
+            c.CrashEffectsEnabled = Toggle(c.CrashEffectsEnabled, "Crash kick (experimental)");
+            c.CrashStrength = Slider(c.CrashStrength, 0, 100, 50, "Crash strength", 1, "%");
+            Help("Short constant push/release, separate from steering and telemetry. Full nominal force can saturate alongside steering. " + CrashController.Status);
+            if (GUILayout.Button("Reset FFB tuning")) { c.ResetFfbTuning(); Main.MarkSettingsDirty(); }
+            Help("Restores the displayed force tuning. Keeps FFB Off/On, the device and all other settings.");
         }
-
-        private static void DrawCameraKeys(Settings cfg)
+        private static void Cameras(Settings c)
         {
-            GUILayout.Label("Choose keyboard keys that do not overlap your game controls. " +
-                "Single keys only; modifier combinations and wheel buttons are not supported here.", Wrap);
-            for (int i = 0; i < CameraKeys.Bindings.Length; i++)
+            if (Main.OtherCameraModLoaded) { Help(BonnetCamera.ExternalCameraHelp); return; }
+            c.BonnetCameraEnabled = Toggle(c.BonnetCameraEnabled, "Bonnet");
+            c.BumperCameraEnabled = Toggle(c.BumperCameraEnabled, "Bumper");
+            Help("Included in the game's Change camera cycle. Change camera and held Look behind use the game's bindings. Close settings to adjust the active mount.");
+            if (GUILayout.Button("Bind Change camera / Look behind")) GameBindings.Open();
+            Help(GameBindings.Status);
+            _cameraKeys = GUILayout.Toggle(_cameraKeys, "Adjustment bindings");
+            if (_cameraKeys)
             {
-                var binding = CameraKeys.Bindings[i];
-                GUILayout.BeginHorizontal();
-                GUILayout.Label(binding.Label, GUILayout.Width(175));
-                GUILayout.Label(CameraKeys.Name(binding.Get(cfg)), GUILayout.Width(125));
-                bool listening = CameraKeys.Listening == i;
-                if (GUILayout.Button(listening ? "Cancel" : "Rebind", GUILayout.Width(80)))
+                c.CameraTuningKeys = Toggle(c.CameraTuningKeys, "Live adjustment shortcuts");
+                Help("Use keyboard keys or separate USB buttons; no numpad required. F8 and the Settings key are reserved. Bind only buttons not already used by the game.");
+                for (int i = 0; i < CameraKeys.Bindings.Length; i++)
                 {
-                    if (listening) CameraKeys.Cancel();
-                    else { GUIUtility.keyboardControl = 0; CameraKeys.Begin(i); }
+                    var binding = CameraKeys.Bindings[i];
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label(binding.Label + ": " + CameraKeys.Name(binding.Get(c)), _wrap);
+                    bool old = GUI.enabled; GUI.enabled = old && (!Editing || CameraKeys.Listening == i);
+                    if (GUILayout.Button(CameraKeys.Listening == i ? "Cancel" : "Bind", GUILayout.Width(80)))
+                    { if (CameraKeys.Listening == i) CameraKeys.Cancel(); else CameraKeys.Begin(i); }
+                    if (GUILayout.Button("Clear", GUILayout.Width(70))) CameraKeys.Clear(c, i);
+                    GUI.enabled = old; GUILayout.EndHorizontal();
+                    Axis(c, WheelInput.CameraChannel(i), binding.Label + " (button)");
                 }
-                if (GUILayout.Button("Clear", GUILayout.Width(60))) CameraKeys.Clear(cfg, i);
-                GUILayout.EndHorizontal();
+                bool enabled = GUI.enabled; GUI.enabled = enabled && !Editing;
+                if (GUILayout.Button("Restore numpad defaults")) CameraKeys.Reset(c);
+                GUI.enabled = enabled; Help(CameraKeys.Status);
             }
-            if (GUILayout.Button("Restore numpad defaults", GUILayout.Width(230))) CameraKeys.Reset(cfg);
-            if (!string.IsNullOrEmpty(CameraKeys.Status)) Help(CameraKeys.Status);
-        }
-
-        private static void DrawTelemetry(Settings cfg)
-        {
-            if (!Section("Telemetry", ref _openTelemetry)) return;
-
-            cfg.TelemetryEnabled = Toggle(cfg.TelemetryEnabled, "Send telemetry",
-                "Forza-compatible UDP, for SimHub, dashboards, bass shakers and motion rigs. " +
-                "Use a Forza Horizon 5 profile. This does not add wheel force feedback or rumble.");
-
-            if (cfg.TelemetryEnabled)
+            if (!SettingsViewPolicy.Advanced(c))
+            { if (SettingsViewPolicy.CustomCamera(c) && GUILayout.Button("Custom camera tuning active — Review in Advanced")) Select(c, true, 3); return; }
+            _mount = GUILayout.Toolbar(_mount, new[] { "Bonnet pose", "Bumper pose" });
+            if (GUILayout.Button("Reset this view (" + (_mount == 0 ? "Bonnet" : "Bumper") + ")")) { c.ResetCameraMount(_mount != 0); Main.MarkSettingsDirty(); }
+            if (_mount == 0)
             {
+                c.BonnetHeight = Slider(c.BonnetHeight, -.5f, 3, .95f, "Height", 1, " m");
+                c.BonnetForward = Slider(c.BonnetForward, -3, 5, 1, "Forward", 1, " m");
+                c.BonnetSide = Slider(c.BonnetSide, -2, 2, 0, "Side", 1, " m");
+                c.BonnetPitch = Slider(c.BonnetPitch, -45, 45, 3, "Tilt", 1, "°");
+                c.BonnetFOV = Slider(c.BonnetFOV, 40, 120, 75, "Field of view", 1, "°");
+            }
+            else
+            {
+                c.BumperHeight = Slider(c.BumperHeight, -.5f, 3, .45f, "Height", 1, " m");
+                c.BumperForward = Slider(c.BumperForward, -3, 5, 1.9f, "Forward", 1, " m");
+                c.BumperSide = Slider(c.BumperSide, -2, 2, 0, "Side", 1, " m");
+                c.BumperPitch = Slider(c.BumperPitch, -45, 45, 2, "Tilt", 1, "°");
+                c.BumperFOV = Slider(c.BumperFOV, 40, 120, 80, "Field of view", 1, "°");
+            }
+            c.BonnetLean = Slider(c.BonnetLean, 0, 1, .1f, "Corner lean (both views)", 100, "%");
+            c.TuneMoveSpeed = Slider(c.TuneMoveSpeed, .05f, 2, .4f, "Shortcut movement speed", 1, " m/s");
+            c.TuneAngleSpeed = Slider(c.TuneAngleSpeed, 1, 60, 20, "Shortcut angle speed", 1, "°/s");
+        }
+        private static void Telemetry(Settings c)
+        {
+            c.TelemetryEnabled = Toggle(c.TelemetryEnabled, "Telemetry");
+            Help("Forza Horizon 5-compatible UDP. In SimHub choose that receiver and match this destination.");
+            GUILayout.Label("Saved destination: " + c.TelemetryHost + ":" + c.TelemetryPort, _wrap);
+            Help(!c.TelemetryEnabled ? "Off" : TelemetryPump.ActiveEndpoint == null ? "Unavailable — pause to connect; inspect Help if it fails." :
+                "Sending to " + TelemetryPump.ActiveEndpoint + ". UDP does not confirm receiver delivery.");
+            if (!SettingsViewPolicy.Advanced(c))
+            {
+                if (GUILayout.Button("Use local SimHub preset (127.0.0.1:8000)")) { c.TelemetryHost = "127.0.0.1"; c.TelemetryPort = 8000; Main.MarkSettingsDirty(); }
+                if (GUILayout.Button("Connection settings (Advanced)")) Select(c, true, 4);
+                return;
+            }
+            if (!Connection.Editing && GUILayout.Button("Edit connection")) Connection.Begin(c);
+            if (Connection.Editing)
+            {
+                GUILayout.Label("Host"); Connection.Host = GUILayout.TextField(Connection.Host ?? "");
+                GUILayout.Label("Port"); Connection.Port = GUILayout.TextField(Connection.Port ?? "");
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("Host", GUILayout.Width(60));
-                cfg.TelemetryHost = GUILayout.TextField(cfg.TelemetryHost ?? "", GUILayout.Width(160));
-                GUILayout.Label("Port", GUILayout.Width(40));
-                string port = GUILayout.TextField(cfg.TelemetryPort.ToString(), GUILayout.Width(70));
-                if (int.TryParse(port, out int p) && p > 0 && p <= 65535) cfg.TelemetryPort = p;
-                GUILayout.EndHorizontal();
-
-                // Live confirmation, so changing the port can be verified here
-                // instead of by alt-tabbing to whatever is meant to receive it.
-                // Connection changes wait for idle; no restart required.
-                string active = TelemetryPump.ActiveEndpoint;
-                GUILayout.Label(active == null
-                    ? "      Not connected. Pause to apply the destination; check support logs if it fails."
-                    : "      Sending to " + active + "   (" + TelemetryPump.PacketsSent + " packets)",
-                    Wrap);
-
-                if (TelemetryPump.EndpointPending && GameState.IsDriving)
-                    Help("Destination change pending: pause to apply it. The current connection stays active until then.");
-                Help("Set the host and port while paused or in a menu. Connection changes apply " +
-                     "there without restarting the game. Telemetry stays off until a connection is ready.");
+                if (GUILayout.Button("Apply connection") && Connection.Apply(c)) Main.MarkSettingsDirty();
+                if (GUILayout.Button("Cancel")) Connection.Cancel();
+                GUILayout.EndHorizontal(); Help(Connection.Error);
             }
-
-            End();
+            Help("Connection applies atomically while paused. Recording remains a separate development probe and is not shipped in this panel.");
         }
-
-        private static void DrawTrouble(Settings cfg)
+        private static void Support(Settings c)
         {
-            if (!Section("Devices and troubleshooting", ref _openTrouble)) return;
-
-            cfg.DiagnosticLogging = Toggle(cfg.DiagnosticLogging, "Log detail for support",
-                "For an intermittent problem: enable, reproduce briefly, pause, then create the file below before restarting. " +
-                "This is the same switch as in Force feedback. Turn off afterward. A support file also works with this off; " +
-                "it cannot recover earlier detailed traces.");
-
+            GUILayout.Label("Art of Sim Rally " + Main.ModVersion, _wrap);
+            Help("No FFB: pause, open FFB, check On and the selected wheel, then Refresh. Missing controls: bind them in Controls. Help text uses Unity Mod Manager's scale setting.");
+            if (GUILayout.Button("Create support file on Desktop")) SupportBundle.Create();
+            Help(string.IsNullOrEmpty(SupportBundle.LastResult) ? "Creates a local file with settings, device identifiers, paths and logs; nothing is uploaded." : SupportBundle.LastResult);
+            if (!SettingsViewPolicy.Advanced(c))
+            { if (GUILayout.Button("Details (Advanced)")) Select(c, true, 5); return; }
+            c.DiagnosticLogging = Toggle(c.DiagnosticLogging, "Log detail for support");
+            Help("Enable, reproduce briefly, pause, create the support file, then turn detail logging off.");
             Panel.DrawInputStatus();
-
-            GUILayout.Space(6);
-            if (GUILayout.Button("Create support file on Desktop", GUILayout.Width(260)))
-                SupportBundle.Create();
-
-            GUILayout.Label(string.IsNullOrEmpty(SupportBundle.LastResult)
-                ? "Collects your settings, devices, bindings and logs into one file to attach " +
-                  "to a bug report."
-                : SupportBundle.LastResult, Wrap);
-
-            End();
         }
-
-        // --- widgets ----------------------------------------------------------
-
-        // A foldout header.
-        //
-        // Deliberately NOT a plain button: the device dropdowns are buttons with a
-        // triangle, and when section headers looked the same it was impossible to
-        // tell structure from control at a glance. Headers are now full-width bold
-        // text on a rule, with a small marker; dropdowns stay indented, narrower,
-        // and read as form fields.
-        private static bool Section(string title, ref bool open)
+        private static bool Toggle(bool value, string label)
         {
-            GUILayout.Space(10);
-            Rule();
-
-            var header = new GUIStyle(GUI.skin.label)
-            {
-                fontStyle = FontStyle.Bold,
-                alignment = TextAnchor.MiddleLeft,
-                padding = new RectOffset(4, 4, 4, 4)
-            };
-            header.normal.textColor = new Color(0.95f, 0.85f, 0.55f);
-
-            // A label that responds to clicks, so the header does not look like a
-            // button while still folding.
-            if (GUILayout.Button((open ? "▾ " : "▸ ") + title.ToUpperInvariant(),
-                                 header, GUILayout.ExpandWidth(true)))
-                open = !open;
-
-            Rule();
-            if (open) GUILayout.Space(4);
-            return open;
+            GUILayout.BeginHorizontal(); GUILayout.Label(label + ": " + (value ? "On" : "Off"), _wrap);
+            int result = GUILayout.Toolbar(value ? 1 : 0, new[] { "Off", "On" }, GUILayout.Width(110));
+            GUILayout.EndHorizontal(); return result == 1;
         }
-
-        // One-pixel separator, drawn as a stretched box.
-        private static void Rule()
+        private static float Slider(float value, float min, float max, float normal, string label, float scale, string unit)
         {
-            var line = new GUIStyle(GUI.skin.box)
-            {
-                margin = new RectOffset(0, 0, 0, 0),
-                padding = new RectOffset(0, 0, 0, 0),
-                fixedHeight = 1
-            };
-            GUILayout.Box(GUIContent.none, line, GUILayout.ExpandWidth(true), GUILayout.Height(1));
-        }
-
-        private static void End() => GUILayout.Space(6);
-
-        private static bool Toggle(bool value, string label, string help)
-        {
-            bool result = GUILayout.Toggle(value, "  " + label);
-            if (!string.IsNullOrEmpty(help)) Help(help);
-            return result;
-        }
-
-        private static float Slider(float value, float min, float max, string label,
-                                    string help, string format = "F0")
-        {
+            GUILayout.Label(label + ": " + (value * scale).ToString("0.##") + unit, _wrap);
             GUILayout.BeginHorizontal();
-            GUILayout.Label("  " + label, GUILayout.Width(150));
-            float result = GUILayout.HorizontalSlider(value, min, max, GUILayout.Width(180));
-            GUILayout.Label(result.ToString(format), GUILayout.Width(50));
-            GUILayout.EndHorizontal();
-            if (!string.IsNullOrEmpty(help)) Help(help);
-            return result;
+            bool changed = GUI.changed; GUI.changed = false;
+            float result = GUILayout.HorizontalSlider(value, min, max);
+            bool moved = GUI.changed; GUI.changed |= changed;
+            if (GUILayout.Button("Default", GUILayout.Width(80))) { result = normal; moved = true; GUI.changed = true; }
+            GUILayout.EndHorizontal(); return moved ? result : value;
         }
-
-        // Help sits under its control as ordinary wrapped text rather than in a
-        // tooltip, which UMM draws to the left of a "?" with no way to change side
-        // - so anything longer than a few words runs off the panel.
-        private static void Help(string text)
-        {
-            GUILayout.Label("      " + text, _help);
-        }
+        private static void Help(string text) { if (!string.IsNullOrEmpty(text)) GUILayout.Label(text, _help); }
     }
 }

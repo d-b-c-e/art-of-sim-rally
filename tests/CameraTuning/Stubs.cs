@@ -2,6 +2,14 @@ using UnityEngine;
 
 namespace ArtOfSimRally.Mod
 {
+    internal static class WheelInput
+    {
+        internal enum Channel { CameraUp, CameraDown, CameraForward, CameraBack, CameraLeft, CameraRight, CameraPitchDown, CameraPitchUp, CameraFovUp, CameraFovDown, CameraReset }
+        internal static readonly HashSet<Channel> Held = new(), Pressed = new();
+        internal static Channel CameraChannel(int index) => (Channel)index;
+        internal static float Value(Channel c) => Held.Contains(c) ? 1 : 0;
+        internal static bool ShortcutPressed(Channel c) => Pressed.Remove(c);
+    }
     // These test-only names shadow Unity's native input/clock ECalls when linking
     // the production tuner. No Unity scene, GUI or physical input is simulated.
     internal static class Input
@@ -14,6 +22,7 @@ namespace ArtOfSimRally.Mod
         public static void Release() { Held.Clear(); Pressed.Clear(); }
     }
     internal static class Time { public static float unscaledTime, unscaledDeltaTime = .02f; }
+    internal static class Application { public static bool isFocused = true; }
     internal static class GameState { public static bool IsDriving = false; }
     internal static class BonnetCamera { public enum View { None, Bonnet, Bumper } }
     internal static class ModLog

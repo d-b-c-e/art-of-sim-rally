@@ -5,15 +5,13 @@
     <GameDir Condition="'$(GameDir)' == ''">D:\Program Files (x86)\Steam\steamapps\common\artofrally</GameDir>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../../src/ArtOfSimRally.Mod/Shifter.cs" Link="Shifter.cs" />
-    <Compile Include="../../src/ArtOfSimRally.Mod/WheelInput.cs" Link="WheelInput.cs" />
-    <Compile Include="../../src/ArtOfSimRally.Mod/WheelInput.Binding.cs" Link="WheelInput.Binding.cs" />
-    <Compile Include="../../src/ArtOfSimRally.Mod/WheelInput.Calibration.cs" Link="WheelInput.Calibration.cs" />
-    <Compile Include="../../src/ArtOfSimRally.Mod/DeferredSave.cs" Link="DeferredSave.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/Settings.cs" Link="Settings.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/SettingsPersistence.cs" Link="SettingsPersistence.cs" />
-    <Compile Include="../../src/ArtOfSimRally.Mod/SettingsCommit.cs" Link="SettingsCommit.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/SettingsViewPolicy.cs" Link="SettingsViewPolicy.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/SettingsMigration.cs" Link="SettingsMigration.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/FfbSelection.cs" Link="FfbSelection.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/Main.SettingsUi.cs" Link="Main.SettingsUi.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/WheelInput.Binding.cs" Link="WheelInput.Binding.cs" />
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(GameDir)/artofrally_Data/Managed/UnityEngine.CoreModule.dll</HintPath></Reference>
-    <Reference Include="UnityModManager"><HintPath>../../lib/umm/UnityModManager.dll</HintPath></Reference>
   </ItemGroup>
 </Project>

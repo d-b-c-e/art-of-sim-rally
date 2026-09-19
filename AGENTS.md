@@ -8,6 +8,14 @@
 
 ## Repository Purpose
 
+**Isolated UX branch, 2026-09-19:** `codex/ux-simple-advanced` contains the
+Simple/Advanced settings implementation candidate. Read
+`docs/UX-OVERNIGHT-2026-09-16.md` for its inventory, validation and explicit
+guideline/runtime gaps. The owner/coordinator authorized integration and local
+deployment on 2026-09-19 after full local gates and an RC6 backup. Keep exact
+toolkit358add5 and owner crash19.52381/landing20 intact. Offline gates do not
+establish in-game UI quality, force feel or complete UX-1 compliance.
+
 Turn art of rally into a sim rig game: force feedback, Forza-compatible UDP
 telemetry, bonnet camera. The game's physics are already a real load-sensitive
 tire model; this project connects that simulation to a wheel, a dashboard and a
