@@ -54,6 +54,9 @@ internal static class Program
                 var pointerType = gameAssembly.GetType("Rewired.Integration.UnityUI.RewiredPointerInputModule", true);
                 var pointerField = pointerType.GetField("m_PlayerPointerData", BindingFlags.Instance|BindingFlags.NonPublic);
                 Check(pointerField != null && pointerField.FieldType.ToString().Contains("PlayerPointerEventData"), "native pointer cache seam changed");
+                var ummUi = Assembly.LoadFrom(Path.Combine(paths[1], "UnityModManager.dll")).GetType("UnityModManagerNet.UnityModManager+UI", true);
+                var hostSize = ummUi.GetField("mWindowSize", BindingFlags.Instance|BindingFlags.NonPublic);
+                Check(hostSize != null && hostSize.FieldType.FullName == "UnityEngine.Vector2", "UMM actual window-size seam changed");
                 uiHarmony.GetType().GetMethod("UnpatchAll").Invoke(uiHarmony,new object[]{"AOSR.SettingsUiTest"});
                 var collisionPatches = recorder.GetField("patches", Static).GetValue(null);
                 var collisionMethods = ((System.Collections.IEnumerable)collisionPatches.GetType().GetMethod("GetPatchedMethods").Invoke(collisionPatches, null)).Cast<MethodBase>();

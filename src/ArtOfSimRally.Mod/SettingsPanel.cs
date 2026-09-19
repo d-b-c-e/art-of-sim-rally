@@ -34,30 +34,30 @@ namespace ArtOfSimRally.Mod
             _help = new GUIStyle(_wrap);
             _help.normal.textColor = new Color(.72f, .72f, .72f);
             HandleKey(c);
-            GUILayout.Label("Wheel settings", new GUIStyle(_wrap) { fontStyle = FontStyle.Bold });
             GUILayout.BeginHorizontal();
-            GUILayout.Label("View:", SettingsPresentation.Width(45));
-            bool wasEnabled = GUI.enabled;
-            GUI.enabled = wasEnabled && !Editing;
-            bool advanced = SettingsViewPolicy.Advanced(c);
-            int view = GUILayout.Toolbar(advanced ? 1 : 0, new[] { "Simple", "Advanced" }, SettingsPresentation.Width(210));
-            if (view != (advanced ? 1 : 0)) Select(c, view == 1, SettingsViewPolicy.Page(c));
-            GUI.enabled = wasEnabled;
-            GUILayout.FlexibleSpace();
+            GUILayout.Label("Wheel settings", new GUIStyle(_wrap) { fontStyle = FontStyle.Bold });
             if (GUILayout.Button("Stop FFB (F8)")) Main.StopFeedback();
             if (GUILayout.Button("Close")) Main.CloseSettings();
             GUILayout.EndHorizontal();
+            bool wasEnabled = GUI.enabled;
+            GUI.enabled = wasEnabled && !Editing;
+            bool advanced = SettingsViewPolicy.Advanced(c);
+            int view = GUILayout.Toolbar(advanced ? 1 : 0, new[] { "Simple", "Advanced" });
+            if (view != (advanced ? 1 : 0)) Select(c, view == 1, SettingsViewPolicy.Page(c));
+            GUI.enabled = wasEnabled;
             if (Editing) Help("Finish or cancel the current edit to change view.");
             GUILayout.Label(Editing ? "Edit in progress — pending calibration/connection is not saved. " + Main.SettingsSaveStatus : Main.SettingsSaveStatus, _wrap);
             if (!c.ForceFeedbackEnabled) Help("FFB off — choose On in FFB when ready.");
             else if (!FfbNative.Ready) Help("FFB unavailable — " + FfbNative.Status);
             GUI.enabled = wasEnabled && !Editing;
-            int page = GUILayout.Toolbar(SettingsViewPolicy.Page(c), SettingsViewPolicy.Pages);
+            int page = GUILayout.SelectionGrid(SettingsViewPolicy.Page(c), SettingsViewPolicy.Pages,
+                SettingsDisplayPolicy.PageColumns(SettingsPresentation.ContentWidth, SettingsPresentation.Scale));
             if (page != SettingsViewPolicy.Page(c)) Select(c, advanced, page);
             GUI.enabled = wasEnabled;
             // Header stays outside our page scroll; explicit host sizes win.
             float height = SettingsPresentation.PageHeight;
             _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.Height(height));
+            GUILayout.BeginVertical(GUILayout.Width(SettingsPresentation.BodyWidth));
             switch (SettingsViewPolicy.Page(c))
             {
                 case 0: Setup(c); break;
@@ -67,7 +67,7 @@ namespace ArtOfSimRally.Mod
                 case 4: Telemetry(c); break;
                 case 5: Support(c); break;
             }
-            GUILayout.EndScrollView();
+            GUILayout.EndVertical(); GUILayout.EndScrollView();
         }
         private static void Select(Settings c, bool advanced, int page)
         {

@@ -161,6 +161,12 @@ static class Program
             Check(SettingsDisplayPolicy.PageHeight(h,scale,0)<=h*.45f,"page scroll escaped screen");
         }
         Check(SettingsDisplayPolicy.Width(3840,2,1000)==930,"explicit host width ignored");
+        Check(SettingsDisplayPolicy.Width(3840,2,0)==890,"zero UMM preference treated as unlimited 4K viewport");
+        Check(SettingsDisplayPolicy.Width(3840,2,960)==890,"actual default UMM host escaped");
+        Check(SettingsDisplayPolicy.PageHeight(2160,2,0)<=200,"default UMM height lost page scroll");
+        Check(SettingsDisplayPolicy.PageColumns(890,2)==3,"4K default host did not wrap page buttons");
+        Check(SettingsDisplayPolicy.PageColumns(890,1)==6,"ordinary host unnecessarily wrapped pages");
+        Check(SettingsDisplayPolicy.PageColumns(200,5)==1,"narrow high-scale page grid invalid");
         var c=new Settings{SettingsFollowHostScale=true};Check(Read(Xml(c)).SettingsFollowHostScale,"display preference not persisted");
     }
 }

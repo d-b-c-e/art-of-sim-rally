@@ -11,6 +11,7 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Candidate settings text scales automatically for high-resolution displays,
   with an option to follow UMM's scale and preservation of its host preferences.
+  Content fits the actual host viewport and page buttons wrap on narrower windows.
 
 - Simple/Advanced settings with Setup, Controls, FFB, Cameras, Telemetry and Help;
   F6 entry, optional USB Settings/Stop FFB buttons, and F8 stop that retains Off.

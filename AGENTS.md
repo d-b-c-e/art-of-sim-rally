@@ -11,7 +11,9 @@
 **Current installed candidate: RC10**, clean source
 `2ab6fb5f27be570693ebe856b48259456f55007f`, all16 gates passed, installed
 2026-09-19 20:10:28UTC. It fixes the confirmed RC9 stock-menu dispatch leak and
-adds scoped automatic4K text scaling; a new live menu test remains pending.
+adds scoped automatic4K text scaling. Live Down/Return/Escape isolation and
+native recovery passed; scaled content overflowed the default960px UMM host.
+Responsive-width correction is in progress; see `docs/reviews/2026-09-19-rc10-ui-smoke.md`.
 The independent source review's missing replay24/25 release case is fixed.
 Exact artifacts/backups/hashes: `docs/LOCAL-DEPLOYMENT.md`. Settings, toolkit
 358add5 and probe0.2.5.4 retained; no force test/public release. Earlier RC9

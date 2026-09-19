@@ -15,9 +15,15 @@ namespace ArtOfSimRally.Mod
         private readonly GUISkin _previous;
         private static readonly PropertyInfo HostParams = typeof(UnityModManager).GetProperty("Params", BindingFlags.Static | BindingFlags.NonPublic);
         private static UnityModManager.Param Preferences => (UnityModManager.Param)HostParams?.GetValue(null, null);
+        private static readonly FieldInfo HostSize = typeof(UnityModManager.UI).GetField("mWindowSize", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static Vector2 WindowSize => HostSize != null && UnityModManager.UI.Instance != null
+            ? (Vector2)HostSize.GetValue(UnityModManager.UI.Instance)
+            : new Vector2(Preferences?.WindowWidth ?? 0, Preferences?.WindowHeight ?? 0);
         internal static float Scale { get; private set; } = 1;
-        internal static GUILayoutOption Width(float value) => GUILayout.Width(value * Scale);
-        internal static float PageHeight => SettingsDisplayPolicy.PageHeight(Screen.height, Scale, Preferences?.WindowHeight ?? 0);
+        internal static float ContentWidth { get; private set; } = 890;
+        internal static float BodyWidth => Math.Max(160, ContentWidth - 30 * Scale);
+        internal static GUILayoutOption Width(float value) => GUILayout.Width(Math.Min(value * Scale, BodyWidth));
+        internal static float PageHeight => SettingsDisplayPolicy.PageHeight(Screen.height, Scale, WindowSize.y);
         internal SettingsPresentation()
         {
             _previous = GUI.skin;
@@ -41,7 +47,10 @@ namespace ArtOfSimRally.Mod
                 _skin.horizontalSliderThumb.fixedHeight = 18 * Scale;
             }
             GUI.skin = _skin;
-            GUILayout.BeginVertical(GUILayout.MinWidth(SettingsDisplayPolicy.Width(Screen.width, Scale, Preferences?.WindowWidth ?? 0)));
+            ContentWidth = SettingsDisplayPolicy.Width(Screen.width, Scale, WindowSize.x);
+            // A MinWidth expands the scroll content rather than the UMM host.
+            // Bound both the outer group and the nested scroll body explicitly.
+            GUILayout.BeginVertical(GUILayout.Width(ContentWidth));
         }
         public void Dispose() { GUILayout.EndVertical(); GUI.skin = _previous; }
     }

@@ -10,8 +10,10 @@ publication and attended sign-off remain separate.
 
 Installed **2026-09-19 20:10:28 UTC**, game closed, after all16 local gates.
 This replaces RC9's confirmed menu leakage and small4K content with reviewed
-dispatch/held-release guards and scoped Auto/UMM text scaling. Runtime retest
-is pending; this is not a public release or complete UX-1 acceptance.
+dispatch/held-release guards and scoped Auto/UMM text scaling. Live keyboard
+isolation/recovery passed, but default4K layout clips controls (KI-40); see
+[RC10 smoke](reviews/2026-09-19-rc10-ui-smoke.md). A layout correction/retest is
+pending; this is not a public release or complete UX-1 acceptance.
 
 - Identity: `0.2.6-rc.10+2ab6fb5f27be570693ebe856b48259456f55007f.clean`.
 - ZIP SHA-256: `F4A46410F5B8F9CD82121C8B183BC161E2788BB47E6F0A1BFF222FC7AD89B9E6`.

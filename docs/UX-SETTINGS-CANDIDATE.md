@@ -10,7 +10,9 @@ comparison with an extra backup of that file.
 
 **RC9 smoke found a blocker:** navigation/Escape can reach the game menu behind
 the panel, and default4K text is too small. RC10 contains the reviewed fixes
-and passed all16 local gates, but still needs a live recheck; see
+and passed all16 local gates. Live keyboard isolation/recovery passed, but
+default4K layout still clips controls; correction/retest are in progress. See
+[RC10 results](reviews/2026-09-19-rc10-ui-smoke.md) and
 [the recorded failure and retest](reviews/2026-09-19-rc9-ui-smoke.md).
 
 ## Open and stop
