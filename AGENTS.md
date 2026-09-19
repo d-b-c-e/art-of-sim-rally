@@ -8,7 +8,15 @@
 
 ## Repository Purpose
 
-**Current installed candidate: RC10**, clean source
+**Current installed candidate: RC12**, clean source
+`cbcf76c5d6401dd8a0c511acfe7ded201df6a99d`, all16 gates passed, installed
+2026-09-19 20:35:39UTC. Default4K content fits the actual UMM host; page buttons
+wrap and large-scale binding rows stack. Narrow independent source review is
+closed; rendered retest remains pending. RC11 was validated but not installed.
+Exact artifacts/backups/hashes: `docs/LOCAL-DEPLOYMENT.md`. Owner settings,
+toolkit358add5 and probe0.2.5.4 retained; no force test or public release.
+
+**Previous RC10**, clean source
 `2ab6fb5f27be570693ebe856b48259456f55007f`, all16 gates passed, installed
 2026-09-19 20:10:28UTC. It fixes the confirmed RC9 stock-menu dispatch leak and
 adds scoped automatic4K text scaling. Live Down/Return/Escape isolation and

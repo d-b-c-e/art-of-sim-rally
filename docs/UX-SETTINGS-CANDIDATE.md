@@ -1,7 +1,7 @@
 # Settings candidate: short test guide
 
-This guide applies to the **installed 0.2.6-rc.10 Simple/Advanced candidate**,
-not the public 0.2.5 download. It replaced RC6 after all 16 local gates on
+This guide applies to the **installed 0.2.6-rc.12 Simple/Advanced candidate**,
+not the public 0.2.5 download. It replaced RC10 after all 16 local gates on
 2026-09-19; see [Local deployment](LOCAL-DEPLOYMENT.md) for the exact identity,
 backup and receipt.
 The [engineering audit](UX-OVERNIGHT-2026-09-16.md) records coverage and remaining
@@ -11,7 +11,9 @@ comparison with an extra backup of that file.
 **RC9 smoke found a blocker:** navigation/Escape can reach the game menu behind
 the panel, and default4K text is too small. RC10 contains the reviewed fixes
 and passed all16 local gates. Live keyboard isolation/recovery passed, but
-default4K layout still clips controls; correction/retest are in progress. See
+default4K layout still clipped controls. RC12 corrects host-bound widths and
+large-scale row stacking, passed all16 gates and is installed; its rendered
+retest is pending. See
 [RC10 results](reviews/2026-09-19-rc10-ui-smoke.md) and
 [the recorded failure and retest](reviews/2026-09-19-rc9-ui-smoke.md).
 

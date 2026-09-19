@@ -39,6 +39,13 @@ offline gates pass, with deployment/rendered retest pending review. See
 This does not close UX-03's720p/custom-scale, first-use, wheel/pad or held-input
 matrix. The binary pin remains358add5, independently of documentation revisions.
 
+Current successor **RC12** passed all16 gates and was installed20:35:39UTC.
+Independent review closed its aggregate row overflow at clean `cbcf76c5`;126
+settings checks cover the default host and large custom scales. RC11 remained
+validation-only. Rendered RC12 acceptance is pending; exact identity and preserved
+files are in [LOCAL-DEPLOYMENT](LOCAL-DEPLOYMENT.md). Historical RC8–10 evidence
+below must not be read as current layout acceptance.
+
 ## Implemented scope
 
 - Persisted Simple/Advanced and six pages: Setup, Controls, FFB, Cameras,

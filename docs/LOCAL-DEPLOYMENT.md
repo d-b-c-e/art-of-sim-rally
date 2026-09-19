@@ -6,7 +6,30 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.6-rc.10
+## Installed candidate — 0.2.6-rc.12
+
+Installed **2026-09-19 20:35:39 UTC**, game closed, after all16 local gates and
+independent source closure of the custom-scale row overflow. RC11 was validated
+but not installed. Rendered RC12 retest is pending; no public release.
+
+- Identity: `0.2.6-rc.12+cbcf76c5d6401dd8a0c511acfe7ded201df6a99d.clean`.
+- ZIP SHA-256: `88A9B71D43F4A0788112CC987EEEB02407BCB43F9D6AECDA8BCAC93F1927B0C4`.
+- [Complete gate](../results/rc-0.2.6-rc.12-bc652082c30b43dba419e09883d67c42/automated.json),
+  SHA-256 `9FC72450E3F8306FE9AF44FC52AA112E07A62008D6D70523073B3F5ED3E32856`.
+- [Installation receipt and RC10 backup](../results/ux-0.2.6-rc.12-install-787e550c1c6b4fa2bc307e3efb32d5ae/receipt.json).
+  All six mod payloads and second native DLL match. Settings, UMM, game assembly
+  and probe hashes are unchanged. Crash on19.52381, landing on20; settings SHA
+  `C373DA18429788ACDFEF7A032496981BDCC5571D7285543B249769846E5876EF`.
+- 126 settings assertions,13 Unity Mono hook/host-size checks, both recorded
+  drives and9,507 landing/crash assertions pass. Toolkit358add5/native0.8.0 and
+  probe0.2.5.4 unchanged. Exact artifacts/evidence155files hash-verified in main.
+- The [smoke/correction review](reviews/2026-09-19-rc10-ui-smoke.md) distinguishes
+  RC10's narrow keyboard pass from its failed layout and RC12's untested rendering.
+
+Before driving, choose **F6 → FFB → Use steering wheel** or reselect the MOZA;
+the saved old name/index lacks an FFB GUID. The installer preserves that choice.
+
+## Previous candidate — 0.2.6-rc.10
 
 Installed **2026-09-19 20:10:28 UTC**, game closed, after all16 local gates.
 This replaces RC9's confirmed menu leakage and small4K content with reviewed
