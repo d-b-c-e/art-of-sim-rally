@@ -6,7 +6,36 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.6-rc.6
+## Installed candidate — 0.2.6-rc.8
+
+Installed **2026-09-19 19:21 UTC** with the game closed after all 16 local gates.
+The new Simple/Advanced settings pages include transactional binding/calibration,
+USB shortcuts, persistent Stop FFB, and native keyboard conflict checks. Use
+[the candidate guide](UX-SETTINGS-CANDIDATE.md); public 0.2.5 has the older UI.
+
+- Identity: `0.2.6-rc.8+2517162d71fc12e030ecda64d8b46d31f0d56b20.clean`.
+- ZIP SHA-256: `0FFB6CEAE47E7268AD2A4815B69F69984D8CEA56C7028A5377E1594B337352C3`.
+- [All 16 gates](../results/rc-0.2.6-rc.8-a16bd4f3f545419d91ccc2ca7f774b90/automated.json)
+  passed, including both real drives, 9,507 landing/crash assertions, Unity Mono
+  hook compatibility and installer entrypoints. No physical wheel output.
+- [Installation receipt and RC6 backup](../results/ux-rc8-install-8a331d2029c14571892bb2e2cb0f5b4f/receipt.json):
+  fresh ZIP extraction and all six installed payloads plus the second native copy
+  verified. Settings, game assembly, UMM parameters and probe files are unchanged.
+- Saved **crash on/19.52381, landing on/20**; settings SHA-256
+  `C373DA18429788ACDFEF7A032496981BDCC5571D7285543B249769846E5876EF`.
+- Toolkit `local+358add53af220eb95bf606e240b230e23a6ea197.clean`, native SHA-256
+  `A07DDF7E10ADBD016DB204324D5E035B951E21A7D8DD373405C91257EB7AD288`, unchanged
+  from RC6. Probe remains 0.2.5.4; no recorder is packaged. Crash feel KI-38 and
+  the settings hardware/layout matrix KI-39 remain open.
+- Source fast-forwarded and pushed to main with `[skip ci]`; built locally.
+  UMM displays 0.2.6; support/build metadata identifies RC8. No public release.
+
+Built in `E:/Source/art-of-sim-rally-ux`; the exact ZIP/checksum, gate evidence,
+RC6 backup and receipt are hash-verified in main's ignored `dist`/`results` too.
+RC7 passed offline but was not installed; RC8 adds native keyboard conflict checks.
+An allocated, force/telemetry-disabled UI smoke remains pending at installation.
+
+## Previous candidate — 0.2.6-rc.6
 
 Installed **2026-09-17 05:05 UTC** with the game closed after all 16 local
 gates. Crashes use method A's finite constant-force push/release, with a

@@ -1,10 +1,10 @@
 # UX-1 adoption audit
 
 Updated **2026-09-19**. The filename identifies the coordinator's UX rollout,
-not the date of a hardware test. This is an **isolated implementation candidate**
+not the date of a hardware test. This **installed candidate** was developed
 on `codex/ux-simple-advanced`, based on consumer `992ed83`. The owner subsequently
 authorized finishing, integrating and deploying through the cross-product
-coordinator on 2026-09-19. RC6 will be backed up before deployment. Exact final
+coordinator on 2026-09-19. RC6 was backed up before RC8 deployment. Exact final
 source/gate/installed identity belongs in the receipt below and LOCAL-DEPLOYMENT.
 
 Guidance: toolkit `a84bebab5ec2abdcd5140b9c63c139ccff86a7d3`, reviewed again at
@@ -178,6 +178,18 @@ receipt appended after the immutable run; individual passing suites alone are
 not the full gate.
 
 ## Next attended check
+
+RC8 (`2517162d71fc12e030ecda64d8b46d31f0d56b20.clean`) passed all 16 local gates;
+the [gate](../results/rc-0.2.6-rc.8-a16bd4f3f545419d91ccc2ca7f774b90/automated.json)
+retains all logs and the untouched pending manual checklist. Both recorded
+drives pass, including 9,507 landing/crash assertions and the original row4230
+landing. The exact ZIP (`0FFB6CEAE47E7268AD2A4815B69F69984D8CEA56C7028A5377E1594B337352C3`)
+was freshly expanded and installed at 2026-09-19 19:21 UTC. All installed payloads
+match; settings/probe/game/UMM parameters stayed byte-identical. Source is on
+main. [Receipt and RC6 backup](../results/ux-rc8-install-8a331d2029c14571892bb2e2cb0f5b4f/receipt.json).
+No live game was launched during deployment. Installer's completion console
+still names the old pages; its packaged README correctly describes the new UI.
+Align the console before final publication. The allocated UI smoke is pending.
 
 The owner/coordinator authorized replacing RC6 on 2026-09-19; preserve its backup
 and force/settings evidence. No live slot is granted. With an allocated slot:

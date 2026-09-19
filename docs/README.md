@@ -12,7 +12,7 @@
 ## Development and validation
 
 - [Settings candidate guide](UX-SETTINGS-CANDIDATE.md) and
-  [UX-1 audit](UX-OVERNIGHT-2026-09-16.md): isolated Simple/Advanced work,
+  [UX-1 audit](UX-OVERNIGHT-2026-09-16.md): installed Simple/Advanced candidate,
   coverage and remaining acceptance; see LOCAL-DEPLOYMENT for installation.
   These changes are not in the public download.
 

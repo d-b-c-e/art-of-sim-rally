@@ -1,6 +1,6 @@
 # Overnight investigation and implementation queue
 
-**Current, 2026-09-17 UTC:** 0.2.5 is published with official toolkit
+**Current, 2026-09-19 UTC:** 0.2.5 is published with official toolkit
 v0.13.0. Owner accepted wheel landing vibration and the built-in 30 Hz SimHub
 comparison. The helper was rejected and removed. Remaining work is in the
 [roadmap](ROADMAP.md); full hardware checks remain pending. The dated queue
@@ -13,7 +13,7 @@ The subsequent shaped RC4 test also failed: three full-intensity cues with no
 early managed cancellation, but no felt effect; ordinary steering worked.
 The completed standalone comparison favored the constant pulse (A) at 40%,
 though still too weak. Owner requested default50/range0–100 and contribution
-of findings to the shared toolkit. Installed RC6 uses a finite constant
+of findings to the shared toolkit. RC6 introduced a finite constant
 crash pulse while preserving landing5/0–40 and one active impact. Playback timing
 and stop reasons remain observable. All 16 local gates pass; upstream API/tests
 and findings are pushed at `358add5`. Stronger feel is still unaccepted. See the latest
@@ -23,10 +23,10 @@ Next, run the
 and SimHub input/output comparison remain pending; no motion gain change.
 
 UX follow-through, 2026-09-19: the coordinator-requested UX-1 Simple/Advanced
-work is implemented as an isolated candidate on `codex/ux-simple-advanced`.
+work is integrated on main and installed as RC8 with all 16 local gates passed.
 See its [inventory, evidence and remaining gaps](UX-OVERNIGHT-2026-09-16.md).
-The owner/coordinator authorized local integration/deployment on 2026-09-19 after
-full gates and backing up RC6. Owner tunes/toolkit358add5 stay intact. Attended
+The 2026-09-19 deployment includes a verified RC6 backup; exact owner settings,
+probe and toolkit358add5 stay intact. Attended
 UI/device checks and stronger crash acceptance remain open; no unattended
 physical tests or public release.
 

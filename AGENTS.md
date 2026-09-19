@@ -8,11 +8,12 @@
 
 ## Repository Purpose
 
-**Isolated UX branch, 2026-09-19:** `codex/ux-simple-advanced` contains the
-Simple/Advanced settings implementation candidate. Read
+**Installed UX candidate, 2026-09-19:** `codex/ux-simple-advanced` was integrated
+and pushed to main at `2517162d71fc12e030ecda64d8b46d31f0d56b20`.
+Simple/Advanced **0.2.6-rc.8** passed all 16 local gates and was installed with
+the game closed at 19:21 UTC, with a verified RC6 backup. Read
 `docs/UX-OVERNIGHT-2026-09-16.md` for its inventory, validation and explicit
-guideline/runtime gaps. The owner/coordinator authorized integration and local
-deployment on 2026-09-19 after full local gates and an RC6 backup. Keep exact
+guideline/runtime gaps and `docs/LOCAL-DEPLOYMENT.md` for exact receipts. Keep
 toolkit358add5 and owner crash19.52381/landing20 intact. Offline gates do not
 establish in-game UI quality, force feel or complete UX-1 compliance.
 
@@ -50,7 +51,11 @@ third-party binaries, nothing that would force the repo private.
 | `tools/installer/README.txt` | Standalone ZIP guide; packaging replaces `@RELEASE@`. Keep aligned with player docs; link online to files not in the archive. |
 | `tools/testing/Test-Installer.ps1` | Isolated real batch/Windows PowerShell installer checks; also included in Test-Rc. No game/hardware output. |
 
-## Status (2026-09-17 UTC) — do not overstate this
+## Status (2026-09-19 UTC) — do not overstate this
+
+The RC8 settings candidate above supersedes RC6 without changing its toolkit,
+steering/effect arithmetic or saved tune. The allocated no-output UI smoke and
+full attended matrix remain pending at installation. Historical evidence follows.
 
 **Constant crash candidate:** owner preferred standalone method A at 40%, still
 too weak, and requested default50/range0–100. Crash now uses a positive-X 120 ms

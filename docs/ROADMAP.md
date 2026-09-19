@@ -1,6 +1,6 @@
 # Roadmap
 
-Status reviewed 2026-09-17 UTC after the standalone crash-effect comparisons.
+Status reviewed 2026-09-19 UTC after the settings candidate deployment.
 **0.2.5 is published with wheel landing vibration enabled by default at strength 5.**
 See [release evidence](reviews/2026-09-13-release-0.2.5.md) and
 [installed identity](LOCAL-DEPLOYMENT.md).
@@ -21,8 +21,8 @@ Remaining feature priorities:
 
 **Settings UX adoption (KI-39):** Simple/Advanced pages, transactional calibration,
 USB mod/camera buttons, strict FFB follow/override, atomic connection drafts and
-support guidance are implemented in the local candidate. The owner authorized
-local integration/deployment on 2026-09-19. See the
+support guidance are integrated on main and installed as RC8 after all 16 local
+gates on 2026-09-19, with an RC6 backup and preserved settings. See the
 [inventory and test record](UX-OVERNIGHT-2026-09-16.md). Actual UMM layout/focus,
 game-binding navigation and wheel/device acceptance remain required; preserve
 the crash candidate's exact toolkit and tuning during this work.

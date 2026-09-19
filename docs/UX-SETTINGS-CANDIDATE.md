@@ -1,9 +1,9 @@
 # Settings candidate: short test guide
 
-This guide applies to the **isolated Simple/Advanced settings candidate**, not
-the public 0.2.5 download. It will replace RC6 after the full local gate, under
-the owner's 2026-09-19 deployment instruction; see LOCAL-DEPLOYMENT.md for
-the exact installed identity and receipt.
+This guide applies to the **installed 0.2.6-rc.8 Simple/Advanced candidate**,
+not the public 0.2.5 download. It replaced RC6 after all 16 local gates on
+2026-09-19; see [Local deployment](LOCAL-DEPLOYMENT.md) for the exact identity,
+backup and receipt.
 The [engineering audit](UX-OVERNIGHT-2026-09-16.md) records coverage and remaining
 gaps. The usual installer still preserves Settings.xml; start any attended
 comparison with an extra backup of that file.

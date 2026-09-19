@@ -31,10 +31,12 @@ stop/recovery. At 720p/high DPI, walk all pages and test fresh/legacy settings,
 calibration/cancellation, binding writes and USB reconnect. See the
 [adoption audit and exact pending checklist](UX-OVERNIGHT-2026-09-16.md).
 
-Review found and fixed two pre-deployment defects: failed binding writes became
+Review found and fixed three pre-deployment defects: failed binding writes became
 effective despite an unchanged file, and Restore numpad defaults could conflict
-with a rebound Settings key. Actual-source locked-file/retry/cancel fixtures
-and batch-reset preflight now cover both. These fixes are not evidence that
+with a rebound Settings key, and new camera/Settings keyboard shortcuts could
+overlap native game actions. Locked-file/retry/cancel and batch/native-map
+preflight fixtures cover these. RC8 passed all 16 gates and is installed with
+the owner's settings retained. These fixes are not evidence that
 the attended checklist has passed. Game action binding retains the native
 Rewired UI; Raw Input-unreadable devices need keyboard/pad for those actions.
 
