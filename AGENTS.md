@@ -10,8 +10,10 @@
 
 **Installed UX candidate, 2026-09-19:** `codex/ux-simple-advanced` was integrated
 and pushed to main at `2517162d71fc12e030ecda64d8b46d31f0d56b20`.
-Simple/Advanced **0.2.6-rc.8** passed all 16 local gates and was installed with
-the game closed at 19:21 UTC, with a verified RC6 backup. Read
+Simple/Advanced RC8 passed all 16 gates and was installed with an RC6 backup.
+**0.2.6-rc.9** (`44e11dd7a7c0e6dd99cef7f2c8be0620e9ce717a.clean`) corrects only
+the installer completion text; its complete gate passed and exact package was
+installed at 19:31 UTC with the game closed, settings/probe unchanged. Read
 `docs/UX-OVERNIGHT-2026-09-16.md` for its inventory, validation and explicit
 guideline/runtime gaps and `docs/LOCAL-DEPLOYMENT.md` for exact receipts. Keep
 toolkit358add5 and owner crash19.52381/landing20 intact. Offline gates do not
@@ -53,9 +55,11 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-19 UTC) — do not overstate this
 
-The RC8 settings candidate above supersedes RC6 without changing its toolkit,
+The RC9 settings candidate above supersedes RC6 without changing its toolkit,
 steering/effect arithmetic or saved tune. The allocated no-output UI smoke and
 full attended matrix remain pending at installation. Historical evidence follows.
+Owner's older FFB name/index lacks a GUID: before driving, explicitly select
+Use steering wheel or the MOZA on F6 → FFB. Do not silently choose hardware.
 
 **Constant crash candidate:** owner preferred standalone method A at 40%, still
 too weak, and requested default50/range0–100. Crash now uses a positive-X 120 ms

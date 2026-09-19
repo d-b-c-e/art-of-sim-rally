@@ -187,9 +187,11 @@ landing. The exact ZIP (`0FFB6CEAE47E7268AD2A4815B69F69984D8CEA56C7028A5377E1594
 was freshly expanded and installed at 2026-09-19 19:21 UTC. All installed payloads
 match; settings/probe/game/UMM parameters stayed byte-identical. Source is on
 main. [Receipt and RC6 backup](../results/ux-rc8-install-8a331d2029c14571892bb2e2cb0f5b4f/receipt.json).
-No live game was launched during deployment. Installer's completion console
-still names the old pages; its packaged README correctly describes the new UI.
-Align the console before final publication. The allocated UI smoke is pending.
+No live game was launched during deployment. RC9 corrects the old page names
+in the installer completion console, with no runtime source changes. All 16
+gates passed again for clean `44e11dd7a7c0e6dd99cef7f2c8be0620e9ce717a`; exact
+RC9 was installed at 19:31 UTC, preserving the same files and tunes. See
+[the current receipt](LOCAL-DEPLOYMENT.md). The allocated UI smoke is pending.
 
 The owner/coordinator authorized replacing RC6 on 2026-09-19; preserve its backup
 and force/settings evidence. No live slot is granted. With an allocated slot:

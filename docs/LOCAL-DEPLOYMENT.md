@@ -6,7 +6,30 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.6-rc.8
+## Installed candidate — 0.2.6-rc.9
+
+Installed **2026-09-19 19:31 UTC** with the game closed after all 16 local gates.
+RC9 aligns the installer's completion text with the new F6/FFB/Controls/Help
+paths; runtime source is unchanged from RC8. It is not a public release.
+
+- Identity: `0.2.6-rc.9+44e11dd7a7c0e6dd99cef7f2c8be0620e9ce717a.clean`.
+- ZIP SHA-256: `8D92D7758AD25F8F62A870A4275B72BE685C533D79FF3976A98FE17EDA3E1199`.
+- [Complete gate](../results/rc-0.2.6-rc.9-6506d4fa38bf41eeb011083b62204b39/automated.json)
+  and [installation receipt/RC8 backup](../results/ux-0.2.6-rc.9-install-3570eb7cbaf247c4b2c74ee9824ef17a/receipt.json).
+  Original RC6 backup remains in the RC8 receipt below. Exact artifacts/evidence
+  are hash-verified in both the UX worktree and main checkout.
+- All six mod files and second native copy verified. Settings/probe/game/UMM
+  files remain byte-identical; crash on/19.52381 and landing on/20, settings SHA
+  `C373DA18429788ACDFEF7A032496981BDCC5571D7285543B249769846E5876EF`.
+- Owner's old FFB selection has a name/index but no verified GUID. Before the
+  next drive, use **F6 → FFB → Use steering wheel**, or explicitly reselect
+  the MOZA. Steering already has a saved GUID; the new strict selector never
+  guesses an output device from an old name/index. No setting was silently changed.
+- UI smoke is queued, with FFB/telemetry to be temporarily Off and exact config
+  restoration afterward. KI-38 crash feel and KI-39 full hardware/layout remain
+  open. Toolkit358add5 and probe0.2.5.4 are unchanged; no recording or SimHub edit.
+
+## Previous candidate — 0.2.6-rc.8
 
 Installed **2026-09-19 19:21 UTC** with the game closed after all 16 local gates.
 The new Simple/Advanced settings pages include transactional binding/calibration,

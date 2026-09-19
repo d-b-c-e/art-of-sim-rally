@@ -1,6 +1,6 @@
 # Settings candidate: short test guide
 
-This guide applies to the **installed 0.2.6-rc.8 Simple/Advanced candidate**,
+This guide applies to the **installed 0.2.6-rc.9 Simple/Advanced candidate**,
 not the public 0.2.5 download. It replaced RC6 after all 16 local gates on
 2026-09-19; see [Local deployment](LOCAL-DEPLOYMENT.md) for the exact identity,
 backup and receipt.
@@ -67,6 +67,12 @@ row, or select a specific wheel. If steering is bound only in the game's own
 controls, select the FFB wheel explicitly here. Missing/unverified devices stay
 unavailable; the mod does not substitute a different controller. Refresh/retry
 while paused. A device selection does not change a saved FFB Off choice.
+
+**Upgrading an older selection:** if FFB says the saved wheel has no verified
+identity, select it again once on this page. On this rig, choose **Use steering
+wheel** to use the already saved MOZA steering identity, or select the MOZA
+explicitly. This step is necessary even though the old wheel name is displayed;
+the old name/index alone does not identify an output device reliably.
 
 Simple shows On/Off, device and Strength. Advanced also shows smoothing,
 direction, landing vibration and experimental crash kick. Steering Strength
