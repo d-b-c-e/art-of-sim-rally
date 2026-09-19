@@ -25,9 +25,11 @@ paths; runtime source is unchanged from RC8. It is not a public release.
   next drive, use **F6 → FFB → Use steering wheel**, or explicitly reselect
   the MOZA. Steering already has a saved GUID; the new strict selector never
   guesses an output device from an old name/index. No setting was silently changed.
-- UI smoke is queued, with FFB/telemetry to be temporarily Off and exact config
-  restoration afterward. KI-38 crash feel and KI-39 full hardware/layout remain
-  open. Toolkit358add5 and probe0.2.5.4 are unchanged; no recording or SimHub edit.
+- The no-output UI smoke found native-menu leakage and small4K text (KI-40).
+  Normal Quit and exact settings/UMM/payload restoration completed19:52:01UTC.
+  See [the evidence and successor retest](reviews/2026-09-19-rc9-ui-smoke.md).
+  KI-38 crash feel and KI-39 full hardware/layout remain open. Toolkit358add5
+  and probe0.2.5.4 are unchanged; no recording or SimHub edit.
 
 ## Previous candidate — 0.2.6-rc.8
 

@@ -21,7 +21,7 @@ Remaining feature priorities:
 
 **Settings UX adoption (KI-39):** Simple/Advanced pages, transactional calibration,
 USB mod/camera buttons, strict FFB follow/override, atomic connection drafts and
-support guidance are integrated on main and installed as RC8 after all 16 local
+support guidance are integrated on main and installed as RC9 after all 16 local
 gates on 2026-09-19, with an RC6 backup and preserved settings. See the
 [inventory and test record](UX-OVERNIGHT-2026-09-16.md). Actual UMM layout/focus,
 game-binding navigation and wheel/device acceptance remain required; preserve

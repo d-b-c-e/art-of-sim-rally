@@ -11,6 +11,10 @@
     <Compile Include="../../src/ArtOfSimRally.Mod/SettingsMigration.cs" Link="SettingsMigration.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/FfbSelection.cs" Link="FfbSelection.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/Main.SettingsUi.cs" Link="Main.SettingsUi.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/MenuInputBarrier.cs" Link="MenuInputBarrier.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/StockUiInput.cs" Link="StockUiInput.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/SettingsDisplayPolicy.cs" Link="SettingsDisplayPolicy.cs" />
+    <Reference Include="0Harmony"><HintPath>../../lib/umm/0Harmony.dll</HintPath></Reference>
     <Compile Include="../../src/ArtOfSimRally.Mod/WheelInput.Binding.cs" Link="WheelInput.Binding.cs" />
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(GameDir)/artofrally_Data/Managed/UnityEngine.CoreModule.dll</HintPath></Reference>
   </ItemGroup>

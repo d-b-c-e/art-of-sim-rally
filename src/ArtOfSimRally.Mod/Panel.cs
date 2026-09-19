@@ -107,7 +107,7 @@ namespace ArtOfSimRally.Mod
 
             if (!Shifter.IsOpen)
             {
-                if (GUILayout.Button("Connect", GUILayout.Width(140)))
+                if (GUILayout.Button("Connect", SettingsPresentation.Width(140)))
                     Shifter.Open(cfg.ShifterDeviceIndex);
                 GUILayout.Label("      " + (string.IsNullOrEmpty(Shifter.Status) ? "Not connected." : Shifter.Status), Wrap);
                 return;
@@ -161,12 +161,12 @@ namespace ArtOfSimRally.Mod
 
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
-            GUILayout.Label(GearLabel(gear), GUILayout.Width(70));
+            GUILayout.Label(GearLabel(gear), SettingsPresentation.Width(70));
             GUILayout.Label(waiting ? "Press a button" : (button >= 0 ? "Button " + (button + 1) : "Not bound"),
-                            GUILayout.Width(90));
-            if (GUILayout.Button(waiting ? "Cancel" : "Bind", GUILayout.Width(70)))
+                            SettingsPresentation.Width(90));
+            if (GUILayout.Button(waiting ? "Cancel" : "Bind", SettingsPresentation.Width(70)))
             { _bindingGear = waiting ? int.MinValue : gear; _bindingUntil = Time.realtimeSinceStartup + 10; }
-            if (button >= 0 && GUILayout.Button("Clear", GUILayout.Width(60)))
+            if (button >= 0 && GUILayout.Button("Clear", SettingsPresentation.Width(60)))
             {
                 SaveShifterButton(cfg, gear, -1);
             }
@@ -187,12 +187,12 @@ namespace ArtOfSimRally.Mod
 
             GUILayout.BeginHorizontal();
             GUILayout.Space(20);
-            GUILayout.Label(isUp ? "Shift up" : "Shift down", GUILayout.Width(90));
+            GUILayout.Label(isUp ? "Shift up" : "Shift down", SettingsPresentation.Width(90));
             GUILayout.Label(waiting ? "Press a button" : (button >= 0 ? "Button " + (button + 1) : "Not bound"),
-                            GUILayout.Width(90));
-            if (GUILayout.Button(waiting ? "Cancel" : "Bind", GUILayout.Width(70)))
+                            SettingsPresentation.Width(90));
+            if (GUILayout.Button(waiting ? "Cancel" : "Bind", SettingsPresentation.Width(70)))
             { _bindingGear = waiting ? int.MinValue : id; _bindingUntil = Time.realtimeSinceStartup + 10; }
-            if (button >= 0 && GUILayout.Button("Clear", GUILayout.Width(60)))
+            if (button >= 0 && GUILayout.Button("Clear", SettingsPresentation.Width(60)))
             {
                 SaveShifterButton(cfg, id, -1);
             }
@@ -238,7 +238,7 @@ namespace ArtOfSimRally.Mod
                         "game's input layer skips devices that do not report as a joystick. " +
                         "Use the Shifter section, which reads the device directly.", Wrap);
 
-                if (GUILayout.Button("Rescan devices", GUILayout.Width(160))) Rescan();
+                if (GUILayout.Button("Rescan devices", SettingsPresentation.Width(160))) Rescan();
             }
             catch (Exception ex)
             {

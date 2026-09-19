@@ -23,6 +23,11 @@ namespace ArtOfSimRally.Mod
         }
         public static void Draw()
         {
+            if (Main.Settings == null) return;
+            using (new SettingsPresentation()) DrawContent();
+        }
+        private static void DrawContent()
+        {
             var c = Main.Settings;
             if (c == null) return;
             _wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
@@ -31,11 +36,11 @@ namespace ArtOfSimRally.Mod
             HandleKey(c);
             GUILayout.Label("Wheel settings", new GUIStyle(_wrap) { fontStyle = FontStyle.Bold });
             GUILayout.BeginHorizontal();
-            GUILayout.Label("View:", GUILayout.Width(45));
+            GUILayout.Label("View:", SettingsPresentation.Width(45));
             bool wasEnabled = GUI.enabled;
             GUI.enabled = wasEnabled && !Editing;
             bool advanced = SettingsViewPolicy.Advanced(c);
-            int view = GUILayout.Toolbar(advanced ? 1 : 0, new[] { "Simple", "Advanced" }, GUILayout.Width(210));
+            int view = GUILayout.Toolbar(advanced ? 1 : 0, new[] { "Simple", "Advanced" }, SettingsPresentation.Width(210));
             if (view != (advanced ? 1 : 0)) Select(c, view == 1, SettingsViewPolicy.Page(c));
             GUI.enabled = wasEnabled;
             GUILayout.FlexibleSpace();
@@ -50,8 +55,8 @@ namespace ArtOfSimRally.Mod
             int page = GUILayout.Toolbar(SettingsViewPolicy.Page(c), SettingsViewPolicy.Pages);
             if (page != SettingsViewPolicy.Page(c)) Select(c, advanced, page);
             GUI.enabled = wasEnabled;
-            // UMM owns overall scale/cursor/focus. Header stays outside our page scroll.
-            float height = Math.Max(180, Math.Min(480, Screen.height * .45f));
+            // Header stays outside our page scroll; explicit host sizes win.
+            float height = SettingsPresentation.PageHeight;
             _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.Height(height));
             switch (SettingsViewPolicy.Page(c))
             {
@@ -264,9 +269,9 @@ namespace ArtOfSimRally.Mod
                     GUILayout.BeginHorizontal();
                     GUILayout.Label(binding.Label + ": " + CameraKeys.Name(binding.Get(c)), _wrap);
                     bool old = GUI.enabled; GUI.enabled = old && (!Editing || CameraKeys.Listening == i);
-                    if (GUILayout.Button(CameraKeys.Listening == i ? "Cancel" : "Bind", GUILayout.Width(80)))
+                    if (GUILayout.Button(CameraKeys.Listening == i ? "Cancel" : "Bind", SettingsPresentation.Width(80)))
                     { if (CameraKeys.Listening == i) CameraKeys.Cancel(); else CameraKeys.Begin(i); }
-                    if (GUILayout.Button("Clear", GUILayout.Width(70))) CameraKeys.Clear(c, i);
+                    if (GUILayout.Button("Clear", SettingsPresentation.Width(70))) CameraKeys.Clear(c, i);
                     GUI.enabled = old; GUILayout.EndHorizontal();
                     Axis(c, WheelInput.CameraChannel(i), binding.Label + " (button)");
                 }
@@ -326,7 +331,11 @@ namespace ArtOfSimRally.Mod
         private static void Support(Settings c)
         {
             GUILayout.Label("Art of Sim Rally " + Main.ModVersion, _wrap);
-            Help("No FFB: pause, open FFB, check On and the selected wheel, then Refresh. Missing controls: bind them in Controls. Help text uses Unity Mod Manager's scale setting.");
+            Help("No FFB: pause, open FFB, check On and the selected wheel, then Refresh. Missing controls: bind them in Controls.");
+            GUILayout.Label("Settings text size", _wrap);
+            int textMode = GUILayout.Toolbar(c.SettingsFollowHostScale ? 1 : 0, new[] { "Auto (screen size)", "Use UMM scale" });
+            c.SettingsFollowHostScale = textMode == 1;
+            Help("Auto enlarges this mod's content on high-resolution screens at UMM's default scale. A custom UMM scale takes priority. The surrounding UMM window keeps its own preferences; use UMM Settings to resize it.");
             if (GUILayout.Button("Create support file on Desktop")) SupportBundle.Create();
             Help(string.IsNullOrEmpty(SupportBundle.LastResult) ? "Creates a local file with settings, device identifiers, paths and logs; nothing is uploaded." : SupportBundle.LastResult);
             if (!SettingsViewPolicy.Advanced(c))
@@ -338,7 +347,7 @@ namespace ArtOfSimRally.Mod
         private static bool Toggle(bool value, string label)
         {
             GUILayout.BeginHorizontal(); GUILayout.Label(label + ": " + (value ? "On" : "Off"), _wrap);
-            int result = GUILayout.Toolbar(value ? 1 : 0, new[] { "Off", "On" }, GUILayout.Width(110));
+            int result = GUILayout.Toolbar(value ? 1 : 0, new[] { "Off", "On" }, SettingsPresentation.Width(110));
             GUILayout.EndHorizontal(); return result == 1;
         }
         private static float Slider(float value, float min, float max, float normal, string label, float scale, string unit)
@@ -348,7 +357,7 @@ namespace ArtOfSimRally.Mod
             bool changed = GUI.changed; GUI.changed = false;
             float result = GUILayout.HorizontalSlider(value, min, max);
             bool moved = GUI.changed; GUI.changed |= changed;
-            if (GUILayout.Button("Default", GUILayout.Width(80))) { result = normal; moved = true; GUI.changed = true; }
+            if (GUILayout.Button("Default", SettingsPresentation.Width(80))) { result = normal; moved = true; GUI.changed = true; }
             GUILayout.EndHorizontal(); return moved ? result : value;
         }
         private static void Help(string text) { if (!string.IsNullOrEmpty(text)) GUILayout.Label(text, _help); }

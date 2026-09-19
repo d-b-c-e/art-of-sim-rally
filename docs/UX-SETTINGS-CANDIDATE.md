@@ -8,6 +8,10 @@ The [engineering audit](UX-OVERNIGHT-2026-09-16.md) records coverage and remaini
 gaps. The usual installer still preserves Settings.xml; start any attended
 comparison with an extra backup of that file.
 
+**RC9 smoke found a blocker:** navigation/Escape can reach the game menu behind
+the panel, and default4K text is too small. A replacement is in progress; see
+[the recorded failure and retest](reviews/2026-09-19-rc9-ui-smoke.md).
+
 ## Open and stop
 
 Press **F6** to open this mod's settings. **Ctrl+F10** still opens Unity Mod

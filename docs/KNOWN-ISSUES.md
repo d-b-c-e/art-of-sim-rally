@@ -21,6 +21,15 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-40 — Settings input reaches native menus; default 4K content is too small
+
+**Confirmed in RC9, 2026-09-19.** Down changed the stock main-menu selection
+behind the open settings panel. Escape cancelled a camera binding but also
+opened the game's Quit confirmation. The default-scale4K text was too small.
+Successor dispatch/release guards and scoped content scaling are under review;
+offline checks alone do not close this issue. Exact evidence, restored settings
+and the required retest are in [the smoke review](reviews/2026-09-19-rc9-ui-smoke.md).
+
 ### KI-39 — Settings UX runtime and layout acceptance is incomplete
 
 **Unverified, candidate 2026-09-19.** The Simple/Advanced implementation includes
@@ -35,8 +44,8 @@ Review found and fixed three pre-deployment defects: failed binding writes becam
 effective despite an unchanged file, and Restore numpad defaults could conflict
 with a rebound Settings key, and new camera/Settings keyboard shortcuts could
 overlap native game actions. Locked-file/retry/cancel and batch/native-map
-preflight fixtures cover these. RC8 passed all 16 gates and is installed with
-the owner's settings retained. These fixes are not evidence that
+preflight fixtures cover these. RC9 passed all 16 gates and is installed with
+the owner's settings retained, but its live smoke found KI-40. These fixes are not evidence that
 the attended checklist has passed. Game action binding retains the native
 Rewired UI; Raw Input-unreadable devices need keyboard/pad for those actions.
 

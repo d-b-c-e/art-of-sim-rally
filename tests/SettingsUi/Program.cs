@@ -88,7 +88,79 @@ static class Program
     }
     static int Main()
     {
-        try{Views();SelectionAndMigration();Runtime();Console.WriteLine(JsonSerializer.Serialize(new{status="passed",assertions,hardwareOutput=false,visualInspection=false}));return 0;}
+        try{Views();SelectionAndMigration();Runtime();MenuIsolation();Display();Console.WriteLine(JsonSerializer.Serialize(new{status="passed",assertions,hardwareOutput=false,visualInspection=false}));return 0;}
         catch(Exception e){Console.Error.WriteLine(e);return 1;}
+    }
+    static void MenuIsolation()
+    {
+        Host.ResetFixture();Ui.Instance=new();StockUiInput.Reset();Input.Held.Clear();Input.Down.Clear();
+        var player=Rewired.ReInput.players.AllPlayers[0];
+        StockUiInput.Observe(new Rewired.Integration.UnityUI.RewiredStandaloneInputModule());
+        Time.frameCount=100;
+        Check(!StockUiInput.Blocked,"unopened menu was blocked");
+        Input.Down.Add(Host.Settings.SettingsKey);
+        Check(StockUiInput.Blocked,"opening key leaked before watchdog");
+        Input.Down.Clear();Ui.Instance.Opened=true;
+        player.Down.Add(17);player.Buttons.Add(17);player.Axes[101]=-1;
+        Check(StockUiInput.Blocked&&!StockUiInput.ButtonDown(player,17)&&StockUiInput.Axis(player,101)==0,"live native menu inputs leaked");
+        var module=new Rewired.Integration.UnityUI.RewiredStandaloneInputModule();
+        var pointer=new Rewired.UI.PlayerPointerEventData{eligibleForClick=true,dragging=true,pointerPress=new(),rawPointerPress=new(),pointerDrag=new(),clickCount=2};
+        module.AddPointer(pointer);
+        var dispatch=typeof(StockUiDispatchGuard).GetMethod("BeforeProcess",BindingFlags.Static|BindingFlags.NonPublic);
+        Check(!(bool)dispatch.Invoke(null,new object[]{module}),"native pointer/module dispatch not stopped");
+        Check(!pointer.eligibleForClick&&!pointer.dragging&&pointer.pointerPress==null&&pointer.rawPointerPress==null&&pointer.pointerDrag==null&&pointer.clickCount==0,"pre-panel pointer press/drag survived ownership");
+        Ui.Instance.Opened=false;
+        for(int i=0;i<10;i++){Time.frameCount++;Check(StockUiInput.Blocked,"close handed back held cancel/navigation");}
+        player.Buttons.Clear();player.Down.Clear();player.Axes.Clear();
+        Input.Held.Add(KeyCode.Escape);Time.frameCount++;
+        Check(StockUiInput.Blocked,"keyboard cancel released to native quit");
+        Input.Held.Clear();Input.Held.Add(KeyCode.Mouse0);Time.frameCount++;
+        Check(StockUiInput.Blocked,"held pointer released to native UI");
+        Input.Held.Clear();WheelInput.SettingsHeld=1;Time.frameCount++;
+        Check(StockUiInput.Blocked,"held Settings button bypassed close barrier");
+        WheelInput.SettingsHeld=0;ArtOfSimRally.Mod.Application.isFocused=false;Time.frameCount++;
+        Check(StockUiInput.Blocked,"unfocused input was treated as released");
+        ArtOfSimRally.Mod.Application.isFocused=true;Rewired.ReInput.isReady=false;Time.frameCount++;
+        Check(StockUiInput.Blocked,"Rewired teardown treated as release");
+        Rewired.ReInput.isReady=true;Time.frameCount++;
+        Check(StockUiInput.Blocked&&StockUiInput.Blocked,"same-frame multiple dispatch calls drained barrier");
+        Time.frameCount++;Check(StockUiInput.Blocked,"release frame leaked a key-up");
+        Time.frameCount++;Check(!StockUiInput.Blocked,"neutral controls never returned native input");
+        player.Down.Add(17);Check(StockUiInput.ButtonDown(player,17),"fresh cancel failed after neutral handback");player.Down.Clear();
+        StockUiInput.Capture();Host.Enabled=false;Check(!StockUiInput.Blocked,"disabled mod trapped native controls");Host.Enabled=true;
+        StockUiInput.Capture();player.Negative.Add(102);Time.frameCount++;
+        Check(StockUiInput.Blocked,"negative controller navigation bypassed barrier");player.Negative.Clear();
+        Ui.Instance.Opened=true;Time.frameCount++;Check(StockUiInput.Blocked,"reopening lost ownership");
+        Ui.Instance.Opened=false;StockUiInput.Reset();
+        // Build17584229 ReplayManager.Update polls24/25 only inside active
+        // playback. Hold each through close; native Axis must remain zero.
+        foreach(int action in new[]{24,25})
+        {
+            StockUiInput.Capture();player.Axes[action]=.05f;
+            for(int i=0;i<6;i++){Time.frameCount++;Check(StockUiInput.Axis(player,action)==0&&StockUiInput.Blocked,"held replay scrub resumed at close: "+action);}
+            player.Axes.Remove(action);
+            for(int i=0;i<3;i++){Time.frameCount++;StockUiInput.Axis(player,action);}
+            Check(!StockUiInput.Blocked,"released replay axis never returned input");
+        }
+        StockUiInput.Capture();player.Axes[24]=1;player.Axes[25]=-1;
+        Time.frameCount+=2; // no replay polling in this context
+        for(int i=0;i<3;i++){Time.frameCount++;_ = StockUiInput.Blocked;}
+        Check(!StockUiInput.Blocked,"inactive replay controls trapped stock menus");
+        player.Axes.Clear();StockUiInput.Reset();
+    }
+    static void Display()
+    {
+        Check(SettingsDisplayPolicy.Scale(2160,1,false)==2,"4K automatic content remained 1x");
+        Check(SettingsDisplayPolicy.Scale(720,1,false)==1,"720p default text shrank");
+        Check(SettingsDisplayPolicy.Scale(2160,1.5f,false)==1.5f,"explicit UMM scale was replaced");
+        Check(SettingsDisplayPolicy.Scale(2160,1,true)==1,"Use UMM scale ignored explicit 1x");
+        foreach(int h in new[]{720,1080,1440,2160})
+        {
+            float scale=SettingsDisplayPolicy.Scale(h,1,false);int w=h*16/9;
+            Check(SettingsDisplayPolicy.Width(w,scale,0)<=w-100,"automatic content escaped screen");
+            Check(SettingsDisplayPolicy.PageHeight(h,scale,0)<=h*.45f,"page scroll escaped screen");
+        }
+        Check(SettingsDisplayPolicy.Width(3840,2,1000)==930,"explicit host width ignored");
+        var c=new Settings{SettingsFollowHostScale=true};Check(Read(Xml(c)).SettingsFollowHostScale,"display preference not persisted");
     }
 }

@@ -30,6 +30,7 @@ namespace ArtOfSimRally.Mod
     /// It survives scene loads, so it is still there when everything else is gone.
     /// </para>
     /// </remarks>
+    [DefaultExecutionOrder(-1000)]
     internal sealed class ModWatchdog : MonoBehaviour
     {
         private static ModWatchdog _instance;
@@ -50,6 +51,7 @@ namespace ArtOfSimRally.Mod
 
         private void Update()
         {
+            ReadWheelInputs();
             Main.TickSettingsUi();
             ObserveFrameHealth();
             TelemetryPump.StopIfDisabled();
@@ -63,7 +65,6 @@ namespace ArtOfSimRally.Mod
                 return;
             }
             InputBackend.Tick();
-            WheelInput.Update();
 
             // Independent of whether any game object is still ticking. The
             // FixedUpdate postfix normally gets here first; this exists for when
@@ -99,6 +100,9 @@ namespace ArtOfSimRally.Mod
         }
 
         private void LateUpdate() => BonnetCamera.ReleaseIfInactive();
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        private static void ReadWheelInputs() => WheelInput.Update();
 
         // Keep Unity ECalls behind a non-inlined runtime boundary. The separate
         // developer probe must be able to attach its Update hook on the CLR for

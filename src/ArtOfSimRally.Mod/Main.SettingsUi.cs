@@ -97,6 +97,7 @@ namespace ArtOfSimRally.Mod
         [HarmonyPrefix]
         private static bool BeforeClose(bool open)
         {
+            if (Main.Enabled) StockUiInput.Capture();
             if (open || !Main.Enabled) return true;
             if (Main.SuppressHostClose) { Main.SuppressHostClose = false; return false; }
             return !SettingsPanel.CancelPendingEdit();

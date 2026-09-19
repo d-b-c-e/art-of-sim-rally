@@ -23,7 +23,7 @@ plus UX-04 neutralization of all roles sharing a disconnected primary device.
 The shipped UMM builds a full-screen raycast-blocking canvas, which is source
 evidence for pointer interception only. This is not a claim that the game's
 cached/native keyboard navigation is suppressed or held-input handoff passes.
-Add native-menu baseline/overlay comparisons to the allocated smoke; keyboard,
+The RC9 smoke confirmed native-menu leakage; the successor adds guarded dispatch. Repeat native-menu baseline/overlay comparisons; keyboard,
 wheel and pad release aggregation remains an explicit acceptance gap until tested.
 WheelInput checks each resolved device's read status before contributing values;
 existing failed-read/disconnect fixtures cover handbrake and shortcut paths.
@@ -71,6 +71,7 @@ Simple and Advanced; expanding a basic group does not select Advanced.
 
 | Stored key or action | Page/view | Default / treatment |
 |---|---|---|
+| `SettingsFollowHostScale` | Help, both (successor) | Off: auto screen scale at default UMM1x; explicit UMM scale takes priority; On follows host exactly |
 | `SettingsView`, `SettingsPage` | Header, both | Simple, Setup; invalid presentation displays these defaults without rewriting tuning |
 | `SettingsKey`; F8 Stop FFB; Close/Escape | Controls / header, both | F6 rebindable; F8 fixed; cancel edit before close |
 | `SettingsButtonBinding`, `StopFfbButtonBinding` | Controls, both | Empty; strict USB button, press/release then Save binding; no change to FFB preference or driving-input enable |
@@ -125,13 +126,13 @@ real runtime patch attachment. It does not mean a player operated the UI.
 | Panel/focus suppression | Production force/input/impact/shifter fixtures; physical stop and held-input behavior pending |
 | UMM route and cancel-first hook | Route tested against a host fixture; actual UMM ToggleWindow hook attaches/unpatches under game's Unity Mono without executing UI |
 | FFB recovery behavior | Existing steering smoothing remains; no dedicated time-based post-panel ramp added. UX-05 says normal suspension *may* resume with a ramp; retain RC6 force arithmetic. At smoothing0 return is immediate after gates, explicitly not a ramp claim |
-| Camera bindings | Keyboard and USB direction/reset/release fixtures, reserved keys/timeout, batch-reset conflict and locked-file rollback; actual editor propagation/UMM Escape ordering pending |
+| Camera bindings | Keyboard and USB direction/reset/release fixtures, reserved keys/timeout, batch-reset conflict and locked-file rollback; RC9 edit cancellation worked but Escape leaked to native Quit; KI-40 successor retest pending |
 | Connection draft | Production atomic policy fixtures plus existing telemetry loopback tests; actual receiver/UI comparison pending |
-| Font scale, 720p/4K, sticky header, keyboard focus | Source inherits UMM styles and uses bounded page scroll; **not rendered or walked in-game** |
+| Font scale, 720p/4K, sticky header, keyboard focus | RC9 rendered at4K and failed readability; scoped successor Auto/host scaling needs4K/720p retest |
 | Game/UMM binding integration | Mod/camera USB binding complete in source. Game actions use native ControlsRemapper via guarded panel route. Independent route fixtures cover driving/edit/intro/inactive/missing/ambiguous guards; actual navigation remains untested |
 | Calibration ergonomics | **Partial:** captured full-travel transaction and one phase of instructions; no dedicated step-by-step wizard |
 | Camera scoped reset | Reset this view and runtime reset share one method; offline scope checks preserve the other mount/shortcuts/tunes |
-| Native pin and installed copy | No toolkit binary changes or game launch. Local deployment authorized after full gates; RC6 archived before replacement |
+| Native pin and installed copy | Toolkit unchanged; RC9 installed and menu-smoked with FFB/telemetry Off, exact settings restored; RC6/RC8 backups retained |
 
 This is not a claim of complete attended UX-1 compliance. Visual/runtime work
 remains open. The native game binding exception is grounded in these inspected
@@ -203,7 +204,7 @@ No live game was launched during deployment. RC9 corrects the old page names
 in the installer completion console, with no runtime source changes. All 16
 gates passed again for clean `44e11dd7a7c0e6dd99cef7f2c8be0620e9ce717a`; exact
 RC9 was installed at 19:31 UTC, preserving the same files and tunes. See
-[the current receipt](LOCAL-DEPLOYMENT.md). The allocated UI smoke is pending.
+[the current receipt](LOCAL-DEPLOYMENT.md). The allocated RC9 smoke failed native-menu isolation and4K readability (KI-40); see [the exact run and successor](reviews/2026-09-19-rc9-ui-smoke.md).
 
 The owner/coordinator authorized replacing RC6 on 2026-09-19; preserve its backup
 and force/settings evidence. No live slot is granted. With an allocated slot:

@@ -99,6 +99,10 @@ The development recorder remains separate and is not included in this ZIP.
 
 HELP
 ----
+Settings text size defaults to Auto: at UMM's default scale it grows with the
+screen resolution. A custom UMM scale takes priority. Choose Use UMM scale to
+follow the host exactly, including 1x. UMM's own window size/chrome preferences
+are unchanged; resize its window in UMM Settings if needed.
 Help > Create support file on Desktop collects settings, device identifiers,
 paths and logs locally; nothing is uploaded. For a recurring problem, enable
 Advanced > Help > Log detail for support, reproduce briefly, pause, export, and

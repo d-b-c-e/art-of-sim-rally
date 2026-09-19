@@ -1,9 +1,4 @@
 using UnityEngine;
-namespace HarmonyLib
-{
-    public class HarmonyPatch : Attribute { public HarmonyPatch(Type type,string name,Type[] args){} }
-    public class HarmonyPrefix : Attribute { }
-}
 namespace UnityModManagerNet
 {
     public static class UnityModManager
@@ -31,13 +26,17 @@ namespace ArtOfSimRally.Mod
         public enum Channel { SettingsButton, StopFfbButton }
         public static readonly HashSet<Channel> Pressed=new();
         public static bool ShortcutPressed(Channel c)=>Pressed.Remove(c);
+        public static float SettingsHeld;
+        public static float Value(Channel c)=>c==Channel.SettingsButton?SettingsHeld:0;
     }
     internal static class Input
     {
         public static readonly HashSet<KeyCode> Down=new();
+        public static readonly HashSet<KeyCode> Held=new();
+        public static bool GetKey(KeyCode key)=>Held.Contains(key);
         public static bool GetKeyDown(KeyCode key)=>Down.Contains(key);
     }
-    internal static class Time { public static float realtimeSinceStartup=100; }
+    internal static class Time { public static float realtimeSinceStartup=100; public static int frameCount; }
     internal static class Application { public static bool isFocused=true; }
     internal static class GameState { public static bool IsDriving; }
     internal static class CameraKeys { public static bool Modified=false; public static bool ModifierHeld()=>Modified; public static void Tick(){} }

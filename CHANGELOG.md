@@ -9,6 +9,9 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Candidate settings text scales automatically for high-resolution displays,
+  with an option to follow UMM's scale and preservation of its host preferences.
+
 - Simple/Advanced settings with Setup, Controls, FFB, Cameras, Telemetry and Help;
   F6 entry, optional USB Settings/Stop FFB buttons, and F8 stop that retains Off.
 - Provisional axis calibration with Save/Cancel, explicit inversion/deadzone,
@@ -47,6 +50,10 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Installer reports the verified release and explains incomplete downloads clearly.
 
 ### Fixed
+
+- Candidate native menu input isolation while settings own input, including
+  cancel, pointer presses and held-control handback. RC9's live failure is
+  preserved; the replacement needs runtime retesting.
 
 - Binding saves, clears and shortcut-default restores retain the previous
   effective assignment if Settings.xml cannot be written. Failed calibration

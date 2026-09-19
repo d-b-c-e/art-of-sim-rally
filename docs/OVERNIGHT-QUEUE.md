@@ -23,7 +23,7 @@ Next, run the
 and SimHub input/output comparison remain pending; no motion gain change.
 
 UX follow-through, 2026-09-19: the coordinator-requested UX-1 Simple/Advanced
-work is integrated on main and installed as RC8 with all 16 local gates passed.
+work is integrated on main and installed as RC9 with all 16 local gates passed; runtime smoke subsequently failed KI-40.
 See its [inventory, evidence and remaining gaps](UX-OVERNIGHT-2026-09-16.md).
 The 2026-09-19 deployment includes a verified RC6 backup; exact owner settings,
 probe and toolkit358add5 stay intact. Attended

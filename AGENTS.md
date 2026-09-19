@@ -19,6 +19,13 @@ guideline/runtime gaps and `docs/LOCAL-DEPLOYMENT.md` for exact receipts. Keep
 toolkit358add5 and owner crash19.52381/landing20 intact. Offline gates do not
 establish in-game UI quality, force feel or complete UX-1 compliance.
 
+**RC9 live smoke failed (KI-40):** Down moves the native main menu behind the
+panel; Escape camera-bind cancellation also opens native Quit. Default4K body
+text is too small. Game closed normally and exact settings/UMM/payload hashes
+were restored at19:52:01UTC. See `docs/reviews/2026-09-19-rc9-ui-smoke.md`.
+The successor guards actual native dispatch and held-input handback, with scoped
+content scaling; it requires a new serialized runtime slot. Do not mark UX-1 passed.
+
 Turn art of rally into a sim rig game: force feedback, Forza-compatible UDP
 telemetry, bonnet camera. The game's physics are already a real load-sensitive
 tire model; this project connects that simulation to a wheel, a dashboard and a
@@ -56,8 +63,8 @@ third-party binaries, nothing that would force the repo private.
 ## Status (2026-09-19 UTC) — do not overstate this
 
 The RC9 settings candidate above supersedes RC6 without changing its toolkit,
-steering/effect arithmetic or saved tune. The allocated no-output UI smoke and
-full attended matrix remain pending at installation. Historical evidence follows.
+steering/effect arithmetic or saved tune. Its subsequent no-output smoke failed
+KI-40; the full attended matrix remains pending. Historical evidence follows.
 Owner's older FFB name/index lacks a GUID: before driving, explicitly select
 Use steering wheel or the MOZA on F6 → FFB. Do not silently choose hardware.
 
