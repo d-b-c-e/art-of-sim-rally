@@ -94,6 +94,8 @@ namespace ArtOfSimRally.Mod
                     return true;
                 }
             var binding = Bindings[Listening];
+            if (!NativeKeyboardBindings.Available(key, out string conflict))
+            { Status = conflict; return true; }
             var previous = binding.Get(cfg);
             if (!SettingsCommit.TrySave(() => binding.Set(cfg, key), () => binding.Set(cfg, previous)))
             { Status = "Could not save; previous key kept. Pause, check Settings.xml is writable, then retry or Cancel."; return true; }
@@ -120,6 +122,8 @@ namespace ArtOfSimRally.Mod
                 var key = binding.Get(defaults);
                 if (key == cfg.SettingsKey || key == KeyCode.F8 || key == KeyCode.F10)
                 { Cancel(); Status = "Defaults conflict with Settings/Stop FFB. Rebind that action first; camera keys kept."; return; }
+                if (!NativeKeyboardBindings.Available(key, out string conflict))
+                { Cancel(); Status = conflict; return; }
             }
             var previous = Array.ConvertAll(Bindings, b => b.Get(cfg));
             if (!SettingsCommit.TrySave(() => { foreach (var binding in Bindings) binding.Set(cfg, binding.Get(defaults)); },

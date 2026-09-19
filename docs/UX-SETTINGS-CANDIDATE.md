@@ -80,7 +80,11 @@ the owner's physical acceptance independently of the UI tests.
 
 **Cameras:** enable bonnet/bumper and expand **Adjustment bindings** to rebind
 keyboard shortcuts or USB buttons. F8, F10 and the Settings key are reserved;
-Restore numpad defaults checks the whole batch before changing any key. Advanced
+Restore numpad defaults checks the whole batch before changing any key. These
+keyboard edits also check the game's loaded keyboard maps and name conflicts;
+this includes inactive contexts and modified game chords. Unavailable maps keep
+the old assignment. Changing bindings later in the game's own menu can introduce
+a conflict again, so choose separate keys there too. Advanced
 adds pose, field of view, lean, shortcut rates and Reset this view. Nexus
 CameraMod retains priority. Choose buttons not used by game actions: there is
 no guessed association between DirectInput button numbers and Rewired maps.

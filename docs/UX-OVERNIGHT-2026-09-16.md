@@ -144,10 +144,28 @@ while allowing the standalone probe attachment fixture. Its 18 checks pass
 after that fix; the complete run must be repeated. The failed run is retained
 as `results/rc-0.2.6-rc.7-44f3c06b9bd94b9a8daaa84794a0c76d/failed.json`.
 
+All 16 RC7 gates subsequently passed at clean `a2e918178aa293e69424f1d1007b852dd2d07f12`;
+its ZIP SHA-256 is `B82A39C53E22CD670DBCB7FDB6C2970372F044B605D867FEF25B74865C943CC9`.
+That package was not installed: a final review confirmed camera keys could
+overlap native keyboard actions. The next scoped change checks player 0's
+loaded keyboard maps before camera Bind, batch defaults or Settings-key Bind.
+It uses Rewired's `ActionElementMap.keyCode` Unity conversion, not a guessed
+enum cast. Read-only queries include inactive contexts and modified chords;
+both can conflict with a bare-key camera shortcut after the editor closes.
+Unavailable maps reject the edit without writing. No Rewired backend/map is
+changed. Later changes through the game's own binder can introduce a conflict
+again; existing saved keys are not silently migrated. The separate DirectInput
+button identity limitation does not apply to these keyboard checks.
+
+The camera suite now passes 328 checks, including action-labelled conflicts,
+late-default batch rejection, unavailable/throwing maps, unchanged XML and a
+successful retry. Production builds against the shipped Rewired assembly.
+These are offline checks; live key/UI acceptance remains pending.
+
 Run the local gate from this worktree using the existing two real capture cases:
 
 ```powershell
-./tools/testing/Test-Rc.ps1 -Version 0.2.6-rc.7 -Corpus E:/Source/art-of-sim-rally/results/regression-corpus/index.json
+./tools/testing/Test-Rc.ps1 -Version 0.2.6-rc.8 -Corpus E:/Source/art-of-sim-rally/results/regression-corpus/index.json
 ```
 
 The SettingsUi suite is part of Test-Rc's regression checkpoint; it exercises

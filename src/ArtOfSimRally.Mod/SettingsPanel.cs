@@ -85,6 +85,8 @@ namespace ArtOfSimRally.Mod
             {
                 bool conflict = false;
                 foreach (var key in CameraKeys.Bindings) if (key.Get(c) == e.keyCode) conflict = true;
+                if (!conflict && !NativeKeyboardBindings.Available(e.keyCode, out string reason))
+                { conflict = true; _keyStatus = reason; }
                 if (!conflict)
                 {
                     var previous = c.SettingsKey;

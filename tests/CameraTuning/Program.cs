@@ -84,6 +84,49 @@ static class Program
         cfg.BumperCameraEnabled = false; Check(!CameraKeys.Available(cfg), "disabled mounts expose active tuner");
         cfg.BonnetCameraEnabled = cfg.BumperCameraEnabled = true;
     }
+    static void NativeKeyboardConflicts()
+    {
+        var cfg = Host.Settings;
+        var maps = Rewired.ReInput.players.Player.controllers.maps;
+        var gameMap = new Rewired.ControllerMap { enabled = false };
+        maps.Items.Add(gameMap); // Include an inactive map after the first map.
+        Rewired.ReInput.mapping.Actions[42] = new Rewired.InputAction { name = "Change camera" };
+        Rewired.ReInput.mapping.Actions[43] = new Rewired.InputAction { name = "Handbrake" };
+        var entry = new Rewired.ActionElementMap { keyCode = KeyCode.Z, actionId = 42, Modified = true };
+        gameMap.AllMaps.Add(entry);
+        Host.SaveSettings();
+        string beforeFile = File.ReadAllText(Host.Path);
+        var beforeKeys = CameraKeys.Bindings.Select(b => b.Get(cfg)).ToArray();
+        int saves = Host.Saves;
+        CameraKeys.Begin(0); CameraKeys.HandleKey(cfg, KeyCode.Z, false);
+        Check(CameraKeys.Listening == 0 && CameraKeys.Status.Contains("Change camera"), "native game chord/context conflict not named");
+        Check(CameraKeys.Bindings.Select(b => b.Get(cfg)).SequenceEqual(beforeKeys) && Host.Saves == saves, "conflicting game key changed camera assignment or saved");
+        entry.actionId = 43;
+        CameraKeys.HandleKey(cfg, KeyCode.Z, false);
+        Check(CameraKeys.Status.Contains("Handbrake"), "map edit used stale action name");
+        entry.keyCode = KeyCode.Keypad0; // Last default: reject entire batch.
+        CameraKeys.Reset(cfg);
+        Check(CameraKeys.Status.Contains("Handbrake") && CameraKeys.Bindings.Select(b => b.Get(cfg)).SequenceEqual(beforeKeys) && Host.Saves == saves,
+            "default batch partially applied before later native-key conflict");
+        entry.actionId = 999;
+        Check(!NativeKeyboardBindings.Available(KeyCode.Keypad0, out string unknown) && unknown.Contains("#999"), "unknown native action accepted");
+        gameMap.AllMaps.Clear();
+        maps.Throw = true;
+        CameraKeys.Begin(0); CameraKeys.HandleKey(cfg, KeyCode.Z, false);
+        Check(CameraKeys.Listening == 0 && cfg.KeyUp == beforeKeys[0] && CameraKeys.Status.Contains("unavailable"), "map failure accepted unchecked key");
+        maps.Throw = false; Rewired.ReInput.isReady = false;
+        CameraKeys.Reset(cfg);
+        Check(Host.Saves == saves && CameraKeys.Bindings.Select(b => b.Get(cfg)).SequenceEqual(beforeKeys), "unready Rewired reset camera keys");
+        Rewired.ReInput.isReady = true;
+        maps.Items.Clear();
+        Check(!NativeKeyboardBindings.Available(KeyCode.Z, out _), "absent keyboard maps treated as empty assignments");
+        maps.Items.Add(new Rewired.ControllerMap());
+        Check(File.ReadAllText(Host.Path) == beforeFile, "native conflict/failure modified XML");
+        CameraKeys.Begin(0); CameraKeys.HandleKey(cfg, KeyCode.Z, false);
+        Check(CameraKeys.Listening == -1 && cfg.KeyUp == KeyCode.Z && Saved().KeyUp == KeyCode.Z, "available keyboard binding did not recover/save");
+        CameraKeys.Begin(0); CameraKeys.HandleKey(cfg, beforeKeys[0], false);
+        Check(cfg.KeyUp == beforeKeys[0], "native-key fixture restore failed");
+    }
     static float[] MountValues(Settings s, bool bumper) => bumper
         ? new[] { s.BumperHeight, s.BumperForward, s.BumperSide, s.BumperPitch, s.BumperFOV }
         : new[] { s.BonnetHeight, s.BonnetForward, s.BonnetSide, s.BonnetPitch, s.BonnetFOV };
@@ -218,7 +261,7 @@ static class Program
         {
             var directory = Path.GetFullPath(Path.Combine("results", "camera-tuning-" + Guid.NewGuid().ToString("N")));
             Directory.CreateDirectory(directory); Host.Path = Path.Combine(directory, "Settings.xml");
-            Saves(); Bindings(); KeyEffects();UsbCameraButtons();
+            Saves(); Bindings(); NativeKeyboardConflicts(); KeyEffects();UsbCameraButtons();
             Console.WriteLine(JsonSerializer.Serialize(new { status = "passed", assertions })); return 0;
         }
         catch (Exception ex) { Console.Error.WriteLine(ex); return 1; }
