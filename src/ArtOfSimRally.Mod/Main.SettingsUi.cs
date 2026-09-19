@@ -14,6 +14,10 @@ namespace ArtOfSimRally.Mod
         internal static bool SuppressHostClose;
         public static string SettingsSaveStatus { get; private set; } = "Saved";
         internal static string ModVersion => _modEntry?.Info.Version ?? "Development build";
+        // Keep Unity ECalls out of methods patched by the separate CLR probe
+        // fixture. The game evaluates this boundary on its own Mono runtime.
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        internal static bool HasFocus() => Application.isFocused;
         public static void MarkSettingsDirty()
         { _uiDirty = true; _uiSaveAt = Time.realtimeSinceStartup + .4f; SettingsSaveStatus = "Changes pending"; }
         internal static void FlushUiSettings(bool force = false)

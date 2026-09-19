@@ -68,7 +68,7 @@ namespace ArtOfSimRally.Mod
             // Independent of whether any game object is still ticking. The
             // FixedUpdate postfix normally gets here first; this exists for when
             // it cannot.
-            if (GameState.IsDriving && !Main.SettingsVisible && Application.isFocused)
+            if (GameState.IsDriving && !Main.SettingsVisible && Main.HasFocus())
             {
                 ImpactController.Tick();
                 _wheelReleased = false;

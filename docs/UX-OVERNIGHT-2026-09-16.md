@@ -137,6 +137,13 @@ No subjective crash, landing, motion or early-landing issue is closed by UI work
 
 ## Reproducible validation
 
+The first full run at `8807080` stopped at CLR probe-hook attachment, before
+packaging. The new direct Unity focus getter in the watchdog exposed an ECall
+to the CLR JIT. A non-inlined Main.HasFocus boundary preserves the focus gate
+while allowing the standalone probe attachment fixture. Its 18 checks pass
+after that fix; the complete run must be repeated. The failed run is retained
+as `results/rc-0.2.6-rc.7-44f3c06b9bd94b9a8daaa84794a0c76d/failed.json`.
+
 Run the local gate from this worktree using the existing two real capture cases:
 
 ```powershell

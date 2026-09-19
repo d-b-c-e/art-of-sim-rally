@@ -22,7 +22,7 @@ namespace ArtOfSimRally.Mod
         public float FyReference=11500, GainFromStrength=.5f, Smoothing=.2f;
         public int Strength=50;
     }
-    internal static class Main { public static Settings Settings=new(); public static bool Enabled=true, SettingsVisible; }
+    internal static class Main { public static Settings Settings=new(); public static bool Enabled=true, SettingsVisible; public static bool HasFocus()=>UnityEngine.Application.isFocused; }
     internal static class GameState { public static bool IsDriving=true; }
     internal static class ModLog { public static void Info(string text) { } }
     internal static class LandingController

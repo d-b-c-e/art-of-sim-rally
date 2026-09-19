@@ -97,6 +97,7 @@ namespace ArtOfSimRally.Mod
         public static void CancelForceRecovery() { }
         public static bool SettingsVisible = false;
         public static void TickSettingsUi() { }
+        public static bool HasFocus() => UnityEngine.Application.isFocused;
     }
     internal static class GameState { public static bool IsDriving=false, IsPlayerView=true; }
     internal static class ModLog { public static void Info(string value) { } }
