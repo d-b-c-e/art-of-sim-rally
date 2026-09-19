@@ -34,7 +34,7 @@ the actual host content bounds, reachable Stop/Close, direct shortcut guards,
 queued pointer cancellation and first-use screens explicit. RC10 passed narrow
 live keyboard isolation/recovery but overflowed the default4K host. RC11 fixes
 host-bound widths and page wrapping without changing UMM preferences; all16
-offline gates pass, with deployment/rendered retest pending review. See
+offline gates passed, but a later row-overflow finding prevented deployment. See
 [RC10 evidence and RC11 correction](reviews/2026-09-19-rc10-ui-smoke.md).
 This does not close UX-03's720p/custom-scale, first-use, wheel/pad or held-input
 matrix. The binary pin remains358add5, independently of documentation revisions.
@@ -42,9 +42,12 @@ matrix. The binary pin remains358add5, independently of documentation revisions.
 Current successor **RC12** passed all16 gates and was installed20:35:39UTC.
 Independent review closed its aggregate row overflow at clean `cbcf76c5`;126
 settings checks cover the default host and large custom scales. RC11 remained
-validation-only. Rendered RC12 acceptance is pending; exact identity and preserved
-files are in [LOCAL-DEPLOYMENT](LOCAL-DEPLOYMENT.md). Historical RC8–10 evidence
-below must not be read as current layout acceptance.
+validation-only. A limited default4K run passed readable header/all six page
+buttons, five Simple page tops and Escape/native Quit recovery. Cameras,
+Advanced, nested scrolling and Bind→Escape remain pending. Normal exit/exact
+restoration completed20:51:49UTC. Exact identity and preserved files are in
+[LOCAL-DEPLOYMENT](LOCAL-DEPLOYMENT.md); the linked smoke review scopes each
+observation. Historical RC8–10 evidence below is not full layout acceptance.
 
 ## Implemented scope
 

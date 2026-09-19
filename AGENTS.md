@@ -12,7 +12,10 @@
 `cbcf76c5d6401dd8a0c511acfe7ded201df6a99d`, all16 gates passed, installed
 2026-09-19 20:35:39UTC. Default4K content fits the actual UMM host; page buttons
 wrap and large-scale binding rows stack. Narrow independent source review is
-closed; rendered retest remains pending. RC11 was validated but not installed.
+closed. Limited4K smoke passed header/page buttons, five Simple page tops and
+Escape/native Quit recovery; Cameras, Advanced, scrolling and Bind→Escape remain
+pending. Normal exit/exact restoration completed20:51:49UTC. RC11 was validated
+but not installed.
 Exact artifacts/backups/hashes: `docs/LOCAL-DEPLOYMENT.md`. Owner settings,
 toolkit358add5 and probe0.2.5.4 retained; no force test or public release.
 
@@ -81,9 +84,10 @@ third-party binaries, nothing that would force the repo private.
 
 ## Status (2026-09-19 UTC) — do not overstate this
 
-The RC9 settings candidate above supersedes RC6 without changing its toolkit,
-steering/effect arithmetic or saved tune. Its subsequent no-output smoke failed
-KI-40; the full attended matrix remains pending. Historical evidence follows.
+The RC12 settings candidate above supersedes RC6 without changing its toolkit,
+steering/effect arithmetic or saved tune. RC9 failed KI-40; RC10/RC12 fix and
+partially retest its input/layout defects. The full attended matrix remains
+pending. Historical evidence follows.
 Owner's older FFB name/index lacks a GUID: before driving, explicitly select
 Use steering wheel or the MOZA on F6 → FFB. Do not silently choose hardware.
 

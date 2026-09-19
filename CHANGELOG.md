@@ -54,7 +54,8 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Candidate native menu input isolation while settings own input, including
   cancel, pointer presses and held-control handback. RC9's live failure is
-  preserved; the replacement needs runtime retesting.
+  preserved; narrow keyboard isolation/recovery has passed, while binding
+  cancellation and the full physical-input matrix still need runtime retesting.
 
 - Binding saves, clears and shortcut-default restores retain the previous
   effective assignment if Settings.xml cannot be written. Failed calibration

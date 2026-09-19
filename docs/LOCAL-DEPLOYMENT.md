@@ -10,7 +10,8 @@ publication and attended sign-off remain separate.
 
 Installed **2026-09-19 20:35:39 UTC**, game closed, after all16 local gates and
 independent source closure of the custom-scale row overflow. RC11 was validated
-but not installed. Rendered RC12 retest is pending; no public release.
+but not installed. RC12's limited default4K menu check passed; the full rendered
+and hardware matrix remains pending. No public release.
 
 - Identity: `0.2.6-rc.12+cbcf76c5d6401dd8a0c511acfe7ded201df6a99d.clean`.
 - ZIP SHA-256: `88A9B71D43F4A0788112CC987EEEB02407BCB43F9D6AECDA8BCAC93F1927B0C4`.
@@ -24,7 +25,12 @@ but not installed. Rendered RC12 retest is pending; no public release.
   drives and9,507 landing/crash assertions pass. Toolkit358add5/native0.8.0 and
   probe0.2.5.4 unchanged. Exact artifacts/evidence155files hash-verified in main.
 - The [smoke/correction review](reviews/2026-09-19-rc10-ui-smoke.md) distinguishes
-  RC10's narrow keyboard pass from its failed layout and RC12's untested rendering.
+  RC10's narrow keyboard pass from its failed layout and RC12's limited layout pass.
+- [RC12 smoke and restoration receipt](../results/ux-rc12-smoke-d24e3e71d58f498699f4eba1ea8c28f7/receipt.json):
+  readable header/all six page buttons and five Simple page tops fit the default
+  4K host; Escape closes only the panel and subsequent native Quit works.
+  Cameras, Advanced, scrolling and binding cancellation remain pending. Normal
+  exit and all16 protected hashes restored at20:51:49.521UTC; no output or recording.
 
 Before driving, choose **F6 → FFB → Use steering wheel** or reselect the MOZA;
 the saved old name/index lacks an FFB GUID. The installer preserves that choice.

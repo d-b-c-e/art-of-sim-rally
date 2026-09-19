@@ -30,8 +30,10 @@ RC10 dispatch/release guards and scoped content scaling are reviewed, passed
 all16 gates and installed. RC10's live Down/Return/Escape isolation and native
 menu recovery passed, but its larger4K content overflowed the default UMM host.
 RC12 constrains width, wraps page buttons and stacks large-scale binding rows;
-all16 gates and narrow source review passed, exact package installed. Its
-rendered retest is pending. See [RC10 evidence](reviews/2026-09-19-rc10-ui-smoke.md).
+all16 gates and narrow source review passed, exact package installed. Its limited
+4K check passed header/page-button fit, five Simple page tops and Escape/native
+Quit recovery. Camera Bind→Escape, Advanced, scrolling and the broader input
+matrix remain pending. See [RC10/RC12 evidence](reviews/2026-09-19-rc10-ui-smoke.md).
 Offline checks alone do not close this issue. Exact evidence, restored settings
 and the required retest are in [the smoke review](reviews/2026-09-19-rc9-ui-smoke.md).
 

@@ -12,8 +12,9 @@ comparison with an extra backup of that file.
 the panel, and default4K text is too small. RC10 contains the reviewed fixes
 and passed all16 local gates. Live keyboard isolation/recovery passed, but
 default4K layout still clipped controls. RC12 corrects host-bound widths and
-large-scale row stacking, passed all16 gates and is installed; its rendered
-retest is pending. See
+large-scale row stacking, passed all16 gates and is installed. Its limited4K
+check passed the header, page buttons, five Simple page tops and Escape/native
+Quit recovery. Cameras, Advanced, scrolling and Bind→Escape still need checking. See
 [RC10 results](reviews/2026-09-19-rc10-ui-smoke.md) and
 [the recorded failure and retest](reviews/2026-09-19-rc9-ui-smoke.md).
 

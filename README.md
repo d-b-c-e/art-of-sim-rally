@@ -103,8 +103,10 @@ The public download remains 0.2.5.
 [Roadmap](docs/ROADMAP.md) · [Release procedure](docs/RELEASING.md)
 
 The native driver, managed FFB wrapper/force curve and telemetry encoder come
-from **dbce-wheel-mod-toolkit v0.13.0**, vendored in this repository. Developer
-recording/replay tools are separate and are not included in the release.
+from **dbce-wheel-mod-toolkit**. Public 0.2.5 uses official **v0.13.0**; the
+development candidate vendors a newer local build, identified in
+[Local deployment](docs/LOCAL-DEPLOYMENT.md). Developer recording/replay tools
+are separate and are not included in the release.
 
 ## Licence
 
