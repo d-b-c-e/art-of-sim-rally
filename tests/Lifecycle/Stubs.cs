@@ -19,6 +19,7 @@ namespace HarmonyLib
 }
 namespace UnityEngine
 {
+    public sealed class DefaultExecutionOrder : Attribute { public DefaultExecutionOrder(int order) { } }
     public class MonoBehaviour { public static void DontDestroyOnLoad(object value) { } }
     public enum HideFlags { HideAndDontSave }
     public class GameObject
