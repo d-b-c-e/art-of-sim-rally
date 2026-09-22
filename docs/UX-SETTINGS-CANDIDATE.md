@@ -1,8 +1,8 @@
 # Settings candidate: short test guide
 
-This guide applies to the **installed 0.2.6-rc.12 Simple/Advanced candidate**,
-not the public 0.2.5 download. It replaced RC10 after all 16 local gates on
-2026-09-19; see [Local deployment](LOCAL-DEPLOYMENT.md) for the exact identity,
+This guide applies to the **installed 0.2.6-rc.13 Simple/Advanced candidate**,
+not the public 0.2.5 download. It replaced RC12 after all16 local gates on
+2026-09-22 UTC (September21 local); see [Local deployment](LOCAL-DEPLOYMENT.md) for the exact identity,
 backup and receipt.
 The [engineering audit](UX-OVERNIGHT-2026-09-16.md) records coverage and remaining
 gaps. The usual installer still preserves Settings.xml; start any attended
@@ -10,8 +10,8 @@ comparison with an extra backup of that file.
 
 The [visual grouping follow-up](reviews/2026-09-21-visual-grouping.md) puts each
 binding and its actions in one shaded group, moves optional sections behind
-Show/Hide buttons, and reduces the header. Its exact deployment state is in
-Local deployment; new rendered checks remain pending.
+Show/Hide buttons, and reduces the header. It is installed for the next launch;
+new rendered checks remain pending. The RC12 smoke below is historical evidence.
 
 **RC9 smoke found a blocker:** navigation/Escape can reach the game menu behind
 the panel, and default4K text is too small. RC10 contains the reviewed fixes
@@ -29,7 +29,7 @@ still need checking. See
 
 Press **F6** to open this mod's settings. **Ctrl+F10** still opens Unity Mod
 Manager, where the same panel is available. F6 is rebindable under
-**Controls → Mod buttons**, with optional separate USB Settings/Stop buttons.
+**Controls → Show mod buttons and Settings key**, with optional separate USB Settings/Stop buttons.
 **F8** or **Stop FFB** turns feedback off and saves
 that choice; choose **FFB → On** explicitly when ready to resume it.
 

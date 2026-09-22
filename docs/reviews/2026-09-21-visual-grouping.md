@@ -68,3 +68,17 @@ Remaining rendered checks on the actual installed candidate:
 These remain **Not tested** this turn. KI-39/KI-40 are not closed by source review
 or an offline policy assertion. Physical controls and force acceptance remain
 independent of this visual improvement.
+
+## Built and installed candidate
+
+RC13 source `470e398b89198d60c861ce3ffad800b0ff93854a` passed all16 local gates,
+including both recorded drives, at2026-09-22 04:15:01UTC. Independent closure
+confirmed no remaining source blocker from the review; final panel SHA-256
+`005DEB0119AA3A820E7D775F5E64D7BA80490B770FDC6B2112D7966C55002F5E`.
+The exact package was installed04:15:29UTC with the game closed. Six mod files
+and the second native DLL match; six owner/game files retain their immediate
+pre-install hashes. Current Settings.xml SHA-256 is
+`A9291BDBE10AE1DC667A8CA20F48E0EF8D529F11F9F28500284419090F536536`.
+The [deployment entry](../LOCAL-DEPLOYMENT.md) links the gate, RC12 backup,
+package hash and installation receipt. No public release, desktop interaction
+or physical-force test occurred. KI-41 remains open for the rendered checks above.

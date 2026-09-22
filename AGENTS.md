@@ -8,15 +8,23 @@
 
 ## Repository Purpose
 
+**Current installed candidate: RC13**, clean source
+`470e398b89198d60c861ce3ffad800b0ff93854a`, all16 gates passed, installed
+2026-09-22 04:15:29UTC (September21 local), game closed. Six payloads and second
+native copy verified, six owner/game files retained byte-for-byte. No game launch
+or force test. Toolkit358add5/probe0.2.5.4 unchanged. KI-41 rendered acceptance
+and the broader KI-39/40 matrix remain pending; exact backup/hashes are in
+`docs/LOCAL-DEPLOYMENT.md`.
+
 **Visual grouping follow-up, 2026-09-21:** `codex/simple-visual-grouping` implements
 UX-03-G from toolkit `673d451`. See `docs/reviews/2026-09-21-visual-grouping.md`
 for actual screenshot/source findings, source review and required rendered checks.
 Do not infer in-game layout acceptance from the SettingsUi policy suite; it does
 not compile the panel. Keep pre-Bind neutral/release hints visible because the
-input layer samples that state at the click. The installed baseline below remains
-current until a new exact candidate passes all16 gates and is deployed.
+input layer samples that state at the click. RC12's rendered evidence below is
+historical; it does not certify the new layout.
 
-**Current installed candidate: RC12**, clean source
+**Previous installed candidate: RC12**, clean source
 `cbcf76c5d6401dd8a0c511acfe7ded201df6a99d`, all16 gates passed, installed
 2026-09-19 20:35:39UTC. Default4K content fits the actual UMM host; page buttons
 wrap and large-scale binding rows stack. Narrow independent source review is

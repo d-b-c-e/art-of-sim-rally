@@ -1,5 +1,11 @@
 # UX-1 adoption audit
 
+**September21 visual follow-up:** RC13 source `470e398` implements toolkit
+UX-03-G `673d451`. All16 gates passed and the exact package was installed with
+current owner settings retained at2026-09-22 04:15:29UTC. No game launch occurred;
+new rendered/interaction acceptance remains pending. The [review](reviews/2026-09-21-visual-grouping.md)
+records the grouping changes and checks. RC12 evidence below is historical.
+
 Updated **2026-09-19**. The filename identifies the coordinator's UX rollout,
 not the date of a hardware test. This **installed candidate** was developed
 on `codex/ux-simple-advanced`, based on consumer `992ed83`. The owner subsequently

@@ -6,7 +6,31 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.6-rc.12
+## Installed candidate — 0.2.6-rc.13
+
+Installed **2026-09-22 04:15:29 UTC** (September21 local), game closed, after
+all16 local RC gates and independent source review. Binding groups and local
+preconditions, camera keyboard/USB ownership, Show/Hide disclosures and compact
+header/Setup address the owner's clutter report. No game was launched; actual
+rendered fit and interaction remain pending (KI-41, plus existing KI-39/40).
+See the [visual grouping review](reviews/2026-09-21-visual-grouping.md).
+
+- Identity: `0.2.6-rc.13+470e398b89198d60c861ce3ffad800b0ff93854a.clean`.
+- ZIP SHA-256: `E9F37818C82D957DE67EC5E039BEF89AE6FDD55B872FFFB4397993E26297A058`.
+- [Complete gate](../results/rc-0.2.6-rc.13-56173d7bf1914b7aaa76da395dbc7bbe/automated.json),
+  SHA-256 `BC85F5E0561CF7FA3B6C09EEE689BE82BE6C066D3B77BD374DD988FBE5E0E61D`.
+  Includes126 settings policy assertions, both recorded drives and9,507 recorded
+  landing/crash assertions. The settings suite does not render the panel.
+- [Install receipt and RC12 backup](../results/ux-0.2.6-rc.13-install-f013528bf9c24b15bbf08ca587f0264e/receipt.json).
+  All six mod payloads and second native plugin match. The six current owner/game
+  files are byte-identical before/after installation. This preserves the owner's
+  latest settings rather than restoring the older September19 snapshot.
+- Settings SHA-256 `A9291BDBE10AE1DC667A8CA20F48E0EF8D529F11F9F28500284419090F536536`;
+  crash on19.52381 and landing on20. UMM preferences and probe0.2.5.4 retained.
+  Toolkit358add5/native0.8.0 remains unchanged in both plugin locations.
+- Shared visual guidance `673d451`; no physical-force test or public release.
+
+## Previous candidate — 0.2.6-rc.12
 
 Installed **2026-09-19 20:35:39 UTC**, game closed, after all16 local gates and
 independent source closure of the custom-scale row overflow. RC11 was validated
