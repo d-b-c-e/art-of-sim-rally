@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dbce.TripleScreen.Core", "src\Dbce.TripleScreen.Core\Dbce.TripleScreen.Core.csproj", "{12B9CD46-058C-4568-9A07-4548211C86D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArtOfRally.TripleScreen.Mod", "src\ArtOfRally.TripleScreen.Mod\ArtOfRally.TripleScreen.Mod.csproj", "{3C78A5DA-2AF2-407E-8745-5B0DE47499E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dbce.TripleScreen.Core.Tests", "tests\Dbce.TripleScreen.Core.Tests\Dbce.TripleScreen.Core.Tests.csproj", "{F7C4FE78-CA1F-4660-BD77-CBCBD19E12B2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{12B9CD46-058C-4568-9A07-4548211C86D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12B9CD46-058C-4568-9A07-4548211C86D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12B9CD46-058C-4568-9A07-4548211C86D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12B9CD46-058C-4568-9A07-4548211C86D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C78A5DA-2AF2-407E-8745-5B0DE47499E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C78A5DA-2AF2-407E-8745-5B0DE47499E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C78A5DA-2AF2-407E-8745-5B0DE47499E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C78A5DA-2AF2-407E-8745-5B0DE47499E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7C4FE78-CA1F-4660-BD77-CBCBD19E12B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7C4FE78-CA1F-4660-BD77-CBCBD19E12B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7C4FE78-CA1F-4660-BD77-CBCBD19E12B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7C4FE78-CA1F-4660-BD77-CBCBD19E12B2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Dbce.TripleScreen.Core.Tests</AssemblyName>
+    <RootNamespace>Dbce.TripleScreen.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Dbce.TripleScreen.Core\Dbce.TripleScreen.Core.csproj" />
+  </ItemGroup>
+</Project>

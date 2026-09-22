@@ -1,0 +1,11 @@
+{
+  "Id": "DbceTripleScreenArtOfRally",
+  "DisplayName": "DBCE triple-screen probe for art of rally",
+  "Author": "d-b-c-e",
+  "Version": "0.0.1",
+  "ManagerVersion": "0.27.0",
+  "AssemblyName": "ArtOfRally.TripleScreen.Mod.dll",
+  "EntryMethod": "ArtOfRally.TripleScreen.Mod.Main.Load",
+  "HomePage": "https://github.com/d-b-c-e/dbce-triple-mod-art-of-rally",
+  "Repository": "https://github.com/d-b-c-e/dbce-triple-mod-art-of-rally"
+}

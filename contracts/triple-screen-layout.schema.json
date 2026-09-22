@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/d-b-c-e/dbce-triple-mod-art-of-rally/contracts/triple-screen-layout.schema.json",
+  "title": "DBCE triple-screen layout",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "panel", "geometry", "output"],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "panel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["count", "nativeWidthPx", "nativeHeightPx", "physicalWidthMm", "physicalHeightMm"],
+      "properties": {
+        "count": { "const": 3 },
+        "nativeWidthPx": { "type": "integer", "minimum": 1 },
+        "nativeHeightPx": { "type": "integer", "minimum": 1 },
+        "physicalWidthMm": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Visible left-to-right chord width. Prefer the manufacturer's active-area measurement."
+        },
+        "physicalHeightMm": { "type": "number", "exclusiveMinimum": 0 },
+        "curveRadiusMm": {
+          "type": ["number", "null"],
+          "exclusiveMinimum": 0,
+          "description": "For example 1500 for a 1500R monitor. Version 1 records this but models each panel as one plane."
+        },
+        "bezelWidthMm": { "type": "number", "minimum": 0, "default": 0 }
+      }
+    },
+    "geometry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eyeDistanceMm", "leftYawDegrees", "rightYawDegrees"],
+      "properties": {
+        "eyeDistanceMm": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Perpendicular distance from the eyes to the center panel plane."
+        },
+        "eyeHeightAbovePanelCenterMm": { "type": "number", "default": 0 },
+        "leftYawDegrees": { "type": "number", "minimum": 0, "exclusiveMaximum": 90 },
+        "rightYawDegrees": { "type": "number", "minimum": 0, "exclusiveMaximum": 90 }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "enum": ["nvidia-surround", "borderless-span", "separate-displays"]
+        },
+        "combinedWidthPx": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Actual wide resolution, including driver bezel correction pixels when present."
+        },
+        "combinedHeightPx": { "type": ["integer", "null"], "minimum": 1 }
+      }
+    }
+  }
+}

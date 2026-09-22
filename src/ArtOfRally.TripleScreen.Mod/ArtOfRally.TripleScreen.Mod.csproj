@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>ArtOfRally.TripleScreen.Mod</AssemblyName>
+    <RootNamespace>ArtOfRally.TripleScreen.Mod</RootNamespace>
+    <Nullable>disable</Nullable>
+    <GameDir Condition="'$(GameDir)' == ''">D:\Program Files (x86)\Steam\steamapps\common\artofrally</GameDir>
+    <ManagedDir>$(GameDir)\artofrally_Data\Managed</ManagedDir>
+    <UmmDir>$(ManagedDir)\UnityModManager</UmmDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dbce.TripleScreen.Core\Dbce.TripleScreen.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="UnityEngine">
+      <HintPath>$(ManagedDir)\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(ManagedDir)\UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityModManager">
+      <HintPath>$(UmmDir)\UnityModManager.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Info.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
