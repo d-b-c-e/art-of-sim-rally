@@ -8,6 +8,14 @@
 
 ## Repository Purpose
 
+**Visual grouping follow-up, 2026-09-21:** `codex/simple-visual-grouping` implements
+UX-03-G from toolkit `673d451`. See `docs/reviews/2026-09-21-visual-grouping.md`
+for actual screenshot/source findings, source review and required rendered checks.
+Do not infer in-game layout acceptance from the SettingsUi policy suite; it does
+not compile the panel. Keep pre-Bind neutral/release hints visible because the
+input layer samples that state at the click. The installed baseline below remains
+current until a new exact candidate passes all16 gates and is deployed.
+
 **Current installed candidate: RC12**, clean source
 `cbcf76c5d6401dd8a0c511acfe7ded201df6a99d`, all16 gates passed, installed
 2026-09-19 20:35:39UTC. Default4K content fits the actual UMM host; page buttons

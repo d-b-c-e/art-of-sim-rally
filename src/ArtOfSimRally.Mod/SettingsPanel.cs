@@ -5,9 +5,10 @@ namespace ArtOfSimRally.Mod
 {
     internal static class SettingsPanel
     {
-        private static GUIStyle _wrap, _help;
+        private static GUIStyle _wrap, _help, _heading, _card;
+        private static int _cardDepth;
         private static Vector2 _scroll;
-        private static bool _shifter, _cameraKeys, _clutch, _settingsKey;
+        private static bool _shifter, _cameraKeys, _clutch, _settingsKey, _modButtons;
         private static float _keyDeadline;
         private static string _keyStatus = "";
         private static int _mount;
@@ -33,22 +34,33 @@ namespace ArtOfSimRally.Mod
             _wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
             _help = new GUIStyle(_wrap);
             _help.normal.textColor = new Color(.72f, .72f, .72f);
+            _heading = new GUIStyle(_wrap) { fontStyle = FontStyle.Bold };
+            int inset = (int)(8 * SettingsPresentation.Scale);
+            _card = new GUIStyle(GUI.skin.box) {
+                padding = new RectOffset(inset, inset, inset, inset),
+                border = new RectOffset(0, 0, 0, 0),
+                margin = new RectOffset(0, 0, 0, 0)
+            };
+            _card.normal.background = Texture2D.whiteTexture;
+            _cardDepth = 0;
             HandleKey(c);
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Wheel settings", new GUIStyle(_wrap) { fontStyle = FontStyle.Bold });
+            GUILayout.Label("Wheel settings", _heading);
             if (GUILayout.Button("Stop FFB (F8)")) Main.StopFeedback();
             if (GUILayout.Button("Close")) Main.CloseSettings();
             GUILayout.EndHorizontal();
             bool wasEnabled = GUI.enabled;
             GUI.enabled = wasEnabled && !Editing;
             bool advanced = SettingsViewPolicy.Advanced(c);
-            int view = GUILayout.Toolbar(advanced ? 1 : 0, new[] { "Simple", "Advanced" });
+            // Keep routine save feedback beside View, without adding a header row.
+            bool compactHeader = !SettingsPresentation.StackRows;
+            if (compactHeader) GUILayout.BeginHorizontal();
+            int view = GUILayout.Toolbar(advanced ? 1 : 0, new[] { "Simple", "Advanced" },
+                compactHeader ? SettingsPresentation.Width(240) : GUILayout.ExpandWidth(true));
             if (view != (advanced ? 1 : 0)) Select(c, view == 1, SettingsViewPolicy.Page(c));
             GUI.enabled = wasEnabled;
-            if (Editing) Help("Finish or cancel the current edit to change view.");
-            GUILayout.Label(Editing ? "Edit in progress — pending calibration/connection is not saved. " + Main.SettingsSaveStatus : Main.SettingsSaveStatus, _wrap);
-            if (!c.ForceFeedbackEnabled) Help("FFB off — choose On in FFB when ready.");
-            else if (!FfbNative.Ready) Help("FFB unavailable — " + FfbNative.Status);
+            GUILayout.Label(Main.SettingsSaveStatus, _wrap);
+            if (compactHeader) GUILayout.EndHorizontal();
             GUI.enabled = wasEnabled && !Editing;
             int page = GUILayout.SelectionGrid(SettingsViewPolicy.Page(c), SettingsViewPolicy.Pages,
                 SettingsDisplayPolicy.PageColumns(SettingsPresentation.ContentWidth, SettingsPresentation.Scale));
@@ -104,47 +116,51 @@ namespace ArtOfSimRally.Mod
         }
         private static void Setup(Settings c)
         {
-            GUILayout.Label("Connect → axes → buttons → check FFB → drive", _wrap);
-            Help("Pause before binding or calibrating. Keep working game controls; add separate devices here as needed.");
             Bar(WheelInput.Channel.Steer, "Steering"); Bar(WheelInput.Channel.Throttle, "Throttle"); Bar(WheelInput.Channel.Brake, "Brake");
             bool complete = c.WheelInputEnabled && WheelInput.IsBound(WheelInput.Channel.Steer) &&
                 WheelInput.IsBound(WheelInput.Channel.Throttle) && WheelInput.IsBound(WheelInput.Channel.Brake);
-            GUILayout.Label(complete ? "Axes assigned — verify the bars, desired buttons and FFB before driving." :
-                "Next: check steering and pedals. Bind any controls the game cannot read.", _wrap);
-            if (GUILayout.Button("Open Controls")) Select(c, SettingsViewPolicy.Advanced(c), 1);
-            if (GUILayout.Button("Check FFB")) Select(c, SettingsViewPolicy.Advanced(c), 2);
-            Help("Handbrake, shifter, cameras and telemetry are optional. Bars show device input, not measured car behavior.");
+            Help(complete ? "Move the wheel and pedals to check these bars." :
+                "Keep working game controls. Bind separate devices in Controls if needed.");
+            if (GUILayout.Button(complete ? "Next: check FFB" : "Open Controls"))
+                Select(c, SettingsViewPolicy.Advanced(c), complete ? 2 : 1);
+            Help("Handbrake, shifter, cameras and telemetry are optional. Bars show device input.");
         }
         private static void Controls(Settings c)
         {
             bool active = Toggle(c.WheelInputEnabled, "Use assigned controls");
             if (active != c.WheelInputEnabled) { c.WheelInputEnabled = active; if (!active) WheelInput.CancelAssign(); }
-            Help("Unbound controls keep the game's bindings. Release/centre before Bind; complete full travel and release before Save calibration.");
             Axis(c, WheelInput.Channel.Steer, "Steering"); Axis(c, WheelInput.Channel.Throttle, "Throttle");
             Axis(c, WheelInput.Channel.Brake, "Brake"); Axis(c, WheelInput.Channel.Handbrake, "Handbrake (axis)");
             Axis(c, WheelInput.Channel.HandbrakeButton, "Handbrake (button)");
+            Help("Unbound controls keep the game's bindings.");
             Help("Handbrake axis, button and game controls use the greater value; a held button contributes 100%.");
-            _clutch = GUILayout.Toggle(_clutch, "Clutch");
+            _clutch = Disclosure(_clutch, "clutch binding");
             if (_clutch) Axis(c, WheelInput.Channel.Clutch, "Clutch");
             if (!WheelInput.Assigning.HasValue) Help(WheelInput.Status);
-            _shifter = GUILayout.Toggle(_shifter, "Shifter bindings");
+            _shifter = Disclosure(_shifter, "shifter bindings");
             if (_shifter)
             {
                 c.ShifterEnabled = Toggle(c.ShifterEnabled, "Separate shifter");
                 if (c.ShifterEnabled) Panel.DrawShifterBinding(c);
                 if (!c.ShifterIsHPattern) c.SkipNeutral = Toggle(c.SkipNeutral, "Skip neutral");
             }
-            GUILayout.Label("Driving and menu buttons", _wrap);
+            BeginCard("Driving and menu buttons");
             Help("The game's binding screen owns Shift up/down, Change camera, held Look behind, Reset car, Pause and menu controls. It preserves keyboard/pad action maps. Settings/Stop FFB buttons below read USB devices directly.");
             if (GUILayout.Button("Open game bindings")) GameBindings.Open();
             Help(GameBindings.Status);
-            GUILayout.Label("Mod buttons", _wrap);
-            if (GUILayout.Button(_settingsKey ? "Press a Settings key (Esc cancels)" : "Settings: " + CameraKeys.Name(c.SettingsKey) + " — Bind"))
-            { if (!Editing) { _settingsKey = true; _keyStatus = "Press a key within 10 seconds. Escape cancels."; _keyDeadline = Time.unscaledTime + 10; } }
-            Help(_keyStatus);
-            Axis(c, WheelInput.Channel.SettingsButton, "Settings (button)");
-            Axis(c, WheelInput.Channel.StopFfbButton, "Stop FFB (button)");
-            Help("F8 always stops FFB. These optional device buttons work even with assigned driving controls Off. Release held buttons after reconnecting.");
+            EndCard();
+            _modButtons = Disclosure(_modButtons, "mod buttons and Settings key");
+            if (_modButtons)
+            {
+                BeginCard("Settings key");
+                if (GUILayout.Button(_settingsKey ? "Press a Settings key (Esc cancels)" : "Settings: " + CameraKeys.Name(c.SettingsKey) + " — Bind"))
+                { if (!Editing) { _settingsKey = true; _keyStatus = "Press a key within 10 seconds. Escape cancels."; _keyDeadline = Time.unscaledTime + 10; } }
+                Help(_keyStatus);
+                EndCard();
+                Axis(c, WheelInput.Channel.SettingsButton, "Settings (button)");
+                Axis(c, WheelInput.Channel.StopFfbButton, "Stop FFB (button)");
+                Help("F8 always stops FFB. These optional device buttons work even with assigned driving controls Off. Release held buttons after reconnecting.");
+            }
             if (!SettingsViewPolicy.Advanced(c) && SettingsViewPolicy.CustomControls(c) &&
                 GUILayout.Button("Custom control tuning active — Review in Advanced")) Select(c, true, 1);
             if (SettingsViewPolicy.Advanced(c))
@@ -160,23 +176,40 @@ namespace ArtOfSimRally.Mod
         }
         private static void Axis(Settings c, WheelInput.Channel channel, string label)
         {
-            GUILayout.Space(6); GUILayout.Label(label + ": " + WheelInput.Describe(channel), _wrap);
-            Bar(channel, "Device input");
-            if (!WheelInput.IsButtonChannel(channel) && WheelInput.IsBound(channel))
+            BeginCard(label + (WheelInput.IsBound(channel) ? " · Device input: " + InputText(channel) : ""));
+            Binding(c, channel, label, false);
+            EndCard();
+        }
+        private static void Binding(Settings c, WheelInput.Channel channel, string label, bool inputLabel = true)
+        {
+            bool bound = WheelInput.IsBound(channel);
+            GUILayout.Label(WheelInput.Describe(channel), _wrap);
+            if (bound && WheelInput.Assigning != channel) Bar(channel, "Device input", inputLabel);
+            if (SettingsViewPolicy.Advanced(c) && !WheelInput.IsButtonChannel(channel) && bound)
                 Help(WheelInput.CalibrationDescription(channel));
+            if (WheelInput.Assigning == channel)
+            {
+                CalibrationEditor(c, label);
+                return;
+            }
+            if (!WheelInput.IsButtonChannel(channel))
+                Help(channel == WheelInput.Channel.Steer ? "Centre first, then Bind or Calibrate." : "Release first, then Bind or Calibrate.");
+            else Help("Release the button first, then Bind.");
             bool enabled = GUI.enabled; GUI.enabled = enabled && !Editing;
-            bool stack = SettingsPresentation.StackRows;
+            bool stack = StackRows;
             if (!stack) GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Bind")) WheelInput.BeginCalibration(channel);
-            GUI.enabled = enabled && !Editing && WheelInput.IsBound(channel);
-            if (!WheelInput.IsButtonChannel(channel) && GUILayout.Button("Calibrate")) WheelInput.BeginCalibration(channel);
-            if (GUILayout.Button("Clear"))
+            if (GUILayout.Button("Bind " + label.ToLowerInvariant())) WheelInput.BeginCalibration(channel);
+            GUI.enabled = enabled && !Editing && bound;
+            if (!WheelInput.IsButtonChannel(channel) && GUILayout.Button(stack ? "Calibrate " + label.ToLowerInvariant() : "Calibrate",
+                stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(100))) WheelInput.BeginCalibration(channel);
+            if (GUILayout.Button(stack ? "Clear " + label.ToLowerInvariant() : "Clear",
+                stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(70)))
             { if (WheelInput.Clear(channel) && channel == WheelInput.Channel.Steer && FfbSelection.FollowsSteering(c)) Main.SelectForceDevice(); }
             if (!stack) GUILayout.EndHorizontal(); GUI.enabled = enabled;
-            if (WheelInput.Assigning == channel) CalibrationEditor(c);
         }
-        private static void CalibrationEditor(Settings c)
+        private static void CalibrationEditor(Settings c, string label)
         {
+                GUILayout.Label("Binding " + label.ToLowerInvariant(), _heading);
                 GUILayout.Label(WheelInput.Status, _wrap);
                 var pending = WheelInput.PendingCalibration;
                 if (pending != null)
@@ -188,7 +221,8 @@ namespace ArtOfSimRally.Mod
                         pending.Deadzone = Slider(pending.Deadzone, 0, .1f, 0, "Deadzone", 100, "%");
                     }
                 }
-                bool stack = SettingsPresentation.StackRows;
+                Help("Escape cancels and keeps the previous binding.");
+                bool stack = StackRows;
                 if (!stack) GUILayout.BeginHorizontal(); bool enabled = GUI.enabled;
                 GUI.enabled = enabled && WheelInput.CanSaveCalibration;
                 if (GUILayout.Button(pending != null && pending.IsButton ? "Save binding" : "Save calibration"))
@@ -201,15 +235,19 @@ namespace ArtOfSimRally.Mod
                 if (!stack) GUILayout.EndHorizontal();
 
         }
-        private static void Bar(WheelInput.Channel channel, string label)
+        private static string InputText(WheelInput.Channel channel)
         {
             float value = WheelInput.Value(channel);
-            string text = !WheelInput.IsBound(channel) ? "Game controls / not bound here" : channel == WheelInput.Channel.Steer
+            return !WheelInput.IsBound(channel) ? "Game controls / not bound here" : channel == WheelInput.Channel.Steer
                 ? Math.Abs(value) < .005f ? "Centre" : (value < 0 ? "Left " : "Right ") + (Math.Abs(value) * 100).ToString("F0") + "%"
                 : (value * 100).ToString("F0") + "%";
-            GUILayout.Label(label + ": " + text, _wrap);
+        }
+        private static void Bar(WheelInput.Channel channel, string label, bool showLabel = true)
+        {
+            if (showLabel) GUILayout.Label(label + ": " + InputText(channel), _wrap);
             if (!WheelInput.IsBound(channel)) return;
-            var rect = GUILayoutUtility.GetRect(20, 14, GUILayout.ExpandWidth(true));
+            float value = WheelInput.Value(channel);
+            var rect = GUILayoutUtility.GetRect(20, 8 * SettingsPresentation.Scale, GUILayout.ExpandWidth(true));
             var color = GUI.color;
             GUI.color = new Color(.2f, .2f, .2f); GUI.DrawTexture(rect, Texture2D.whiteTexture);
             var fill = rect;
@@ -260,7 +298,7 @@ namespace ArtOfSimRally.Mod
             Help("Included in the game's Change camera cycle. Change camera and held Look behind use the game's bindings. Close settings to adjust the active mount.");
             if (GUILayout.Button("Bind Change camera / Look behind")) GameBindings.Open();
             Help(GameBindings.Status);
-            _cameraKeys = GUILayout.Toggle(_cameraKeys, "Adjustment bindings");
+            _cameraKeys = Disclosure(_cameraKeys, "adjustment bindings");
             if (_cameraKeys)
             {
                 c.CameraTuningKeys = Toggle(c.CameraTuningKeys, "Live adjustment shortcuts");
@@ -268,15 +306,19 @@ namespace ArtOfSimRally.Mod
                 for (int i = 0; i < CameraKeys.Bindings.Length; i++)
                 {
                     var binding = CameraKeys.Bindings[i];
-                    bool stack = SettingsPresentation.StackRows;
+                    BeginCard(binding.Label);
+                    bool stack = StackRows;
                     if (!stack) GUILayout.BeginHorizontal();
-                    GUILayout.Label(binding.Label + ": " + CameraKeys.Name(binding.Get(c)), _wrap);
+                    GUILayout.Label("Keyboard: " + CameraKeys.Name(binding.Get(c)), _wrap);
                     bool old = GUI.enabled; GUI.enabled = old && (!Editing || CameraKeys.Listening == i);
-                    if (GUILayout.Button(CameraKeys.Listening == i ? "Cancel" : "Bind", stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(80)))
+                    if (GUILayout.Button(CameraKeys.Listening == i ? "Cancel" : "Bind key", stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(80)))
                     { if (CameraKeys.Listening == i) CameraKeys.Cancel(); else CameraKeys.Begin(i); }
                     if (GUILayout.Button("Clear", stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(70))) CameraKeys.Clear(c, i);
                     GUI.enabled = old; if (!stack) GUILayout.EndHorizontal();
-                    Axis(c, WheelInput.CameraChannel(i), binding.Label + " (button)");
+                    if (CameraKeys.Listening == i) Help(CameraKeys.Status);
+                    GUILayout.Space(8 * SettingsPresentation.Scale);
+                    Binding(c, WheelInput.CameraChannel(i), binding.Label + " (button)");
+                    EndCard();
                 }
                 bool enabled = GUI.enabled; GUI.enabled = enabled && !Editing;
                 if (GUILayout.Button("Restore numpad defaults")) CameraKeys.Reset(c);
@@ -349,7 +391,7 @@ namespace ArtOfSimRally.Mod
         }
         private static bool Toggle(bool value, string label)
         {
-            bool stack = SettingsPresentation.StackRows;
+            bool stack = StackRows;
             if (!stack) GUILayout.BeginHorizontal(); GUILayout.Label(label + ": " + (value ? "On" : "Off"), _wrap);
             int result = GUILayout.Toolbar(value ? 1 : 0, new[] { "Off", "On" }, stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(110));
             if (!stack) GUILayout.EndHorizontal(); return result == 1;
@@ -357,13 +399,38 @@ namespace ArtOfSimRally.Mod
         private static float Slider(float value, float min, float max, float normal, string label, float scale, string unit)
         {
             GUILayout.Label(label + ": " + (value * scale).ToString("0.##") + unit, _wrap);
-            bool stack = SettingsPresentation.StackRows;
+            bool stack = StackRows;
             if (!stack) GUILayout.BeginHorizontal();
             bool changed = GUI.changed; GUI.changed = false;
             float result = GUILayout.HorizontalSlider(value, min, max);
             bool moved = GUI.changed; GUI.changed |= changed;
             if (GUILayout.Button("Default", stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(80))) { result = normal; moved = true; GUI.changed = true; }
             if (!stack) GUILayout.EndHorizontal(); return moved ? result : value;
+        }
+        private static bool StackRows => SettingsDisplayPolicy.StackRows(
+            SettingsPresentation.BodyWidth - _cardDepth * 16 * SettingsPresentation.Scale, SettingsPresentation.Scale);
+        private static void BeginCard(string title)
+        {
+            var previous = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(.16f, .17f, .18f, 1);
+            GUILayout.BeginVertical(_card);
+            GUI.backgroundColor = previous;
+            _cardDepth++;
+            GUILayout.Label(title, _heading);
+        }
+        private static void EndCard()
+        {
+            _cardDepth--;
+            GUILayout.EndVertical();
+            GUILayout.Space(16 * SettingsPresentation.Scale);
+        }
+        private static bool Disclosure(bool open, string label)
+        {
+            bool enabled = GUI.enabled;
+            GUI.enabled = enabled && !Editing;
+            if (GUILayout.Button((open ? "Hide " : "Show ") + label)) open = !open;
+            GUI.enabled = enabled;
+            return open;
         }
         private static void Help(string text) { if (!string.IsNullOrEmpty(text)) GUILayout.Label(text, _help); }
     }

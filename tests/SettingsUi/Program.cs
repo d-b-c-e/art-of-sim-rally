@@ -163,7 +163,8 @@ static class Program
         Check(SettingsDisplayPolicy.Width(3840,2,1000)==930,"explicit host width ignored");
         Check(SettingsDisplayPolicy.Width(3840,2,0)==890,"zero UMM preference treated as unlimited 4K viewport");
         Check(SettingsDisplayPolicy.Width(3840,2,960)==890,"actual default UMM host escaped");
-        Check(SettingsDisplayPolicy.PageHeight(2160,2,0)<=200,"default UMM height lost page scroll");
+        Check(SettingsDisplayPolicy.PageHeight(2160,2,0)>=300 && SettingsDisplayPolicy.PageHeight(2160,2,0)<=340,
+            "compact header must leave room for an actionable binding group inside the default host");
         Check(SettingsDisplayPolicy.PageColumns(890,2)==3,"4K default host did not wrap page buttons");
         Check(SettingsDisplayPolicy.PageColumns(890,1)==6,"ordinary host unnecessarily wrapped pages");
         Check(SettingsDisplayPolicy.PageColumns(200,5)==1,"narrow high-scale page grid invalid");

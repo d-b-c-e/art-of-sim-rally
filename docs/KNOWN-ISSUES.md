@@ -21,6 +21,16 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-41 — Simple binding layout lacks clear visual ownership
+
+**Owner-reported, 2026-09-21.** RC12's axis labels and generic action rows have
+little visual separation. Retained4K Controls screenshots also show excessive
+header/instruction space before the first binding. The visual-grouping follow-up
+adds bounded groups, local hints and compact header/Setup. Independent source
+review is complete; actual rendered acceptance is pending. See
+[changes and exact checks](reviews/2026-09-21-visual-grouping.md). Do not close
+this issue based solely on a build or policy-height assertion.
+
 ### KI-40 — Settings input reaches native menus; default 4K content is too small
 
 **Confirmed in RC9, 2026-09-19.** Down changed the stock main-menu selection

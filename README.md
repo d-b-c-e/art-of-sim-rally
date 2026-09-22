@@ -11,6 +11,9 @@ direct USB controls, bonnet/bumper cameras and telemetry for SimHub.
 The development version has a new
 [Simple/Advanced settings candidate](docs/UX-SETTINGS-CANDIDATE.md).
 It is not in the download above; the instructions below describe public 0.2.5.
+The [visual grouping follow-up](docs/reviews/2026-09-21-visual-grouping.md) makes
+binding ownership clearer and reduces clutter in Simple; rendered acceptance
+is tracked separately from its build and local deployment.
 
 ## Install
 

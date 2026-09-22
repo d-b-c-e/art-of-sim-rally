@@ -8,6 +8,11 @@ The [engineering audit](UX-OVERNIGHT-2026-09-16.md) records coverage and remaini
 gaps. The usual installer still preserves Settings.xml; start any attended
 comparison with an extra backup of that file.
 
+The [visual grouping follow-up](reviews/2026-09-21-visual-grouping.md) puts each
+binding and its actions in one shaded group, moves optional sections behind
+Show/Hide buttons, and reduces the header. Its exact deployment state is in
+Local deployment; new rendered checks remain pending.
+
 **RC9 smoke found a blocker:** navigation/Escape can reach the game menu behind
 the panel, and default4K text is too small. RC10 contains the reviewed fixes
 and passed all16 local gates. Live keyboard isolation/recovery passed, but

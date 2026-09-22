@@ -9,6 +9,12 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Clearer candidate binding groups with bold names, owned actions and local
+  calibration instructions; camera keyboard/USB bindings share one group.
+  Compact header and Setup, plus Show/Hide optional sections, reduce Simple
+  clutter. Owner values and runtime behavior are preserved; visual acceptance
+  of this layout remains pending.
+
 - Candidate settings text scales automatically for high-resolution displays,
   with an option to follow UMM's scale and preservation of its host preferences.
   Content fits the actual host viewport and page buttons wrap on narrower windows.
