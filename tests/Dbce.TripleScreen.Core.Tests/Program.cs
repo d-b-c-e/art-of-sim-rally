@@ -1,5 +1,7 @@
 using System;
+using System.Text;
 using Dbce.TripleScreen;
+using Dbce.TripleScreen.Protocol;
 
 namespace Dbce.TripleScreen.Tests;
 
@@ -15,8 +17,12 @@ internal static class Program
             HingesAreContinuous();
             CenterProjectionIsSymmetric();
             SideProjectionsAreMirroredAndOffAxis();
+            IndependentSideAnglesArePreserved();
             MatrixMatchesFrustum();
             BadEyeSideIsRejected();
+            CanonicalLayoutParsesStrictly();
+            InvalidLayoutsAreRejected();
+            RuntimeStatusMatchesCanonicalShape();
             Console.WriteLine($"PASS: {_assertions} triple-screen geometry assertions");
             return 0;
         }
@@ -68,6 +74,19 @@ internal static class Program
         Near(projection.ProjectionMatrix[3, 2], -1d, 0d, "projection perspective row");
     }
 
+    private static void IndependentSideAnglesArePreserved()
+    {
+        var dimensions = PanelDimensions.FromDiagonal(32d, 16d, 9d);
+        var surfaces = TripleRigBuilder.Build(new TripleRigDefinition(
+            dimensions.WidthMm,
+            dimensions.HeightMm,
+            700d,
+            45d,
+            65d));
+        Near(surfaces[0].CameraYawDegrees(), -45d, 1e-10, "left independent yaw");
+        Near(surfaces[2].CameraYawDegrees(), 65d, 1e-10, "right independent yaw");
+    }
+
     private static void BadEyeSideIsRejected()
     {
         var threw = false;
@@ -83,11 +102,75 @@ internal static class Program
         Check(threw, "eye behind display must be rejected");
     }
 
+    private static void CanonicalLayoutParsesStrictly()
+    {
+        var result = LayoutContractParser.Parse(Utf8(ValidLayout));
+        Check(result.IsSuccess, result.ErrorMessage ?? "valid layout rejected");
+        Check(result.Document?.Geometry?.LeftYawDegrees == 55d, "left yaw lost during parse");
+        Check(result.Document?.Geometry?.RightYawDegrees == 60d, "right yaw lost during parse");
+        Check(result.Sha256?.Length == 64, "layout SHA-256 missing");
+    }
+
+    private static void InvalidLayoutsAreRejected()
+    {
+        var unknown = LayoutContractParser.Parse(Utf8(ValidLayout.Replace("\"schemaVersion\":1", "\"schemaVersion\":1,\"invented\":true")));
+        Check(!unknown.IsSuccess && unknown.ErrorCode == "LAYOUT_INVALID_JSON", "unknown property accepted");
+
+        var duplicate = LayoutContractParser.Parse(Utf8(ValidLayout.Replace("\"schemaVersion\":1", "\"schemaVersion\":1,\"schemaVersion\":1")));
+        Check(!duplicate.IsSuccess && duplicate.ErrorCode == "LAYOUT_INVALID_JSON", "duplicate property accepted");
+
+        var future = LayoutContractParser.Parse(Utf8(ValidLayout.Replace("\"schemaVersion\":1", "\"schemaVersion\":2")));
+        Check(!future.IsSuccess && future.ErrorCode == "LAYOUT_VERSION_UNSUPPORTED", "future contract guessed at");
+
+        var badAngle = LayoutContractParser.Parse(Utf8(ValidLayout.Replace("\"leftYawDegrees\":55", "\"leftYawDegrees\":90")));
+        Check(!badAngle.IsSuccess && badAngle.ErrorCode == "LAYOUT_GEOMETRY_INVALID", "invalid side angle accepted");
+
+        var comment = LayoutContractParser.Parse(Utf8(ValidLayout + "/* trailing comment */"));
+        Check(!comment.IsSuccess && comment.ErrorCode == "LAYOUT_COMMENTS_UNSUPPORTED", "JSON comment accepted");
+
+        var trailing = LayoutContractParser.Parse(Utf8(ValidLayout + "{}"));
+        Check(!trailing.IsSuccess, "trailing JSON value accepted");
+
+        var oversized = LayoutContractParser.Parse(new byte[LayoutContractParser.MaximumDocumentBytes + 1]);
+        Check(!oversized.IsSuccess && oversized.ErrorCode == "LAYOUT_TOO_LARGE", "oversized layout accepted");
+    }
+
+    private static void RuntimeStatusMatchesCanonicalShape()
+    {
+        var status = new RuntimeStatusDocument
+        {
+            AdapterId = "dbce-triple-mod-art-of-rally",
+            AdapterVersion = "0.1.0",
+            GameId = "art-of-rally",
+            State = "active",
+            AcceptedLayoutSha256 = new string('a', 64),
+            LayoutContractVersion = 1,
+            Topology = "nvidia-surround",
+            ActiveCameraCount = 1,
+            LastSuccessfulFrameUtc = "2026-09-21T12:00:00.0000000Z"
+        };
+        status.ActiveCapabilities.Add("asymmetric-frustum");
+        status.Diagnostics.Add(new RuntimeDiagnostic("CENTER_PREVIEW_ACTIVE", "info", "Center projection preview is active."));
+        var json = RuntimeStatusJson.Serialize(status);
+        Check(json.Contains("\"schemaVersion\": 1"), "status schema version missing");
+        Check(json.Contains("\"state\": \"active\""), "status state missing");
+        Check(json.Contains("\"activeCapabilities\": ["), "status capabilities missing");
+    }
+
     private static System.Collections.Generic.IReadOnlyList<DisplaySurface> Rig()
     {
         var dimensions = PanelDimensions.FromDiagonal(32d, 16d, 9d);
         return TripleRigBuilder.Build(new TripleRigDefinition(dimensions.WidthMm, dimensions.HeightMm, 700d, 60d));
     }
+
+    private static byte[] Utf8(string value) => Encoding.UTF8.GetBytes(value);
+
+    private const string ValidLayout = "{" +
+        "\"schemaVersion\":1," +
+        "\"panel\":{\"count\":3,\"nativeWidthPx\":2560,\"nativeHeightPx\":1440,\"physicalWidthMm\":708.4,\"physicalHeightMm\":398.5,\"curveRadiusMm\":1500,\"bezelWidthMm\":8}," +
+        "\"geometry\":{\"eyeDistanceMm\":700,\"eyeHeightAbovePanelCenterMm\":10,\"leftYawDegrees\":55,\"rightYawDegrees\":60}," +
+        "\"output\":{\"mode\":\"nvidia-surround\",\"combinedWidthPx\":7680,\"combinedHeightPx\":1440}" +
+        "}";
 
     private static void Near(double actual, double expected, double tolerance, string name)
     {
@@ -104,4 +187,12 @@ internal static class Program
         _assertions++;
         if (!condition) throw new InvalidOperationException(message);
     }
+}
+
+internal static class SurfaceTestExtensions
+{
+    internal static double CameraYawDegrees(this DisplaySurface surface) =>
+        Math.Atan2(surface.CameraForward().X, -surface.CameraForward().Z) * 180d / Math.PI;
+
+    private static Vector3d CameraForward(this DisplaySurface surface) => -surface.NormalTowardViewer;
 }

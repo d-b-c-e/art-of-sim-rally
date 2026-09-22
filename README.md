@@ -5,20 +5,24 @@ Research and prototype code for robust, configurable triple-screen rendering in
 modern sim-racing title, with NVIDIA Surround ultrawide as the dependable
 fallback. This repository does not redistribute game or mod-loader binaries.
 
-The first prototype contains:
+The current `0.1.0` milestone contains:
 
 - `Dbce.TripleScreen.Core`, a Unity-independent .NET Standard 2.0 library that
   turns physical panel measurements into three display planes and asymmetric
   projection matrices;
-- a read-only Unity Mod Manager probe that inventories the game's cameras,
-  display API state, render targets, projection matrices, attached effects, and
-  UI canvases without changing them; and
-- a versioned JSON contract intended for `triple-screen-optimizer`.
+- a Unity Mod Manager adapter with a default-off, reversible center-panel
+  off-axis projection preview;
+- strict consumption of the canonical optimizer layout plus atomic canonical
+  runtime-status reporting; and
+- an honest adapter manifest that advertises only the implemented
+  `asymmetric-frustum` capability.
 
-No rendering mod is claimed working yet. The next gate is an attended probe run
-against a stage, followed by a center-only projection override and then a
-three-render-target compositor. See [research](docs/research.md),
-[architecture](docs/architecture.md), and the [experiment plan](docs/experiments/001-runtime-camera-inventory.md).
+The code builds and its geometry/protocol checks pass, but it has not been
+installed or exercised in the game. It is not a true-triple renderer yet: the
+feature-gated preview draws only the center physical viewport into a combined
+wide output and leaves side projections unimplemented. See
+[research](docs/research.md), [architecture](docs/architecture.md), and the
+[next attended experiment](docs/experiments/002-center-panel-projection-preview.md).
 
 ## Getting Started
 
@@ -37,15 +41,17 @@ Build with a different game location:
 dotnet build Dbce.TripleScreen.sln -c Release -p:GameDir='E:\SteamLibrary\steamapps\common\artofrally'
 ```
 
-The probe is deliberately not auto-installed. Follow the experiment checklist
-only when the game is closed, and keep the generated UMM log as evidence.
+The build is deliberately not auto-installed. Follow the attended experiment
+checklist only when the game is closed, and preserve logs and screenshots as
+evidence.
 
 ## Project Structure
 
 - `src/Dbce.TripleScreen.Core/` — reusable physical layout and projection math.
-- `src/ArtOfRally.TripleScreen.Mod/` — observation-only UMM runtime probe.
+- `src/Dbce.TripleScreen.Protocol/` — strict layout/status protocol types.
+- `src/ArtOfRally.TripleScreen.Mod/` — feature-gated UMM runtime adapter.
 - `tests/` — dependency-free executable geometry regression tests.
-- `contracts/` — optimizer/mod interchange schema.
+- `contracts/` — pinned canonical optimizer/mod interchange schemas.
 - `examples/` — illustrative layouts; not recommendations.
 - `docs/` — evidence, architecture, risks, and experiments.
 
@@ -57,9 +63,17 @@ game can render at the combined width. This is not angle-correct: it remains one
 perspective frustum and stretches the side views. True triples need three
 per-panel projections and about three times the scene rendering work.
 
-## Safety and Scope
+## Runtime Contract and Safety
 
-The checked-in probe only logs state. It does not call `Display.Activate`,
-`Screen.SetResolution`, set `Camera.projectionMatrix`, clone a camera, patch a
-game method, or write game configuration. Do not report a feature as working
-until it has passed the attended experiments in `docs/experiments/`.
+The optimizer writes
+`%LOCALAPPDATA%\DBCE\TripleScreen\games\art-of-rally\desired-layout.json`; the
+adapter reads it without modifying it and atomically publishes `status.json`
+beside it. The preview defaults off and refuses separate displays, output-size
+mismatches, and TAA. When enabled on the verified gameplay camera shape, it
+sets `Camera.rect` and `Camera.projectionMatrix` immediately before rendering;
+disable/unload restores the original viewport and Unity projection.
+
+This milestone does not call `Display.Activate` or `Screen.SetResolution`,
+patch game methods, create cameras or render textures, manipulate windows, or
+write game configuration. Do not report runtime support as working until the
+attended experiment passes.

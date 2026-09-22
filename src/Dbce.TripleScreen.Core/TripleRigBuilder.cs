@@ -17,16 +17,17 @@ public static class TripleRigBuilder
         var centerRight = new Vector3d(1d, 0d, 0d);
         var center = CreateSurface("center", new Vector3d(0d, centerY, centerZ), centerRight, up, width, height);
 
-        var radians = definition.SideAngleDegrees * Math.PI / 180d;
-        var cosine = Math.Cos(radians);
-        var sine = Math.Sin(radians);
+        var leftRadians = definition.LeftAngleDegrees * Math.PI / 180d;
+        var leftCosine = Math.Cos(leftRadians);
+        var leftSine = Math.Sin(leftRadians);
 
-        var leftRight = new Vector3d(cosine, 0d, -sine);
+        var leftRight = new Vector3d(leftCosine, 0d, -leftSine);
         var leftHinge = new Vector3d(-width / 2d, centerY, centerZ);
         var leftCenter = leftHinge - (leftRight * (width / 2d));
         var left = CreateSurface("left", leftCenter, leftRight, up, width, height);
 
-        var rightRight = new Vector3d(cosine, 0d, sine);
+        var rightRadians = definition.RightAngleDegrees * Math.PI / 180d;
+        var rightRight = new Vector3d(Math.Cos(rightRadians), 0d, Math.Sin(rightRadians));
         var rightHinge = new Vector3d(width / 2d, centerY, centerZ);
         var rightCenter = rightHinge + (rightRight * (width / 2d));
         var right = CreateSurface("right", rightCenter, rightRight, up, width, height);

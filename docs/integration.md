@@ -1,9 +1,9 @@
 # Integration with triple-screen-optimizer
 
 The optimizer should own hardware discovery and user-facing measurement. This
-repo should own Art of Rally adaptation. Their stable seam is
-`contracts/triple-screen-layout.schema.json` plus the projection semantics in
-`Dbce.TripleScreen.Core`.
+repo should own Art of Rally adaptation. Their stable seam is the three pinned
+schemas in `contracts/`, the file protocol below, and the projection semantics
+in `Dbce.TripleScreen.Core`.
 
 Minimum optimizer inputs:
 
@@ -22,7 +22,18 @@ Recommendation logic should prefer:
    single-window output is required; and
 3. separate Unity displays only while explicitly marked experimental.
 
-The optimizer may write this mod's own profile file after validating against the
-schema. It should back up an existing profile and perform an atomic replace. It
-should not edit Art of Rally PlayerPrefs or enable/disable NVIDIA Surround in
-the first implementation.
+The canonical file protocol is:
+
+- desired state: `%LOCALAPPDATA%\DBCE\TripleScreen\games\art-of-rally\desired-layout.json`;
+- observed state: `%LOCALAPPDATA%\DBCE\TripleScreen\games\art-of-rally\status.json`.
+
+The optimizer writes desired state atomically after schema validation. The mod
+never edits that file; it validates it strictly, applies only supported gated
+behavior, and atomically publishes observed status. Consumers must require an
+`active` state, matching layout SHA-256, and the expected active capabilities
+before presenting a green result. A matching hash alone is not proof that the
+rendering path is active.
+
+The first implementation does not edit Art of Rally PlayerPrefs or toggle
+NVIDIA Surround. It advertises only `nvidia-surround` and `borderless-span`,
+not separate displays.

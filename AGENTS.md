@@ -9,6 +9,7 @@ game hooks isolated in the UMM adapter.
 ## Repository Structure
 
 - `src/Dbce.TripleScreen.Core/`: dependency-free physical geometry/projection.
+- `src/Dbce.TripleScreen.Protocol/`: strict canonical contract reader/writer.
 - `src/ArtOfRally.TripleScreen.Mod/`: Unity 2019.4 / UMM adapter and probes.
 - `tests/`: executable offline regression checks.
 - `contracts/`: versioned JSON interchange contracts.
@@ -19,6 +20,8 @@ game hooks isolated in the UMM adapter.
 - Treat installed game assemblies as read-only, copyrighted inputs. Never commit
   game, Unity, Unity Mod Manager, or decompiler output.
 - The core must not reference Unity, UMM, Windows APIs, or the optimizer UI.
+- Treat `contracts/` as a pinned copy of `triple-screen-optimizer/contracts`;
+  update it from upstream rather than evolving a game-specific dialect.
 - Measurements use millimetres and degrees at API/contract boundaries. Core
   vectors are eye-relative, right-handed: +X right, +Y up, -Z forward.
 - A display's corners are lower-left, lower-right, upper-left as seen by the

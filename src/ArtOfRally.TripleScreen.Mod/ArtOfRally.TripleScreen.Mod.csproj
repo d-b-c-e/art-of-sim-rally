@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dbce.TripleScreen.Core\Dbce.TripleScreen.Core.csproj" />
+    <ProjectReference Include="..\Dbce.TripleScreen.Protocol\Dbce.TripleScreen.Protocol.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +23,10 @@
       <HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(ManagedDir)\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="UnityEngine.UIModule">
       <HintPath>$(ManagedDir)\UnityEngine.UIModule.dll</HintPath>
       <Private>false</Private>
@@ -30,9 +35,22 @@
       <HintPath>$(UmmDir)\UnityModManager.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(ManagedDir)\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.Postprocessing.Runtime">
+      <HintPath>$(ManagedDir)\Unity.Postprocessing.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(ManagedDir)\Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Info.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\adapter-manifest.json" Link="manifest.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

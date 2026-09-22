@@ -2,12 +2,14 @@
 
 ## Boundary
 
-Keep two layers:
+Keep three layers:
 
 1. `Dbce.TripleScreen.Core` owns measurements, display planes, camera bases,
    asymmetric frusta, and projection matrices. It has no Unity, game, Windows,
    or UI dependency.
-2. `ArtOfRally.TripleScreen.Mod` owns discovery of the game's authoritative
+2. `Dbce.TripleScreen.Protocol` strictly reads the optimizer's canonical JSON
+   and serializes canonical runtime status without depending on Unity or UMM.
+3. `ArtOfRally.TripleScreen.Mod` owns discovery of the game's authoritative
    camera, lifecycle, Unity matrix conversion, render targets, compositor,
    UI routing, and UMM settings.
 
@@ -87,8 +89,9 @@ DPI, refresh rate, focus/input, pause, and teardown have passed.
 
 1. **Inventory:** capture cameras, canvases, effects, projections, displays in
    menu, stage, pause, replay, and photo mode.
-2. **Single-camera override:** apply the center physical FOV/off-axis matrix and
-   prove handoff/restoration across all camera states.
+2. **Single-camera override (implemented, not runtime-verified):** apply the
+   center physical FOV/off-axis matrix and prove handoff/restoration across all
+   camera states. It is default-off and reports only after a rendered frame.
 3. **Three unprocessed views:** render three RTs without post effects; validate
    seams with a grid overlay and representative stages.
 4. **Effects and UI:** clone/route only the components proven safe; test every
