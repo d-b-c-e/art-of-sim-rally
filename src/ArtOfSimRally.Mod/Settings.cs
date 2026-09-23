@@ -23,7 +23,7 @@ namespace ArtOfSimRally.Mod
         // Presentation only. Unknown/missing view values display Simple.
         public string SettingsView = "Simple";
         public int SettingsPage = 0;
-        public bool SettingsFollowHostScale = false;
+        public bool SettingsFollowHostScale = true;
         public KeyCode SettingsKey = KeyCode.F6;
         public string SettingsButtonBinding = "";
         public string StopFfbButtonBinding = "";

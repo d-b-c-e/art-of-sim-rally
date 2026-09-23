@@ -83,6 +83,7 @@ namespace ArtOfSimRally.Mod
             if (!SettingsVisible && _settingsWereVisible)
             { SettingsPanel.CancelPendingEdit(); CameraTuner.SuppressUntilRelease(); FlushUiSettings(true); }
             _settingsWereVisible = SettingsVisible;
+            GameBindings.Tick();
             CameraKeys.Tick();
             CameraTuner.ReadResetButton();
             FlushUiSettings();

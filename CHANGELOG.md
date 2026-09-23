@@ -17,8 +17,17 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   page choices retain their meaning. Owner tuning and runtime behavior are
   preserved; rendered acceptance of this layout remains pending.
 
-- Candidate settings text scales automatically for high-resolution displays,
-  with an option to follow UMM's scale and preservation of its host preferences.
+- Compact right-aligned commands replace remaining full-width action bars;
+  setting choices stay compact segmented controls and Advanced/Show navigation
+  uses flat links. New settings follow UMM's scale by default; Auto remains an
+  explicit per-mod alternative.
+- Opening the game's bindings screen now waits for the initiating UMM click/key
+  to release, then explicitly returns native-menu ownership after two neutral
+  frames. Persistent wheel/pedal UI axes can no longer leave that screen animated
+  but unable to accept input.
+
+- Candidate settings text follows UMM's scale by default, with an Auto option
+  for high-resolution enlargement and preservation of host preferences.
   Content fits the actual host viewport and page buttons wrap on narrower windows.
 
 - Simple/Advanced settings with Controls, FFB, Cameras, Telemetry and Help;

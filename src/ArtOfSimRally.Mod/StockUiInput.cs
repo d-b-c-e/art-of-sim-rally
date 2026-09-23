@@ -64,9 +64,7 @@ namespace ArtOfSimRally.Mod
         {
             // Exclude joystick buttons here: a parked H-pattern gear must not
             // lock the menu. Only mapped UI actions and our Settings button matter.
-            foreach (var key in Keys)
-                if (key > KeyCode.None && key < KeyCode.JoystickButton0 && Input.GetKey(key)) return true;
-            if (WheelInput.Value(WheelInput.Channel.SettingsButton) > .5f) return true;
+            if (HandoffHeld()) return true;
             try
             {
                 if (!ReInput.isReady) return true;
@@ -88,6 +86,15 @@ namespace ArtOfSimRally.Mod
             }
             catch { return true; } // Teardown is not evidence of control release.
             return false;
+        }
+        // A programmatic UMM -> game-panel handoff waits only on controls that
+        // can actually activate UMM. Unity joystick buttons and Rewired axes may
+        // be parked/offset continuously and must not trap the native screen.
+        internal static bool HandoffHeld()
+        {
+            foreach (var key in Keys)
+                if (key > KeyCode.None && key < KeyCode.JoystickButton0 && Input.GetKey(key)) return true;
+            return WheelInput.Value(WheelInput.Channel.SettingsButton) > .5f;
         }
         private static bool AxisHeld(Player player, int action) => action >= 0 &&
             (player.GetButton(action) || player.GetNegativeButton(action) || Math.Abs(player.GetAxis(action)) > .1f);

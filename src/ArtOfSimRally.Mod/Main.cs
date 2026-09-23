@@ -128,6 +128,7 @@ namespace ArtOfSimRally.Mod
             if (!value)
             {
                 CameraKeys.Cancel();
+                GameBindings.CancelPending();
                 // Let go of the wheel and park consumers the moment the player
                 // disables the mod, rather than leaving a force applied and a
                 // dashboard frozen.
@@ -156,6 +157,7 @@ namespace ArtOfSimRally.Mod
         {
             Enabled = false;
             CameraKeys.Cancel();
+            GameBindings.CancelPending();
             ModWatchdog.Shutdown(unloading: true);
             WheelInput.Close();
             _harmony?.UnpatchAll(modEntry.Info.Id);

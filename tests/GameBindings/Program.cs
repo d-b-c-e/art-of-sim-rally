@@ -22,8 +22,25 @@ static class Program
                 GameBindings.Open();Check(manager.Adds==0&&Host.SettingsVisible,"route changed host under guard: "+guard);
                 if(guard=="ambiguous")UnityEngine.Object.All.RemoveAt(UnityEngine.Object.All.Count-1);
             }
-            GameBindings.Open();Check(manager.Adds==1&&!Host.SettingsVisible&&manager.Last==panel,"route failed to close UMM before using game stack");
+            UnityEngine.Time.frameCount=100;
+            StockUiInput.HandoffIsHeld=true;
+            GameBindings.Open();
+            Check(manager.Adds==0&&!Host.SettingsVisible,"route opened native panel in the UMM click frame");
+            for(int i=0;i<4;i++){UnityEngine.Time.frameCount++;GameBindings.Tick();}
+            Check(manager.Adds==0,"held initiating input reached native panel");
+            StockUiInput.HandoffIsHeld=false;UnityEngine.Application.isFocused=false;
+            UnityEngine.Time.frameCount++;GameBindings.Tick();
+            Check(manager.Adds==0,"unfocused handoff opened native panel");
+            UnityEngine.Application.isFocused=true;
+            for(int i=0;i<2;i++){UnityEngine.Time.frameCount++;GameBindings.Tick();Check(manager.Adds==0,"handoff skipped neutral release frames");}
+            UnityEngine.Time.frameCount++;GameBindings.Tick();
+            Check(manager.Adds==1&&manager.Last==panel,"route failed to hand native input back after release");
+            Check(StockUiInput.Resets==1,"persistent stock input barrier was not released at explicit handoff");
             Check(GameBindings.Status.Contains("opened"),"success status missing");
+            Host.SettingsVisible=true;GameBindings.Open();Check(manager.Adds==1,"second route opened before release");
+            Host.SettingsVisible=true;GameBindings.Tick();Host.SettingsVisible=false;
+            UnityEngine.Time.frameCount+=3;GameBindings.Tick();
+            Check(manager.Adds==1&&GameBindings.Status.Contains("cancelled"),"reopened UMM did not cancel pending route");
             Console.WriteLine(JsonSerializer.Serialize(new{status="passed",assertions,liveUi=false}));return 0;
         }
         catch(Exception ex){Console.Error.WriteLine(ex);return 1;}
@@ -37,6 +54,8 @@ namespace UnityEngine
         public static T FindObjectOfType<T>() where T:Object=>All.OfType<T>().FirstOrDefault();
         public static T[] FindObjectsOfType<T>() where T:Object=>All.OfType<T>().ToArray();
     }
+    public static class Application { public static bool isFocused=true; }
+    public static class Time { public static int frameCount; }
 }
 public class GameObject { public bool activeInHierarchy=true; }
 public class Panel:UnityEngine.Object { public string name="ControlsSettings";public GameObject gameObject=new(); }
@@ -57,5 +76,16 @@ namespace ArtOfSimRally.Mod
     public static class Main { public static bool SettingsVisible=true;public static void CloseSettings()=>SettingsVisible=false; }
     public static class GameState { public static bool IsDriving; }
     public static class SettingsPanel { public static bool Editing; }
+    public static class WheelInput
+    {
+        public enum Channel { SettingsButton }
+        public static float Value(Channel channel)=>0;
+    }
+    public static class StockUiInput
+    {
+        public static int Resets;public static bool HandoffIsHeld;
+        public static bool HandoffHeld()=>HandoffIsHeld;
+        public static void Reset()=>Resets++;
+    }
     public static class ModLog { public static void Warning(string value){} }
 }

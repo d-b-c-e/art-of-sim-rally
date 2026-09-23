@@ -60,9 +60,10 @@ Simple is the first view; Advanced adds tuning to the same saved values.
   Settings and Stop FFB buttons; these work with assigned driving controls Off.
 
 * Driving/menu buttons: Open game bindings uses the game's existing controls
-  screen and action maps. If unavailable in this scene, use Options > Controls
-  from the main menu. A device unreadable by the game's Raw Input route still
-  needs keyboard/pad for those actions; direct axes/mod buttons remain available.
+  screen and action maps. Release the click/key used to open it before navigating.
+  If unavailable in this scene, use Options > Controls from the main menu. A
+  device unreadable by the game's Raw Input route still needs keyboard/pad for
+  those actions; direct axes/mod buttons remain available.
   Shifter is an expandable Controls group: select the device and sequential or
   H-pattern mode, then Bind its buttons. Clear unwanted duplicate game bindings.
 
@@ -99,10 +100,10 @@ The development recorder remains separate and is not included in this ZIP.
 
 HELP
 ----
-Settings text size defaults to Auto: at UMM's default scale it grows with the
-screen resolution. A custom UMM scale takes priority. Choose Use UMM scale to
-follow the host exactly, including 1x. UMM's own window size/chrome preferences
-are unchanged; resize its window in UMM Settings if needed.
+Settings text size follows UMM's scale by default, including 1x. Choose Auto to
+let only this mod grow with screen resolution when UMM remains at 1x; a custom
+UMM scale still takes priority. UMM's own window size/chrome preferences are
+unchanged; resize its window in UMM Settings if needed.
 Help > Create support file on Desktop collects settings, device identifiers,
 paths and logs locally; nothing is uploaded. For a recurring problem, enable
 Advanced > Help > Log detail for support, reproduce briefly, pause, export, and

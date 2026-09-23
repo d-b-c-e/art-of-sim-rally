@@ -21,15 +21,28 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-42 — Open game bindings can leave the native screen without input
+
+**Owner-confirmed on installed RC14, 2026-09-22.** **Open game bindings** closed
+UMM and displayed the game's Controls screen, but its selection only pulsed and
+mouse/keyboard navigation never returned; Alt+F4 and relaunch were required. The
+general close barrier waited on Rewired UI axes, which can rest non-zero on a
+wheel/pedal map forever. The successor defers opening until the initiating UMM
+mouse/key input has been released for two frames, ignores parked joystick/axis
+state for this explicit route, clears the old barrier and only then pushes the
+native panel. Focus, held initiating input, cancellation and delayed handoff have
+offline coverage. Actual in-game navigation/back behavior remains pending.
+
 ### KI-41 — Simple binding layout lacks clear visual ownership
 
-**Owner-reported, 2026-09-21; RC13 review extended 2026-09-22.** RC12's axis
+**Owner-reported, 2026-09-21; RC13/RC14 review extended 2026-09-22.** RC12's axis
 labels and generic action rows had little visual separation. RC13 added local
 groups, but the owner found the rendered panel still cluttered: its cards lacked
 enough contrast, navigation looked like another bank of command buttons, the
 Setup page repeated Controls/FFB content and row actions remained oversized.
-The successor adds bordered higher-contrast cards, flat selected tabs, compact
-right-aligned actions and removes Setup while preserving old saved page meaning.
+RC14 added bordered higher-contrast cards, flat selected tabs and removed Setup,
+but its remaining full-width Help/actions still read as section delimiters. The
+successor uses compact right-aligned commands, segmented choices and flat links.
 Actual rendered acceptance is pending. See
 [changes and exact checks](reviews/2026-09-21-visual-grouping.md). Do not close
 this issue based solely on a build or policy-height assertion.

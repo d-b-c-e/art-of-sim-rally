@@ -5,7 +5,7 @@ namespace ArtOfSimRally.Mod
 {
     internal static class SettingsPanel
     {
-        private static GUIStyle _wrap, _help, _heading, _cardHeading, _card, _topButton, _tab;
+        private static GUIStyle _wrap, _help, _heading, _cardHeading, _card, _topButton, _tab, _link, _disclosure;
         private static Texture2D _cardBackground, _tabNormal, _tabHover, _tabSelected;
         private static int _cardDepth;
         private static Vector2 _scroll;
@@ -60,6 +60,16 @@ namespace ArtOfSimRally.Mod
                     (int)(3 * SettingsPresentation.Scale), (int)(3 * SettingsPresentation.Scale))
             };
             ConfigureTabStyle(_tab);
+            _link = new GUIStyle(_wrap) {
+                alignment = TextAnchor.MiddleRight,
+                fontStyle = FontStyle.Bold,
+                padding = new RectOffset((int)(5 * SettingsPresentation.Scale), (int)(5 * SettingsPresentation.Scale),
+                    (int)(3 * SettingsPresentation.Scale), (int)(3 * SettingsPresentation.Scale))
+            };
+            _link.normal.textColor = new Color(.32f, .78f, .86f, 1);
+            _link.hover.textColor = Color.white;
+            _link.active.textColor = Color.white;
+            _disclosure = new GUIStyle(_link) { alignment = TextAnchor.MiddleLeft };
             _cardDepth = 0;
             HandleKey(c);
             GUILayout.BeginHorizontal();
@@ -157,15 +167,19 @@ namespace ArtOfSimRally.Mod
             }
             BeginCard("Driving and menu buttons");
             Help("The game's binding screen owns Shift up/down, Change camera, held Look behind, Reset car, Pause and menu controls. It preserves keyboard/pad action maps. Settings/Stop FFB buttons below read USB devices directly.");
-            if (GUILayout.Button("Open game bindings")) GameBindings.Open();
+            if (RightButton("Open game bindings", 180)) GameBindings.Open();
             Help(GameBindings.Status);
             EndCard();
             _modButtons = Disclosure(_modButtons, "mod buttons and Settings key");
             if (_modButtons)
             {
                 BeginCard("Settings key");
-                if (GUILayout.Button(_settingsKey ? "Press a Settings key (Esc cancels)" : "Settings: " + CameraKeys.Name(c.SettingsKey) + " — Bind"))
-                { if (!Editing) { _settingsKey = true; _keyStatus = "Press a key within 10 seconds. Escape cancels."; _keyDeadline = Time.unscaledTime + 10; } }
+                string keyText = _settingsKey ? "Press a key; Escape cancels." : "Current key: " + CameraKeys.Name(c.SettingsKey);
+                if (CommandRow(keyText, _settingsKey ? "Cancel capture" : "Bind", 110))
+                {
+                    if (_settingsKey) { _settingsKey = false; _keyStatus = "Settings key capture cancelled."; }
+                    else if (!Editing) { _settingsKey = true; _keyStatus = "Press a key within 10 seconds. Escape cancels."; _keyDeadline = Time.unscaledTime + 10; }
+                }
                 Help(_keyStatus);
                 EndCard();
                 Axis(c, WheelInput.Channel.SettingsButton, "Settings (button)");
@@ -173,7 +187,7 @@ namespace ArtOfSimRally.Mod
                 Help("F8 always stops FFB. These optional device buttons work even with assigned driving controls Off. Release held buttons after reconnecting.");
             }
             if (!SettingsViewPolicy.Advanced(c) && SettingsViewPolicy.CustomControls(c) &&
-                GUILayout.Button("Custom control tuning active — Review in Advanced")) Select(c, true, 0);
+                LinkButton("Review custom controls in Advanced >", 245)) Select(c, true, 0);
             if (SettingsViewPolicy.Advanced(c))
             {
                 GUILayout.Label("Steering compatibility", _wrap);
@@ -236,15 +250,16 @@ namespace ArtOfSimRally.Mod
                 }
                 Help("Escape cancels and keeps the previous binding.");
                 bool stack = StackRows;
-                if (!stack) GUILayout.BeginHorizontal(); bool enabled = GUI.enabled;
+                if (!stack) { GUILayout.BeginHorizontal(); GUILayout.FlexibleSpace(); } bool enabled = GUI.enabled;
                 GUI.enabled = enabled && WheelInput.CanSaveCalibration;
-                if (GUILayout.Button(pending != null && pending.IsButton ? "Save binding" : "Save calibration"))
+                if (GUILayout.Button(pending != null && pending.IsButton ? "Save binding" : "Save calibration",
+                    stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(125)))
                 {
                     string previous = c.SteerBinding;
                     if (WheelInput.SaveCalibration() && previous != c.SteerBinding && FfbSelection.FollowsSteering(c)) Main.SelectForceDevice();
                 }
                 GUI.enabled = enabled;
-                if (GUILayout.Button("Cancel")) WheelInput.CancelAssign();
+                if (GUILayout.Button("Cancel", stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(75))) WheelInput.CancelAssign();
                 if (!stack) GUILayout.EndHorizontal();
 
         }
@@ -286,22 +301,22 @@ namespace ArtOfSimRally.Mod
                 "Inactive while settings are open. Feedback resumes through normal driving gates.");
             if (!SettingsViewPolicy.Advanced(c))
             {
-                if (SettingsViewPolicy.CustomFfb(c) && GUILayout.Button("Custom FFB tuning active — Review in Advanced")) Select(c, true, 1);
+                if (SettingsViewPolicy.CustomFfb(c) && LinkButton("Review custom FFB tuning in Advanced >", 260)) Select(c, true, 1);
                 return;
             }
             c.Smoothing = Slider(c.Smoothing, 0, .95f, .2f, "Smoothing", 100, "%");
             Help("Higher smoothing softens rapid force changes and delays their response.");
             c.Invert = Toggle(c.Invert, "Invert force direction");
             Help("Force reference: " + c.FyReference.ToString("0.##") + " N (legacy tuning; default 11500 N).");
-            if (c.FyReference != 11500f && GUILayout.Button("Restore default force reference")) { c.FyReference = 11500f; Main.MarkSettingsDirty(); }
+            if (c.FyReference != 11500f && RightButton("Restore force reference", 180)) { c.FyReference = 11500f; Main.MarkSettingsDirty(); }
             c.LandingEffectsEnabled = Toggle(c.LandingEffectsEnabled, "Landing vibration");
             c.LandingStrength = Slider(c.LandingStrength, 0, 40, 5, "Landing strength", 1, "%");
             Help(LandingController.Status);
             c.CrashEffectsEnabled = Toggle(c.CrashEffectsEnabled, "Crash kick (experimental)");
             c.CrashStrength = Slider(c.CrashStrength, 0, 100, 50, "Crash strength", 1, "%");
             Help("Short constant push/release, separate from steering and telemetry. Full nominal force can saturate alongside steering. " + CrashController.Status);
-            if (GUILayout.Button("Reset FFB tuning")) { c.ResetFfbTuning(); Main.MarkSettingsDirty(); }
-            Help("Restores the displayed force tuning. Keeps FFB Off/On, the device and all other settings.");
+            if (CommandRow("Keeps FFB Off/On, the device and all other settings.", "Reset FFB tuning", 150))
+            { c.ResetFfbTuning(); Main.MarkSettingsDirty(); }
         }
         private static void Cameras(Settings c)
         {
@@ -309,7 +324,7 @@ namespace ArtOfSimRally.Mod
             c.BonnetCameraEnabled = Toggle(c.BonnetCameraEnabled, "Bonnet");
             c.BumperCameraEnabled = Toggle(c.BumperCameraEnabled, "Bumper");
             Help("Included in the game's Change camera cycle. Change camera and held Look behind use the game's bindings. Close settings to adjust the active mount.");
-            if (GUILayout.Button("Bind Change camera / Look behind")) GameBindings.Open();
+            if (RightButton("Open game bindings", 180)) GameBindings.Open();
             Help(GameBindings.Status);
             _cameraKeys = Disclosure(_cameraKeys, "adjustment bindings");
             if (_cameraKeys)
@@ -334,13 +349,13 @@ namespace ArtOfSimRally.Mod
                     EndCard();
                 }
                 bool enabled = GUI.enabled; GUI.enabled = enabled && !Editing;
-                if (GUILayout.Button("Restore numpad defaults")) CameraKeys.Reset(c);
+                if (RightButton("Restore numpad defaults", 180)) CameraKeys.Reset(c);
                 GUI.enabled = enabled; Help(CameraKeys.Status);
             }
             if (!SettingsViewPolicy.Advanced(c))
-            { if (SettingsViewPolicy.CustomCamera(c) && GUILayout.Button("Custom camera tuning active — Review in Advanced")) Select(c, true, 2); return; }
-            _mount = GUILayout.Toolbar(_mount, new[] { "Bonnet pose", "Bumper pose" });
-            if (GUILayout.Button("Reset this view (" + (_mount == 0 ? "Bonnet" : "Bumper") + ")")) { c.ResetCameraMount(_mount != 0); Main.MarkSettingsDirty(); }
+            { if (SettingsViewPolicy.CustomCamera(c) && LinkButton("Review custom camera tuning in Advanced >", 275)) Select(c, true, 2); return; }
+            _mount = Segmented(_mount, new[] { "Bonnet pose", "Bumper pose" }, "Camera pose", 230);
+            if (RightButton("Reset " + (_mount == 0 ? "bonnet" : "bumper") + " view", 150)) { c.ResetCameraMount(_mount != 0); Main.MarkSettingsDirty(); }
             if (_mount == 0)
             {
                 c.BonnetHeight = Slider(c.BonnetHeight, -.5f, 3, .95f, "Height", 1, " m");
@@ -370,19 +385,20 @@ namespace ArtOfSimRally.Mod
                 "Sending to " + TelemetryPump.ActiveEndpoint + ". UDP does not confirm receiver delivery.");
             if (!SettingsViewPolicy.Advanced(c))
             {
-                if (GUILayout.Button("Use local SimHub preset (127.0.0.1:8000)")) { c.TelemetryHost = "127.0.0.1"; c.TelemetryPort = 8000; Main.MarkSettingsDirty(); }
-                if (GUILayout.Button("Connection settings (Advanced)")) Select(c, true, 3);
+                if (CommandRow("Standard local SimHub receiver: 127.0.0.1:8000", "Use local preset", 140)) { c.TelemetryHost = "127.0.0.1"; c.TelemetryPort = 8000; Main.MarkSettingsDirty(); }
+                if (LinkButton("Connection settings in Advanced >", 225)) Select(c, true, 3);
                 return;
             }
-            if (!Connection.Editing && GUILayout.Button("Edit connection")) Connection.Begin(c);
+            if (!Connection.Editing && RightButton("Edit connection", 130)) Connection.Begin(c);
             if (Connection.Editing)
             {
                 GUILayout.Label("Host"); Connection.Host = GUILayout.TextField(Connection.Host ?? "");
                 GUILayout.Label("Port"); Connection.Port = GUILayout.TextField(Connection.Port ?? "");
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Apply connection") && Connection.Apply(c)) Main.MarkSettingsDirty();
-                if (GUILayout.Button("Cancel")) Connection.Cancel();
-                GUILayout.EndHorizontal(); Help(Connection.Error);
+                bool stack = StackRows;
+                if (!stack) { GUILayout.BeginHorizontal(); GUILayout.FlexibleSpace(); }
+                if (GUILayout.Button("Apply connection", stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(130)) && Connection.Apply(c)) Main.MarkSettingsDirty();
+                if (GUILayout.Button("Cancel", stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(75))) Connection.Cancel();
+                if (!stack) GUILayout.EndHorizontal(); Help(Connection.Error);
             }
             Help("Connection applies atomically while paused. Recording remains a separate development probe and is not shipped in this panel.");
         }
@@ -390,17 +406,49 @@ namespace ArtOfSimRally.Mod
         {
             GUILayout.Label("Art of Sim Rally " + Main.ModVersion, _wrap);
             Help("No FFB: pause, open FFB, check On and the selected wheel, then Refresh. Missing controls: bind them in Controls.");
-            GUILayout.Label("Settings text size", _wrap);
-            int textMode = GUILayout.Toolbar(c.SettingsFollowHostScale ? 1 : 0, new[] { "Auto (screen size)", "Use UMM scale" });
+            int textMode = Segmented(c.SettingsFollowHostScale ? 1 : 0,
+                new[] { "Auto", "Use UMM scale" }, "Settings text size", 240);
             c.SettingsFollowHostScale = textMode == 1;
-            Help("Auto enlarges this mod's content on high-resolution screens at UMM's default scale. A custom UMM scale takes priority. The surrounding UMM window keeps its own preferences; use UMM Settings to resize it.");
-            if (GUILayout.Button("Create support file on Desktop")) SupportBundle.Create();
-            Help(string.IsNullOrEmpty(SupportBundle.LastResult) ? "Creates a local file with settings, device identifiers, paths and logs; nothing is uploaded." : SupportBundle.LastResult);
+            Help("Uses UMM's scale by default. Auto can enlarge only this mod at high screen resolutions. The surrounding window keeps UMM's own size preference.");
+            string support = string.IsNullOrEmpty(SupportBundle.LastResult)
+                ? "Includes settings, device identifiers, paths and logs; nothing is uploaded." : SupportBundle.LastResult;
+            if (CommandRow(support, "Create support file", 160)) SupportBundle.Create();
             if (!SettingsViewPolicy.Advanced(c))
-            { if (GUILayout.Button("Details (Advanced)")) Select(c, true, 4); return; }
+            { if (LinkButton("Diagnostic details in Advanced >", 220)) Select(c, true, 4); return; }
             c.DiagnosticLogging = Toggle(c.DiagnosticLogging, "Log detail for support");
             Help("Enable, reproduce briefly, pause, create the support file, then turn detail logging off.");
             Panel.DrawInputStatus();
+        }
+        private static bool CommandRow(string guidance, string label, float width)
+        {
+            bool stack = StackRows;
+            if (!stack) GUILayout.BeginHorizontal();
+            if (!string.IsNullOrEmpty(guidance)) GUILayout.Label(guidance, _help, GUILayout.ExpandWidth(true));
+            else if (!stack) GUILayout.FlexibleSpace();
+            bool clicked = GUILayout.Button(label,
+                stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(width));
+            if (!stack) GUILayout.EndHorizontal();
+            return clicked;
+        }
+        private static bool RightButton(string label, float width) => CommandRow(null, label, width);
+        private static bool LinkButton(string label, float width)
+        {
+            bool stack = StackRows;
+            if (!stack) { GUILayout.BeginHorizontal(); GUILayout.FlexibleSpace(); }
+            bool clicked = GUILayout.Button(label, _link,
+                stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(width));
+            if (!stack) GUILayout.EndHorizontal();
+            return clicked;
+        }
+        private static int Segmented(int value, string[] labels, string caption, float width)
+        {
+            bool stack = StackRows;
+            if (!stack) GUILayout.BeginHorizontal();
+            if (!string.IsNullOrEmpty(caption)) GUILayout.Label(caption, _wrap, GUILayout.ExpandWidth(true));
+            int result = GUILayout.Toolbar(value, labels, _tab,
+                stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(width));
+            if (!stack) GUILayout.EndHorizontal();
+            return result;
         }
         private static bool Toggle(bool value, string label)
         {
@@ -441,7 +489,11 @@ namespace ArtOfSimRally.Mod
         {
             bool enabled = GUI.enabled;
             GUI.enabled = enabled && !Editing;
-            if (GUILayout.Button((open ? "Hide " : "Show ") + label)) open = !open;
+            bool stack = StackRows;
+            if (!stack) GUILayout.BeginHorizontal();
+            if (GUILayout.Button((open ? "Hide " : "Show ") + label, _disclosure,
+                stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(210))) open = !open;
+            if (!stack) { GUILayout.FlexibleSpace(); GUILayout.EndHorizontal(); }
             GUI.enabled = enabled;
             return open;
         }

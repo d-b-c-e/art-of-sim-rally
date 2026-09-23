@@ -82,6 +82,8 @@ Pause. If unavailable in the current scene, use **Options → Controls** from th
 main menu. The mod does not duplicate that binder's maps. Devices the game's
 Raw Input cannot read still need keyboard/pad for game button actions; direct
 USB axes, shifter and mod/camera buttons use the mod's reader independently.
+The successor waits for the UMM click/key to release before opening the native
+panel; parked wheel/pedal UI axes do not keep that handoff blocked indefinitely.
 
 ## FFB
 
@@ -129,10 +131,11 @@ problem, use **Advanced → Help → Log detail for support**, reproduce briefly
 pause, create the support file, then turn detail off. No file is uploaded.
 The recorder remains a separate development probe and is not in the release.
 
-**Settings text size:** Auto enlarges this mod's content with screen resolution
-when UMM uses its default1x scale. A custom UMM scale takes priority. Choose
-**Use UMM scale** to follow the host exactly, including1x. The surrounding UMM
-window retains its saved dimensions and own text; resize it in UMM Settings.
+**Settings text size:** new settings use **UMM scale** by default, following the
+host exactly, including1x. **Auto** can enlarge this mod's content with screen
+resolution when UMM remains at1x; a custom UMM scale still takes priority. The
+surrounding UMM window retains its saved dimensions and own text; resize it in
+UMM Settings. Saved choices remain explicit and are not silently migrated.
 
 ## Attended acceptance still required
 

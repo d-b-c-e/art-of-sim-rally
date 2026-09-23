@@ -136,6 +136,9 @@ static class Program
         Check(StockUiInput.Blocked,"negative controller navigation bypassed barrier");player.Negative.Clear();
         Ui.Instance.Opened=true;Time.frameCount++;Check(StockUiInput.Blocked,"reopening lost ownership");
         Ui.Instance.Opened=false;StockUiInput.Reset();
+        Input.Held.Add(KeyCode.Mouse0);Check(StockUiInput.HandoffHeld(),"mouse press did not hold programmatic handoff");Input.Held.Clear();
+        WheelInput.SettingsHeld=1;Check(StockUiInput.HandoffHeld(),"USB Settings press did not hold programmatic handoff");WheelInput.SettingsHeld=0;
+        Input.Held.Add(KeyCode.JoystickButton0);Check(!StockUiInput.HandoffHeld(),"parked joystick button trapped programmatic handoff");Input.Held.Clear();
         // Build17584229 ReplayManager.Update polls24/25 only inside active
         // playback. Hold each through close; native Axis must remain zero.
         foreach(int action in new[]{24,25})
@@ -183,6 +186,7 @@ static class Program
         Check(SettingsDisplayPolicy.StackRows(770,4),"960px/4x bound sequential row not stacked");
         Check(SettingsDisplayPolicy.StackRows(740,5),"960px/5x camera/dropdown row not stacked");
         Check(!SettingsDisplayPolicy.StackRows(830,2),"default4K binding rows unnecessarily stacked");
+        Check(new Settings().SettingsFollowHostScale,"new settings did not follow UMM scale by default");
         var c=new Settings{SettingsFollowHostScale=true};Check(Read(Xml(c)).SettingsFollowHostScale,"display preference not persisted");
     }
 }

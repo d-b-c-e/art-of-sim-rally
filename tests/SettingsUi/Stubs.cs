@@ -42,6 +42,7 @@ namespace ArtOfSimRally.Mod
     internal static class CameraKeys { public static bool Modified=false; public static bool ModifierHeld()=>Modified; public static void Tick(){} }
     internal static class CameraTuner { public static int Suppressed; public static void SuppressUntilRelease()=>Suppressed++; public static void ReadResetButton(){} }
     internal static class Shifter { public static void SuppressUntilRelease(){} }
+    internal static class GameBindings { public static void Tick(){} }
     internal static class SettingsPanel
     {
         public static bool Editing;

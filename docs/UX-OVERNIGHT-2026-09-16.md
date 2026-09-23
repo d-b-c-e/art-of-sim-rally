@@ -108,7 +108,7 @@ Simple and Advanced; expanding a basic group does not select Advanced.
 
 | Stored key or action | Page/view | Default / treatment |
 |---|---|---|
-| `SettingsFollowHostScale` | Help, both (successor) | Off: auto screen scale at default UMM1x; explicit UMM scale takes priority; On follows host exactly |
+| `SettingsFollowHostScale` | Help, both (successor) | On for new settings: follows UMM exactly; Off selects per-mod Auto enlargement; saved choices remain explicit |
 | `SettingsView`, `SettingsPage` | Header, both | Simple, Controls; old Setup and invalid values display Controls without rewriting tuning; other old page values retain meaning |
 | `SettingsKey`; F8 Stop FFB; Close/Escape | Controls / header, both | F6 rebindable; F8 fixed; cancel edit before close |
 | `SettingsButtonBinding`, `StopFfbButtonBinding` | Controls, both | Empty; strict USB button, press/release then Save binding; no change to FFB preference or driving-input enable |
