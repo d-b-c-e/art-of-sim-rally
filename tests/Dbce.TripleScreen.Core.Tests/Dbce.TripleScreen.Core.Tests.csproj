@@ -11,6 +11,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dbce.TripleScreen.Core\Dbce.TripleScreen.Core.csproj" />
     <ProjectReference Include="..\..\src\Dbce.TripleScreen.Protocol\Dbce.TripleScreen.Protocol.csproj" />
+    <Compile Include="..\..\src\ArtOfRally.TripleScreen.Mod\AdapterConstants.cs" Link="AdapterConstants.cs" />
+    <Compile Include="..\..\src\ArtOfRally.TripleScreen.Mod\LayoutSource.cs" Link="LayoutSource.cs" />
   </ItemGroup>
 
   <ItemGroup>

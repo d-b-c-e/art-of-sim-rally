@@ -72,14 +72,58 @@ resizing, bezel-corrected output, or curved-panel warp is attempted.
   newly exported per-user `desired-layout.json` (a direct `File.OpenRead`
   returned `FileNotFoundException`). The identical staged layout fallback in
   the owned mod folder was then implemented, tested offline, and deployed.
-  That fallback has **not yet been verified in the game**.
+  A linked-source regression now exercises missing, staged, canonical,
+  canonical-removal, and oversized-file cases; all 44 offline assertions pass.
+  The current DLL also restores Unity's active render target after compositing.
+  The staged fallback was subsequently verified in the game: the runtime
+  accepted its SHA-256 hash even when the canonical per-user path was not
+  visible to the game process.
 - Direct executable launches without a fresh Steam handoff eventually failed
   with `Steamworks is not initialized`, unrelated to projection. A proper
   Steam launch then displayed a conflict warning that another computer was
   playing on the same account. The launch was canceled; no other session was
-  disconnected. Reattempt only when Steam is free.
+  disconnected. The conflict later cleared and the following tests used
+  normal Steam launches.
 
-The next runtime action is the safe default-off loader pass with the staged
-layout present. It must show `inactive` / `FEATURE_DISABLED` and an accepted
-layout hash matching the optimizer export before moving to Surround or
-enabling three-view rendering.
+## 2026-09-23 attended runtime result
+
+- Default-off loader pass succeeded. The mod loaded under UMM 0.33.0, accepted
+  layout SHA-256 `cd4291834afb65ec45c7cef3e38b661e2377bb23e5de178c2ef6876c8818865d`,
+  and reported `inactive` / `FEATURE_DISABLED` with zero cameras. Stock free
+  roam was entered without a crash. The optimizer's Launch Game button also
+  launched the game successfully.
+- After switching to saved `Sim Racing Surround`, Windows exposed one
+  `7680×1440` display. With the experimental toggle enabled, Art of Rally's
+  *windowed fullscreen* + *auto (7680×1440)* combination actually gave Unity
+  a `2560×1440` output. The mod correctly reported `degraded` /
+  `OUTPUT_RESOLUTION_MISMATCH` and did not take over the camera.
+- With AA set to *none*, changing to *exclusive fullscreen* + explicit
+  `7680×1440` passed the output guard; status advanced to `starting` /
+  `STAGE_CAMERA_WAIT` in menus. The live mode switch then stopped accepting
+  the remote test controls. On the next launch at exclusive `7680×1440`, the
+  game remained on its loading screen and Windows marked it unresponsive;
+  it was closed by its exact process ID.
+- A borderless wide-mode restart reached the title screen at `7680×1440`,
+  but remote controls still could not reliably advance its menus. A temporary
+  reduced `1920×1080` contract (`3×640×1080` viewports) was tried as an
+  isolated compositor smoke, but that launch also stalled before title while
+  Surround was active. No gameplay frame was rendered with the experimental
+  feature enabled. There is **no three-view visual pass** and no `active` /
+  `activeCameraCount: 3` evidence yet.
+- The temporary reduced contract was removed. The canonical layout was
+  restored byte-identically from the staged copy (hash above), the installed
+  mod's experimental toggle was turned back off, and the game was closed.
+  The game's windowed-fullscreen and auto-resolution preferences were
+  restored; AA was set back to auto. The deployed mod DLL remains installed.
+- Returning the monitor profile to `Sim Racing` failed twice in the NVIDIA
+  Surround-disabling API (`NvAPI_Mosaic_SetDisplayGrids`, `NVAPI_ERROR -1`),
+  including one attempt through the tray IPC and one direct CLI attempt.
+  NVIDIA Surround remained active at `7680×1440` at the end of this test.
+  Do not report the desktop as restored until this is resolved and verified.
+
+Next pass: recover the independent-monitor profile, then perform an attended
+gameplay test at actual `7680×1440`. Confirm controls work locally even if
+remote input does not; capture the first composite frame and status JSON. If
+the game stalls regardless of input method, isolate whether the stall occurs
+with the experimental toggle off at the same display mode before changing
+the renderer again.

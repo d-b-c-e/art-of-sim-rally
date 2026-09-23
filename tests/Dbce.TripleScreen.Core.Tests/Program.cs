@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Text;
+using ArtOfRally.TripleScreen.Mod;
 using Dbce.TripleScreen;
 using Dbce.TripleScreen.Protocol;
 
@@ -23,6 +25,7 @@ internal static class Program
             BadEyeSideIsRejected();
             CanonicalLayoutParsesStrictly();
             InvalidLayoutsAreRejected();
+            StagedLayoutFallbackAndReload();
             RuntimeStatusMatchesCanonicalShape();
             Console.WriteLine($"PASS: {_assertions} triple-screen geometry assertions");
             return 0;
@@ -182,6 +185,40 @@ internal static class Program
         Check(json.Contains("\"schemaVersion\": 1"), "status schema version missing");
         Check(json.Contains("\"state\": \"active\""), "status state missing");
         Check(json.Contains("\"activeCapabilities\": ["), "status capabilities missing");
+    }
+
+    private static void StagedLayoutFallbackAndReload()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "dbce-triple-layout-test-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        try
+        {
+            var canonicalPath = Path.Combine(directory, "canonical.json");
+            var stagedPath = Path.Combine(directory, "staged.json");
+            var source = new LayoutSource(stagedPath, canonicalPath);
+            Check(!source.Refresh(true) && source.Current.ErrorCode == "LAYOUT_NOT_FOUND", "missing layout should remain rejected");
+
+            File.WriteAllText(stagedPath, ValidLayout);
+            Check(source.Refresh(false) && source.Current.IsSuccess, "staged layout fallback was not accepted");
+            Check(source.CurrentPath == stagedPath, "staged path was not selected");
+            Check(!source.Refresh(false), "unchanged staged layout should not reload");
+
+            File.WriteAllText(canonicalPath, ValidLayout.Replace("\"leftYawDegrees\":55", "\"leftYawDegrees\":45"));
+            Check(source.Refresh(false) && source.Current.IsSuccess, "canonical layout was not accepted");
+            Check(source.CurrentPath == canonicalPath, "canonical path should take precedence");
+            Check(source.Current.Document?.Geometry?.LeftYawDegrees == 45d, "canonical layout changes were not loaded");
+
+            File.Delete(canonicalPath);
+            Check(source.Refresh(false) && source.CurrentPath == stagedPath, "staged fallback was not restored");
+            Check(source.Current.Document?.Geometry?.LeftYawDegrees == 55d, "staged fallback loaded the wrong layout");
+
+            File.WriteAllBytes(stagedPath, new byte[LayoutContractParser.MaximumDocumentBytes + 1]);
+            Check(source.Refresh(false) && source.Current.ErrorCode == "LAYOUT_TOO_LARGE", "oversized staged layout was not rejected");
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
     }
 
     private static System.Collections.Generic.IReadOnlyList<DisplaySurface> Rig()

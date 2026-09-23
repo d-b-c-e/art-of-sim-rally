@@ -6,21 +6,27 @@ namespace ArtOfRally.TripleScreen.Mod;
 
 internal sealed class LayoutSource
 {
+    private readonly string _canonicalPath;
     private readonly string _stagedPath;
     private string _lastPath = string.Empty;
     private DateTime _lastWriteUtc = DateTime.MinValue;
     private long _lastLength = -1;
     private LayoutLoadResult _current = LayoutLoadResult.Failure("LAYOUT_NOT_FOUND", "The optimizer has not written desired-layout.json.");
 
-    internal LayoutSource(string stagedPath) => _stagedPath = stagedPath;
+    internal LayoutSource(string stagedPath) : this(stagedPath, AdapterConstants.DesiredLayoutPath) { }
+
+    internal LayoutSource(string stagedPath, string canonicalPath)
+    {
+        _stagedPath = stagedPath;
+        _canonicalPath = canonicalPath;
+    }
 
     internal LayoutLoadResult Current => _current;
     internal string CurrentPath => _lastPath;
 
     internal bool Refresh(bool force)
     {
-        var canonicalPath = AdapterConstants.DesiredLayoutPath;
-        var path = File.Exists(canonicalPath) ? canonicalPath : _stagedPath;
+        var path = File.Exists(_canonicalPath) ? _canonicalPath : _stagedPath;
         try
         {
             var info = new FileInfo(path);
@@ -43,7 +49,9 @@ internal sealed class LayoutSource
             _lastPath = path;
             _lastLength = info.Length;
             _lastWriteUtc = info.LastWriteTimeUtc;
-            _current = LayoutContractParser.Parse(File.ReadAllBytes(path));
+            _current = info.Length > LayoutContractParser.MaximumDocumentBytes
+                ? LayoutLoadResult.Failure("LAYOUT_TOO_LARGE", "The desired layout exceeds 64 KiB.")
+                : LayoutContractParser.Parse(File.ReadAllBytes(path));
             return true;
         }
         catch (Exception exception)

@@ -121,18 +121,26 @@ internal sealed class ThreeViewRenderDriver : MonoBehaviour
                 return;
             }
 
-            RenderTexture.active = destination;
-            GL.Clear(true, true, Color.black);
-            GL.PushMatrix();
+            var previousTarget = RenderTexture.active;
             try
             {
-                GL.LoadPixelMatrix(0, outputWidth, outputHeight, 0);
-                for (var index = 0; index < 3; index++)
-                    Graphics.DrawTexture(new Rect(index * _panelWidth, 0, _panelWidth, _panelHeight), _targets[index]);
+                RenderTexture.active = destination;
+                GL.Clear(true, true, Color.black);
+                GL.PushMatrix();
+                try
+                {
+                    GL.LoadPixelMatrix(0, outputWidth, outputHeight, 0);
+                    for (var index = 0; index < 3; index++)
+                        Graphics.DrawTexture(new Rect(index * _panelWidth, 0, _panelWidth, _panelHeight), _targets[index]);
+                }
+                finally
+                {
+                    GL.PopMatrix();
+                }
             }
             finally
             {
-                GL.PopMatrix();
+                RenderTexture.active = previousTarget;
             }
 
             SuccessfulFrames++;
