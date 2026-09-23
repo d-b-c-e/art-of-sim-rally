@@ -42,9 +42,12 @@ groups, but the owner found the rendered panel still cluttered: its cards lacked
 enough contrast, navigation looked like another bank of command buttons, the
 Setup page repeated Controls/FFB content and row actions remained oversized.
 RC14 added bordered higher-contrast cards, flat selected tabs and removed Setup,
-but its remaining full-width Help/actions still read as section delimiters. The
-successor uses compact right-aligned commands, segmented choices and flat links.
-Actual rendered acceptance is pending. See
+but its remaining full-width Help/actions still read as section delimiters. RC15
+uses compact commands, segmented choices and flat links. The owner's RC15 FFB
+screenshot still shows the device selector expanded as full-width command bars
+and Refresh as a full-width button; a successor candidate bounds the picker,
+shows explicit choice markers and makes Refresh compact. Actual rendered
+acceptance of that successor is pending. See
 [changes and exact checks](reviews/2026-09-21-visual-grouping.md). Do not close
 this issue based solely on a build or policy-height assertion.
 

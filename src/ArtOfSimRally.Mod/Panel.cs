@@ -50,14 +50,15 @@ namespace ArtOfSimRally.Mod
             int position = follow ? 0 : FfbNative.SelectedPosition(cfg) + 1;
             bool missing = !follow && position == 0;
             var labels = new string[_ffbDevices.Length + 1 + (missing ? 1 : 0)];
-            labels[0] = "Use steering wheel — " + (steering?.Device ?? "Steering not bound");
+            labels[0] = "Follow steering binding (" + (steering?.Device ?? "steering not bound") + ")";
             for (int i = 0; i < _ffbDevices.Length; i++)
             {
                 string guid = FfbNative.DeviceGuid(i);
                 labels[i + 1] = _ffbDevices[i] + (guid.Length >= 6 ? " · " + guid.Substring(guid.Length - 6) : " (identity unavailable)");
             }
-            if (missing) { position = labels.Length - 1; labels[position] = "Saved device disconnected/unverified — " + cfg.PreferredDevice; }
-            int chosen = DeviceDropdown.Draw("wheel", "FFB device", labels, position, "No devices found.");
+            if (missing) { position = labels.Length - 1; labels[position] = "Saved wheel unavailable: " + cfg.PreferredDevice; }
+            int chosen = DeviceDropdown.Draw("wheel", "FFB device", labels, position,
+                "No devices found.", _ffbDevices.Length + 1);
             if (chosen >= 0 && chosen <= _ffbDevices.Length)
             {
                 string oldMode = cfg.FfbDeviceMode, oldName = cfg.PreferredDevice, oldGuid = cfg.PreferredDeviceGuid;
@@ -69,9 +70,13 @@ namespace ArtOfSimRally.Mod
                 _ffbSelectionStatus = saved ? "Selection saved." : "Could not save. Previous FFB device kept; check Settings.xml is writable.";
                 if (saved) Main.SelectForceDevice();
             }
-            GUILayout.Label(_ffbSelectionStatus, Wrap);
+            if (!string.IsNullOrEmpty(_ffbSelectionStatus)) GUILayout.Label(_ffbSelectionStatus, Wrap);
             if (!FfbSelection.TryTarget(cfg, out _, out _, out _, out var reason)) GUILayout.Label(reason, Wrap);
-            if (GUILayout.Button("Refresh / retry connection")) { Rescan(); Main.SelectForceDevice(); }
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            bool refresh = GUILayout.Button("Refresh devices", SettingsPresentation.Width(150));
+            GUILayout.EndHorizontal();
+            if (refresh) { Rescan(); Main.SelectForceDevice(); }
         }
 
         public static void DrawShifterBinding(Settings cfg)

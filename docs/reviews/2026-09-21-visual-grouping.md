@@ -117,3 +117,19 @@ and the second native copy match, and six protected owner/game files retain thei
 pre-install hashes. The [deployment entry](../LOCAL-DEPLOYMENT.md) links the gate,
 RC13 backup and receipt. No game launch, rendered RC14 check, physical-force test
 or public release occurred; KI-41 remains open.
+
+## RC15 FFB device-picker follow-up
+
+The owner's RC15 screenshot shows the expanded FFB device list as three
+full-width raised bars. Although the first bar follows the steering binding and
+the second explicitly chooses the same MOZA, the controls look like commands
+rather than mutually exclusive device choices. Refresh has the same full-width
+bar treatment. The compact-action pass did not cover the shared device picker.
+
+The next candidate bounds the selector and its expanded options, places its
+label beside the current choice, and uses check-marked choices instead of
+raised bars. The saved-disconnected row stays visible but cannot be selected.
+Refresh becomes a compact action on the right. The same selector is used for
+shifter devices; GUID-based selection and persistence are unchanged. Build/RC
+validation will check behavior, but actual fit, selection and contrast still
+require a rendered check before KI-41 can close.

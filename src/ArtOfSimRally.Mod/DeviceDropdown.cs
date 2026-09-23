@@ -8,9 +8,9 @@ namespace ArtOfSimRally.Mod
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Collapsed it shows one line - the current choice - so a panel with two
-    /// device pickers does not become a wall of every controller listed twice.
-    /// Expanding pushes the options inline rather than floating them, because an
+    /// Collapsed it shows one bounded-width choice beside its label. Expanding
+    /// shows radio-like choices instead of a wall of full-width command buttons.
+    /// The options push content inline rather than floating, because an
     /// overlay popup inside UMM's scrolling settings view lands behind the
     /// controls below it.
     /// </para>
@@ -34,13 +34,14 @@ namespace ArtOfSimRally.Mod
         /// <param name="devices">Device names, in enumeration order.</param>
         /// <param name="selected">Currently selected index, or -1 for none.</param>
         /// <param name="emptyText">Shown when there are no devices at all.</param>
-        public static int Draw(string id, string label, string[] devices, int selected, string emptyText)
+        /// <param name="selectableCount">Allows a final saved-but-missing row to be shown but not chosen.</param>
+        public static int Draw(string id, string label, string[] devices, int selected, string emptyText,
+            int selectableCount = int.MaxValue)
         {
             var wrap = new GUIStyle(GUI.skin.label) { wordWrap = true };
-            GUILayout.Label("<b>" + label + "</b>");
-
             if (devices == null || devices.Length == 0)
             {
+                GUILayout.Label("<b>" + label + "</b>");
                 GUILayout.Label(emptyText, wrap);
                 return -1;
             }
@@ -50,22 +51,38 @@ namespace ArtOfSimRally.Mod
                 ? devices[selected]
                 : "(none selected)";
 
-            if (GUILayout.Button((open ? "▼  " : "▶  ") + current))
+            bool stacked = SettingsPresentation.StackRows;
+            if (!stacked) GUILayout.BeginHorizontal(SettingsPresentation.Width(540));
+            GUILayout.Label("<b>" + label + "</b>", wrap,
+                stacked ? GUILayout.ExpandWidth(false) : SettingsPresentation.Width(105));
+            if (GUILayout.Button(current + (open ? "  ▲" : "  ▼"), SettingsPresentation.Width(420)))
                 _openId = open ? null : id;
+            if (!stacked) GUILayout.EndHorizontal();
 
             if (!open) return -1;
 
             int chosen = -1;
+            if (!stacked)
+            {
+                GUILayout.BeginHorizontal(SettingsPresentation.Width(540));
+                GUILayout.Space(105 * SettingsPresentation.Scale);
+            }
+            GUILayout.BeginVertical(SettingsPresentation.Width(420));
             for (int i = 0; i < devices.Length; i++)
             {
                 bool isCurrent = i == selected;
-                string text = (isCurrent ? "•  " : "    ") + devices[i];
-                if (GUILayout.Button(text))
+                bool wasEnabled = GUI.enabled;
+                GUI.enabled = wasEnabled && i < selectableCount;
+                bool checkedNow = GUILayout.Toggle(isCurrent, devices[i], GUI.skin.toggle);
+                GUI.enabled = wasEnabled;
+                if (checkedNow && !isCurrent && i < selectableCount)
                 {
                     chosen = i;
                     _openId = null;
                 }
             }
+            GUILayout.EndVertical();
+            if (!stacked) GUILayout.EndHorizontal();
             return chosen;
         }
 

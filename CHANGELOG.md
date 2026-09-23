@@ -9,6 +9,9 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- FFB and shifter device pickers now use bounded selectors with explicit choice
+  markers instead of full-width button stacks. The FFB refresh action is compact;
+  a saved but disconnected wheel remains visible without being selectable.
 - Clearer candidate binding groups with stronger borders and contrast, bold
   names, owned actions and local calibration instructions; camera keyboard/USB
   bindings share one group. Flat navigation tabs, compact header commands,
