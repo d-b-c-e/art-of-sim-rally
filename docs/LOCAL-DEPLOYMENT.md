@@ -6,7 +6,31 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.6-rc.13
+## Installed candidate — 0.2.6-rc.14
+
+Installed **2026-09-23 03:59:32 UTC** (September22 local), game closed, after
+all16 local RC gates. This successor responds to the owner's RC13 screenshots
+with bordered higher-contrast cards, flat tabs with a selected underline, five
+core pages without redundant Setup, smaller header/row commands and guidance to
+their left. Old saved page values retain their meaning. No game was launched;
+actual rendered fit and interaction remain pending (KI-41 and existing KI-39/40).
+
+- Identity: `0.2.6-rc.14+8d37db001aea2ff21ca30455723f604523d78ac4.clean`.
+- ZIP SHA-256: `68E956B06FC421D2A6C0215BF885033A22268A75DB252407D394EC26A35E7EFA`.
+- [Complete gate](../results/rc-0.2.6-rc.14-84916e9de11f4b7bac505ba5118892b8/automated.json),
+  SHA-256 `E6677D44D96675E5455BF2C6642DD43A839D7ED2214860C88E32285CAB23F548`.
+  Includes130 settings policy assertions, both recorded drives and9,507 recorded
+  landing/crash assertions. The suite compiles the mod but does not render Unity IMGUI.
+- [Install receipt and RC13 backup](../results/ux-0.2.6-rc.14-install-3de661486d8f4ce8981448ab5cd196a8/receipt.json).
+  All six mod payloads and second native plugin match. The six current owner/game
+  files are byte-identical before/after installation.
+- Settings SHA-256 `A9291BDBE10AE1DC667A8CA20F48E0EF8D529F11F9F28500284419090F536536`;
+  crash on19.52381 and landing on20. UMM preferences and probe0.2.5.4 retained.
+  Toolkit binaries358add5/native0.8.0 remain unchanged in both plugin locations.
+- Shared UX guidance `be5519541820ce3408953588d78f16e78794f1d6`; no physical-force
+  test or public release.
+
+## Previous candidate — 0.2.6-rc.13
 
 Installed **2026-09-22 04:15:29 UTC** (September21 local), game closed, after
 all16 local RC gates and independent source review. Binding groups and local

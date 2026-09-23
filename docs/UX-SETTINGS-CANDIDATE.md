@@ -1,8 +1,8 @@
 # Settings candidate: short test guide
 
-This guide applies to the **installed 0.2.6-rc.13 Simple/Advanced candidate**,
-not the public 0.2.5 download. It replaced RC12 after all16 local gates on
-2026-09-22 UTC (September21 local); see [Local deployment](LOCAL-DEPLOYMENT.md) for the exact identity,
+This guide applies to the **installed 0.2.6-rc.14 Simple/Advanced candidate**,
+not the public 0.2.5 download. It replaced RC13 after all16 local gates on
+2026-09-23 UTC (September22 local); see [Local deployment](LOCAL-DEPLOYMENT.md) for the exact identity,
 backup and receipt.
 The [engineering audit](UX-OVERNIGHT-2026-09-16.md) records coverage and remaining
 gaps. The usual installer still preserves Settings.xml; start any attended

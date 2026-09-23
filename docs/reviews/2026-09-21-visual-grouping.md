@@ -105,3 +105,15 @@ The SettingsUi policy suite covers the persisted-page translation and layout
 column decisions. It still cannot certify Unity IMGUI rendering, contrast or
 interaction. A complete RC gate, exact local deployment and rendered owner check
 remain required before closing KI-41.
+
+Toolkit documentation commit `be5519541820ce3408953588d78f16e78794f1d6`
+adopts these five findings for other consumers without changing toolkit binaries.
+RC14 clean source `8d37db001aea2ff21ca30455723f604523d78ac4` passed all16
+local gates at2026-09-23 03:57:20UTC, including130 SettingsUi assertions,
+both recorded drives and9,507 recorded landing/crash assertions. ZIP SHA-256 is
+`68E956B06FC421D2A6C0215BF885033A22268A75DB252407D394EC26A35E7EFA`.
+The exact package was installed03:59:32UTC with the game closed; all six payloads
+and the second native copy match, and six protected owner/game files retain their
+pre-install hashes. The [deployment entry](../LOCAL-DEPLOYMENT.md) links the gate,
+RC13 backup and receipt. No game launch, rendered RC14 check, physical-force test
+or public release occurred; KI-41 remains open.

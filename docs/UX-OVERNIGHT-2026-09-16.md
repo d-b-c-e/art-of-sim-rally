@@ -1,10 +1,12 @@
 # UX-1 adoption audit
 
-**September21 visual follow-up:** RC13 source `470e398` implements toolkit
-UX-03-G `673d451`. All16 gates passed and the exact package was installed with
-current owner settings retained at2026-09-22 04:15:29UTC. No game launch occurred;
-new rendered/interaction acceptance remains pending. The [review](reviews/2026-09-21-visual-grouping.md)
-records the grouping changes and checks. RC12 evidence below is historical.
+**September22 visual follow-up:** owner screenshots rejected RC13's weak card/tab
+hierarchy and redundant Setup page. RC14 clean source `8d37db0` applies that
+feedback and shared toolkit guidance `be55195`. All16 gates passed and the exact
+package was installed with current owner settings retained at2026-09-23
+03:59:32UTC. No game launch occurred; rendered/interaction acceptance remains
+pending. The [review](reviews/2026-09-21-visual-grouping.md) records the changes
+and checks. RC12/RC13 evidence below is historical.
 
 Updated **2026-09-19**. The filename identifies the coordinator's UX rollout,
 not the date of a hardware test. This **installed candidate** was developed
@@ -22,6 +24,12 @@ save-before-effective/batch-reset clarifications,
 `docs/reference/wheel-settings.html`, is guidance, not a rendered AOSR screen.
 The consumer's **native/managed binary pin stays `358add5`** (local toolkit
 0.15.0/native 0.8.0); this UI work does not publish or repin the toolkit.
+
+Guidance revision `be5519541820ce3408953588d78f16e78794f1d6` incorporates
+the RC13 rendered findings across projects: perceptible surface boundaries,
+navigation distinct from commands, Setup only for a distinct guided workflow,
+compact right-side actions with named narrow fallback, and stable legacy page
+meaning. It changes toolkit documents only; the binary pin above is unchanged.
 
 Coordinator revision `12df6b325d770625baffd75b2d2eb74f1fcd0a8c` clarifies UX-03 stock-menu pointer/submit/navigation
 isolation and release of all keyboard/wheel/pad/Settings controls before handoff,
@@ -45,7 +53,7 @@ offline gates passed, but a later row-overflow finding prevented deployment. See
 This does not close UX-03's720p/custom-scale, first-use, wheel/pad or held-input
 matrix. The binary pin remains358add5, independently of documentation revisions.
 
-Current successor **RC12** passed all16 gates and was installed20:35:39UTC.
+Earlier successor **RC12** passed all16 gates and was installed20:35:39UTC.
 Independent review closed its aggregate row overflow at clean `cbcf76c5`;126
 settings checks cover the default host and large custom scales. RC11 remained
 validation-only. Limited default4K runs passed readable header/all six page

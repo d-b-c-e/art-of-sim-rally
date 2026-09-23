@@ -8,21 +8,30 @@
 
 ## Repository Purpose
 
-**Current installed candidate: RC13**, clean source
-`470e398b89198d60c861ce3ffad800b0ff93854a`, all16 gates passed, installed
-2026-09-22 04:15:29UTC (September21 local), game closed. Six payloads and second
-native copy verified, six owner/game files retained byte-for-byte. No game launch
-or force test. Toolkit358add5/probe0.2.5.4 unchanged. KI-41 rendered acceptance
-and the broader KI-39/40 matrix remain pending; exact backup/hashes are in
-`docs/LOCAL-DEPLOYMENT.md`.
+**Current installed candidate: RC14**, clean source
+`8d37db001aea2ff21ca30455723f604523d78ac4`, all16 gates passed, installed
+2026-09-23 03:59:32UTC (September22 local), game closed. Six payloads and second
+native copy verified, six owner/game files retained byte-for-byte. It strengthens
+card contrast/borders, uses flat selected tabs, compacts row/header actions and
+removes redundant Setup while preserving old page meanings. No game launch or
+force test. Toolkit binaries358add5/probe0.2.5.4 unchanged; shared UX guidance
+is `be55195`. KI-41 rendered acceptance and the broader KI-39/40 matrix remain
+pending; exact backup/hashes are in `docs/LOCAL-DEPLOYMENT.md`.
 
-**Visual grouping follow-up, 2026-09-21:** `codex/simple-visual-grouping` implements
-UX-03-G from toolkit `673d451`. See `docs/reviews/2026-09-21-visual-grouping.md`
-for actual screenshot/source findings, source review and required rendered checks.
+**Visual grouping follow-up, 2026-09-21–22:** RC13 implemented UX-03-G from
+toolkit `673d451`, but owner screenshots rejected its weak hierarchy. RC14 applies
+that rendered feedback and toolkit guidance `be55195`. See
+`docs/reviews/2026-09-21-visual-grouping.md` for findings and required checks.
 Do not infer in-game layout acceptance from the SettingsUi policy suite; it does
 not compile the panel. Keep pre-Bind neutral/release hints visible because the
-input layer samples that state at the click. RC12's rendered evidence below is
-historical; it does not certify the new layout.
+input layer samples that state at the click. RC12/RC13 evidence is historical;
+neither certifies RC14 rendering.
+
+**Previous installed candidate: RC13**, clean source `470e398b89198d60c861ce3ffad800b0ff93854a`,
+all16 gates passed and installed2026-09-22 04:15:29UTC. Its grouping structure
+rendered, but the owner found cards too subtle, navigation too button-like, Setup
+redundant and binding actions too large. RC14 supersedes it without changing tune,
+input or force behavior.
 
 **Previous installed candidate: RC12**, clean source
 `cbcf76c5d6401dd8a0c511acfe7ded201df6a99d`, all16 gates passed, installed
