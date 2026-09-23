@@ -30,8 +30,9 @@ general close barrier waited on Rewired UI axes, which can rest non-zero on a
 wheel/pedal map forever. The successor defers opening until the initiating UMM
 mouse/key input has been released for two frames, ignores parked joystick/axis
 state for this explicit route, clears the old barrier and only then pushes the
-native panel. Focus, held initiating input, cancellation and delayed handoff have
-offline coverage. Actual in-game navigation/back behavior remains pending.
+native panel. RC15 clean package passed all16 gates and is installed. Focus, held
+initiating input, cancellation and delayed handoff have offline coverage. Actual
+in-game navigation/back behavior remains pending.
 
 ### KI-41 — Simple binding layout lacks clear visual ownership
 

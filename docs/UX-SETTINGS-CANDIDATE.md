@@ -1,7 +1,7 @@
 # Settings candidate: short test guide
 
-This guide applies to the **installed 0.2.6-rc.14 Simple/Advanced candidate**,
-not the public 0.2.5 download. It replaced RC13 after all16 local gates on
+This guide applies to the **installed 0.2.6-rc.15 Simple/Advanced candidate**,
+not the public 0.2.5 download. It replaced RC14 after all16 local gates on
 2026-09-23 UTC (September22 local); see [Local deployment](LOCAL-DEPLOYMENT.md) for the exact identity,
 backup and receipt.
 The [engineering audit](UX-OVERNIGHT-2026-09-16.md) records coverage and remaining
@@ -13,7 +13,9 @@ binding and its actions in one bordered group, moves optional sections behind
 Show/Hide buttons, and reduces the header. The latest successor strengthens card
 contrast, gives navigation a flat tab treatment, puts compact actions to the
 right of their guidance and removes the redundant Setup page. New rendered
-checks remain pending. The RC12 smoke below is historical evidence.
+checks remain pending. RC15 additionally compacts the remaining command and
+disclosure rows and fixes the native game-bindings handoff. The RC12 smoke below
+is historical evidence.
 
 **RC9 smoke found a blocker:** navigation/Escape can reach the game menu behind
 the panel, and default4K text is too small. RC10 contains the reviewed fixes

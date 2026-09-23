@@ -6,7 +6,34 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.6-rc.14
+## Installed candidate — 0.2.6-rc.15
+
+Installed **2026-09-23 04:30:35 UTC** (September22 local), game closed, after
+all16 local RC gates. RC15 defers the UMM→native bindings route until the actual
+initiating control releases for two neutral frames, then clears the general menu
+barrier before opening ControlsSettings. Persistent Rewired wheel/pedal axes and
+parked joystick buttons cannot latch this explicit handoff. It also replaces
+remaining full-width command/disclosure bars with compact actions, segmented
+choices and flat links, and makes UMM scale the default for new settings.
+
+- Identity: `0.2.6-rc.15+b0f8d4b2bc59a8080718d089d701f0bbc140201e.clean`.
+- ZIP SHA-256: `7E4D7166F43E04D3C409E80F67FA44FDB9BFC368841C15D98F9BC99D78936B07`.
+- [Complete gate](../results/rc-0.2.6-rc.15-1937e90db01845a2be10b3cb5ba83707/automated.json),
+  SHA-256 `7910935679FD065104CE04C5D1442B0BFAD64ABDEC001B194F1F2B0EDB4D2E72`.
+  Includes134 settings assertions,19 native-route assertions, both recorded
+  drives and9,507 recorded landing/crash assertions.
+- [Install receipt and RC14 backup](../results/ux-0.2.6-rc.15-install-07892038fed24701b7bf707ceda858cf/receipt.json).
+  All six payloads and second native plugin match; six protected owner/game files
+  retain their pre-install hashes.
+- Settings SHA-256 `334F3BE34C33F6687FBBACD951F95BB6FB023FEE29D8FC783AE06DEE53942ACA`;
+  UMM scale selected, crash on19.52381, landing on20. UMM Params and probe0.2.5.4
+  were retained exactly. Toolkit binaries358add5/native0.8.0 are unchanged.
+- Shared toolkit UX guidance `76cd02ac030c05cf79b7ed1aa83500d7015911c2`
+  records compact-action and initiating-control-only handoff rules; documentation only.
+- No game launch, attended bindings navigation, rendered RC15 acceptance,
+  physical-force test or public release.
+
+## Previous candidate — 0.2.6-rc.14
 
 Installed **2026-09-23 03:59:32 UTC** (September22 local), game closed, after
 all16 local RC gates. This successor responds to the owner's RC13 screenshots
