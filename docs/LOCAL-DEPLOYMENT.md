@@ -6,7 +6,31 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.6-rc.15
+## Installed candidate — 0.2.6-rc.16
+
+Installed **2026-09-23 04:58:32 UTC**, game closed, after all16 local RC gates.
+The FFB device selector and its expanded choices are now bounded and show a
+selected marker; the saved-disconnected row stays visible but disabled. Refresh
+is a compact right-aligned command. The shared shifter picker has the same
+choice treatment. FFB device identity, persistence, tune and input are unchanged.
+
+- Identity: `0.2.6-rc.16+e854b994125494fb38442a1c41476c42befad934.clean`.
+- ZIP SHA-256: `3577C288C08B68EF10C9431D4CB0DFBB3404DEADC3DB61B2184FCE524AA5877B`.
+- [Complete gate](../results/rc-0.2.6-rc.16-dc65c1ebb31442f992ad29bb613369a6/automated.json),
+  SHA-256 `469CD0D87AC329A61D9F858AD198BEB5EC06CF9D158E9C8431760F92950BB1B9`.
+  Includes both recorded drives and all16 checkpoints. The first attempt used
+  Windows PowerShell and stopped at an expected-failure replay check because
+  stderr became a terminating error; the clean-source gate passed under pwsh.
+- [Install receipt and RC15 backup](../results/ux-0.2.6-rc.16-install-36486d1e3ede46f4b1583ebd0cb4a7e3/receipt.json).
+  All six mod payloads and the second native plugin match the archive. Six
+  protected owner/game files retain their immediate pre-install hashes.
+- Settings SHA-256 `4B8E04D1308CC329504C8024E0C860C609AC36EA3203B65D6F5809924EC726AD`;
+  UMM scale remains selected, crash on19.52381 and landing on20. Toolkit
+  binaries358add5/native0.8.0 and probe0.2.5.4 remain unchanged.
+- No post-install game launch, rendered RC16 acceptance, physical-force test
+  or public release. KI-41 and the wider KI-39/40 matrix remain pending.
+
+## Previous candidate — 0.2.6-rc.15
 
 Installed **2026-09-23 04:30:35 UTC** (September22 local), game closed, after
 all16 local RC gates. RC15 defers the UMM→native bindings route until the actual

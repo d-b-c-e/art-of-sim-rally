@@ -8,17 +8,24 @@
 
 ## Repository Purpose
 
-**Current installed candidate: RC15**, clean source
+**Current installed candidate: RC16**, clean source
+`e854b994125494fb38442a1c41476c42befad934`, all16 gates passed, installed
+2026-09-23 04:58:32UTC, game closed. Six payloads and second native copy verified,
+six owner/game files retained byte-for-byte. The FFB/shifter device dropdowns
+now use bounded choices instead of full-width raised bars, and FFB Refresh is
+compact. Saved GUID selection and tune are unchanged. No post-install game launch
+or force test. Toolkit binaries358add5/probe0.2.5.4 unchanged. KI-41 rendered
+acceptance and the broader KI-39/40 matrix remain pending; exact backup/hashes
+are in `docs/LOCAL-DEPLOYMENT.md`.
+
+**Previous installed candidate: RC15**, clean source
 `b0f8d4b2bc59a8080718d089d701f0bbc140201e`, all16 gates passed, installed
-2026-09-23 04:30:35UTC (September22 local), game closed. Six payloads and second
-native copy verified, six owner/game files retained byte-for-byte. It fixes the
-RC14 Open-game-bindings input deadlock, compacts remaining command/disclosure
-rows and defaults new settings to UMM scale. Owner setting already selected UMM
-scale and was preserved, along with crash19.52381/landing20. No game launch or
-force test. Toolkit binaries358add5/probe0.2.5.4 unchanged; shared compact-action
-and scoped-handoff guidance is `76cd02a`. KI-42 handoff and
-KI-41 rendered acceptance plus broader KI-39/40 remain pending; exact evidence
-is in `docs/LOCAL-DEPLOYMENT.md`.
+2026-09-23 04:30:35UTC. It fixes the RC14 Open-game-bindings input deadlock,
+compacts remaining commands and defaults new settings to UMM scale. The owner
+subsequently tested Open game bindings in-game and reported that it worked
+(KI-42 resolved). The owner's FFB screenshot still found the full-width device
+and Refresh controls unintuitive; RC16 addresses those. Shared toolkit guidance
+is `76cd02a`.
 
 **RC15 handoff rule:** programmatic UMM→native controls waits for the initiating
 keyboard/mouse/USB Settings control and two neutral frames, then explicitly resets
@@ -33,7 +40,7 @@ that rendered feedback and toolkit guidance `be55195`. See
 Do not infer in-game layout acceptance from the SettingsUi policy suite; it does
 not compile the panel. Keep pre-Bind neutral/release hints visible because the
 input layer samples that state at the click. RC12/RC13 evidence is historical;
-the owner's RC14 screenshots do not certify RC15 rendering.
+the owner's RC14/RC15 screenshots do not certify RC16 rendering.
 
 **Previous installed candidate: RC14**, clean source `8d37db001aea2ff21ca30455723f604523d78ac4`,
 all16 gates passed and installed2026-09-23 03:59:32UTC. Its cards/tabs improved,

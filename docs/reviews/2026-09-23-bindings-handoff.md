@@ -61,3 +61,8 @@ settings from the main Options menu, choose **Open game bindings**, release the
 click, then verify mouse, arrows/Return and Back all work. Repeat from Cameras and
 confirm F6 can reopen Wheel settings without a latent native-panel transition.
 Rendered compact-control acceptance and KI-39/40's broader matrix remain separate.
+
+Owner follow-up on 2026-09-22 local: **Open game bindings worked** in the live
+RC15 test. This resolves the reported dead-input route (KI-42); the owner did
+not report results for every entry/exit/focus case in the attended checklist,
+which remains part of the broader KI-39/40 matrix.

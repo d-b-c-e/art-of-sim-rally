@@ -133,3 +133,12 @@ Refresh becomes a compact action on the right. The same selector is used for
 shifter devices; GUID-based selection and persistence are unchanged. Build/RC
 validation will check behavior, but actual fit, selection and contrast still
 require a rendered check before KI-41 can close.
+
+RC16 clean source `e854b994125494fb38442a1c41476c42befad934` passed all16
+local gates; archive SHA-256 is
+`3577C288C08B68EF10C9431D4CB0DFBB3404DEADC3DB61B2184FCE524AA5877B`.
+The exact archive was installed 2026-09-23 04:58:32UTC with the game closed.
+Six payloads and the second native copy match; saved settings and five other
+protected files retain their pre-install hashes. See the
+[deployment receipt](../LOCAL-DEPLOYMENT.md). No post-install game launch or
+rendered acceptance occurred; KI-41 remains open.
