@@ -21,19 +21,6 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
-### KI-42 — Open game bindings can leave the native screen without input
-
-**Owner-confirmed on installed RC14, 2026-09-22.** **Open game bindings** closed
-UMM and displayed the game's Controls screen, but its selection only pulsed and
-mouse/keyboard navigation never returned; Alt+F4 and relaunch were required. The
-general close barrier waited on Rewired UI axes, which can rest non-zero on a
-wheel/pedal map forever. The successor defers opening until the initiating UMM
-mouse/key input has been released for two frames, ignores parked joystick/axis
-state for this explicit route, clears the old barrier and only then pushes the
-native panel. RC15 clean package passed all16 gates and is installed. Focus, held
-initiating input, cancellation and delayed handoff have offline coverage. Actual
-in-game navigation/back behavior remains pending.
-
 ### KI-41 — Simple binding layout lacks clear visual ownership
 
 **Owner-reported, 2026-09-21; RC13/RC14 review extended 2026-09-22.** RC12's axis
@@ -725,6 +712,15 @@ failed socket. Production-code loopback tests cover recovery, three parked packe
 destination switching and repeat shutdown. SimHub remains an attended gate.
 
 ## Resolved
+
+### KI-42 — Open game bindings can leave the native screen without input
+
+**Owner-confirmed on RC14; fixed and owner-tested on RC15, 2026-09-22.** The
+native Controls screen opened but ignored input. RC15 waits for the initiating
+UMM control to release for two frames, clears the general close barrier, then
+hands input to the game. The owner reports the route worked in a live test.
+Offline checks cover focus, held input, cancellation and delayed handoff. The
+broader settings input matrix remains tracked by KI-40.
 
 ### KI-35 — Adding a second regression capture fails to replace the index
 
