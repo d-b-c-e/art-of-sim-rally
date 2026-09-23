@@ -9,9 +9,11 @@ gaps. The usual installer still preserves Settings.xml; start any attended
 comparison with an extra backup of that file.
 
 The [visual grouping follow-up](reviews/2026-09-21-visual-grouping.md) puts each
-binding and its actions in one shaded group, moves optional sections behind
-Show/Hide buttons, and reduces the header. It is installed for the next launch;
-new rendered checks remain pending. The RC12 smoke below is historical evidence.
+binding and its actions in one bordered group, moves optional sections behind
+Show/Hide buttons, and reduces the header. The latest successor strengthens card
+contrast, gives navigation a flat tab treatment, puts compact actions to the
+right of their guidance and removes the redundant Setup page. New rendered
+checks remain pending. The RC12 smoke below is historical evidence.
 
 **RC9 smoke found a blocker:** navigation/Escape can reach the game menu behind
 the panel, and default4K text is too small. RC10 contains the reviewed fixes
@@ -39,8 +41,12 @@ that the game simulation is paused. A held shifter button must be released
 before shifting again. Close/Escape cancels an unfinished edit first; close a
 second time to leave. Camera adjustment keys wait for release after closing.
 
-**Simple** is the first view. **Advanced** adds tuning on the same six pages;
-switching views preserves the actual values. Your view/page choice is saved.
+**Simple** is the first view. **Advanced** adds tuning on the same five pages:
+Controls, FFB, Cameras, Telemetry and Help. The former Setup page repeated those
+pages and has been removed; an old saved Setup choice opens Controls. Other old
+saved page choices retain their meaning. Flat tabs distinguish navigation from
+raised command buttons. Switching views preserves the actual values. Your
+view/page choice is saved.
 Custom hidden settings have a **Review in Advanced** link. The save status is
 visible above the pages; a pending calibration or connection edit is not saved
 until you use its Save/Apply button. Keep a mouse/keyboard available for UMM;

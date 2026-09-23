@@ -12,8 +12,9 @@ The development version has a new
 [Simple/Advanced settings candidate](docs/UX-SETTINGS-CANDIDATE.md).
 It is not in the download above; the instructions below describe public 0.2.5.
 The [visual grouping follow-up](docs/reviews/2026-09-21-visual-grouping.md) makes
-binding ownership clearer and reduces clutter in Simple; rendered acceptance
-is tracked separately from its build and local deployment.
+binding ownership clearer with bordered cards, flat tabs and compact actions.
+It also removes the redundant Setup page; rendered acceptance is tracked
+separately from its build and local deployment.
 
 ## Install
 

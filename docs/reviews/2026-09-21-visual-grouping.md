@@ -82,3 +82,26 @@ pre-install hashes. Current Settings.xml SHA-256 is
 The [deployment entry](../LOCAL-DEPLOYMENT.md) links the gate, RC12 backup,
 package hash and installation receipt. No public release, desktop interaction
 or physical-force test occurred. KI-41 remains open for the rendered checks above.
+
+## RC13 rendered owner review and successor
+
+The owner's first RC13 screenshots confirmed the grouping structure but did not
+accept its visual hierarchy. Card boundaries remained too subtle, the two view
+choices and six page choices still looked like ordinary command buttons, Setup
+duplicated destinations already represented by Controls and FFB, and full-width
+binding actions added visual weight. This is direct rendered evidence and
+supersedes the earlier source-only expectation that RC13 addressed the clutter.
+
+The successor uses a darker card fill with a perceptible one-pixel border and a
+brighter local heading. Simple/Advanced and the page choices use a flat tab style
+with a cyan selected underline; Stop FFB and Close retain command-button styling
+and smaller fixed widths. Five tabs fit one row in the default 4K host. Setup is
+removed, with persisted value0 and1 both opening Controls and old values2–5
+retaining FFB through Help. Binding preconditions stay visible to the left while
+compact Bind/Calibrate/Clear actions sit on the right; stacked layouts repeat
+their target names. No input, force, telemetry, camera or tuning behavior changes.
+
+The SettingsUi policy suite covers the persisted-page translation and layout
+column decisions. It still cannot certify Unity IMGUI rendering, contrast or
+interaction. A complete RC gate, exact local deployment and rendered owner check
+remain required before closing KI-41.

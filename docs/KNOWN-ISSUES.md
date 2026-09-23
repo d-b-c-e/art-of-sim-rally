@@ -23,11 +23,14 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ### KI-41 — Simple binding layout lacks clear visual ownership
 
-**Owner-reported, 2026-09-21.** RC12's axis labels and generic action rows have
-little visual separation. Retained4K Controls screenshots also show excessive
-header/instruction space before the first binding. The visual-grouping follow-up
-adds bounded groups, local hints and compact header/Setup. Independent source
-review is complete; actual rendered acceptance is pending. See
+**Owner-reported, 2026-09-21; RC13 review extended 2026-09-22.** RC12's axis
+labels and generic action rows had little visual separation. RC13 added local
+groups, but the owner found the rendered panel still cluttered: its cards lacked
+enough contrast, navigation looked like another bank of command buttons, the
+Setup page repeated Controls/FFB content and row actions remained oversized.
+The successor adds bordered higher-contrast cards, flat selected tabs, compact
+right-aligned actions and removes Setup while preserving old saved page meaning.
+Actual rendered acceptance is pending. See
 [changes and exact checks](reviews/2026-09-21-visual-grouping.md). Do not close
 this issue based solely on a build or policy-height assertion.
 

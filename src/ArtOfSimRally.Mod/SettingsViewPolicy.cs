@@ -5,14 +5,17 @@ namespace ArtOfSimRally.Mod
     // No device/output calls: view selection can only change presentation fields.
     internal static class SettingsViewPolicy
     {
-        public static readonly string[] Pages = { "Setup", "Controls", "FFB", "Cameras", "Telemetry", "Help" };
+        public static readonly string[] Pages = { "Controls", "FFB", "Cameras", "Telemetry", "Help" };
         public static bool Advanced(Settings cfg) => cfg.SettingsView == "Advanced";
-        public static int Page(Settings cfg) => cfg.SettingsPage >= 0 && cfg.SettingsPage < Pages.Length ? cfg.SettingsPage : 0;
+        // Keep the old persisted values stable: 0 was Setup, 1 Controls ... 5 Help.
+        // Setup now opens Controls, while the other saved pages retain their meaning.
+        public static int Page(Settings cfg) => cfg.SettingsPage >= 1 && cfg.SettingsPage <= Pages.Length
+            ? cfg.SettingsPage - 1 : 0;
         public static bool Select(Settings cfg, bool advanced, int page, bool editing)
         {
             if (editing || page < 0 || page >= Pages.Length) return false;
             cfg.SettingsView = advanced ? "Advanced" : "Simple";
-            cfg.SettingsPage = page;
+            cfg.SettingsPage = page + 1;
             return true;
         }
         public static bool CustomFfb(Settings c) => c.Smoothing != .2f || c.Invert || c.FyReference != 11500f ||

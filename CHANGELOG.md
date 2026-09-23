@@ -9,17 +9,19 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Clearer candidate binding groups with bold names, owned actions and local
-  calibration instructions; camera keyboard/USB bindings share one group.
-  Compact header and Setup, plus Show/Hide optional sections, reduce Simple
-  clutter. Owner values and runtime behavior are preserved; visual acceptance
-  of this layout remains pending.
+- Clearer candidate binding groups with stronger borders and contrast, bold
+  names, owned actions and local calibration instructions; camera keyboard/USB
+  bindings share one group. Flat navigation tabs, compact header commands,
+  left-aligned guidance with smaller row actions and Show/Hide optional sections
+  reduce Simple clutter. The redundant Setup page is removed while old saved
+  page choices retain their meaning. Owner tuning and runtime behavior are
+  preserved; rendered acceptance of this layout remains pending.
 
 - Candidate settings text scales automatically for high-resolution displays,
   with an option to follow UMM's scale and preservation of its host preferences.
   Content fits the actual host viewport and page buttons wrap on narrower windows.
 
-- Simple/Advanced settings with Setup, Controls, FFB, Cameras, Telemetry and Help;
+- Simple/Advanced settings with Controls, FFB, Cameras, Telemetry and Help;
   F6 entry, optional USB Settings/Stop FFB buttons, and F8 stop that retains Off.
 - Provisional axis calibration with Save/Cancel, explicit inversion/deadzone,
   separate additive handbrake axis/button, and strict FFB follow-Steering selection.

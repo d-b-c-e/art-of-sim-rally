@@ -58,8 +58,10 @@ observation. Historical RC8–10 evidence below is not full layout acceptance.
 
 ## Implemented scope
 
-- Persisted Simple/Advanced and six pages: Setup, Controls, FFB, Cameras,
-  Telemetry, Help. Switching presentation does not reset runtime tuning.
+- Persisted Simple/Advanced and five pages: Controls, FFB, Cameras, Telemetry,
+  Help. The redundant Setup page is removed; its old stored value opens Controls
+  and other old stored page values retain their meaning. Switching presentation
+  does not reset runtime tuning.
 - F6 selects this mod in UMM's existing window; Ctrl+F10 remains available.
   Settings/Stop FFB also accept strict USB button bindings even when assigned
   driving controls are Off. Press edges and held reconnects are covered offline.
@@ -99,11 +101,11 @@ Simple and Advanced; expanding a basic group does not select Advanced.
 | Stored key or action | Page/view | Default / treatment |
 |---|---|---|
 | `SettingsFollowHostScale` | Help, both (successor) | Off: auto screen scale at default UMM1x; explicit UMM scale takes priority; On follows host exactly |
-| `SettingsView`, `SettingsPage` | Header, both | Simple, Setup; invalid presentation displays these defaults without rewriting tuning |
+| `SettingsView`, `SettingsPage` | Header, both | Simple, Controls; old Setup and invalid values display Controls without rewriting tuning; other old page values retain meaning |
 | `SettingsKey`; F8 Stop FFB; Close/Escape | Controls / header, both | F6 rebindable; F8 fixed; cancel edit before close |
 | `SettingsButtonBinding`, `StopFfbButtonBinding` | Controls, both | Empty; strict USB button, press/release then Save binding; no change to FFB preference or driving-input enable |
 | `WheelInputEnabled` | Controls, both | Off; Save calibration explicitly enables assigned controls |
-| `SteerBinding`, `ThrottleBinding`, `BrakeBinding` | Setup bars; Controls, both | Empty; provisional full-travel calibration, per-channel identity and normalization |
+| `SteerBinding`, `ThrottleBinding`, `BrakeBinding` | Controls, both | Empty; provisional full-travel calibration, per-channel identity and normalization |
 | `HandbrakeBinding`, `HandbrakeButtonBinding` | Controls, both | Empty; independent analog and button; max with stock game input |
 | `ClutchBinding` | Controls, expanded basic group | Empty; same calibration transaction |
 | Binding calibration suffix (`Left`, rest/far, inversion, deadzone) | Controls candidate edit, both | No new global defaults; legacy strings preserved; new deadzone 0; UI 0–10%, parser accepts saved 0–25% |
@@ -237,7 +239,7 @@ The owner/coordinator authorized replacing RC6 on 2026-09-19; preserve its backu
 and force/settings evidence. No live slot is granted. With an allocated slot:
 
 1. Back up installed settings and payload. Use a fresh settings fixture, then a
-   copy of legacy settings; verify Simple/Setup defaults, explicit Advanced
+   copy of legacy settings; verify old Setup opens Simple/Controls, explicit Advanced
    persistence, owner tune values and FFB Off across restart.
 2. Walk all pages at720p, rig resolution and larger UMM scale. Check header,
    Stop/Close, wrapped text, errors, nested scrolling and keyboard focus.

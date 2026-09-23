@@ -17,15 +17,19 @@ static class Program
     static void Views()
     {
         var c=Read("<Settings><ForceFeedbackEnabled>false</ForceFeedbackEnabled><Smoothing>0.61</Smoothing><CrashStrength>19.52381</CrashStrength><LandingStrength>20</LandingStrength><BonnetHeight>1.4</BonnetHeight><PreferredDeviceGuid>"+Wheel+"</PreferredDeviceGuid></Settings>");
-        string before=Xml(c);
-        Check(!SettingsViewPolicy.Advanced(c)&&SettingsViewPolicy.Page(c)==0,"legacy config not Simple Setup");
+        Check(!SettingsViewPolicy.Advanced(c)&&SettingsViewPolicy.Page(c)==0,"legacy Setup did not open Simple Controls");
         Check(SettingsViewPolicy.CustomFfb(c)&&SettingsViewPolicy.CustomCamera(c),"custom tune hidden without summary");
         Check(!SettingsViewPolicy.CustomControls(c),"default controls labelled custom");
         c.DirectSteering=false;Check(SettingsViewPolicy.CustomControls(c),"custom controls hidden");c.DirectSteering=true;
-        Check(SettingsViewPolicy.Select(c,true,3,false),"Advanced selection failed");
-        var again=Read(Xml(c));Check(SettingsViewPolicy.Advanced(again)&&again.SettingsPage==3,"view/page not persistent");
+        Check(SettingsViewPolicy.Select(c,true,2,false),"Advanced selection failed");
+        var again=Read(Xml(c));Check(SettingsViewPolicy.Advanced(again)&&again.SettingsPage==3&&SettingsViewPolicy.Page(again)==2,"view/page not persistent");
         Check(!SettingsViewPolicy.Select(c,false,0,true)&&c.SettingsPage==3&&SettingsViewPolicy.Advanced(c),"edit guard discarded current page");
-        SettingsViewPolicy.Select(c,false,0,false);Check(Xml(c)==before,"view round trip changed runtime settings");
+        SettingsViewPolicy.Select(c,false,0,false);
+        Check(c.SettingsPage==1&&c.Smoothing==.61f&&c.CrashStrength==19.52381f&&c.LandingStrength==20&&c.BonnetHeight==1.4f&&!c.ForceFeedbackEnabled,
+            "view normalization changed runtime settings");
+        c.SettingsPage=1;Check(SettingsViewPolicy.Page(c)==0,"saved Controls page moved");
+        c.SettingsPage=2;Check(SettingsViewPolicy.Page(c)==1,"saved FFB page moved");
+        c.SettingsPage=5;Check(SettingsViewPolicy.Page(c)==4,"saved Help page moved");
         c.SettingsView="unknown";c.SettingsPage=999;
         Check(!SettingsViewPolicy.Advanced(c)&&SettingsViewPolicy.Page(c)==0&&!c.ForceFeedbackEnabled,"unknown presentation reset tune");
         var network=new ConnectionEdit();string oldHost=c.TelemetryHost;int oldPort=c.TelemetryPort;
@@ -69,7 +73,7 @@ static class Program
         Input.Down.Add(KeyCode.F8);Host.TickSettingsUi();Input.Down.Clear();
         Check(!Host.Settings.ForceFeedbackEnabled&&FfbNative.Stops==1&&Host.Saves==1&&Host.Cancels==1,"F8 did not stop before saved Off");
         for(int i=0;i<10;i++)Host.TickSettingsUi();Check(!Host.Settings.ForceFeedbackEnabled&&Host.Requests==0,"panic auto-resumed");
-        SettingsViewPolicy.Select(Host.Settings,true,2,false);Host.TickSettingsUi();Check(FfbNative.Stops==1&&!Host.Settings.ForceFeedbackEnabled,"view switch affected FFB");
+        SettingsViewPolicy.Select(Host.Settings,true,1,false);Host.TickSettingsUi();Check(FfbNative.Stops==1&&!Host.Settings.ForceFeedbackEnabled,"view switch affected FFB");
         FfbNative.Ready=false;Host.SelectForceDevice();Check(Host.Requests==0&&!Host.Settings.ForceFeedbackEnabled,"picker cleared Off");
         Host.SetFeedbackEnabled(true);Check(Host.Requests==1&&Host.Settings.ForceFeedbackEnabled,"explicit On cannot resume");
         WheelInput.Pressed.Add(WheelInput.Channel.StopFfbButton);Host.TickSettingsUi();Check(!Host.Settings.ForceFeedbackEnabled,"USB stop failed to save Off");
@@ -165,8 +169,9 @@ static class Program
         Check(SettingsDisplayPolicy.Width(3840,2,960)==890,"actual default UMM host escaped");
         Check(SettingsDisplayPolicy.PageHeight(2160,2,0)>=300 && SettingsDisplayPolicy.PageHeight(2160,2,0)<=340,
             "compact header must leave room for an actionable binding group inside the default host");
-        Check(SettingsDisplayPolicy.PageColumns(890,2)==3,"4K default host did not wrap page buttons");
-        Check(SettingsDisplayPolicy.PageColumns(890,1)==6,"ordinary host unnecessarily wrapped pages");
+        Check(SettingsDisplayPolicy.PageColumns(890,2)==5,"4K default host did not keep five compact tabs on one row");
+        Check(SettingsDisplayPolicy.PageColumns(890,1)==5,"ordinary host did not keep five tabs on one row");
+        Check(SettingsDisplayPolicy.PageColumns(700,2)==4,"narrow host did not wrap compact tabs");
         Check(SettingsDisplayPolicy.PageColumns(200,5)==1,"narrow high-scale page grid invalid");
         foreach(float s in new[]{.5f,1f,1.5f,2f,3f,4f,5f})
         foreach(float host in new[]{960f,1280f,1920f})

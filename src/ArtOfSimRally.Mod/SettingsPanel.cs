@@ -5,7 +5,8 @@ namespace ArtOfSimRally.Mod
 {
     internal static class SettingsPanel
     {
-        private static GUIStyle _wrap, _help, _heading, _card;
+        private static GUIStyle _wrap, _help, _heading, _cardHeading, _card, _topButton, _tab;
+        private static Texture2D _cardBackground, _tabNormal, _tabHover, _tabSelected;
         private static int _cardDepth;
         private static Vector2 _scroll;
         private static bool _shifter, _cameraKeys, _clutch, _settingsKey, _modButtons;
@@ -35,20 +36,39 @@ namespace ArtOfSimRally.Mod
             _help = new GUIStyle(_wrap);
             _help.normal.textColor = new Color(.72f, .72f, .72f);
             _heading = new GUIStyle(_wrap) { fontStyle = FontStyle.Bold };
-            int inset = (int)(8 * SettingsPresentation.Scale);
+            _cardHeading = new GUIStyle(_heading);
+            _cardHeading.normal.textColor = new Color(.86f, .94f, .96f);
+            _cardHeading.margin = new RectOffset(0, 0, 0, (int)(3 * SettingsPresentation.Scale));
+            int inset = (int)(10 * SettingsPresentation.Scale);
             _card = new GUIStyle(GUI.skin.box) {
                 padding = new RectOffset(inset, inset, inset, inset),
-                border = new RectOffset(0, 0, 0, 0),
+                border = new RectOffset(1, 1, 1, 1),
                 margin = new RectOffset(0, 0, 0, 0)
             };
-            _card.normal.background = Texture2D.whiteTexture;
+            _card.normal.background = CardBackground();
+            int buttonGap = Math.Max(2, (int)(3 * SettingsPresentation.Scale));
+            _topButton = new GUIStyle(GUI.skin.button) {
+                margin = new RectOffset(buttonGap, buttonGap, 0, 0),
+                padding = new RectOffset((int)(6 * SettingsPresentation.Scale), (int)(6 * SettingsPresentation.Scale),
+                    (int)(2 * SettingsPresentation.Scale), (int)(2 * SettingsPresentation.Scale))
+            };
+            _tab = new GUIStyle(GUI.skin.button) {
+                alignment = TextAnchor.MiddleCenter,
+                border = new RectOffset(0, 0, 0, 1),
+                margin = new RectOffset(buttonGap, buttonGap, buttonGap, buttonGap),
+                padding = new RectOffset((int)(6 * SettingsPresentation.Scale), (int)(6 * SettingsPresentation.Scale),
+                    (int)(3 * SettingsPresentation.Scale), (int)(3 * SettingsPresentation.Scale))
+            };
+            ConfigureTabStyle(_tab);
             _cardDepth = 0;
             HandleKey(c);
             GUILayout.BeginHorizontal();
             GUILayout.Label("Wheel settings", _heading);
-            if (GUILayout.Button("Stop FFB (F8)")) Main.StopFeedback();
-            if (GUILayout.Button("Close")) Main.CloseSettings();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Stop FFB (F8)", _topButton, SettingsPresentation.Width(120))) Main.StopFeedback();
+            if (GUILayout.Button("Close", _topButton, SettingsPresentation.Width(72))) Main.CloseSettings();
             GUILayout.EndHorizontal();
+            GUILayout.Space(4 * SettingsPresentation.Scale);
             bool wasEnabled = GUI.enabled;
             GUI.enabled = wasEnabled && !Editing;
             bool advanced = SettingsViewPolicy.Advanced(c);
@@ -56,28 +76,30 @@ namespace ArtOfSimRally.Mod
             bool compactHeader = !SettingsPresentation.StackRows;
             if (compactHeader) GUILayout.BeginHorizontal();
             int view = GUILayout.Toolbar(advanced ? 1 : 0, new[] { "Simple", "Advanced" },
-                compactHeader ? SettingsPresentation.Width(240) : GUILayout.ExpandWidth(true));
+                _tab, compactHeader ? SettingsPresentation.Width(170) : GUILayout.ExpandWidth(true));
             if (view != (advanced ? 1 : 0)) Select(c, view == 1, SettingsViewPolicy.Page(c));
             GUI.enabled = wasEnabled;
+            if (compactHeader) GUILayout.FlexibleSpace();
             GUILayout.Label(Main.SettingsSaveStatus, _wrap);
             if (compactHeader) GUILayout.EndHorizontal();
+            GUILayout.Space(3 * SettingsPresentation.Scale);
             GUI.enabled = wasEnabled && !Editing;
             int page = GUILayout.SelectionGrid(SettingsViewPolicy.Page(c), SettingsViewPolicy.Pages,
-                SettingsDisplayPolicy.PageColumns(SettingsPresentation.ContentWidth, SettingsPresentation.Scale));
+                SettingsDisplayPolicy.PageColumns(SettingsPresentation.ContentWidth, SettingsPresentation.Scale), _tab);
             if (page != SettingsViewPolicy.Page(c)) Select(c, advanced, page);
             GUI.enabled = wasEnabled;
+            GUILayout.Space(4 * SettingsPresentation.Scale);
             // Header stays outside our page scroll; explicit host sizes win.
             float height = SettingsPresentation.PageHeight;
             _scroll = GUILayout.BeginScrollView(_scroll, GUILayout.Height(height));
             GUILayout.BeginVertical(GUILayout.Width(SettingsPresentation.BodyWidth));
             switch (SettingsViewPolicy.Page(c))
             {
-                case 0: Setup(c); break;
-                case 1: Controls(c); break;
-                case 2: Feedback(c); break;
-                case 3: Cameras(c); break;
-                case 4: Telemetry(c); break;
-                case 5: Support(c); break;
+                case 0: Controls(c); break;
+                case 1: Feedback(c); break;
+                case 2: Cameras(c); break;
+                case 3: Telemetry(c); break;
+                case 4: Support(c); break;
             }
             GUILayout.EndVertical(); GUILayout.EndScrollView();
         }
@@ -113,17 +135,6 @@ namespace ArtOfSimRally.Mod
                 }
             }
             e.Use();
-        }
-        private static void Setup(Settings c)
-        {
-            Bar(WheelInput.Channel.Steer, "Steering"); Bar(WheelInput.Channel.Throttle, "Throttle"); Bar(WheelInput.Channel.Brake, "Brake");
-            bool complete = c.WheelInputEnabled && WheelInput.IsBound(WheelInput.Channel.Steer) &&
-                WheelInput.IsBound(WheelInput.Channel.Throttle) && WheelInput.IsBound(WheelInput.Channel.Brake);
-            Help(complete ? "Move the wheel and pedals to check these bars." :
-                "Keep working game controls. Bind separate devices in Controls if needed.");
-            if (GUILayout.Button(complete ? "Next: check FFB" : "Open Controls"))
-                Select(c, SettingsViewPolicy.Advanced(c), complete ? 2 : 1);
-            Help("Handbrake, shifter, cameras and telemetry are optional. Bars show device input.");
         }
         private static void Controls(Settings c)
         {
@@ -162,7 +173,7 @@ namespace ArtOfSimRally.Mod
                 Help("F8 always stops FFB. These optional device buttons work even with assigned driving controls Off. Release held buttons after reconnecting.");
             }
             if (!SettingsViewPolicy.Advanced(c) && SettingsViewPolicy.CustomControls(c) &&
-                GUILayout.Button("Custom control tuning active — Review in Advanced")) Select(c, true, 1);
+                GUILayout.Button("Custom control tuning active — Review in Advanced")) Select(c, true, 0);
             if (SettingsViewPolicy.Advanced(c))
             {
                 GUILayout.Label("Steering compatibility", _wrap);
@@ -192,13 +203,15 @@ namespace ArtOfSimRally.Mod
                 CalibrationEditor(c, label);
                 return;
             }
-            if (!WheelInput.IsButtonChannel(channel))
-                Help(channel == WheelInput.Channel.Steer ? "Centre first, then Bind or Calibrate." : "Release first, then Bind or Calibrate.");
-            else Help("Release the button first, then Bind.");
+            string hint = !WheelInput.IsButtonChannel(channel)
+                ? channel == WheelInput.Channel.Steer ? "Centre first, then bind or calibrate." : "Release first, then bind or calibrate."
+                : "Release the button first, then bind.";
             bool enabled = GUI.enabled; GUI.enabled = enabled && !Editing;
             bool stack = StackRows;
-            if (!stack) GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Bind " + label.ToLowerInvariant())) WheelInput.BeginCalibration(channel);
+            if (!stack) { GUILayout.BeginHorizontal(); GUILayout.Label(hint, _help, GUILayout.ExpandWidth(true)); }
+            else Help(hint);
+            if (GUILayout.Button(stack ? "Bind " + label.ToLowerInvariant() : "Bind",
+                stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(78))) WheelInput.BeginCalibration(channel);
             GUI.enabled = enabled && !Editing && bound;
             if (!WheelInput.IsButtonChannel(channel) && GUILayout.Button(stack ? "Calibrate " + label.ToLowerInvariant() : "Calibrate",
                 stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(100))) WheelInput.BeginCalibration(channel);
@@ -273,7 +286,7 @@ namespace ArtOfSimRally.Mod
                 "Inactive while settings are open. Feedback resumes through normal driving gates.");
             if (!SettingsViewPolicy.Advanced(c))
             {
-                if (SettingsViewPolicy.CustomFfb(c) && GUILayout.Button("Custom FFB tuning active — Review in Advanced")) Select(c, true, 2);
+                if (SettingsViewPolicy.CustomFfb(c) && GUILayout.Button("Custom FFB tuning active — Review in Advanced")) Select(c, true, 1);
                 return;
             }
             c.Smoothing = Slider(c.Smoothing, 0, .95f, .2f, "Smoothing", 100, "%");
@@ -325,7 +338,7 @@ namespace ArtOfSimRally.Mod
                 GUI.enabled = enabled; Help(CameraKeys.Status);
             }
             if (!SettingsViewPolicy.Advanced(c))
-            { if (SettingsViewPolicy.CustomCamera(c) && GUILayout.Button("Custom camera tuning active — Review in Advanced")) Select(c, true, 3); return; }
+            { if (SettingsViewPolicy.CustomCamera(c) && GUILayout.Button("Custom camera tuning active — Review in Advanced")) Select(c, true, 2); return; }
             _mount = GUILayout.Toolbar(_mount, new[] { "Bonnet pose", "Bumper pose" });
             if (GUILayout.Button("Reset this view (" + (_mount == 0 ? "Bonnet" : "Bumper") + ")")) { c.ResetCameraMount(_mount != 0); Main.MarkSettingsDirty(); }
             if (_mount == 0)
@@ -358,7 +371,7 @@ namespace ArtOfSimRally.Mod
             if (!SettingsViewPolicy.Advanced(c))
             {
                 if (GUILayout.Button("Use local SimHub preset (127.0.0.1:8000)")) { c.TelemetryHost = "127.0.0.1"; c.TelemetryPort = 8000; Main.MarkSettingsDirty(); }
-                if (GUILayout.Button("Connection settings (Advanced)")) Select(c, true, 4);
+                if (GUILayout.Button("Connection settings (Advanced)")) Select(c, true, 3);
                 return;
             }
             if (!Connection.Editing && GUILayout.Button("Edit connection")) Connection.Begin(c);
@@ -384,7 +397,7 @@ namespace ArtOfSimRally.Mod
             if (GUILayout.Button("Create support file on Desktop")) SupportBundle.Create();
             Help(string.IsNullOrEmpty(SupportBundle.LastResult) ? "Creates a local file with settings, device identifiers, paths and logs; nothing is uploaded." : SupportBundle.LastResult);
             if (!SettingsViewPolicy.Advanced(c))
-            { if (GUILayout.Button("Details (Advanced)")) Select(c, true, 5); return; }
+            { if (GUILayout.Button("Details (Advanced)")) Select(c, true, 4); return; }
             c.DiagnosticLogging = Toggle(c.DiagnosticLogging, "Log detail for support");
             Help("Enable, reproduce briefly, pause, create the support file, then turn detail logging off.");
             Panel.DrawInputStatus();
@@ -412,11 +425,11 @@ namespace ArtOfSimRally.Mod
         private static void BeginCard(string title)
         {
             var previous = GUI.backgroundColor;
-            GUI.backgroundColor = new Color(.16f, .17f, .18f, 1);
+            GUI.backgroundColor = Color.white;
             GUILayout.BeginVertical(_card);
             GUI.backgroundColor = previous;
             _cardDepth++;
-            GUILayout.Label(title, _heading);
+            GUILayout.Label(title, _cardHeading);
         }
         private static void EndCard()
         {
@@ -431,6 +444,61 @@ namespace ArtOfSimRally.Mod
             if (GUILayout.Button((open ? "Hide " : "Show ") + label)) open = !open;
             GUI.enabled = enabled;
             return open;
+        }
+        private static Texture2D CardBackground()
+        {
+            if (_cardBackground != null) return _cardBackground;
+            _cardBackground = new Texture2D(3, 3) {
+                name = "ArtOfSimRally.SettingsCard",
+                filterMode = FilterMode.Point,
+                wrapMode = TextureWrapMode.Clamp,
+                hideFlags = HideFlags.HideAndDontSave
+            };
+            var border = new Color(.32f, .36f, .39f, 1);
+            var fill = new Color(.11f, .125f, .14f, 1);
+            for (int y = 0; y < 3; y++)
+                for (int x = 0; x < 3; x++)
+                    _cardBackground.SetPixel(x, y, x == 0 || x == 2 || y == 0 || y == 2 ? border : fill);
+            _cardBackground.Apply(false, true);
+            return _cardBackground;
+        }
+        private static void ConfigureTabStyle(GUIStyle style)
+        {
+            if (_tabNormal == null)
+            {
+                _tabNormal = TabBackground("ArtOfSimRally.Tab", new Color(.16f, .17f, .18f, 1), new Color(.28f, .3f, .32f, 1));
+                _tabHover = TabBackground("ArtOfSimRally.TabHover", new Color(.2f, .22f, .24f, 1), new Color(.44f, .49f, .52f, 1));
+                _tabSelected = TabBackground("ArtOfSimRally.TabSelected", new Color(.2f, .23f, .25f, 1), new Color(.3f, .75f, .82f, 1));
+            }
+            style.normal.background = _tabNormal;
+            style.hover.background = _tabHover;
+            style.focused.background = _tabHover;
+            style.active.background = _tabSelected;
+            style.onNormal.background = _tabSelected;
+            style.onHover.background = _tabSelected;
+            style.onActive.background = _tabSelected;
+            style.onFocused.background = _tabSelected;
+            style.normal.textColor = new Color(.78f, .8f, .82f, 1);
+            style.hover.textColor = Color.white;
+            style.focused.textColor = Color.white;
+            style.active.textColor = Color.white;
+            style.onNormal.textColor = Color.white;
+            style.onHover.textColor = Color.white;
+            style.onActive.textColor = Color.white;
+            style.onFocused.textColor = Color.white;
+        }
+        private static Texture2D TabBackground(string name, Color fill, Color underline)
+        {
+            var texture = new Texture2D(3, 3) {
+                name = name,
+                filterMode = FilterMode.Point,
+                wrapMode = TextureWrapMode.Clamp,
+                hideFlags = HideFlags.HideAndDontSave
+            };
+            for (int y = 0; y < 3; y++)
+                for (int x = 0; x < 3; x++) texture.SetPixel(x, y, y == 0 ? underline : fill);
+            texture.Apply(false, true);
+            return texture;
         }
         private static void Help(string text) { if (!string.IsNullOrEmpty(text)) GUILayout.Label(text, _help); }
     }
