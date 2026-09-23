@@ -6,32 +6,41 @@ namespace ArtOfRally.TripleScreen.Mod;
 
 internal sealed class LayoutSource
 {
+    private readonly string _stagedPath;
+    private string _lastPath = string.Empty;
     private DateTime _lastWriteUtc = DateTime.MinValue;
     private long _lastLength = -1;
     private LayoutLoadResult _current = LayoutLoadResult.Failure("LAYOUT_NOT_FOUND", "The optimizer has not written desired-layout.json.");
 
+    internal LayoutSource(string stagedPath) => _stagedPath = stagedPath;
+
     internal LayoutLoadResult Current => _current;
+    internal string CurrentPath => _lastPath;
 
     internal bool Refresh(bool force)
     {
-        var path = AdapterConstants.DesiredLayoutPath;
+        var canonicalPath = AdapterConstants.DesiredLayoutPath;
+        var path = File.Exists(canonicalPath) ? canonicalPath : _stagedPath;
         try
         {
             var info = new FileInfo(path);
             if (!info.Exists)
             {
                 var changed = _lastLength != -1 || _current.ErrorCode != "LAYOUT_NOT_FOUND";
+                _lastPath = string.Empty;
                 _lastLength = -1;
                 _lastWriteUtc = DateTime.MinValue;
                 _current = LayoutLoadResult.Failure("LAYOUT_NOT_FOUND", "The optimizer has not written desired-layout.json.");
                 return changed;
             }
 
-            if (!force && info.Length == _lastLength && info.LastWriteTimeUtc == _lastWriteUtc)
+            if (!force && string.Equals(path, _lastPath, StringComparison.OrdinalIgnoreCase) &&
+                info.Length == _lastLength && info.LastWriteTimeUtc == _lastWriteUtc)
             {
                 return false;
             }
 
+            _lastPath = path;
             _lastLength = info.Length;
             _lastWriteUtc = info.LastWriteTimeUtc;
             _current = LayoutContractParser.Parse(File.ReadAllBytes(path));

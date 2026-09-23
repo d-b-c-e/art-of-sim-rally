@@ -17,6 +17,7 @@ internal static class Program
             HingesAreContinuous();
             CenterProjectionIsSymmetric();
             SideProjectionsAreMirroredAndOffAxis();
+            SharedEdgesLandOnAdjacentViewportBorders();
             IndependentSideAnglesArePreserved();
             MatrixMatchesFrustum();
             BadEyeSideIsRejected();
@@ -72,6 +73,32 @@ internal static class Program
         var expectedM00 = (2d * projection.Near) / (projection.Right - projection.Left);
         Near(projection.ProjectionMatrix[0, 0], expectedM00, 1e-12, "projection m00");
         Near(projection.ProjectionMatrix[3, 2], -1d, 0d, "projection perspective row");
+    }
+
+    private static void SharedEdgesLandOnAdjacentViewportBorders()
+    {
+        var surfaces = Rig();
+        var projections = new[]
+        {
+            ProjectionCalculator.Calculate(surfaces[0], new Vector3d(0d, 0d, 0d), 0.1d, 1500d),
+            ProjectionCalculator.Calculate(surfaces[1], new Vector3d(0d, 0d, 0d), 0.1d, 1500d),
+            ProjectionCalculator.Calculate(surfaces[2], new Vector3d(0d, 0d, 0d), 0.1d, 1500d)
+        };
+
+        var leftHinge = surfaces[1].LowerLeft + (surfaces[1].Up * (surfaces[1].Height / 2d));
+        var rightHinge = surfaces[1].LowerRight + (surfaces[1].Up * (surfaces[1].Height / 2d));
+        Near(ProjectHorizontal(projections[0], leftHinge), 1d, 1e-9, "left view inner edge");
+        Near(ProjectHorizontal(projections[1], leftHinge), -1d, 1e-9, "center view left edge");
+        Near(ProjectHorizontal(projections[1], rightHinge), 1d, 1e-9, "center view right edge");
+        Near(ProjectHorizontal(projections[2], rightHinge), -1d, 1e-9, "right view inner edge");
+    }
+
+    private static double ProjectHorizontal(OffAxisProjection view, Vector3d point)
+    {
+        var ray = point - view.CameraPosition;
+        var depth = Vector3d.Dot(ray, view.CameraForward);
+        var nearX = Vector3d.Dot(ray, view.CameraRight) * view.Near / depth;
+        return (2d * nearX - view.Left - view.Right) / (view.Right - view.Left);
     }
 
     private static void IndependentSideAnglesArePreserved()

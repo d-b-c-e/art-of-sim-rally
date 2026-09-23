@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "adapterId": "dbce-triple-mod-art-of-rally",
-  "adapterVersion": "0.1.0",
+  "adapterVersion": "0.2.0",
   "gameId": "art-of-rally",
   "layoutContractVersions": {
     "minimum": 1,
@@ -25,6 +25,7 @@
     "Mods/DbceTripleScreenArtOfRally/Dbce.TripleScreen.Core.dll",
     "Mods/DbceTripleScreenArtOfRally/Dbce.TripleScreen.Protocol.dll",
     "Mods/DbceTripleScreenArtOfRally/Info.json",
-    "Mods/DbceTripleScreenArtOfRally/manifest.json"
+    "Mods/DbceTripleScreenArtOfRally/manifest.json",
+    "Mods/DbceTripleScreenArtOfRally/desired-layout.json"
   ]
 }

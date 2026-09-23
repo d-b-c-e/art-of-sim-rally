@@ -27,6 +27,14 @@ The canonical file protocol is:
 - desired state: `%LOCALAPPDATA%\DBCE\TripleScreen\games\art-of-rally\desired-layout.json`;
 - observed state: `%LOCALAPPDATA%\DBCE\TripleScreen\games\art-of-rally\status.json`.
 
+If the game process cannot see a freshly exported per-user file, the optimizer
+also stages identical bytes at `Mods/DbceTripleScreenArtOfRally/desired-layout.json`
+inside the installed adapter. The mod prefers the canonical per-user file when
+visible and reads the staged copy only when that file is absent from its view.
+The active layout SHA-256 in `status.json` still lets the optimizer verify that
+the game accepted exactly the profile it exported. Both writes are backed up
+before replacement.
+
 The optimizer writes desired state atomically after schema validation. The mod
 never edits that file; it validates it strictly, applies only supported gated
 behavior, and atomically publishes observed status. Consumers must require an

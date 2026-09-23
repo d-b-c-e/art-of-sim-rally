@@ -11,6 +11,7 @@ internal sealed class CenterProjectionDriver : MonoBehaviour
     private Rect _originalRect;
     private Matrix4x4 _projection;
     private Rect _targetRect;
+    private string _layoutHash;
     private bool _configured;
 
     internal long SuccessfulFrames { get; private set; }
@@ -22,8 +23,14 @@ internal sealed class CenterProjectionDriver : MonoBehaviour
         if (_camera != null) _originalRect = _camera.rect;
     }
 
-    internal void Configure(Matrix4x4 projection, Rect targetRect)
+    internal void Configure(string layoutHash, Matrix4x4 projection, Rect targetRect)
     {
+        if (!string.Equals(_layoutHash, layoutHash, StringComparison.Ordinal))
+        {
+            _layoutHash = layoutHash;
+            SuccessfulFrames = 0;
+            LastSuccessfulFrameUtc = default;
+        }
         _projection = projection;
         _targetRect = targetRect;
         _configured = true;

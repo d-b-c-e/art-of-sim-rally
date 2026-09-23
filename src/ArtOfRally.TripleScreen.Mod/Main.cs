@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using UnityEngine;
 using UnityModManagerNet;
 
@@ -8,7 +9,7 @@ internal static class Main
 {
     private static UnityModManager.ModEntry _modEntry;
     private static Settings _settings;
-    private static readonly LayoutSource Layout = new();
+    private static LayoutSource Layout;
     private static readonly ProjectionController Projection = new();
     private static StatusPublisher _status;
     private static bool _enabled;
@@ -29,6 +30,12 @@ internal static class Main
         }
 
         _status = new StatusPublisher(modEntry.Logger);
+        Layout = new LayoutSource(Path.Combine(modEntry.Path, "desired-layout.json"));
+        var layoutPath = AdapterConstants.DesiredLayoutPath;
+        modEntry.Logger.Log("Layout candidates: canonical=" + layoutPath +
+                            " (visible=" + File.Exists(layoutPath) + "), staged=" +
+                            Path.Combine(modEntry.Path, "desired-layout.json") +
+                            " (visible=" + File.Exists(Path.Combine(modEntry.Path, "desired-layout.json")) + ").");
         Layout.Refresh(true);
         modEntry.OnUpdate = OnUpdate;
         modEntry.OnGUI = OnGUI;
@@ -37,11 +44,11 @@ internal static class Main
         modEntry.OnUnload = OnUnload;
         _enabled = true;
 
-        _lastOutcome = _settings.EnableCenterPanelPreview
+        _lastOutcome = _settings.EnableThreeViewPrototype || _settings.EnableCenterPanelPreview
             ? ProjectionOutcome.Starting(Layout.Current, "ADAPTER_STARTING", "Adapter loaded; waiting to evaluate the stage camera.")
-            : ProjectionOutcome.Inactive(Layout.Current, "FEATURE_DISABLED", "Center-panel projection preview is disabled; stock rendering is unchanged.");
+            : ProjectionOutcome.Inactive(Layout.Current, "FEATURE_DISABLED", "Triple-screen rendering is disabled; stock rendering is unchanged.");
         _status.Publish(_lastOutcome, Application.version, true);
-        modEntry.Logger.Log("Loaded v" + AdapterConstants.AdapterVersion + ". Center-panel preview defaults off; no display or resolution APIs are changed.");
+        modEntry.Logger.Log("Loaded v" + AdapterConstants.AdapterVersion + ". Three-view rendering defaults off; no display or resolution APIs are changed.");
         return true;
     }
 
@@ -72,10 +79,13 @@ internal static class Main
     {
         _ = modEntry;
         GUILayout.Label("DBCE triple-screen adapter v" + AdapterConstants.AdapterVersion);
-        GUILayout.Label("True triples are not enabled in this milestone. The gated preview renders only the physical center viewport.");
+        GUILayout.Label("Experimental triple-screen renderer: NVIDIA Surround or an exact-size borderless span is required.");
+        _settings.EnableThreeViewPrototype = GUILayout.Toggle(
+            _settings.EnableThreeViewPrototype,
+            "Enable experimental three-view rendering (unprocessed; no TAA)");
         _settings.EnableCenterPanelPreview = GUILayout.Toggle(
             _settings.EnableCenterPanelPreview,
-            "Enable experimental center-panel projection preview");
+            "Enable center-panel projection preview when three-view rendering is off");
         _settings.AllowOutputResolutionMismatch = GUILayout.Toggle(
             _settings.AllowOutputResolutionMismatch,
             "Developer override: allow output resolution mismatch");
@@ -126,7 +136,8 @@ internal static class Main
     {
         if (!changed || _modEntry == null) return;
         var layout = Layout.Current;
-        if (layout.IsSuccess) _modEntry.Logger.Log("Accepted optimizer layout " + layout.Sha256.Substring(0, 12) + "…");
+        if (layout.IsSuccess) _modEntry.Logger.Log("Accepted optimizer layout " + layout.Sha256.Substring(0, 12) +
+                                                   "… from " + Layout.CurrentPath);
         else _modEntry.Logger.Warning((layout.ErrorCode ?? "LAYOUT_INVALID") + ": " + layout.ErrorMessage);
     }
 

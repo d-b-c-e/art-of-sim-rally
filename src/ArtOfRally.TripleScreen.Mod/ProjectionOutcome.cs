@@ -35,8 +35,12 @@ internal sealed class ProjectionOutcome
     internal static ProjectionOutcome Starting(LayoutLoadResult layout, string code, string message) =>
         Create("starting", layout, 0, null, code, "info", message);
 
-    internal static ProjectionOutcome Active(LayoutLoadResult layout, DateTime lastFrameUtc, string code, string message) =>
+    internal static ProjectionOutcome CenterPreviewActive(LayoutLoadResult layout, DateTime lastFrameUtc, string code, string message) =>
         Create("active", layout, 1, lastFrameUtc, code, "warning", message, "asymmetric-frustum");
+
+    internal static ProjectionOutcome ThreeViewActive(LayoutLoadResult layout, DateTime lastFrameUtc, string code, string message) =>
+        Create("active", layout, 3, lastFrameUtc, code, "warning", message,
+            "asymmetric-frustum", "three-projections", "surround-compositor");
 
     internal static ProjectionOutcome Degraded(LayoutLoadResult layout, string code, string message) =>
         Create("degraded", layout, 0, null, code, "warning", message);
