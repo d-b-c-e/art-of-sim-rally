@@ -3,8 +3,8 @@ art of sim rally - @RELEASE@
 
 Wheel force feedback, direct USB controls, bonnet/bumper views and SimHub telemetry
 for the 64-bit Windows game. Tested on Steam; other stores are not confirmed.
-This candidate includes the new Simple/Advanced settings UI. Runtime UI/device
-acceptance is pending. No SDK, separate toolkit download or SimHub helper needed.
+Version 0.2.6 includes Simple/Advanced settings. No SDK, separate toolkit
+download or SimHub helper is needed. Some hardware scenarios remain untested.
 
 INSTALL / UPDATE
 ----------------
@@ -80,7 +80,7 @@ Leave the legacy steering limiter override Off; use the game's assist settings.
 CAMERAS
 -------
 Bonnet/Bumper On includes those views in the game's Change camera cycle.
-Adjustment bindings in Simple supports keyboard keys and USB buttons:
+Adjustment bindings in Simple support keyboard keys and USB buttons:
 8/2 up/down, 9/7 forward/back, 4/6 left/right, 1/3 tilt, +/- FOV, 0 reset.
 Defaults use the numpad. Bind/Clear work without a numpad. Close settings and
 release captured/held controls before adjusting a view. F8/F10 and the Settings
@@ -113,6 +113,5 @@ what happened. Check Saved/error status: failed binding writes keep old values.
 
 Source, docs and licence: https://github.com/d-b-c-e/art-of-sim-rally
 Issues: https://github.com/d-b-c-e/art-of-sim-rally/issues
-Stable 0.2.5 docs describe the old panel. This README describes this candidate.
-Tested hardware history: MOZA R12; positive R5/T300 reports. This UI, full hardware
-transition matrix, Fanatec/TSS travel and stronger crash feel await testing.
+Tested hardware history: MOZA R12; positive R5/T300 reports. The full hardware
+transition matrix, Fanatec/TSS travel and stronger crash feel need more reports.

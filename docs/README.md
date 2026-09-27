@@ -11,13 +11,12 @@
 
 ## Development and validation
 
-- [Settings candidate guide](UX-SETTINGS-CANDIDATE.md) and
-  [UX-1 audit](UX-OVERNIGHT-2026-09-16.md): installed Simple/Advanced candidate,
-  coverage and remaining acceptance; see LOCAL-DEPLOYMENT for installation.
-  These changes are not in the public download.
+- [Simple/Advanced settings guide](UX-SETTINGS-CANDIDATE.md) and
+  [UX-1 audit](UX-OVERNIGHT-2026-09-16.md): detailed controls and remaining
+  acceptance cases. The public 0.2.6 download includes these settings pages.
 
-- [Crash vibration candidate](CRASH-EFFECTS.md): optional wheel effect and short
-  attended comparison; not in the 0.2.5 public download.
+- [Experimental crash kick](CRASH-EFFECTS.md): optional wheel effect and short
+  attended comparison; off by default in 0.2.6.
 
 - [Building](BUILDING.md): local prerequisites and commands.
 - [Known issues](KNOWN-ISSUES.md): defects and hardware cases awaiting confirmation.
@@ -37,4 +36,4 @@
 These references include dated investigations and older experiments. For current
 user instructions, use the setup guide above. Reviews in `reviews/` preserve
 what was known/tested at the time; an old candidate receipt is not the installed
-version. [Current release evidence](reviews/2026-09-13-release-0.2.5.md).
+version. [0.2.6 release notes](releases/0.2.6.md).

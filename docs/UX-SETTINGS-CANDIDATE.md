@@ -1,9 +1,8 @@
-# Settings candidate: short test guide
+# Wheel settings: detailed guide and test checklist
 
-This guide applies to the **installed 0.2.6-rc.15 Simple/Advanced candidate**,
-not the public 0.2.5 download. It replaced RC14 after all16 local gates on
-2026-09-23 UTC (September22 local); see [Local deployment](LOCAL-DEPLOYMENT.md) for the exact identity,
-backup and receipt.
+This guide covers the Simple/Advanced settings in **0.2.6**. RC16 introduced
+compact device pickers; see [Local deployment](LOCAL-DEPLOYMENT.md) for its exact
+identity and [release notes](releases/0.2.6.md) for publication.
 The [engineering audit](UX-OVERNIGHT-2026-09-16.md) records coverage and remaining
 gaps. The usual installer still preserves Settings.xml; start any attended
 comparison with an extra backup of that file.
@@ -14,14 +13,15 @@ Show/Hide buttons, and reduces the header. The latest successor strengthens card
 contrast, gives navigation a flat tab treatment, puts compact actions to the
 right of their guidance and removes the redundant Setup page. New rendered
 checks remain pending. RC15 additionally compacts the remaining command and
-disclosure rows and fixes the native game-bindings handoff. The RC12 smoke below
+disclosure rows and fixes the native game-bindings handoff. RC16 bounds the FFB
+and shifter choices and makes Refresh compact. The RC12 smoke below
 is historical evidence.
 
 **RC9 smoke found a blocker:** navigation/Escape can reach the game menu behind
 the panel, and default4K text is too small. RC10 contains the reviewed fixes
 and passed all16 local gates. Live keyboard isolation/recovery passed, but
 default4K layout still clipped controls. RC12 corrects host-bound widths and
-large-scale row stacking, passed all16 gates and is installed. Its limited4K
+large-scale row stacking and passed all16 gates. Its limited4K
 checks passed the header, page buttons, all six Simple page tops, camera nested
 scrolling, timed Bind→Escape cancellation and native Quit recovery. Advanced
 Cameras top was observed; other Advanced pages, custom scales and physical input
@@ -106,8 +106,8 @@ direction, landing vibration and experimental crash kick. Steering Strength
 50 retains the existing reference tuning. Landing defaults to 5 (range 0–40);
 crash defaults to 50 (range 0–100) and remains off for new settings. Existing
 values are preserved. These effect strengths are percentages of nominal wheel
-force; they do not scale telemetry or SimHub. The crash candidate still needs
-the owner's physical acceptance independently of the UI tests.
+force; they do not scale telemetry or SimHub. Crash feel remains
+hardware-specific; the broad rig matrix is separate from UI testing.
 
 ## Cameras, telemetry and help
 

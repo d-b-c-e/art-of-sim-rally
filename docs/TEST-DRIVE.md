@@ -5,11 +5,9 @@ developer mod observes game signals; a standalone command replays them without
 the game or wheel. Record a representative drive once, then reuse that case on
 subsequent builds. Allow about 20–30 minutes for attended release checks.
 
-The installed Stream Deck target uses **stable 0.2.5**, recorded in
-[LOCAL-DEPLOYMENT.md](LOCAL-DEPLOYMENT.md), with settings/backups preserved.
-The owner accepted RC8 and authorized publication. The separate final-artifact
-drive and full scenario matrix remain pending. This guide is for subsequent
-development capture/testing, not required player installation steps.
+The Stream Deck key launches Steam app 550320 and therefore the game's current
+local installation, recorded in [LOCAL-DEPLOYMENT.md](LOCAL-DEPLOYMENT.md).
+This guide is for development capture/testing, not player installation.
 
 1. **Prepare the candidate.** Close art of rally, retain the previous ZIP and
    Settings.xml, and install the exact ZIP identified by the successful

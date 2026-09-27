@@ -1,10 +1,10 @@
 # Overnight investigation and implementation queue
 
-**Current, 2026-09-19 UTC:** 0.2.5 is published with official toolkit
-v0.13.0. Owner accepted wheel landing vibration and the built-in 30 Hz SimHub
-comparison. The helper was rejected and removed. Remaining work is in the
-[roadmap](ROADMAP.md); full hardware checks remain pending. The dated queue
-entries below preserve earlier states and do not describe the current install.
+**Historical queue through 2026-09-19 UTC.** The owner later accepted RC16
+overall and requested 0.2.6 publication. Use the [roadmap](ROADMAP.md),
+[known issues](KNOWN-ISSUES.md) and [local deployment](LOCAL-DEPLOYMENT.md) for
+current status. Dated entries below preserve earlier states, including the
+accepted wheel landing/30 Hz SimHub comparison and rejected helper.
 
 ## Current follow-through — crash candidate and 0.2.5 feedback
 

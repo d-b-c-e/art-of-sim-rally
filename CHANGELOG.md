@@ -5,7 +5,7 @@ Notable changes to art of sim rally.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.6] - 2026-09-27
 
 ### Added
 
@@ -67,15 +67,14 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   crash feel remains unaccepted; UI changes do not retune forces or telemetry.
 - Shorter install/first-drive README and dedicated setup/build guides, including
   separate USB handbrakes, updates/removal, SimHub and support-file instructions.
-- Standalone release readme with usable online links and current 0.2.5 defaults.
+- Standalone release readme with usable online links and current 0.2.6 defaults.
 - Installer reports the verified release and explains incomplete downloads clearly.
 
 ### Fixed
 
-- Candidate native menu input isolation while settings own input, including
-  cancel, pointer presses and held-control handback. RC9's live failure is
-  preserved; narrow keyboard isolation/recovery has passed, while binding
-  cancellation and the full physical-input matrix still need runtime retesting.
+- Keep settings input out of native menus; opening the game's bindings screen
+  waits for the initiating control to release. The owner confirmed that route
+  works in game. The broader physical-input matrix remains pending.
 
 - Binding saves, clears and shortcut-default restores retain the previous
   effective assignment if Settings.xml cannot be written. Failed calibration
@@ -84,7 +83,7 @@ versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   shifter buttons wait for release before reuse. Physical/UI verification pending.
 - Slow native impact calls no longer consume the managed burst lifetime.
   Support records call latency and stop reasons to diagnose early interruption.
-- Native toolkit candidate stops writing every changing steering-force sample
+- Native toolkit stops writing every changing steering-force sample
   to disk by default. Startup, lifecycle and error logs remain available.
   This removes avoidable driving I/O; the reported startup hitch is not yet reproduced.
 - Developer analysis no longer reports a landing from an airborne spawn/reset.

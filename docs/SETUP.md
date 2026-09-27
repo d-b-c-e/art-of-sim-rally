@@ -1,17 +1,15 @@
 # Setup guide
 
 Start with the [four install steps](../README.md#install). This guide covers
-custom folders, controls and optional rig setup for **0.2.5**.
-
-For the isolated Simple/Advanced candidate, use its
-[settings guide](UX-SETTINGS-CANDIDATE.md). It has different panel paths and is
-not a public release. [Local deployment](LOCAL-DEPLOYMENT.md) identifies the
-owner's exact installed candidate.
+custom folders, controls and optional rig setup for **0.2.6**. The settings have
+Simple and Advanced views, with Controls, FFB, Cameras, Telemetry and Help pages.
+Pause before changing devices or bindings. [Local deployment](LOCAL-DEPLOYMENT.md)
+identifies the owner's exact installed build.
 
 ## Check the installation
 
-Launch through Steam, press **Ctrl+F10**, and find **art of sim rally 0.2.5** in
-Unity Mod Manager. Open the mod's settings. If the entry is absent or red, follow
+Launch through Steam, press **F6** for Wheel settings or **Ctrl+F10** for UMM,
+and find **art of sim rally 0.2.6**. If the entry is absent or red, follow
 [installation troubleshooting](TROUBLESHOOTING.md#installation-or-settings-panel-missing).
 
 The game folder contains `artofrally.exe`. Our mod goes in
@@ -62,18 +60,20 @@ updates so both copies stay in sync. Vortex installation has not been validated.
 1. Connect the wheel and pedals and verify they respond in the manufacturer's
    Windows software. Use the real USB wheel rather than routing it through a
    virtual Xbox controller.
-2. In the game, pause and open **Ctrl+F10 → Force feedback**. Enable FFB and
-   select your wheel in **Wheel**. Keep the game focused and allow a few seconds
-   for setup. If it remains unavailable, toggle **Enabled** off/on while paused.
-3. Use the game's control bindings if they already work. If they do not, open
-   **Wheel input (direct)** and enable **Read the wheel directly**.
-4. Centre the wheel/release the pedal. Click **Assign** beside **Steer**,
-   **Throttle**, **Brake** or **Clutch**, then move only that control. Exercise
-   its normal full range once. Steering should centre near 0 and move from -1
-   to 1; pedals should return to 0 and reach 1. Use **Flip** if reversed.
-5. Drive slowly first. If steering input is reversed, use **Flip** on **Steer**.
-   If input is correct but the force pulls away from centre, use **Force feedback
-   → Invert direction** instead.
+2. In the game, pause and open **F6 → FFB**. Choose **On**. **Follow steering
+   binding** uses the wheel saved in this mod's Controls page; if steering is
+   bound only in the game's controls, choose the physical FFB wheel explicitly.
+   Keep the game focused and allow a few seconds for setup. Use **Refresh devices**
+   after reconnecting a wheel.
+3. Keep the game's control bindings if they work. For missing axes, open
+   **Controls** and choose **Use assigned controls**.
+4. Centre the wheel or release the pedal. Click **Bind** beside **Steering**,
+   **Throttle**, **Brake** or an expanded **Clutch** row, move only that control,
+   and exercise its full range. Check the preview and inversion/deadzone, then
+   **Save calibration**. Cancel or a failed save keeps the prior assignment.
+5. Drive slowly first. If steering input is reversed, invert **Steering** in
+   Controls. If input is correct but force pulls away from centre, use
+   **Advanced → FFB → Invert force direction** instead.
 
 Only assigned direct-input rows replace the game's inputs. Different rows can
 read different USB devices. Menus continue to use the keyboard or a pad.
@@ -86,11 +86,11 @@ for duplicate device names and the limits of current hardware confirmation.
 TSS means **Thrustmaster TSS Handbrake**; it can also operate as a sequential
 shifter. Select its handbrake mode in the device setup before assigning it here.
 
-1. Pause and open **Wheel input (direct)**. Enable **Read the wheel directly**.
-2. With the lever released, click **Assign** beside **Handbrake**, then pull it.
-3. Move through full travel once, then release. Check the live value at rest,
-   partial pull and full pull: an axis should vary gradually from 0 to 1.
-   Use **Flip** if backwards.
+1. Pause and open **Controls**. Choose **Use assigned controls**.
+2. With the lever released, click **Bind** on **Handbrake (axis)**, then pull it.
+3. Move through full travel once, then release. Check the live preview at rest,
+   partial pull and full pull: an axis should vary gradually from 0 to 100%.
+   Adjust inversion if backwards, then **Save calibration**.
 4. Leave working wheel/pedal rows unbound. Clear conflicting game or separate
    shifter bindings if pulling the handbrake also shifts gear.
 
@@ -107,18 +107,17 @@ Actual TSS travel/braking behavior still needs user confirmation.
 | **Strength**, default 50 | Overall steering force. Lower it for a lighter wheel. |
 | **Smoothing**, default 0.20 | Higher values soften rapid force changes/rattle and add delay. It filters FFB, not steering input. |
 | **Landing vibration**, default on | A short wheel vibration at a qualifying touchdown. Saved opt-outs remain off. |
-| **Landing strength**, default 5 | Independent wheel vibration strength; smaller landings use less. Zero disables it. Maximum 20 in 0.2.5; 40 in the 0.2.6 candidate. |
+| **Landing strength**, default 5 | Independent wheel vibration strength; smaller landings use less. Zero disables it. Range 0–40. |
 
 Steering force fades in between 3 and 12 km/h. Landing vibration requires wheel
 sine-effect support; if unsupported, steering can still work. Small hops may not
 trigger it. [Details and limitations](LANDING-EFFECTS.md).
 
-**0.2.6 candidate only:** [Crash kick (experimental)](CRASH-EFFECTS.md)
+**Crash kick (experimental):** [How it works](CRASH-EFFECTS.md). It
 is off by default, with independent strength **50** and range **0–100**. Enable
 while paused for testing. It requests a short constant-force push, then releases;
-the new effect needs wheel testing. Landing and crash effects do not stack.
+hardware-specific feel still needs feedback. Landing and crash effects do not stack.
 A wheel that rejects constant crash effects can still use landing vibration.
-The public 0.2.5 download does not include this setting.
 
 Landing remains strength **5**, range **0–40**. Both controls are percentages of
 nominal wheel force: saved values are preserved, so select 50 manually to compare
@@ -132,8 +131,9 @@ override of the game's assist slider; use the game's assist settings instead.
 
 ## Shifter
 
-While paused, open **Shifter → Use a separate shifter**, choose the device and
-H-pattern or sequential mode, then click **set** for each gear/shift action and
+While paused, open **Controls → Show shifter bindings**, enable **Separate
+shifter**, choose the device and H-pattern or sequential mode, then **Bind**
+each gear/shift action and
 move the lever. A shifter can be a separate USB device. If a gate also brakes
 or accelerates, clear that conflicting binding in the game's controls.
 
@@ -151,7 +151,8 @@ These are external mounts; the cars do not have modelled cockpit interiors.
 | + / - | Field of view |
 | 0 | Reset active mount |
 
-No numpad? Use **Camera → Enable camera tuning keys → Rebind**. Choose keys that
+No numpad? Use **Cameras → Show adjustment bindings** to bind keyboard keys or
+separate USB buttons. Choose keys that
 do not overlap driving controls. Close the panel and release held keys before
 tuning. Adjustments save when paused or otherwise idle.
 
@@ -166,9 +167,10 @@ does not change the wheel force settings.
 
 1. Open SimHub and select **Forza Horizon 5** as the receiving game. Use its
    game/UDP settings to check the listening port is **8000**.
-2. In art of rally, pause and open **Telemetry**. Enable **Send telemetry**.
-   On the same PC, set host **127.0.0.1** and port **8000**. For another PC,
-   use that PC's local network address and matching port.
+2. In art of rally, pause and open **Telemetry**. Choose **On**. For the same PC,
+   select **Use local preset** (127.0.0.1:8000). For another PC, use
+   **Advanced → Edit connection** and enter that PC's local network address and
+   matching port; **Apply connection** saves host and port together.
 3. Apply setup while paused, then start a stage. Confirm the mod's packet count
    increases and SimHub's speed/RPM respond. A sending counter alone does not
    prove receipt. Art of rally supplies the packets; Forza itself does not need

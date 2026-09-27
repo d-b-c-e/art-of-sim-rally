@@ -1,9 +1,10 @@
 # Roadmap
 
-Status reviewed 2026-09-19 UTC after the settings candidate deployment.
-**0.2.5 is published with wheel landing vibration enabled by default at strength 5.**
-See [release evidence](reviews/2026-09-13-release-0.2.5.md) and
-[installed identity](LOCAL-DEPLOYMENT.md).
+Status reviewed 2026-09-27 for the 0.2.6 release. The owner has accepted the
+current installed candidate overall and requested publication. The exact
+final-labelled package still requires official toolkit repin, its own local
+gate and publication verification. See [0.2.6 release notes](releases/0.2.6.md)
+and [installed identity](LOCAL-DEPLOYMENT.md).
 The defect register is [KNOWN-ISSUES.md](KNOWN-ISSUES.md); the implementation review
 is [2026-09-06-rc-review.md](reviews/2026-09-06-rc-review.md).
 
@@ -19,20 +20,19 @@ See [implementation, limits and A/B drive](LANDING-EFFECTS.md).
 
 Remaining feature priorities:
 
-**Settings UX adoption (KI-39):** Simple/Advanced pages, transactional calibration,
-USB mod/camera buttons, strict FFB follow/override, atomic connection drafts and
-support guidance are integrated on main and installed as RC9 after all 16 local
-gates on 2026-09-19, with an RC6 backup and preserved settings. See the
-[inventory and test record](UX-OVERNIGHT-2026-09-16.md). Actual UMM layout/focus,
-game-binding navigation and wheel/device acceptance remain required; preserve
-the crash candidate's exact toolkit and tuning during this work.
+**Settings UX adoption (KI-39/KI-41):** Simple/Advanced pages, transactional
+calibration, USB mod/camera buttons, strict FFB follow/override, atomic connection
+drafts and support guidance are integrated and installed as RC16. The owner
+reported the native game-bindings handoff working and accepted the current build
+overall. The complete layout/focus/device matrix across resolutions and hardware
+is still open. See the [inventory and test record](UX-OVERNIGHT-2026-09-16.md).
 
 **Current focus: FR-2 crash feedback in wheel FFB and SimHub motion.** The game
 has a collision callback suitable for passive observation; 48 new synthetic
 crash scenarios pass through the production telemetry sampler and encoded UDP.
 The owner crash drive is preserved and replays exactly: a roughly 145→4 km/h
 head-on event produces almost zero steering output. Probe 0.2.5.4 now adds body
-collision observations; its live drive check is pending. The 0.2.6 candidate
+collision observations; its live drive check is pending. Version 0.2.6
 implements an independent opt-in wheel crash effect and shared landing/crash
 impact ownership. [Candidate and test plan](CRASH-EFFECTS.md).
 RC3 passed all 16 local gates but its owner drive produced no distinct crash cue
@@ -46,12 +46,14 @@ new-settings default50/range0–100; landing stays default5/range0–40. API sta
 does not prove physical output, and the stronger range remains unaccepted.
 Findings and the generic finite constant API are contributed upstream for other
 consumers; their tunes are not automatically changed.
-All 16 local gates pass, including both recorded corpus cases; saved owner
-strengths are preserved. Public release and stronger physical acceptance remain pending.
+All 16 RC16 local gates pass, including both recorded corpus cases; saved owner
+strengths are preserved. The owner requested 0.2.6 publication while stronger
+crash-specific physical acceptance remains open.
 See [implementation and evidence](reviews/2026-09-17-constant-crash.md) and the latest
 [gate/install receipt](LOCAL-DEPLOYMENT.md). Next: retest crash feel and ordinary
-landing/steering/lifecycle behavior. Local toolkit pins require official release
-before publication. SimHub motion amplification remains explicitly deferred. See
+landing/steering/lifecycle behavior. The local toolkit pin must be replaced by
+an official binary-identical release before publication. SimHub motion
+amplification remains explicitly deferred. See
 [findings and validation sequence](research/2026-09-14-crash-feedback.md) and
 [drive evidence](reviews/2026-09-15-crash-capture.md).
 
@@ -82,7 +84,7 @@ These are validation/support work rather than missing features.
 
 **Landing timing/strength:** investigate the Haapajarvi slightly-early report
 (KI-36) before changing first-contact timing. The requested optional 30–40 wheel
-strength is now implemented for the 0.2.6 candidate: both impact sliders allow
+strength is implemented for 0.2.6: both impact sliders allow
 0–40%, with default 5 and existing values preserved. Physical comparison of the
 stronger range remains pending. The owner's ButtKicker clipping is a separate
 device/output observation and does not establish another rig's wheel limit.

@@ -1,6 +1,17 @@
-# Release readiness — 2026-09-13
+# Release readiness — 2026-09-27
 
-**Current: stable 0.2.5 is published and installed.** The owner accepted RC8's
+**0.2.6 preparation:** the owner accepted the installed RC16 overall and requested
+release. RC16 passed all16 local gates; the final-labelled 0.2.6 artifact still
+requires an official toolkit pin, its own complete gate, exact installation if
+the game is closed, GitHub upload/download verification and a publication record.
+The owner did not report item-by-item results for the full attended matrix;
+KI-39/40/41 and hardware-specific reports remain open. See the
+[0.2.6 notes](releases/0.2.6.md), [known issues](KNOWN-ISSUES.md) and
+[local deployment](LOCAL-DEPLOYMENT.md).
+
+## Previous 0.2.5 release
+
+**Stable 0.2.5 was published and installed.** The owner accepted RC8's
 wheel/shaker result and authorized release with landing vibration enabled by
 default at strength 5. All 16 final local gates passed; published downloads and
 installed payloads match the exact validated artifact. Settings were preserved.

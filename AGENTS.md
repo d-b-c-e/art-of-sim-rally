@@ -18,6 +18,16 @@ or force test. Toolkit binaries358add5/probe0.2.5.4 unchanged. KI-41 rendered
 acceptance and the broader KI-39/40 matrix remain pending; exact backup/hashes
 are in `docs/LOCAL-DEPLOYMENT.md`.
 
+**0.2.6 release preparation, 2026-09-27:** the owner reports further testing was
+good overall and authorized a new release. Treat that as scoped candidate
+acceptance, not a completed item-by-item hardware matrix. The final package
+requires an official binary-identical toolkit pin, clean-source 16-gate build,
+local installation while the game is closed, publication of the exact ZIP and
+checksum, and download verification. README, SETUP, troubleshooting and the
+packaged README are being updated to the Simple/Advanced UI. Keep KI-38/39/40/41
+and hardware-specific cases open unless separately tested. See
+`docs/releases/0.2.6.md` and `docs/RELEASE-READINESS.md`.
+
 **Previous installed candidate: RC15**, clean source
 `b0f8d4b2bc59a8080718d089d701f0bbc140201e`, all16 gates passed, installed
 2026-09-23 04:30:35UTC. It fixes the RC14 Open-game-bindings input deadlock,
@@ -125,6 +135,7 @@ third-party binaries, nothing that would force the repo private.
 | `docs/DEVELOPMENT-CAPTURE.md` | Separate probe schema, motion/contact units, standalone analysis and interpretation limits. |
 | `docs/` | FINDINGS, FORCE-FEEDBACK, TELEMETRY, CONTROLS, CAMERA, ROADMAP, RELEASING |
 | `docs/SETUP.md` / `docs/README.md` / `docs/BUILDING.md` | Player setup, documentation index and developer prerequisites. README stays a short install/first-drive entry point. |
+| `docs/releases/` | User-facing GitHub release notes; the 0.2.6 notes describe the final package. |
 | `tools/installer/README.txt` | Standalone ZIP guide; packaging replaces `@RELEASE@`. Keep aligned with player docs; link online to files not in the archive. |
 | `tools/testing/Test-Installer.ps1` | Isolated real batch/Windows PowerShell installer checks; also included in Test-Rc. No game/hardware output. |
 

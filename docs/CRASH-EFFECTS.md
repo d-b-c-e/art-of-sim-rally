@@ -1,22 +1,22 @@
-# Crash kick — 0.2.6 candidate
+# Crash kick — 0.2.6 experimental feature
 
-**Experimental, off by default; not in the published 0.2.5 download.** The saved
+**Experimental and off by default in 0.2.6.** The saved
 owner drive shows head-on deceleration with almost no steering force. The new
 wheel cue addresses that missing response without changing the steering curve.
 RC3 and shaped RC4 both failed the owner's feel test (KI-38). RC4 accepted three
 full-intensity commands with no early managed stops, but no felt crash effect;
 ordinary steering worked. The owner preferred the standalone constant pulse
 (method A) at 40%, but requested more strength. The next candidate uses that
-route. [Current investigation](reviews/2026-09-17-constant-crash.md).
+route. [Investigation](reviews/2026-09-17-constant-crash.md).
 
-Pause, open Ctrl+F10 → **Force feedback → Crash kick (experimental)**,
+Pause, open **F6 → Advanced → FFB → Crash kick (experimental)**,
 and choose **Crash strength**. New settings default to **50**, with a **0–100**
 range independent of steering and landing strength. Existing saved strengths
 are preserved; select 50 manually when comparing with the new default.
 The pulse requires the toolkit's finite constant-force support. Landing settings
 and steering strength are preserved. No SimHub helper is needed.
 
-## What the candidate does
+## What it does
 
 - Passively observes the active player's body collisions before the game's
   original callback. No damage, grip, assists or car behavior is changed.
@@ -108,6 +108,7 @@ See [candidate evidence and deployment](reviews/2026-09-17-constant-crash.md).
    quitting.** Record approximate event times. Compare the same events with
    SimHub input/effect output before changing any motion profile.
 
-See [local deployment](LOCAL-DEPLOYMENT.md) for the exact installed candidate and
-validation receipt. No public release or attended sign-off is implied.
+See [local deployment](LOCAL-DEPLOYMENT.md) for the owner's exact installed build
+and [0.2.6 release notes](releases/0.2.6.md). These records do not establish
+the full attended hardware matrix.
 See [RC3 evidence and shaped-candidate review](reviews/2026-09-17-crash-kick.md).

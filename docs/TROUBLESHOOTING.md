@@ -1,16 +1,15 @@
 # Troubleshooting
 
-The isolated [Simple/Advanced candidate](UX-SETTINGS-CANDIDATE.md) uses new page
-names: controls in Controls, force settings in FFB, and support export in Help.
-The public 0.2.5 instructions below retain the released panel names.
+Version 0.2.6 uses Simple/Advanced views with Controls, FFB, Cameras, Telemetry
+and Help pages. Pause before changing a binding or device.
 
 For initial setup, use the [setup guide](SETUP.md). If the mod loads, pause and
-collect a support file: Ctrl+F10 → *Devices and troubleshooting* →
-**Create support file on Desktop**. Attach it when reporting a problem.
+collect a support file: **F6 → Help → Create support file**. Attach it when
+reporting a problem.
 
 ## Installation or settings panel missing
 
-- **Missing Install.bat:** download `ArtOfSimRally-0.2.5.zip` from release
+- **Missing Install.bat:** download `ArtOfSimRally-0.2.6.zip` from release
   **Assets**, not either **Source code** archive. Use **Extract All** before
   running it; keep the extracted files together.
 - **Game not found:** [supply the folder containing artofrally.exe](SETUP.md#custom-game-folder).
@@ -41,8 +40,7 @@ Turn detailed logging off afterward. Include build, driver/firmware, car/stage,
 approximate event time and other active mods. Log tails cannot recover an entire
 earlier drive or show why an FPS drop occurred.
 
-The **Log detail for support** checkboxes in **Force feedback** and **Devices
-and troubleshooting** control the same setting; either is sufficient. Attach
+**Log detail for support** is in **Advanced → Help**. Attach
 the generated `art-of-sim-rally-support-*.txt` file from your Desktop.
 
 Version 0.2.5 retains a small diagnostic summary at idle/normal exit and
@@ -59,7 +57,7 @@ now waits for you to pause; file reading/writing can itself stall the main threa
 Recent log windows are explicitly bounded/truncated, and the bundle lists loaded
 mods plus cached input values. Export soon after the event to retain useful tails.
 
-The **0.2.6 test candidate** additionally counts 33/50/100 ms intervals in the
+Version 0.2.6 additionally counts 33/50/100 ms intervals in the
 first five seconds, next ten seconds and later driving. Counts overlap and depend
 on your frame cap; a 30 fps cap naturally produces many 33 ms frames. These are
 clues to when a slowdown occurred, not a diagnosis. For early landing reports,
@@ -67,7 +65,7 @@ the same support toggle adds last-event contact/compression timing. A short vide
 is still needed to compare with visible touchdown. Enable support logging before
 the run, reproduce once, then pause and export before quitting.
 
-The candidate's native toolkit no longer traces every steering-force update by
+The 0.2.6 native toolkit no longer traces every steering-force update by
 default; initialization and errors are still logged. Advanced native tracing
 requires `DBCE_FFB_TRACE_FORCE=1` in the game process environment before launch;
 it is separate from **Log detail for support**, and is not needed for this normal
@@ -86,34 +84,36 @@ device — both show as 32 axes / 144 buttons and never report a movement, in PC
 or compatibility mode. No binding trick fixes this; the mod reads the wheel
 itself instead.
 
-- Ctrl+F10 → **Wheel input (direct)** → tick *Read the wheel directly*.
-- **Steer → Assign**, then turn the wheel (either direction). **Throttle →
-  Assign**, press the throttle. **Brake → Assign**, press the brake. Clutch and
-  handbrake if you use them (a button works for handbrake).
-- Drive. The first full press of each pedal and the first full turn calibrate
-  the range. If a control runs the wrong way, press **Flip** on that row.
+- F6 → **Controls** → choose **Use assigned controls**.
+- **Steering → Bind**, then turn the wheel both ways. Bind Throttle and Brake
+  separately; expand Clutch if needed. Check inversion/deadzone and preview,
+  then **Save calibration** for each row. A handbrake button has its own row.
+- Drive. Explicit calibration keeps the saved range; use the row's **Calibrate**
+  action to change it.
 - Menus still use the keyboard or a gamepad; that is expected.
 
 **2. Force feedback is dead, or was dead until 0.2.2.**
 Only one of the two `FANATEC Wheel` devices has the motor. Picking the other
-one in the *Wheel* dropdown used to fail silently. From 0.2.2 the mod tries
-every force-feedback device before giving up, and the dropdown shows axis and
-button counts: the **8 axes / 108 buttons** entry is the one with force
-feedback, the 12 axes / 63 buttons entry is the rim and its buttons. If the
-direction is wrong, tick *Invert direction* under Force feedback.
+one in the FFB device selector used to fail silently. From 0.2.2 the mod tries
+each available force-feedback device before giving up. With duplicate names,
+bind Steering in Controls and use **Follow steering binding**, or explicitly
+select the verified FFB device; do not infer that either same-name entry is the
+motor without checking its identity and status. If force direction is wrong,
+use **Advanced → FFB → Invert force direction**.
 
 **3. Choosing a shifter crashed the game (before 0.2.2).**
 Fixed. It happened only when force feedback had failed to initialise, which on
 a Fanatec was the wrong-twin case above.
 
 **Pedals on a separate USB cable** (ClubSport V3 etc.) appear as their own
-device and are read the same way: Assign, press the pedal.
+device and are read the same way: Bind, press the pedal, check the preview,
+then Save calibration.
 
 ## Separate handbrake (TSS or other USB device)
 
 Version 0.2.5 identifies newly assigned axes/buttons by device instance GUID
 and retries unavailable readers while paused. If an old binding reports identical
-devices, pause and use Assign again for that row. Assign also discovers devices
+devices, pause and use Bind again for that row. Bind also discovers devices
 plugged in after launch. Existing unambiguous bindings upgrade automatically after
 a successful read; their calibration is preserved. Hardware validation is pending.
 For a separate shifter, pause before choosing its device. Version 0.2.5 also
@@ -129,12 +129,13 @@ Version 0.2.4 adds live values and fixes Flip/reopen/assignment failures
 (KI-15). If still using 0.2.3, prefer assigning from a released lever and using full
 travel; pedal Flip has a known defect. Live numeric values below are a 0.2.4 addition.
 
-1. Pause with the TSS in handbrake mode. Open Ctrl+F10 → **Wheel input (direct)** and
-   enable **Read the wheel directly**.
-2. Release the lever, click **Assign** beside **Handbrake**, then pull it. Avoid
+1. Pause with the TSS in handbrake mode. Open F6 → **Controls** and choose
+   **Use assigned controls**.
+2. Release the lever, click **Bind** on **Handbrake (axis)**, then pull it. Avoid
    moving other controls during assignment.
-3. Use the lever's full travel once to learn its range, then release it. The value
-   should move gradually between 0 and 1 and return to 0. If reversed, use **Flip**.
+3. Use the lever's full travel, then release it. Verify partial travel in the
+   preview, adjust inversion if needed, and **Save calibration**. The value
+   should move gradually from 0 to 100% and return to 0.
 4. Leave unrelated direct-input rows unbound if their existing game bindings work.
    Clear conflicting shift bindings if pulling the lever also changes gear.
 
@@ -149,13 +150,12 @@ there alone does not establish whether the device also exposes an analog axis.
 
 ## The wheel steers the wrong way with direct input
 
-Press **Flip** on the Steer row (Ctrl+F10 → Wheel input (direct)). From 0.2.2
-assignment no longer depends on which way you turned during Assign, but a wheel
-whose axis runs backwards would still need it.
+In F6 → Controls, bind or recalibrate **Steering** and choose **Invert** if its
+preview moves backwards. This changes input direction, not force direction.
 
 ## Force feedback too strong or too weak
 
-Use *Force feedback → Strength* to adjust force level; 50 is the default.
+Use **FFB → Strength** to adjust steering force; 50 is the default.
 Force fades in between 3 and 12 km/h. Smoothing controls how quickly force
 changes reach the wheel; keep it consistent when comparing builds.
 
@@ -164,20 +164,21 @@ At the default **0.20**, each force update blends 20% of the previous output wit
 rattle, but also soften bumps and add response delay. Smoothing filters wheel
 force, not steering input; it does not reduce a sustained force like Strength does.
 
-Lowering Strength lowers steering-force detail too. Version 0.2.5 adds
+Lowering Strength lowers steering-force detail too. The mod adds
 independent [landing vibration](LANDING-EFFECTS.md), on by default at strength 5;
 existing saved choices are preserved. Check its status while paused.
 If setup or delivery fails, toggle it off/on while paused and export support.
-Some drivers may reject sine effects; steering continues. Road/crash effects
-remain planned. For a ButtKicker, use [SimHub's built-in effects](SETUP.md#simhub-and-buttkicker);
+Some drivers may reject sine effects; steering continues. The experimental
+crash kick is separate, off by default in Advanced FFB. For a ButtKicker, use
+[SimHub's built-in effects](SETUP.md#simhub-and-buttkicker);
 wheel Landing strength does not change the shaker or telemetry.
 
 ## Settings explanations stay small when increasing Mod Manager scale
 
 Version 0.2.4 fixed explanatory text at 11 pixels, regardless of UMM's scale.
-Version 0.2.5 removes that override and uses the current UMM font for
-explanations, headings and wrapped status text. No separate mod font option is
-needed. Visual testing at normal/enlarged scale is still pending (KI-32).
+Version 0.2.5 removed that override. In 0.2.6, **Help → Settings text size**
+defaults to **Use UMM scale**; **Auto** can enlarge this mod's content on a
+high-resolution screen. Resize the surrounding window in UMM Settings.
 
 ## Steering assist: does the mod temporarily replace the game's value?
 
@@ -213,9 +214,10 @@ it. If you still see it, the support file's force-feedback section will show
   and Plugins/x86_64. **Do not delete a copy just because it is in Plugins.**
   If hashes differ, close the game and reinstall the complete package, then
   capture a fresh support file. Multiple resident modules are reported as ambiguous.
-- In 0.2.5, toolkit pin **v0.13.0** and native component **0.6.0** are different version
-  sequences; that combination is expected. Older support files call the latter
-  `native abi`, and their `loaded from` field only recorded the preload request.
+- Toolkit release and native-component versions use different sequences. Read
+  both from the support file and the published package; a different number is
+  expected. Older support files call the latter `native abi`, and their
+  `loaded from` field only recorded the preload request.
 - The support file's force-feedback section says whether the mod computed
   forces and whether the device refused them (`SetParameters FAILED`).
 - Another program holding the wheel exclusively (a second game instance, a
