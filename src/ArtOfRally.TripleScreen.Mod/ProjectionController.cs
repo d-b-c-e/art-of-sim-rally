@@ -97,8 +97,9 @@ internal sealed class ProjectionController
         var rig = camera == null || camera.transform.parent == null
             ? null
             : camera.transform.parent.GetComponent<CarCameras>();
-        var continuingSpanCamera = camera != null && camera == _camera && _separateDriver?.SpanMode == true;
-        if (camera == null || rig == null || (!rig.enabled && !continuingSpanCamera) || camera.name != "Camera Main")
+        if (!StageCameraEligibility.CanRender(camera != null && camera.name == "Camera Main",
+                rig != null, rig?.enabled == true, camera != null && camera == _camera,
+                _separateDriver?.SpanMode == true))
         {
             Release();
             return ProjectionOutcome.Starting(layoutResult, "STAGE_CAMERA_WAIT", "Waiting for the active gameplay Stage Camera; menus and cinematics use stock rendering.");
@@ -252,8 +253,9 @@ internal sealed class ProjectionController
         // The game's CameraManager disables CarCameras at the finish line and
         // enables CinemachineBrain on the same Stage Camera. Keep an already
         // armed three-display driver on that Camera Main through the handoff.
-        var continuingStageCamera = camera != null && camera == _camera && _separateDriver != null;
-        if (camera == null || rig == null || (!rig.enabled && !continuingStageCamera) || camera.name != "Camera Main")
+        if (!StageCameraEligibility.CanRender(camera != null && camera.name == "Camera Main",
+                rig != null, rig?.enabled == true, camera != null && camera == _camera,
+                _separateDriver != null && !_separateDriver.SpanMode))
         {
             Release();
             return ProjectionOutcome.Starting(layoutResult, "STAGE_CAMERA_WAIT",
@@ -376,19 +378,12 @@ internal sealed class ProjectionController
         return matrix;
     }
 
-    private static double SafeViewWidthScale(float requested)
-    {
-        if (float.IsNaN(requested) || float.IsInfinity(requested)) return 1d;
-        return Math.Max(FovPreference.MinimumSliderScale,
-            Math.Min(FovPreference.MaximumSliderScale, requested));
-    }
-
     private static double ResolveViewWidthScale(PanelDocument panel, GeometryDocument geometry,
         Camera camera, Settings settings)
     {
-        if (settings.OverrideFieldOfView) return SafeViewWidthScale(settings.ViewWidthScale);
-        return FovPreference.ScaleForGameDegrees(panel.PhysicalHeightMm,
-            geometry.EyeDistanceMm, geometry.EyeHeightAbovePanelCenterMm, camera.fieldOfView);
+        return FovPreference.ResolveScale(panel.PhysicalHeightMm, geometry.EyeDistanceMm,
+            geometry.EyeHeightAbovePanelCenterMm, settings.OverrideFieldOfView,
+            settings.ViewWidthScale, camera.fieldOfView);
     }
 
     private string FovDescription(Settings settings, Camera camera) => settings.OverrideFieldOfView

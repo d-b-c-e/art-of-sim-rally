@@ -23,6 +23,7 @@ internal static class Program
             SpanViewportsCoverTheOutput();
             ViewWidthOverridePreservesHinges();
             GameFovPreservesAllThreeSeams();
+            CameraHandoffKeepsArmedView();
             IndependentSideAnglesArePreserved();
             MatrixMatchesFrustum();
             BadEyeSideIsRejected();
@@ -150,19 +151,41 @@ internal static class Program
         const double width = 708.4d;
         const double height = 398.5d;
         const double distance = 660d;
-        var wideScale = FovPreference.ScaleForGameDegrees(height, distance, 0d, 75d);
+        const double savedSliderScale = 1.33168638d;
+        var wideScale = FovPreference.ResolveScale(height, distance, 0d,
+            false, savedSliderScale, 75d);
         Check(wideScale > FovPreference.MaximumSliderScale,
             "game FOV was incorrectly limited to the manual slider range");
         Near(FovPreference.VerticalDegrees(height, distance, 0d, wideScale), 75d,
             1e-9, "game camera FOV match");
-        var tighterScale = FovPreference.ScaleForGameDegrees(height, distance, 0d, 65d);
+        var tighterScale = FovPreference.ResolveScale(height, distance, 0d,
+            false, savedSliderScale, 65d);
         Check(tighterScale < wideScale, "live game FOV changes should update the shared scale");
-        var savedSliderDegrees = FovPreference.VerticalDegrees(height, distance, 0d, 1.33d);
+        var sliderScale = FovPreference.ResolveScale(height, distance, 0d,
+            true, savedSliderScale, 75d);
+        Near(sliderScale, savedSliderScale, 1e-12,
+            "turning override on should restore the saved slider scale");
+        Near(FovPreference.ResolveScale(height, distance, 0d,
+            false, savedSliderScale, 75d), wideScale, 1e-12,
+            "turning override off again should restore game FOV");
+        var savedSliderDegrees = FovPreference.VerticalDegrees(height, distance, 0d, sliderScale);
         Near(FovPreference.ScaleForSliderDegrees(height, distance, 0d, savedSliderDegrees),
-            1.33d, 1e-9, "saved slider FOV is preserved when override is enabled");
+            savedSliderScale, 1e-9, "saved slider FOV is preserved when override is enabled");
+        Near(FovPreference.ClampSliderScale(double.NaN), 1d, 0d,
+            "invalid saved slider scale uses the safe measured view");
 
+        CheckSeamsForScale(width, height, distance, wideScale, "game FOV before override");
+        CheckSeamsForScale(width, height, distance, sliderScale, "saved slider override");
+        CheckSeamsForScale(width, height, distance,
+            FovPreference.ResolveScale(height, distance, 0d, false, savedSliderScale, 75d),
+            "game FOV after override");
+    }
+
+    private static void CheckSeamsForScale(double width, double height, double distance,
+        double scale, string phase)
+    {
         var surfaces = TripleRigBuilder.Build(new TripleRigDefinition(
-            width, height, distance / wideScale, 70d, 70d));
+            width, height, distance / scale, 70d, 70d));
         var views = new[]
         {
             ProjectionCalculator.Calculate(surfaces[0], new Vector3d(0d, 0d, 0d), 0.1d, 1500d),
@@ -171,10 +194,26 @@ internal static class Program
         };
         var leftHinge = surfaces[1].LowerLeft + (surfaces[1].Up * (height / 2d));
         var rightHinge = surfaces[1].LowerRight + (surfaces[1].Up * (height / 2d));
-        Near(ProjectHorizontal(views[0], leftHinge), 1d, 1e-9, "game-FOV left seam");
-        Near(ProjectHorizontal(views[1], leftHinge), -1d, 1e-9, "game-FOV center left seam");
-        Near(ProjectHorizontal(views[1], rightHinge), 1d, 1e-9, "game-FOV center right seam");
-        Near(ProjectHorizontal(views[2], rightHinge), -1d, 1e-9, "game-FOV right seam");
+        Near(ProjectHorizontal(views[0], leftHinge), 1d, 1e-9, phase + " left seam");
+        Near(ProjectHorizontal(views[1], leftHinge), -1d, 1e-9, phase + " center left seam");
+        Near(ProjectHorizontal(views[1], rightHinge), 1d, 1e-9, phase + " center right seam");
+        Near(ProjectHorizontal(views[2], rightHinge), -1d, 1e-9, phase + " right seam");
+    }
+
+    private static void CameraHandoffKeepsArmedView()
+    {
+        Check(StageCameraEligibility.CanRender(true, true, true, false, false),
+            "the initial driving camera should be eligible before driver arming");
+        Check(StageCameraEligibility.CanRender(true, true, false, true, true),
+            "the armed stage camera should survive the Cinemachine handoff");
+        Check(!StageCameraEligibility.CanRender(true, true, false, true, false),
+            "a disabled driving rig must not arm an unrelated output mode");
+        Check(!StageCameraEligibility.CanRender(true, true, false, false, true),
+            "a new camera must not inherit an old driver's handoff state");
+        Check(!StageCameraEligibility.CanRender(false, true, true, false, false),
+            "a menu camera must not receive the stage projection");
+        Check(!StageCameraEligibility.CanRender(true, false, true, false, false),
+            "a camera without the driving rig must not arm the stage projection");
     }
 
     private static void IndependentSideAnglesArePreserved()

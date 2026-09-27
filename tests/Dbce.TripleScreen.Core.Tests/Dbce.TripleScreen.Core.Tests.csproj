@@ -13,6 +13,7 @@
     <ProjectReference Include="..\..\src\Dbce.TripleScreen.Protocol\Dbce.TripleScreen.Protocol.csproj" />
     <Compile Include="..\..\src\ArtOfRally.TripleScreen.Mod\AdapterConstants.cs" Link="AdapterConstants.cs" />
     <Compile Include="..\..\src\ArtOfRally.TripleScreen.Mod\FovPreference.cs" Link="FovPreference.cs" />
+    <Compile Include="..\..\src\ArtOfRally.TripleScreen.Mod\StageCameraEligibility.cs" Link="StageCameraEligibility.cs" />
     <Compile Include="..\..\src\ArtOfRally.TripleScreen.Mod\LayoutSource.cs" Link="LayoutSource.cs" />
   </ItemGroup>
 

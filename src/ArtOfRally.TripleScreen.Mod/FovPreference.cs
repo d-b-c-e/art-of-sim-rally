@@ -11,6 +11,18 @@ internal static class FovPreference
     private const double MinimumGameScale = 0.1d;
     private const double MaximumGameScale = 10d;
 
+    internal static double ResolveScale(double panelHeightMm, double eyeDistanceMm,
+        double eyeHeightMm, bool overrideFieldOfView, double savedSliderScale,
+        double gameCameraDegrees) => overrideFieldOfView
+            ? ClampSliderScale(savedSliderScale)
+            : ScaleForGameDegrees(panelHeightMm, eyeDistanceMm, eyeHeightMm, gameCameraDegrees);
+
+    internal static double ClampSliderScale(double requested)
+    {
+        if (!Finite(requested)) return 1d;
+        return Math.Max(MinimumSliderScale, Math.Min(MaximumSliderScale, requested));
+    }
+
     internal static double VerticalDegrees(double panelHeightMm, double eyeDistanceMm,
         double eyeHeightMm, double scale)
     {
