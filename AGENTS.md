@@ -8,7 +8,17 @@
 
 ## Repository Purpose
 
-**Current installed candidate: RC16**, clean source
+**Current release and local install: 0.2.6**, clean source
+`8fc5c4da3ff3e8228281bf46dc49e052b166f0ea`, published and installed
+2026-09-27 06:02:52 UTC. All 16 final local gates passed; the published download
+matches the tested ZIP, and six mod payloads plus the second native copy match
+the installed files. Settings and five other protected game/probe files retained
+their pre-install hashes. Official toolkit v0.15.0 has the same five payloads as
+the tested local pin. Owner accepted RC16 overall, but the final artifact has not
+been driven and the full attended hardware/layout matrix remains pending. See
+`docs/reviews/2026-09-27-release-0.2.6.md` and `docs/LOCAL-DEPLOYMENT.md`.
+
+**Previous installed candidate: RC16**, clean source
 `e854b994125494fb38442a1c41476c42befad934`, all16 gates passed, installed
 2026-09-23 04:58:32UTC, game closed. Six payloads and second native copy verified,
 six owner/game files retained byte-for-byte. The FFB/shifter device dropdowns

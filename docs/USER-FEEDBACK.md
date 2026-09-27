@@ -1,5 +1,10 @@
 # User feedback and support follow-up
 
+**2026-09-27 release follow-up:** 0.2.6 is public. The GitHub issue audit found
+no new report or comment after 2026-09-06. Issue #1 remains open with the
+reporter's PS5-controller workaround; it still needs a paired controller
+comparison before closure. No public reply was sent in this release pass.
+
 **Historical feedback through 2026-09-16:** 0.2.5 was published, including default-on wheel
 landing vibration and clearer/scaling-aware settings help. The owner accepted
 the built-in SimHub comparison and observed clipping. Current setup answers

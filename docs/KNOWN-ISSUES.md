@@ -32,9 +32,9 @@ RC14 added bordered higher-contrast cards, flat selected tabs and removed Setup,
 but its remaining full-width Help/actions still read as section delimiters. RC15
 uses compact commands, segmented choices and flat links. The owner's RC15 FFB
 screenshot still shows the device selector expanded as full-width command bars
-and Refresh as a full-width button; a successor candidate bounds the picker,
-shows explicit choice markers and makes Refresh compact. Actual rendered
-acceptance of that successor is pending. See
+and Refresh as a full-width button. Released 0.2.6 bounds the picker, shows
+explicit choice markers and makes Refresh compact. The owner accepted RC16
+overall; focused rendered acceptance of those FFB choices is still pending. See
 [changes and exact checks](reviews/2026-09-21-visual-grouping.md). Do not close
 this issue based solely on a build or policy-height assertion.
 
@@ -127,7 +127,7 @@ is preserved. See [follow-through](reviews/2026-09-17-constant-crash.md).
 
 ### KI-37 — Native force tracing performs synchronous driving I/O by default
 
-**Confirmed implementation overhead; candidate fix, hardware retest pending.**
+**Confirmed implementation overhead; fix shipped in 0.2.6, hardware retest pending.**
 Official toolkit v0.13.0 logs each changing `SetDeviceForcesXY` value through
 open/write/close on the calling physics thread, independent of the mod's support
 logging checkbox. Upstream local candidate `82c7891` (native 0.6.1) gates only

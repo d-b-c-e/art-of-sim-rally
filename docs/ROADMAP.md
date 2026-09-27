@@ -1,9 +1,10 @@
 # Roadmap
 
-Status reviewed 2026-09-27 for the 0.2.6 release. The owner has accepted the
-current installed candidate overall and requested publication. The exact
-final-labelled package still requires official toolkit repin, its own local
-gate and publication verification. See [0.2.6 release notes](releases/0.2.6.md)
+Status reviewed 2026-09-27 after the 0.2.6 release. The owner accepted RC16
+overall; official toolkit v0.15.0, the final local gate, installation and
+published-download verification are complete. The final package has not been
+driven, and the full attended matrix remains open. See [release review](reviews/2026-09-27-release-0.2.6.md),
+[0.2.6 release notes](releases/0.2.6.md)
 and [installed identity](LOCAL-DEPLOYMENT.md).
 The defect register is [KNOWN-ISSUES.md](KNOWN-ISSUES.md); the implementation review
 is [2026-09-06-rc-review.md](reviews/2026-09-06-rc-review.md).

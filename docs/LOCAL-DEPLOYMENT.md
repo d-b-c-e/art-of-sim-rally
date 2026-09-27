@@ -6,7 +6,34 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Installed candidate — 0.2.6-rc.16
+## Current release and installation — 0.2.6
+
+Published [0.2.6](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.6)
+and installed **2026-09-27 06:02:52 UTC** with the game closed. The owner
+accepted the preceding RC16 overall and requested publication. The final-labelled
+artifact passed all 16 local gates, including the recorded-drive corpus, actual
+Unity Mono checks and installer tests. The final build has not been driven; the
+full attended matrix remains pending.
+
+- Identity: `0.2.6+8fc5c4da3ff3e8228281bf46dc49e052b166f0ea.clean`.
+- ZIP SHA-256: `B3BE9E06653A65385AAC7ACC3EC3D96E87FC9E47F581DE38E9FABC18B5391AC4`.
+- [Final gate](../results/rc-0.2.6-4fb6adad132a419992299a3a48dd11e5/automated.json),
+  SHA-256 `10A5C698731BFD9D6F57CDFBA715BD4A78206F34B74E4A2EC3827880D570538B`;
+  16 passed checks from a clean source tree.
+- [Install receipt and RC16 backup](../results/release-026-install-4b1c25d6403246c98b48010ffe906fd9/receipt.json):
+  six mod payloads and the second native plugin match the ZIP. Settings and five
+  other protected game/probe files kept their pre-install SHA-256 hashes.
+- The published ZIP and checksum file were downloaded independently and match
+  the local assets byte-for-byte. Download folder:
+  `results/release-026-download-91a897b0a81e4172b3ba40ada3080887`.
+- Official toolkit v0.15.0 repin changed VERSION/manifest labels only; its five
+  payloads match the previously tested local toolkit pin. No recorder is shipped.
+- No game launch, physical-force test, SimHub change or completed full attended
+  matrix is implied by installation or the offline gate.
+
+See [release review](reviews/2026-09-27-release-0.2.6.md).
+
+## Previous candidate — 0.2.6-rc.16
 
 Installed **2026-09-23 04:58:32 UTC**, game closed, after all16 local RC gates.
 The FFB device selector and its expanded choices are now bounded and show a

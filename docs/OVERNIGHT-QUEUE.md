@@ -1,5 +1,16 @@
 # Overnight investigation and implementation queue
 
+**Post-release triage, 2026-09-27:** 0.2.6 is published and installed. The
+GitHub audit found one open issue, [#1 camera view reversal](https://github.com/d-b-c-e/art-of-sim-rally/issues/1),
+with no new comment since the reporter said unplugging a PS5 controller resolved
+their symptom on 2026-09-06. Queue a paired controller-attached/absent camera
+check and ask for fresh 0.2.6 evidence if the reporter sees it again. Do not
+close #1 from that one workaround alone. Next local investigations are KI-41's
+rendered FFB choice layout, KI-39/40's wider settings/input matrix, KI-38's
+constant crash feel, and cold/restart Haapajarvi hitch and landing timing
+(KI-5/KI-36/37). The final artifact has not been driven; do not turn the pending
+manual checklist into passed evidence. See the [release record](reviews/2026-09-27-release-0.2.6.md).
+
 **Historical queue through 2026-09-19 UTC.** The owner later accepted RC16
 overall and requested 0.2.6 publication. Use the [roadmap](ROADMAP.md),
 [known issues](KNOWN-ISSUES.md) and [local deployment](LOCAL-DEPLOYMENT.md) for

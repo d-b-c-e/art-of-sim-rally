@@ -1,11 +1,12 @@
 # Release readiness — 2026-09-27
 
-**0.2.6 preparation:** the owner accepted the installed RC16 overall and requested
-release. RC16 passed all16 local gates; the final-labelled 0.2.6 artifact still
-requires an official toolkit pin, its own complete gate, exact installation if
-the game is closed, GitHub upload/download verification and a publication record.
-The owner did not report item-by-item results for the full attended matrix;
-KI-39/40/41 and hardware-specific reports remain open. See the
+**0.2.6 is published and installed.** Official toolkit v0.15.0 matches the
+RC16-tested binaries; the final-labelled clean-source build passed all 16 local
+gates. The installed payload and separately downloaded GitHub assets match the
+validated archive. The owner accepted RC16 overall and requested release, but
+did not report item-by-item results for the full attended matrix. The final
+artifact has not been driven; KI-39/40/41 and hardware-specific reports remain
+open. See the [release review](reviews/2026-09-27-release-0.2.6.md),
 [0.2.6 notes](releases/0.2.6.md), [known issues](KNOWN-ISSUES.md) and
 [local deployment](LOCAL-DEPLOYMENT.md).
 
