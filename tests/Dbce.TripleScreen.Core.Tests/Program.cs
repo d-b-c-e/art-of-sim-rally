@@ -22,6 +22,7 @@ internal static class Program
             SharedEdgesLandOnAdjacentViewportBorders();
             SpanViewportsCoverTheOutput();
             ViewWidthOverridePreservesHinges();
+            GameFovPreservesAllThreeSeams();
             IndependentSideAnglesArePreserved();
             MatrixMatchesFrustum();
             BadEyeSideIsRejected();
@@ -139,6 +140,41 @@ internal static class Program
         Near(ProjectHorizontal(widerCenter, leftHinge), -1d, 1e-9, "wider center left edge");
         Near(ProjectHorizontal(widerCenter, rightHinge), 1d, 1e-9, "wider center right edge");
         Near(ProjectHorizontal(right, rightHinge), -1d, 1e-9, "wider right inner edge");
+    }
+
+    private static void GameFovPreservesAllThreeSeams()
+    {
+        // The observed game camera uses 75° while the measured center view is
+        // much narrower. Game-follow must permit values beyond the slider's
+        // old 2x scale and apply one virtual eye to every physical view.
+        const double width = 708.4d;
+        const double height = 398.5d;
+        const double distance = 660d;
+        var wideScale = FovPreference.ScaleForGameDegrees(height, distance, 0d, 75d);
+        Check(wideScale > FovPreference.MaximumSliderScale,
+            "game FOV was incorrectly limited to the manual slider range");
+        Near(FovPreference.VerticalDegrees(height, distance, 0d, wideScale), 75d,
+            1e-9, "game camera FOV match");
+        var tighterScale = FovPreference.ScaleForGameDegrees(height, distance, 0d, 65d);
+        Check(tighterScale < wideScale, "live game FOV changes should update the shared scale");
+        var savedSliderDegrees = FovPreference.VerticalDegrees(height, distance, 0d, 1.33d);
+        Near(FovPreference.ScaleForSliderDegrees(height, distance, 0d, savedSliderDegrees),
+            1.33d, 1e-9, "saved slider FOV is preserved when override is enabled");
+
+        var surfaces = TripleRigBuilder.Build(new TripleRigDefinition(
+            width, height, distance / wideScale, 70d, 70d));
+        var views = new[]
+        {
+            ProjectionCalculator.Calculate(surfaces[0], new Vector3d(0d, 0d, 0d), 0.1d, 1500d),
+            ProjectionCalculator.Calculate(surfaces[1], new Vector3d(0d, 0d, 0d), 0.1d, 1500d),
+            ProjectionCalculator.Calculate(surfaces[2], new Vector3d(0d, 0d, 0d), 0.1d, 1500d)
+        };
+        var leftHinge = surfaces[1].LowerLeft + (surfaces[1].Up * (height / 2d));
+        var rightHinge = surfaces[1].LowerRight + (surfaces[1].Up * (height / 2d));
+        Near(ProjectHorizontal(views[0], leftHinge), 1d, 1e-9, "game-FOV left seam");
+        Near(ProjectHorizontal(views[1], leftHinge), -1d, 1e-9, "game-FOV center left seam");
+        Near(ProjectHorizontal(views[1], rightHinge), 1d, 1e-9, "game-FOV center right seam");
+        Near(ProjectHorizontal(views[2], rightHinge), -1d, 1e-9, "game-FOV right seam");
     }
 
     private static void IndependentSideAnglesArePreserved()

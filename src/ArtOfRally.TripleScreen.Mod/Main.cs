@@ -104,11 +104,21 @@ internal static class Main
         var layout = EffectiveLayout.Resolve(Layout.Current, _settings);
         var panel = layout.Document?.Panel;
         var geometry = layout.Document?.Geometry;
-        if (mode != 0 && panel != null && geometry != null)
+        if (mode != 0)
+            _settings.OverrideFieldOfView = GUILayout.Toggle(_settings.OverrideFieldOfView,
+                "Override field of view");
+        if (mode != 0 && !_settings.OverrideFieldOfView)
         {
-            var minimum = FovAtScale(layout, 0.75d);
-            var maximum = FovAtScale(layout, 2d);
-            var current = FovAtScale(layout, Mathf.Clamp(_settings.ViewWidthScale, 0.75f, 2f));
+            GUILayout.Label("Following the game's camera field of view on all three screens.");
+            if (_lastOutcome != null && Projection.CenterVerticalFovDegrees.HasValue)
+                GUILayout.Label($"Current center field of view: {Projection.CenterVerticalFovDegrees.Value:0}°");
+        }
+        else if (mode != 0 && panel != null && geometry != null)
+        {
+            var minimum = FovAtScale(layout, FovPreference.MinimumSliderScale);
+            var maximum = FovAtScale(layout, FovPreference.MaximumSliderScale);
+            var current = FovAtScale(layout, Mathf.Clamp(_settings.ViewWidthScale,
+                (float)FovPreference.MinimumSliderScale, (float)FovPreference.MaximumSliderScale));
             GUILayout.Label($"Field of view: {current:0}°");
             var chosen = GUILayout.HorizontalSlider((float)current, (float)minimum, (float)maximum);
             _settings.ViewWidthScale = ScaleForFov(layout, chosen);
@@ -173,23 +183,15 @@ internal static class Main
     {
         var panel = layout.Document.Panel;
         var geometry = layout.Document.Geometry;
-        var distance = geometry.EyeDistanceMm / scale;
-        var halfHeight = panel.PhysicalHeightMm / 2d;
-        return (Math.Atan((halfHeight - geometry.EyeHeightAbovePanelCenterMm) / distance) -
-            Math.Atan((-halfHeight - geometry.EyeHeightAbovePanelCenterMm) / distance)) * 180d / Math.PI;
+        return FovPreference.VerticalDegrees(panel.PhysicalHeightMm, geometry.EyeDistanceMm,
+            geometry.EyeHeightAbovePanelCenterMm, scale);
     }
 
     private static float ScaleForFov(LayoutLoadResult layout, float degrees)
     {
-        var low = 0.75d;
-        var high = 2d;
-        for (var index = 0; index < 18; index++)
-        {
-            var mid = (low + high) / 2d;
-            if (FovAtScale(layout, mid) < degrees) low = mid;
-            else high = mid;
-        }
-        return (float)((low + high) / 2d);
+        return (float)FovPreference.ScaleForSliderDegrees(layout.Document.Panel.PhysicalHeightMm,
+            layout.Document.Geometry.EyeDistanceMm,
+            layout.Document.Geometry.EyeHeightAbovePanelCenterMm, degrees);
     }
 
     private static int IntField(string label, int value)

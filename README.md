@@ -6,6 +6,8 @@ Angle-correct left, center, and right views for [art of rally](https://store.ste
 
 Version **0.3.11** is a playable prototype tested on the Steam game build **1.5.8b** with Unity Mod Manager (UMM) **0.27.0**. The separate-display drive had aligned seams, stable vegetation, matched lighting, and no visible tearing on the tested rig. A later Surround drive showed much better vegetation and lighting with the viewport renderer, but **tearing remains an open issue in Surround**. See [known issues](docs/KNOWN-ISSUES.md) before installing.
 
+The current source is preparing **0.3.12** with an **Override field of view** toggle. Turn it off to follow the game's live camera FOV on all three screens; turn it on to use the saved slider value. This change has passed offline geometry checks but still needs an attended game drive. It is not in the 0.3.11 download.
+
 ## Install
 
 For the 64-bit Windows game. You need art of rally and UMM 0.27.0 or newer; no SDK, optimizer, or other mod is required to play.

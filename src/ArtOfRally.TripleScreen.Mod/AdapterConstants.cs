@@ -6,7 +6,7 @@ namespace ArtOfRally.TripleScreen.Mod;
 internal static class AdapterConstants
 {
     internal const string AdapterId = "dbce-triple-mod-art-of-rally";
-    internal const string AdapterVersion = "0.3.11";
+    internal const string AdapterVersion = "0.3.12";
     internal const string GameId = "art-of-rally";
 
     internal static string GameProtocolDirectory => Path.Combine(

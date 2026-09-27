@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — 0.3.12 candidate
+
+- Added **Override field of view**. With it off, all three projections follow
+  the game's live camera FOV; with it on, the existing slider and saved value
+  remain in control. Existing installations keep override on until changed.
+- Offline geometry checks cover the observed 75° game FOV with the current 70°
+  side-screen example. In-game visual validation is still pending.
+
 ## 0.3.11 — 2026-09-27
 
 First packaged release candidate for art of rally triple-screen support.

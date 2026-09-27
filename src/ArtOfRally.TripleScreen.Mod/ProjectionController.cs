@@ -113,7 +113,7 @@ internal sealed class ProjectionController
 
         try
         {
-            var viewWidthScale = SafeViewWidthScale(settings.ViewWidthScale);
+            var viewWidthScale = ResolveViewWidthScale(panel, geometry, camera, settings);
             var definition = new TripleRigDefinition(
                 panel.PhysicalWidthMm,
                 panel.PhysicalHeightMm,
@@ -160,7 +160,7 @@ internal sealed class ProjectionController
                     layoutResult,
                     _separateDriver.LastThreeViewFrameUtc,
                     "THREE_VIEW_EXPERIMENTAL",
-                    $"Three camera viewports cover the wide display at {ActiveViewWidthScale:0.00}x view width. HUD routing, replay, and photo mode still need visual verification.");
+                    $"Three camera viewports cover the wide display with {FovDescription(settings, camera)}. HUD routing, replay, and photo mode still need visual verification.");
             }
 
             EnsureCenterDriver(camera);
@@ -270,7 +270,7 @@ internal sealed class ProjectionController
 
         try
         {
-            var viewWidthScale = SafeViewWidthScale(settings.ViewWidthScale);
+            var viewWidthScale = ResolveViewWidthScale(panel, geometry, camera, settings);
             var definition = new TripleRigDefinition(
                 panel.PhysicalWidthMm, panel.PhysicalHeightMm, geometry.EyeDistanceMm / viewWidthScale,
                 geometry.LeftYawDegrees, geometry.RightYawDegrees, geometry.EyeHeightAbovePanelCenterMm);
@@ -298,7 +298,7 @@ internal sealed class ProjectionController
                     "Three physical views are armed; waiting for all three cameras to finish a frame.");
             return ProjectionOutcome.SeparateViewActive(layoutResult, _separateDriver.LastThreeViewFrameUtc,
                 "SEPARATE_DISPLAYS_EXPERIMENTAL",
-                $"Three cameras target independent Unity displays at {ActiveViewWidthScale:0.00}x view width. Side post-processing, UI routing, FPS and scanout remain under test.");
+                $"Three cameras target independent Unity displays with {FovDescription(settings, camera)}. Side post-processing, UI routing, FPS and scanout remain under test.");
         }
         catch (Exception exception)
         {
@@ -379,8 +379,21 @@ internal sealed class ProjectionController
     private static double SafeViewWidthScale(float requested)
     {
         if (float.IsNaN(requested) || float.IsInfinity(requested)) return 1d;
-        return Math.Max(0.75d, Math.Min(2d, requested));
+        return Math.Max(FovPreference.MinimumSliderScale,
+            Math.Min(FovPreference.MaximumSliderScale, requested));
     }
+
+    private static double ResolveViewWidthScale(PanelDocument panel, GeometryDocument geometry,
+        Camera camera, Settings settings)
+    {
+        if (settings.OverrideFieldOfView) return SafeViewWidthScale(settings.ViewWidthScale);
+        return FovPreference.ScaleForGameDegrees(panel.PhysicalHeightMm,
+            geometry.EyeDistanceMm, geometry.EyeHeightAbovePanelCenterMm, camera.fieldOfView);
+    }
+
+    private string FovDescription(Settings settings, Camera camera) => settings.OverrideFieldOfView
+        ? $"custom {CenterVerticalFovDegrees:0}° center FOV"
+        : $"the game's {camera.fieldOfView:0}° camera FOV across all views";
 
     private static string SafeMessage(string message)
     {

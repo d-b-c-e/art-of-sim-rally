@@ -17,6 +17,10 @@ public sealed class Settings : UnityModManager.ModSettings
     public int LeftDisplayIndex = 1;
     public int RightDisplayIndex = 2;
 
+    // Existing installs keep their current slider behavior. When disabled,
+    // all three views follow the game's live camera FOV instead.
+    public bool OverrideFieldOfView = true;
+
     // 1 uses the measured eye distance. Larger values widen all three views
     // together; this is a visual preference, not a new physical measurement.
     public float ViewWidthScale = 1f;

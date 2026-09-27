@@ -32,8 +32,9 @@ For Single wide display, first enable a 3-panel-wide resolution such as NVIDIA
 Surround, then select that mode in the mod. For Three separate displays, keep
 Windows extended desktop mode, set the center monitor as primary, and select
 the two secondary Unity display indices in Advanced setup. Restart after
-changing Windows display mode. The field-of-view slider adjusts all three
-views together; Reset returns to your entered geometry.
+changing Windows display mode. Turn off Override field of view to follow the
+game's camera FOV across all three views. Turn it on to use the saved slider;
+Reset returns to your entered geometry.
 
 KNOWN LIMITS
 ------------

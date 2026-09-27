@@ -32,6 +32,11 @@ your own rig before using it.
 
 The mod uses these measurements for the three off-axis projections. Use the **Field of view** slider for a visual preference after setup; it moves all three projections together so seams stay aligned. **Reset field of view** restores the measured view. It does not change the saved physical measurements.
 
+The upcoming 0.3.12 source candidate adds **Override field of view**. Turn it
+off to follow the game's live camera FOV on all three views; turn it on to use
+the saved slider value. Existing settings retain slider control by default.
+This option is not in the published 0.3.11 ZIP yet.
+
 ## Three separate displays
 
 With the game closed, set Windows to **Extend these displays**. Make the center screen Windows primary and use the same native resolution on all three screens. Launch the game at that native center resolution. Choose **Three separate displays** in the mod and start a stage. The title and menus remain on the primary screen.

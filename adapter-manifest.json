@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "adapterId": "dbce-triple-mod-art-of-rally",
-  "adapterVersion": "0.3.11",
+  "adapterVersion": "0.3.12",
   "gameId": "art-of-rally",
   "layoutContractVersions": {
     "minimum": 1,
