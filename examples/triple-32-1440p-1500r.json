@@ -10,10 +10,10 @@
     "bezelWidthMm": 8
   },
   "geometry": {
-    "eyeDistanceMm": 700,
+    "eyeDistanceMm": 660,
     "eyeHeightAbovePanelCenterMm": 0,
-    "leftYawDegrees": 60,
-    "rightYawDegrees": 60
+    "leftYawDegrees": 70,
+    "rightYawDegrees": 70
   },
   "output": {
     "mode": "nvidia-surround",

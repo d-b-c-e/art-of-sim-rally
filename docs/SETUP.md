@@ -25,6 +25,11 @@ Open **Advanced setup and diagnostics** in the mod's UMM panel. Enter:
 
 Choose **Use these measurements**. The values shown initially are examples and do nothing until accepted. You can instead use an existing optimizer `desired-layout.json` as a measurement source and leave **Use measurements entered here** off. The mod copies neither the optimizer app nor its UI. The imported layout is optional and is read from `%LOCALAPPDATA%\DBCE\TripleScreen\games\art-of-rally\desired-layout.json` or a staged copy beside the mod.
 
+The checked-in [32-inch example](../examples/triple-32-1440p-1500r.json) now
+uses the owner's updated 660 mm eye distance and 70° angle for each side panel.
+It is a measurement example, not a new attended runtime validation; measure
+your own rig before using it.
+
 The mod uses these measurements for the three off-axis projections. Use the **Field of view** slider for a visual preference after setup; it moves all three projections together so seams stay aligned. **Reset field of view** restores the measured view. It does not change the saved physical measurements.
 
 ## Three separate displays
