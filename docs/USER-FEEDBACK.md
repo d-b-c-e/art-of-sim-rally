@@ -302,6 +302,21 @@ comments were posted or issues closed during this audit.
 
 ## Draft follow-ups — not sent
 
+### GitHub #1 — updated 2026-09-27 draft
+
+Thanks for the report and the PS5-controller workaround. Since 0.2.3,
+switching from our bonnet/bumper views back to stock cameras restores the
+stock camera transform; 0.2.6 includes that fix. We have not reproduced the
+PS5-pad interaction itself. If you try 0.2.6 with the pad connected, do stock
+views 3–8 still face backward? If so, please share a new support file and your
+ChangeCamera binding. Leave the issue open for that comparison unless new
+evidence shows the pad-attached case also works.
+
+The owner's separate triple-screen tests observed a working finish-camera
+handoff in the triple-screen adapter. They do not establish stock views 3–8
+with a PS5 pad attached, and they predate the
+final-labelled 0.2.6 install. Do not treat them as that exact issue's pass.
+
 ### GitHub #1
 
 Thanks for reporting the PS5-controller workaround. Version 0.2.3 is now available
