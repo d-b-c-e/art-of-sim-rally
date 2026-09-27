@@ -10,10 +10,36 @@ internal sealed class ProjectionController
 {
     private Camera _camera;
     private CenterProjectionDriver _centerDriver;
-    private ThreeViewRenderDriver _threeViewDriver;
+    private SeparateDisplayRenderDriver _separateDriver;
+
+    internal double? CenterVerticalFovDegrees { get; private set; }
+    internal long SuccessfulWideFrames => _separateDriver?.SpanMode == true
+        ? _separateDriver.SuccessfulCenterFrames : 0;
+    internal DateTime? LastSuccessfulWideFrameUtc => SuccessfulWideFrames == 0
+        ? (DateTime?)null : _separateDriver.LastCenterFrameUtc;
+    internal bool SeparateDisplaysRendered => _separateDriver != null && _separateDriver.AllDisplaysRendered;
+    internal double? SeparateCameraCallbackSpanMs => _separateDriver?.LastCameraCallbackSpanMs;
+    internal int ActiveSidePostProcessLayers => _separateDriver?.ActiveSidePostProcessLayers ?? 0;
+    internal bool SideColorGradingEnabled => _separateDriver != null && _separateDriver.SideColorGradingEnabled;
+    internal bool SideColorGradeCreated => _separateDriver != null && _separateDriver.SideColorGradeCreated;
+    internal string SideColorGradeError => _separateDriver?.SideColorGradeError;
+    internal string SideEffectSummary => _separateDriver?.SideEffectSummary;
+    internal int ExpandedVegetationSystems => _separateDriver?.ExpandedVegetationSystems ?? 0;
+    internal int SideOcclusionCount => _separateDriver?.SideOcclusionCount ?? 0;
+    internal int SideBeautifyCount => _separateDriver?.SideBeautifyCount ?? 0;
+    internal int SideVolumetricCount => _separateDriver?.SideVolumetricCount ?? 0;
+    internal int LastRaisedSideWindowCount => _separateDriver?.LastRaisedSideWindowCount ?? 0;
+    internal double ActiveViewWidthScale { get; private set; } = 1d;
 
     internal ProjectionOutcome Update(LayoutLoadResult layoutResult, Settings settings)
     {
+        if (!settings.EnableCenterPanelPreview && !settings.EnableThreeViewPrototype &&
+            !settings.EnableSeparateDisplayPrototype)
+        {
+            Release();
+            return ProjectionOutcome.Inactive(layoutResult, "FEATURE_DISABLED", "Triple-screen rendering is off; stock rendering is active.");
+        }
+
         if (!layoutResult.IsSuccess || layoutResult.Document is null)
         {
             Release();
@@ -30,16 +56,13 @@ internal sealed class ProjectionController
             return ProjectionOutcome.Rejected("LAYOUT_INVALID", "The desired layout is missing a required object.");
         }
 
+        if (output.Mode == "separate-displays")
+            return UpdateSeparateDisplays(layoutResult, settings);
+
         if (!settings.EnableCenterPanelPreview && !settings.EnableThreeViewPrototype)
         {
             Release();
             return ProjectionOutcome.Inactive(layoutResult, "FEATURE_DISABLED", "Triple-screen rendering is disabled; stock rendering is unchanged.");
-        }
-
-        if (output.Mode == "separate-displays")
-        {
-            Release();
-            return ProjectionOutcome.Degraded(layoutResult, "TOPOLOGY_UNSUPPORTED", "Separate-display activation is not implemented; stock rendering remains active.");
         }
 
         if (!output.CombinedWidthPx.HasValue || !output.CombinedHeightPx.HasValue)
@@ -74,7 +97,8 @@ internal sealed class ProjectionController
         var rig = camera == null || camera.transform.parent == null
             ? null
             : camera.transform.parent.GetComponent<CarCameras>();
-        if (camera == null || rig == null || !rig.enabled || camera.name != "Camera Main")
+        var continuingSpanCamera = camera != null && camera == _camera && _separateDriver?.SpanMode == true;
+        if (camera == null || rig == null || (!rig.enabled && !continuingSpanCamera) || camera.name != "Camera Main")
         {
             Release();
             return ProjectionOutcome.Starting(layoutResult, "STAGE_CAMERA_WAIT", "Waiting for the active gameplay Stage Camera; menus and cinematics use stock rendering.");
@@ -89,14 +113,16 @@ internal sealed class ProjectionController
 
         try
         {
+            var viewWidthScale = SafeViewWidthScale(settings.ViewWidthScale);
             var definition = new TripleRigDefinition(
                 panel.PhysicalWidthMm,
                 panel.PhysicalHeightMm,
-                geometry.EyeDistanceMm,
+                geometry.EyeDistanceMm / viewWidthScale,
                 geometry.LeftYawDegrees,
                 geometry.RightYawDegrees,
                 geometry.EyeHeightAbovePanelCenterMm);
             var surfaces = TripleRigBuilder.Build(definition);
+            ActiveViewWidthScale = viewWidthScale;
 
             if (settings.EnableThreeViewPrototype)
             {
@@ -109,46 +135,32 @@ internal sealed class ProjectionController
                         "The first three-view prototype requires exactly three native panel widths; disable driver bezel correction for this experiment.");
                 }
 
-                if (panel.NativeWidthPx > SystemInfo.maxTextureSize ||
-                    panel.NativeHeightPx > SystemInfo.maxTextureSize ||
-                    (long)panel.NativeWidthPx * panel.NativeHeightPx * 3 > 30_000_000L)
-                {
-                    Release();
-                    return ProjectionOutcome.Degraded(
-                        layoutResult,
-                        "RENDER_TARGET_SIZE_UNSUPPORTED",
-                        "The requested three-view render targets exceed the safe prototype limit for this GPU.");
-                }
-
-                EnsureThreeViewDriver(camera);
                 var projections = new Matrix4x4[3];
                 var rotations = new Quaternion[3];
                 for (var index = 0; index < 3; index++)
                 {
                     var view = CalculateView(surfaces[index], camera);
                     projections[index] = ToUnityProjection(view, camera);
+                    if (index == 1)
+                        CenterVerticalFovDegrees = (Math.Atan(view.Top / view.Near) - Math.Atan(view.Bottom / view.Near)) * 180d / Math.PI;
                     var forward = view.CameraForward;
                     rotations[index] = Quaternion.LookRotation(
                         new Vector3((float)forward.X, (float)forward.Y, (float)-forward.Z),
                         Vector3.up);
                 }
 
-                _threeViewDriver.Configure(
-                    layoutResult.Sha256,
-                    panel.NativeWidthPx,
-                    panel.NativeHeightPx,
-                    projections,
-                    rotations);
-                if (_threeViewDriver.RenderError != null)
-                    return ProjectionOutcome.Error(layoutResult, "THREE_VIEW_RENDER_ERROR", _threeViewDriver.RenderError);
-                if (_threeViewDriver.SuccessfulFrames == 0)
-                    return ProjectionOutcome.Starting(layoutResult, "THREE_VIEW_ARMED", "Three off-axis views are armed; waiting for the first composited frame.");
+                EnsureSeparateDriver(camera);
+                _separateDriver.ConfigureSpan(layoutResult.Sha256, projections, rotations);
+                if (_separateDriver.RenderError != null)
+                    return ProjectionOutcome.Error(layoutResult, "THREE_VIEW_RENDER_ERROR", _separateDriver.RenderError);
+                if (!_separateDriver.AllDisplaysRendered)
+                    return ProjectionOutcome.Starting(layoutResult, "THREE_VIEW_ARMED", "Three off-axis viewports are armed; waiting for all cameras to render.");
 
                 return ProjectionOutcome.ThreeViewActive(
                     layoutResult,
-                    _threeViewDriver.LastSuccessfulFrameUtc,
+                    _separateDriver.LastThreeViewFrameUtc,
                     "THREE_VIEW_EXPERIMENTAL",
-                    "Three panel-sized views are composited. Post-processing, HUD routing, replay, and photo mode still need visual verification.");
+                    $"Three camera viewports cover the wide display at {ActiveViewWidthScale:0.00}x view width. HUD routing, replay, and photo mode still need visual verification.");
             }
 
             EnsureCenterDriver(camera);
@@ -158,6 +170,7 @@ internal sealed class ProjectionController
             // Unity clip distances expressed in millimetres, then convert those
             // four edges back to Unity units before constructing the matrix.
             var physical = CalculateView(center, camera);
+            CenterVerticalFovDegrees = (Math.Atan(physical.Top / physical.Near) - Math.Atan(physical.Bottom / physical.Near)) * 180d / Math.PI;
 
             var viewportWidth = settings.AllowOutputResolutionMismatch ? Screen.width : output.CombinedWidthPx.Value;
             if (viewportWidth <= 0)
@@ -188,6 +201,112 @@ internal sealed class ProjectionController
         }
     }
 
+    private ProjectionOutcome UpdateSeparateDisplays(LayoutLoadResult layoutResult, Settings settings)
+    {
+        var panel = layoutResult.Document.Panel;
+        var geometry = layoutResult.Document.Geometry;
+        if (!settings.EnableSeparateDisplayPrototype)
+        {
+            Release();
+            return ProjectionOutcome.Inactive(layoutResult, "SEPARATE_DISPLAY_OPT_IN_REQUIRED",
+                "The independent-display experiment is off; stock rendering remains active.");
+        }
+
+        if (settings.EnableThreeViewPrototype || settings.EnableCenterPanelPreview)
+        {
+            Release();
+            return ProjectionOutcome.Degraded(layoutResult, "RENDER_MODE_CONFLICT",
+                "Turn off the Surround three-view and center-preview options before using independent displays.");
+        }
+
+        if (Screen.width != panel.NativeWidthPx || Screen.height != panel.NativeHeightPx)
+        {
+            Release();
+            return ProjectionOutcome.Degraded(layoutResult, "PRIMARY_DISPLAY_MISMATCH",
+                $"Primary game output is {Screen.width}x{Screen.height}; independent displays require the center monitor at {panel.NativeWidthPx}x{panel.NativeHeightPx}.");
+        }
+
+        var displays = Display.displays;
+        if (settings.LeftDisplayIndex < 1 || settings.RightDisplayIndex < 1 ||
+            settings.LeftDisplayIndex == settings.RightDisplayIndex ||
+            settings.LeftDisplayIndex >= displays.Length || settings.RightDisplayIndex >= displays.Length)
+        {
+            Release();
+            return ProjectionOutcome.Degraded(layoutResult, "SECONDARY_DISPLAY_MAPPING_INVALID",
+                $"Unity reports {displays.Length} displays; choose distinct secondary indices for left and right (center is 0).");
+        }
+
+        if (displays[settings.LeftDisplayIndex].systemWidth != panel.NativeWidthPx ||
+            displays[settings.LeftDisplayIndex].systemHeight != panel.NativeHeightPx ||
+            displays[settings.RightDisplayIndex].systemWidth != panel.NativeWidthPx ||
+            displays[settings.RightDisplayIndex].systemHeight != panel.NativeHeightPx)
+        {
+            Release();
+            return ProjectionOutcome.Degraded(layoutResult, "SECONDARY_DISPLAY_RESOLUTION_MISMATCH",
+                "Both selected secondary Unity displays must report the panel's native resolution before activation.");
+        }
+
+        var camera = Camera.main;
+        var rig = camera == null || camera.transform.parent == null
+            ? null : camera.transform.parent.GetComponent<CarCameras>();
+        // The game's CameraManager disables CarCameras at the finish line and
+        // enables CinemachineBrain on the same Stage Camera. Keep an already
+        // armed three-display driver on that Camera Main through the handoff.
+        var continuingStageCamera = camera != null && camera == _camera && _separateDriver != null;
+        if (camera == null || rig == null || (!rig.enabled && !continuingStageCamera) || camera.name != "Camera Main")
+        {
+            Release();
+            return ProjectionOutcome.Starting(layoutResult, "STAGE_CAMERA_WAIT",
+                "Waiting for the active gameplay camera. Menus remain on the primary center display.");
+        }
+
+        var postProcessing = camera.GetComponent<PostProcessLayer>();
+        if (postProcessing != null && postProcessing.antialiasingMode == PostProcessLayer.Antialiasing.TemporalAntialiasing)
+        {
+            Release();
+            return ProjectionOutcome.Degraded(layoutResult, "TAA_UNSUPPORTED",
+                "Temporal anti-aliasing can reset custom projection matrices; select another AA mode for this experiment.");
+        }
+
+        try
+        {
+            var viewWidthScale = SafeViewWidthScale(settings.ViewWidthScale);
+            var definition = new TripleRigDefinition(
+                panel.PhysicalWidthMm, panel.PhysicalHeightMm, geometry.EyeDistanceMm / viewWidthScale,
+                geometry.LeftYawDegrees, geometry.RightYawDegrees, geometry.EyeHeightAbovePanelCenterMm);
+            var surfaces = TripleRigBuilder.Build(definition);
+            ActiveViewWidthScale = viewWidthScale;
+            var projections = new Matrix4x4[3];
+            var rotations = new Quaternion[3];
+            for (var index = 0; index < 3; index++)
+            {
+                var view = CalculateView(surfaces[index], camera);
+                projections[index] = ToUnityProjection(view, camera);
+                if (index == 1)
+                    CenterVerticalFovDegrees = (Math.Atan(view.Top / view.Near) - Math.Atan(view.Bottom / view.Near)) * 180d / Math.PI;
+                var forward = view.CameraForward;
+                rotations[index] = Quaternion.LookRotation(
+                    new Vector3((float)forward.X, (float)forward.Y, (float)-forward.Z), Vector3.up);
+            }
+
+            EnsureSeparateDriver(camera);
+            _separateDriver.Configure(layoutResult.Sha256, projections, rotations, settings.LeftDisplayIndex, settings.RightDisplayIndex);
+            if (_separateDriver.RenderError != null)
+                return ProjectionOutcome.Error(layoutResult, "SEPARATE_DISPLAY_RENDER_ERROR", _separateDriver.RenderError);
+            if (!_separateDriver.AllDisplaysRendered)
+                return ProjectionOutcome.Starting(layoutResult, "SEPARATE_DISPLAYS_ARMED",
+                    "Three physical views are armed; waiting for all three cameras to finish a frame.");
+            return ProjectionOutcome.SeparateViewActive(layoutResult, _separateDriver.LastThreeViewFrameUtc,
+                "SEPARATE_DISPLAYS_EXPERIMENTAL",
+                $"Three cameras target independent Unity displays at {ActiveViewWidthScale:0.00}x view width. Side post-processing, UI routing, FPS and scanout remain under test.");
+        }
+        catch (Exception exception)
+        {
+            Release();
+            return ProjectionOutcome.Error(layoutResult, "SEPARATE_DISPLAY_ERROR", SafeMessage(exception.Message));
+        }
+    }
+
     internal void Release()
     {
         if (_centerDriver != null)
@@ -196,15 +315,17 @@ internal sealed class ProjectionController
             UnityEngine.Object.Destroy(_centerDriver);
         }
 
-        if (_threeViewDriver != null)
+        if (_separateDriver != null)
         {
-            _threeViewDriver.Release();
-            UnityEngine.Object.Destroy(_threeViewDriver);
+            _separateDriver.Release();
+            UnityEngine.Object.Destroy(_separateDriver);
         }
 
         _centerDriver = null;
-        _threeViewDriver = null;
+        _separateDriver = null;
         _camera = null;
+        CenterVerticalFovDegrees = null;
+        ActiveViewWidthScale = 1d;
     }
 
     private void EnsureCenterDriver(Camera camera)
@@ -216,13 +337,13 @@ internal sealed class ProjectionController
         if (_centerDriver == null) _centerDriver = camera.gameObject.AddComponent<CenterProjectionDriver>();
     }
 
-    private void EnsureThreeViewDriver(Camera camera)
+    private void EnsureSeparateDriver(Camera camera)
     {
-        if (_camera == camera && _threeViewDriver != null) return;
+        if (_camera == camera && _separateDriver != null) return;
         Release();
         _camera = camera;
-        _threeViewDriver = camera.GetComponent<ThreeViewRenderDriver>();
-        if (_threeViewDriver == null) _threeViewDriver = camera.gameObject.AddComponent<ThreeViewRenderDriver>();
+        _separateDriver = camera.GetComponent<SeparateDisplayRenderDriver>();
+        if (_separateDriver == null) _separateDriver = camera.gameObject.AddComponent<SeparateDisplayRenderDriver>();
     }
 
     private static OffAxisProjection CalculateView(DisplaySurface surface, Camera camera)
@@ -253,6 +374,12 @@ internal sealed class ProjectionController
         for (var column = 0; column < 4; column++)
             matrix[row, column] = (float)source[row, column];
         return matrix;
+    }
+
+    private static double SafeViewWidthScale(float requested)
+    {
+        if (float.IsNaN(requested) || float.IsInfinity(requested)) return 1d;
+        return Math.Max(0.75d, Math.Min(2d, requested));
     }
 
     private static string SafeMessage(string message)

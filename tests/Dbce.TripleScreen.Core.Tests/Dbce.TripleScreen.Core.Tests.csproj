@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>Dbce.TripleScreen.Core.Tests</AssemblyName>
     <RootNamespace>Dbce.TripleScreen.Tests</RootNamespace>
-    <GameDir Condition="'$(GameDir)' == ''">D:\Program Files (x86)\Steam\steamapps\common\artofrally</GameDir>
+    <GameDir Condition="'$(GameDir)' == ''">$(ART_OF_RALLY_DIR)</GameDir>
     <ManagedDir>$(GameDir)\artofrally_Data\Managed</ManagedDir>
   </PropertyGroup>
 

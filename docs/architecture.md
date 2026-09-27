@@ -1,117 +1,44 @@
-# Proposed Architecture
+# Architecture
 
-## Boundary
+## Boundaries
 
-Keep three layers:
+1. `Dbce.TripleScreen.Core` turns physical panel measurements into three display planes, camera rotations, and off-axis projection matrices. It has no Unity, game, Windows, UMM, or optimizer dependency.
+2. `Dbce.TripleScreen.Protocol` validates an optional schema-versioned layout and serializes runtime status. It reads Json.NET from the installed game at build/runtime rather than redistributing it.
+3. `ArtOfRally.TripleScreen.Mod` owns UMM settings, local measurement setup, game-camera lifecycle, Unity display targets, image effects, vegetation visibility, and status diagnostics.
 
-1. `Dbce.TripleScreen.Core` owns measurements, display planes, camera bases,
-   asymmetric frusta, and projection matrices. It has no Unity, game, Windows,
-   or UI dependency.
-2. `Dbce.TripleScreen.Protocol` strictly reads the optimizer's canonical JSON
-   and serializes canonical runtime status without depending on Unity or UMM.
-3. `ArtOfRally.TripleScreen.Mod` owns discovery of the game's authoritative
-   camera, lifecycle, Unity matrix conversion, render targets, compositor,
-   UI routing, and UMM settings.
+The mod is standalone. Triple Screen Optimizer may write a `desired-layout.json` measurement source, but neither the optimizer app nor its private toolkit is required to build, install, or configure the mod. The contract continues to use millimetres and degrees.
 
-`triple-screen-optimizer` can consume the .NET Standard library directly if its
-stack is .NET, or exchange schema-versioned JSON and reproduce/host the same
-math in a small service/CLI. The contract uses millimetres and degrees and must
-remain backwards compatible within a schema version.
+## Runtime views
 
-## Runtime pipeline
-
-Preferred true-triple path:
+The game's `Camera Main` is the center view and remains tagged as the main camera. The mod adds untagged left/right cameras as children. Every frame it copies the source camera's transform and camera settings, then applies three physical projections and side rotations. A late pre-cull hook reapplies each side matrix after the game's post-processing callbacks. The side cameras use physical camera properties so the post-processing layer does not reset their matrices.
 
 ```text
-CarCameras / Cinemachine / art-of-sim-rally
-                    |
-            authoritative Camera Main
-                    |
-       late transform + clip/effect snapshot
-              /           |           \
-       left camera    center camera    right camera
-        off-axis         off-axis         off-axis
-          RT L             RT C             RT R
-              \            |            /
-                  wide compositor
-                         |
-       Surround or borderless 3-panel output
+CarCameras or Cinemachine on Stage Camera
+                  |
+           original Camera Main
+           /       |       \
+      left copy  center  right copy
+         off-axis projection each
+                  |
+    one wide output OR three Unity displays
 ```
 
-Key rules:
+- **Single wide display:** center camera renders into the middle third of the 3-panel-wide output; side cameras render into the left and right thirds. This replaced the earlier render-texture compositor, which lost vegetation and camera lighting effects. The viewports use the same projections as separate displays.
+- **Three separate displays:** center uses Unity display 0, while side cameras target two selected secondary Unity displays. Display activation lasts until process exit.
+- **Off:** the mod releases camera state and leaves stock rendering. An existing Unity secondary window can retain its last image until process exit; restart after changing modes.
 
-- The original `Camera Main` remains tagged main and is the lifecycle anchor.
-- Render cameras have no audio listener and no MainCamera tag.
-- Projection is applied as late as necessary and re-applied every frame because
-  the game, Cinemachine, and TAA can update camera state.
-- Start with post-processing and TAA disabled on clones. Add components/effects
-  one at a time using evidence from the inventory probe.
-- Prefer one full render texture per view over three partial `Camera.rect`
-  viewports; this isolates post effects and enables a later curved-panel warp.
-- UI renders once. In a wide output it should default to the center-panel safe
-  area; optional HUD spreading is a separate feature.
-- Restore or destroy all created state on disable, scene transition, and unload.
+Each side camera gets an isolated PostProcessVolume copied from the center's active effects except MotionBlur, plus the center's enabled occlusion and volumetric effects. Copies must keep camera-specific callbacks independent. The game draws vegetation from its source camera; the mod widens that camera's vegetation culling to 360° while three views are active and restores the original mode on release. Per-camera direct vegetation registration caused side vegetation to disappear in the 0.3.7 attended test.
 
-## Output modes
+At the finish line, the game disables `CarCameras` and lets `CinemachineBrain` move the same `Camera Main`. An already armed driver stays attached through that handoff. The mod does not attach a three-view driver to an unrelated menu camera before gameplay.
 
-### NVIDIA Surround
+## Configuration and safety
 
-Recommended first. The driver exposes one combined resolution, optionally with
-bezel correction. The true-triple compositor fills that surface. If the mod is
-disabled, the game still has a usable single-camera ultrawide fallback.
+The UMM panel presents Off, Single wide display, Three separate displays, and a field-of-view slider. Advanced setup accepts a local panel size, eye distance, side angles, and separate-display indices. Example measurements remain inactive until the user accepts them. An imported optimizer layout is optional; the effective layout is validated and hashed without mutating the import.
 
-### Borderless desktop span
+The wide mode requires exactly three native panel widths and one native height. The separate mode requires the center as Windows primary, a native-size game output, matching secondary displays, and distinct Unity indices. The adapter never calls `Screen.SetResolution` or changes NVIDIA/Windows display topology. It writes runtime status and diagnostic JSON atomically under `%LOCALAPPDATA%\DBCE\TripleScreen\games\art-of-rally\`.
 
-Same wide compositor, but a later Windows adapter sizes and positions the game
-window across ordinary extended monitors. Keep window control outside the core
-and require exact monitor topology validation before changing a window.
+## Test status and risks
 
-### Separate Unity displays
+Attended checks on game build 1.5.8b found aligned seams, FOV continuity, stable vegetation, closer lighting, and no visible tearing in separate-display mode. The 0.3.10 finish-camera handoff appeared fixed. The 0.3.11 wide viewport path improved vegetation and lighting. **Surround tearing remains open** despite Unity VSync 1; update FPS and camera callbacks are not scanout timing. A minor vegetation fringe reported in separate mode has not been isolated with a same-scene comparison. See [known issues](KNOWN-ISSUES.md) and [experiment 008](experiments/008-attended-separate-display-check.md).
 
-Experimental. Activate display 1/2 once, send one camera to each target, and
-route a center UI canvas explicitly. The user must restart the game to undo
-display activation. Do not make this the default until window ordering, mixed
-DPI, refresh rate, focus/input, pause, and teardown have passed.
-
-## Configuration flow
-
-1. Optimizer reads EDID/Windows topology for count, pixel modes, coordinates,
-   GPU, and whether Surround appears active.
-2. User supplies/validates physical width or diagonal/aspect, curve radius,
-   bezels, side angles, eye distance, and vertical eye offset.
-3. Optimizer validates the contract and recommends an output mode.
-4. Art of Rally adapter reads the same JSON, builds three `DisplaySurface`
-   instances, and converts the core matrices/bases to Unity types.
-5. The adapter writes only its own UMM configuration. It should not mutate
-   registry PlayerPrefs or NVIDIA settings in the first release.
-
-## Phases and gates
-
-1. **Inventory:** capture cameras, canvases, effects, projections, displays in
-   menu, stage, pause, replay, and photo mode.
-2. **Single-camera override (implemented, not runtime-verified):** apply the
-   center physical FOV/off-axis matrix and prove handoff/restoration across all
-   camera states. It is default-off and reports only after a rendered frame.
-3. **Three unprocessed views:** render three RTs without post effects; validate
-   seams with a grid overlay and representative stages.
-4. **Effects and UI:** clone/route only the components proven safe; test every
-   AA mode, weather/fog, shadows, menus, HUD, photo mode, and replay.
-5. **Output alternatives:** Surround first, then borderless span, then separate
-   displays if it adds enough value.
-6. **Curvature:** optional cylindrical compositor warp using curve radius and
-   measured active-area geometry.
-
-## Principal risks
-
-- Three views can approach three times the scene render cost before shared work.
-- Global shader state and screen-space effects may be overwritten by the last
-  camera and differ at seams.
-- TAA can reset/jitter custom projection matrices and maintain per-camera
-  history that does not agree at panel edges.
-- Camera lifecycle changes between gameplay, Cinemachine sequences, replay, and
-  photo mode; stale clones could render the wrong transform or survive teardown.
-- Multiple UMM camera mods can fight over update order. If `ArtOfSimRally` is
-  loaded, the triple renderer should sample after its mounted-camera update and
-  never alter its saved camera rotation list.
-- 1500R/other curved panels need warp for exact geometry; a planar approximation
-  must be labeled as such in the UI.
+Three cameras can cost substantially more than one. Screen-space effects can disagree across seams, and global shader state may be overwritten between cameras. Mixed monitor sizes, DPI, all menus, replay, photo mode, and longer performance runs need further attended testing. Offline geometry tests verify projection and viewport math but cannot certify those visual/lifecycle gates.

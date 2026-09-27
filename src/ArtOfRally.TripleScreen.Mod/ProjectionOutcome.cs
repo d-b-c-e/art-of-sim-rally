@@ -42,6 +42,10 @@ internal sealed class ProjectionOutcome
         Create("active", layout, 3, lastFrameUtc, code, "warning", message,
             "asymmetric-frustum", "three-projections", "surround-compositor");
 
+    internal static ProjectionOutcome SeparateViewActive(LayoutLoadResult layout, DateTime lastFrameUtc, string code, string message) =>
+        Create("active", layout, 3, lastFrameUtc, code, "warning", message,
+            "asymmetric-frustum", "three-projections", "independent-displays");
+
     internal static ProjectionOutcome Degraded(LayoutLoadResult layout, string code, string message) =>
         Create("degraded", layout, 0, null, code, "warning", message);
 

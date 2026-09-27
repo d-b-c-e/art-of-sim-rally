@@ -1,5 +1,10 @@
 # Technical Research
 
+This is the 2026-09-21 feasibility analysis. Its initial preference for a
+render-texture compositor was superseded by the attended 0.3.11 direct-viewport
+renderer. See [architecture](architecture.md) and [known issues](KNOWN-ISSUES.md)
+for current behavior.
+
 Research date: 2026-09-21. Conclusions below distinguish inspected facts from
 proposals. No game binary or decompiled source is stored in this repository.
 
@@ -128,3 +133,36 @@ reason to ignore the angle and distance inputs.
 
 Nothing above establishes runtime visual correctness. The checked-in probe and
 attended experiments exist to close that evidence gap.
+
+## Surround refresh-rate investigation — 2026-09-25
+
+The owner's NVIDIA setup screenshot shows the three GS32QCA panels grouped at
+7680x1440 with **only 60 Hz offered**. A read-only driver check reported an RTX
+5080 on 610.88. This proves the current configured group is limited to 60 Hz;
+it does not establish a universal Surround limit or identify the exact cause.
+
+NVIDIA's [Surround support guide](https://nvidia.custhelp.com/app/answers/detail/a_id/5335/kw/global%20settings)
+explains that a Surround group uses the highest **common resolution and
+refresh timing**, including pixel clock, across all selected displays. It
+recommends identical displays on the same connection protocol and comparable
+cables; adapters can alter reported timings. It also documents the custom
+resolution icon next to the resolution dropdown, available after Surround is
+enabled. The three selected monitors are the same model, but their individual
+active timings and connector protocols have not yet been compared.
+
+The [GS32QCA manufacturer manual](https://download.gigabyte.com/FileList/Manual/GIGABYTE_GS27QCA_GS32QCA_UM_English_20240823.pdf)
+lists 2560x1440 at 120 Hz on all input columns, while the model's published
+maximum is 180 Hz. Thus **120 Hz is a sensible first common-mode target**, not
+a guaranteed Surround mode. NVIDIA's UI may still reject it if the three
+panels report different detailed timings, port modes, or other constraints.
+
+Safe diagnostic sequence after exiting games: disable Surround, inspect each
+GS32QCA individually at 2560x1440 for available 120 Hz and higher modes,
+connector type, color depth/HDR, and whether all three cables are the same
+protocol. If all three expose 120 Hz, set them to the same supported mode and
+re-open Surround's dropdown. Only then consider its documented custom-mode
+dialog, with a known way back to 60 Hz. Do **not** blindly edit EDIDs, force a
+high-rate custom timing, update the GPU driver, or change cable topology during
+gameplay. Independent-display rendering may access each panel's higher native
+rate, but loses NVIDIA Surround's documented inter-display synchronization;
+it is not inherently a screen-tear cure.

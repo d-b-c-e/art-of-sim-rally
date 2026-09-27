@@ -4,7 +4,7 @@
     <AssemblyName>ArtOfRally.TripleScreen.Mod</AssemblyName>
     <RootNamespace>ArtOfRally.TripleScreen.Mod</RootNamespace>
     <Nullable>disable</Nullable>
-    <GameDir Condition="'$(GameDir)' == ''">D:\Program Files (x86)\Steam\steamapps\common\artofrally</GameDir>
+    <GameDir Condition="'$(GameDir)' == ''">$(ART_OF_RALLY_DIR)</GameDir>
     <ManagedDir>$(GameDir)\artofrally_Data\Managed</ManagedDir>
     <UmmDir>$(ManagedDir)\UnityModManager</UmmDir>
   </PropertyGroup>
@@ -31,6 +31,10 @@
       <HintPath>$(ManagedDir)\UnityEngine.UIModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>$(ManagedDir)\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="UnityModManager">
       <HintPath>$(UmmDir)\UnityModManager.dll</HintPath>
       <Private>false</Private>
@@ -39,8 +43,16 @@
       <HintPath>$(ManagedDir)\Assembly-CSharp.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>$(ManagedDir)\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Unity.Postprocessing.Runtime">
       <HintPath>$(ManagedDir)\Unity.Postprocessing.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="AwesomeTechnologies.VegetationStudioPro.Runtime">
+      <HintPath>$(ManagedDir)\AwesomeTechnologies.VegetationStudioPro.Runtime.dll</HintPath>
       <Private>false</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json">

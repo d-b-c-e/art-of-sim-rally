@@ -5,7 +5,7 @@
     <RootNamespace>Dbce.TripleScreen.Protocol</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
-    <GameDir Condition="'$(GameDir)' == ''">D:\Program Files (x86)\Steam\steamapps\common\artofrally</GameDir>
+    <GameDir Condition="'$(GameDir)' == ''">$(ART_OF_RALLY_DIR)</GameDir>
     <ManagedDir>$(GameDir)\artofrally_Data\Managed</ManagedDir>
   </PropertyGroup>
 

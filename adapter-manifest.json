@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "adapterId": "dbce-triple-mod-art-of-rally",
-  "adapterVersion": "0.2.0",
+  "adapterVersion": "0.3.11",
   "gameId": "art-of-rally",
   "layoutContractVersions": {
     "minimum": 1,
@@ -10,7 +10,8 @@
   "supportedGameBuilds": [],
   "topologies": [
     "nvidia-surround",
-    "borderless-span"
+    "borderless-span",
+    "separate-displays"
   ],
   "capabilities": [
     "asymmetric-frustum"

@@ -40,6 +40,7 @@ TestResults/
 *.nupkg
 *.snupkg
 publish/
+dist/
 
 # Never commit copied game/mod-loader binaries or decompiler output
 lib/

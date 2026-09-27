@@ -20,10 +20,13 @@ internal static class Program
             CenterProjectionIsSymmetric();
             SideProjectionsAreMirroredAndOffAxis();
             SharedEdgesLandOnAdjacentViewportBorders();
+            SpanViewportsCoverTheOutput();
+            ViewWidthOverridePreservesHinges();
             IndependentSideAnglesArePreserved();
             MatrixMatchesFrustum();
             BadEyeSideIsRejected();
             CanonicalLayoutParsesStrictly();
+            SeparateDisplayLayoutParsesWithoutWideOutput();
             InvalidLayoutsAreRejected();
             StagedLayoutFallbackAndReload();
             RuntimeStatusMatchesCanonicalShape();
@@ -104,6 +107,40 @@ internal static class Program
         return (2d * nearX - view.Left - view.Right) / (view.Right - view.Left);
     }
 
+    private static void SpanViewportsCoverTheOutput()
+    {
+        var left = TripleViewportLayout.ForPanelIndex(0);
+        var center = TripleViewportLayout.ForPanelIndex(1);
+        var right = TripleViewportLayout.ForPanelIndex(2);
+        Near(left.X, 0d, 0d, "span begins at left edge");
+        Near(left.X + left.Width, center.X, 1e-12, "span left/center border");
+        Near(center.X + center.Width, right.X, 1e-12, "span center/right border");
+        Near(right.X + right.Width, 1d, 1e-12, "span ends at right edge");
+        Near(left.Height, 1d, 0d, "span fills output height");
+        Check(left.Width == center.Width && center.Width == right.Width,
+            "span panels must have equal viewport widths");
+    }
+
+    private static void ViewWidthOverridePreservesHinges()
+    {
+        var dimensions = PanelDimensions.FromDiagonal(32d, 16d, 9d);
+        var measured = TripleRigBuilder.Build(new TripleRigDefinition(dimensions.WidthMm, dimensions.HeightMm, 700d, 60d));
+        var widened = TripleRigBuilder.Build(new TripleRigDefinition(dimensions.WidthMm, dimensions.HeightMm, 700d / 1.5d, 60d));
+        var measuredCenter = ProjectionCalculator.Calculate(measured[1], new Vector3d(0d, 0d, 0d), 0.1d, 1500d);
+        var widerCenter = ProjectionCalculator.Calculate(widened[1], new Vector3d(0d, 0d, 0d), 0.1d, 1500d);
+        Check(widerCenter.Right - widerCenter.Left > measuredCenter.Right - measuredCenter.Left,
+            "view-width preference should widen the center frustum");
+
+        var left = ProjectionCalculator.Calculate(widened[0], new Vector3d(0d, 0d, 0d), 0.1d, 1500d);
+        var right = ProjectionCalculator.Calculate(widened[2], new Vector3d(0d, 0d, 0d), 0.1d, 1500d);
+        var leftHinge = widened[1].LowerLeft + (widened[1].Up * (widened[1].Height / 2d));
+        var rightHinge = widened[1].LowerRight + (widened[1].Up * (widened[1].Height / 2d));
+        Near(ProjectHorizontal(left, leftHinge), 1d, 1e-9, "wider left inner edge");
+        Near(ProjectHorizontal(widerCenter, leftHinge), -1d, 1e-9, "wider center left edge");
+        Near(ProjectHorizontal(widerCenter, rightHinge), 1d, 1e-9, "wider center right edge");
+        Near(ProjectHorizontal(right, rightHinge), -1d, 1e-9, "wider right inner edge");
+    }
+
     private static void IndependentSideAnglesArePreserved()
     {
         var dimensions = PanelDimensions.FromDiagonal(32d, 16d, 9d);
@@ -163,6 +200,17 @@ internal static class Program
 
         var oversized = LayoutContractParser.Parse(new byte[LayoutContractParser.MaximumDocumentBytes + 1]);
         Check(!oversized.IsSuccess && oversized.ErrorCode == "LAYOUT_TOO_LARGE", "oversized layout accepted");
+    }
+
+    private static void SeparateDisplayLayoutParsesWithoutWideOutput()
+    {
+        var independent = ValidLayout.Replace(
+            "\"output\":{\"mode\":\"nvidia-surround\",\"combinedWidthPx\":7680,\"combinedHeightPx\":1440}",
+            "\"output\":{\"mode\":\"separate-displays\"}");
+        var result = LayoutContractParser.Parse(Utf8(independent));
+        Check(result.IsSuccess, result.ErrorMessage ?? "separate-display layout rejected");
+        Check(result.Document?.Output?.Mode == "separate-displays", "independent display mode lost");
+        Check(result.Document?.Output?.CombinedWidthPx is null, "separate layout unexpectedly requires a wide canvas");
     }
 
     private static void RuntimeStatusMatchesCanonicalShape()

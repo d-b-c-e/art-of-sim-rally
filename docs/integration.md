@@ -1,47 +1,28 @@
-# Integration with triple-screen-optimizer
+# Optional Triple Screen Optimizer integration
 
-The optimizer should own hardware discovery and user-facing measurement. This
-repo should own Art of Rally adaptation. Their stable seam is the three pinned
-schemas in `contracts/`, the file protocol below, and the projection semantics
-in `Dbce.TripleScreen.Core`.
+The mod works on its own. Players can select **Off**, **Single wide display**, or
+**Three separate displays**, enter screen measurements, and adjust field of view
+in the mod's Unity Mod Manager panel. Triple Screen Optimizer is an optional
+source of those measurements; it does not install or control the mod.
 
-Minimum optimizer inputs:
+The stable interchange is the pinned JSON schemas in `contracts/` and the
+projection semantics in `Dbce.TripleScreen.Core`. The optimizer may write a
+desired layout to
+`%LOCALAPPDATA%\DBCE\TripleScreen\games\art-of-rally\desired-layout.json`.
+When the game cannot see that per-user file, it may stage identical bytes at
+`Mods/DbceTripleScreenArtOfRally/desired-layout.json`. The mod prefers the
+canonical file and reads the staged copy only when the canonical file is absent.
+Players can use measurements entered locally even when an imported file exists.
 
-- detected monitor count, pixel resolution, desktop coordinates, refresh rate,
-  GPU/vendor, and whether Windows currently exposes one Surround display;
-- physical active width/height (manufacturer value preferred; diagonal/aspect
-  estimate otherwise), curve radius, and bezel width;
-- left/right side-panel yaw, eye distance perpendicular to center screen, and
-  vertical eye offset.
+The mod reports observed state at
+`%LOCALAPPDATA%\DBCE\TripleScreen\games\art-of-rally\status.json`. Consumers
+should require an active state, the expected layout hash, and the required
+capability before showing success. A matching hash alone does not prove that
+the rendering path is active. Imported layouts do not automatically enable a
+mode; the player chooses the output mode in the mod.
 
-Recommendation logic should prefer:
-
-1. true-triple compositor over a working single-wide output when the mod is
-   installed and the profile has passed compatibility gates;
-2. NVIDIA Surround ultrawide when Surround is already available or robust
-   single-window output is required; and
-3. separate Unity displays only while explicitly marked experimental.
-
-The canonical file protocol is:
-
-- desired state: `%LOCALAPPDATA%\DBCE\TripleScreen\games\art-of-rally\desired-layout.json`;
-- observed state: `%LOCALAPPDATA%\DBCE\TripleScreen\games\art-of-rally\status.json`.
-
-If the game process cannot see a freshly exported per-user file, the optimizer
-also stages identical bytes at `Mods/DbceTripleScreenArtOfRally/desired-layout.json`
-inside the installed adapter. The mod prefers the canonical per-user file when
-visible and reads the staged copy only when that file is absent from its view.
-The active layout SHA-256 in `status.json` still lets the optimizer verify that
-the game accepted exactly the profile it exported. Both writes are backed up
-before replacement.
-
-The optimizer writes desired state atomically after schema validation. The mod
-never edits that file; it validates it strictly, applies only supported gated
-behavior, and atomically publishes observed status. Consumers must require an
-`active` state, matching layout SHA-256, and the expected active capabilities
-before presenting a green result. A matching hash alone is not proof that the
-rendering path is active.
-
-The first implementation does not edit Art of Rally PlayerPrefs or toggle
-NVIDIA Surround. It advertises only `nvidia-surround` and `borderless-span`,
-not separate displays.
+The current renderer supports three viewports on an exact three-panel-wide
+output and direct rendering to three separate Unity displays. It does not
+change NVIDIA Surround or Windows display topology. Both modes require a
+matching output resolution and the same physical rig measurements. Surround
+tearing remains [open](KNOWN-ISSUES.md).
