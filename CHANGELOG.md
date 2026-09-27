@@ -6,7 +6,10 @@
   the game's live camera FOV; with it on, the existing slider and saved value
   remain in control. Existing installations keep override on until changed.
 - Offline geometry checks cover the observed 75° game FOV with the current 70°
-  side-screen example. In-game visual validation is still pending.
+  side-screen example. The attended Surround drive confirmed a game-like view
+  and aligned seams with override off. Switching back to the saved slider value
+  still needs an attended check. Hard stutters occurred during the drive amid
+  other background activity; the cause is unconfirmed.
 
 ## 0.3.11 — 2026-09-27
 
