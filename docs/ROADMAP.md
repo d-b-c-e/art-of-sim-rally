@@ -51,8 +51,8 @@ strengths are preserved. The owner requested 0.2.6 publication while stronger
 crash-specific physical acceptance remains open.
 See [implementation and evidence](reviews/2026-09-17-constant-crash.md) and the latest
 [gate/install receipt](LOCAL-DEPLOYMENT.md). Next: retest crash feel and ordinary
-landing/steering/lifecycle behavior. The local toolkit pin must be replaced by
-an official binary-identical release before publication. SimHub motion
+landing/steering/lifecycle behavior. The consumer now pins official toolkit
+v0.15.0 with binary-identical payloads. SimHub motion
 amplification remains explicitly deferred. See
 [findings and validation sequence](research/2026-09-14-crash-feedback.md) and
 [drive evidence](reviews/2026-09-15-crash-capture.md).
@@ -84,8 +84,9 @@ These are validation/support work rather than missing features.
 
 **Landing timing/strength:** investigate the Haapajarvi slightly-early report
 (KI-36) before changing first-contact timing. The requested optional 30–40 wheel
-strength is implemented for 0.2.6: both impact sliders allow
-0–40%, with default 5 and existing values preserved. Physical comparison of the
+strength is implemented for 0.2.6: landing allows 0–40% with default 5;
+the experimental crash kick allows 0–100% with default 50. Existing values are
+preserved. Physical comparison of the
 stronger range remains pending. The owner's ButtKicker clipping is a separate
 device/output observation and does not establish another rig's wheel limit.
 Owner clarified motion-rig telemetry was the primary interest, then explicitly

@@ -14,7 +14,9 @@
 six owner/game files retained byte-for-byte. The FFB/shifter device dropdowns
 now use bounded choices instead of full-width raised bars, and FFB Refresh is
 compact. Saved GUID selection and tune are unchanged. No post-install game launch
-or force test. Toolkit binaries358add5/probe0.2.5.4 unchanged. KI-41 rendered
+or force test. Toolkit binaries358add5/probe0.2.5.4 unchanged. The consumer
+source now pins official toolkit v0.15.0 with byte-identical payloads; the
+installed game still contains the same tested binaries. KI-41 rendered
 acceptance and the broader KI-39/40 matrix remain pending; exact backup/hashes
 are in `docs/LOCAL-DEPLOYMENT.md`.
 
@@ -599,7 +601,7 @@ unless the owner changes this preference. No Actions workflows were present when
 checked. Tag the artifact's recorded source commit and preserve its hashes;
 local publishing does not waive attended checks. See docs/RELEASING.md.
 
-Use `tools/testing/Test-Rc.ps1 -Version 0.2.5-rc.N` with a new RC number, or
+Use `tools/testing/Test-Rc.ps1 -Version X.Y.Z-rc.N` with a new RC number, or
 `-Version X.Y.Z -Final` for a final-labelled artifact; neither grants runtime sign-off.
 It explicitly runs consumer arithmetic, save, camera/lifecycle and capture tests,
 package/installer checks, and creates an attended checklist. `dotnet test

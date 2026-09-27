@@ -4,7 +4,7 @@ The register of what is broken, what is unverified, and what was deliberately
 abandoned. One entry per problem, newest first within each section.
 
 **Reporting something new:** open an [issue](https://github.com/d-b-c-e/art-of-sim-rally/issues) with a support file
-(Ctrl+F10 → *Devices and troubleshooting* → **Create support file on Desktop**).
+(F6 → *Help* → **Create support file on Desktop**).
 User-facing fixes by symptom live in [TROUBLESHOOTING.md](TROUBLESHOOTING.md);
 this file is the engineering view, including things a user cannot act on.
 
@@ -135,7 +135,9 @@ routine force samples behind `DBCE_FFB_TRACE_FORCE=1`; lifecycle/errors remain.
 Both architectures pass production-adapter fake-output tests with identical
 force values, directions, flags and repeated-value delivery. No wheel was
 attached during upstream smoke; this is not a live FFB or stutter verification.
-The consumer's local pin is unpublished and cannot be used for a final release.
+The consumer now pins official toolkit v0.15.0 with binaries identical to the
+tested local candidate. This removes the packaging blocker, but does not prove
+the reported in-game stutter is fixed; a cold-stage comparison remains pending.
 See [investigation and evidence](reviews/2026-09-16-landing-startup-investigation.md).
 
 ### KI-36 — Landing vibration may precede visible touchdown on Haapajarvi

@@ -134,12 +134,12 @@ checked on that date. GitHub hosts the source and release assets; it does not
 need to rebuild the archive.
 
 1. Vendor the intended official toolkit release using the transactional
-   Sync-Toolkit.ps1. For 0.2.6, confirm the managed/native DLLs match the tested
-   local RC16 pin byte-for-byte before changing its VERSION label.
+   Sync-Toolkit.ps1. For 0.2.6, the five v0.15.0 payloads match the tested
+   local RC16 pin byte-for-byte.
    Confirm VERSION and hashes; do not label an unreleased toolkit build as a
    published toolkit version. Building this consumer locally is the normal path.
 2. Keep `Version.props` and source Info.json on the same numeric UMM version.
-   Run `tools/testing/Test-Rc.ps1 -Version 0.2.5-rc.N` with an unused RC number.
+   Run `tools/testing/Test-Rc.ps1 -Version X.Y.Z-rc.N` with an unused RC number.
    It builds with warnings as errors, runs consumer checks, validates vendor
    hashes/exports and packages the identified artifact. Existing RCs are immutable.
 3. Close the game, install that zip and complete the generated attended checklist.
