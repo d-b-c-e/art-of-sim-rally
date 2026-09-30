@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Version 0.2.6 uses Simple/Advanced views with Controls, FFB, Cameras, Telemetry
+Version 0.2.7 uses Simple/Advanced views with Controls, FFB, Cameras, Telemetry
 and Help pages. Pause before changing a binding or device.
 
 For initial setup, use the [setup guide](SETUP.md). If the mod loads, pause and
@@ -9,7 +9,7 @@ reporting a problem.
 
 ## Installation or settings panel missing
 
-- **Missing Install.bat:** download `ArtOfSimRally-0.2.6.zip` from release
+- **Missing Install.bat:** download `ArtOfSimRally-0.2.7.zip` from release
   **Assets**, not either **Source code** archive. Use **Extract All** before
   running it; keep the extracted files together.
 - **Game not found:** [supply the folder containing artofrally.exe](SETUP.md#custom-game-folder).
@@ -123,7 +123,7 @@ wheel/pedal assignments even when the mod's assigned controls are Off; that
 does not establish that the TSS binding is active. If binding still fails,
 create a support file **before reinstalling or clearing settings**, and include
 the pause state, status text, device mode, and whether the preview moves.
-The 0.2.6 T300/TSS fresh-bind report is tracked as
+The 0.2.6 T300/TSS fresh-bind report, still awaiting a TSS retest in 0.2.7, is tracked as
 [KI-43](KNOWN-ISSUES.md#ki-43--026-binding-and-calibration-may-not-capture-a-separate-tss-handbrake).
 
 Version 0.2.5 identifies newly assigned axes/buttons by device instance GUID

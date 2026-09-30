@@ -4,12 +4,11 @@ Drive [art of rally](https://store.steampowered.com/app/550320/) with a racing
 wheel, pedals and a shifter. Adds force feedback from the game's tyre forces,
 direct USB controls, bonnet/bumper cameras and telemetry for SimHub.
 
-**[Download stable 0.2.6](https://github.com/d-b-c-e/art-of-sim-rally/releases/latest)** ·
-[Try 0.2.7-rc.2](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.7-rc.2) ·
+**[Download 0.2.7](https://github.com/d-b-c-e/art-of-sim-rally/releases/latest)** ·
 [Setup guide](docs/SETUP.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Changelog](CHANGELOG.md)
 
-Version 0.2.6 has five settings pages—Controls, FFB, Cameras, Telemetry and Help—
+Version 0.2.7 has five settings pages—Controls, FFB, Cameras, Telemetry and Help—
 with Simple and Advanced views. Press **F6** to open Wheel settings. Pause before
 changing bindings or devices; the game simulation does not pause automatically.
 
@@ -24,12 +23,12 @@ download is needed.
    [Unity Mod Manager](https://www.nexusmods.com/site/mods/21). Run
    `UnityModManager.exe`, select **Art of Rally**, check its game folder, and click
    **Install**. This is a one-time setup for this game.
-2. Download **ArtOfSimRally-0.2.6.zip** from the release's **Assets** section.
+2. Download **ArtOfSimRally-0.2.7.zip** from the release's **Assets** section.
    Choose the mod ZIP, not GitHub's **Source code** downloads.
 3. Right-click the ZIP → **Extract All**. Open the extracted folder and
    double-click **Install.bat**. Wait for the successful verification message.
 4. Launch art of rally through Steam. Press **F6** for Wheel settings, or
-   **Ctrl+F10** to open UMM. Check that version **0.2.6** is listed.
+   **Ctrl+F10** to open UMM. Check that version **0.2.7** is listed.
 
 The installer finds Steam libraries on other drives and preserves existing mod
 settings. If it cannot find your game, see [custom folders](docs/SETUP.md#custom-game-folder).
@@ -94,11 +93,15 @@ checks are in [KNOWN-ISSUES.md](docs/KNOWN-ISSUES.md).
 
 ## Development
 
-Version 0.2.6 adds an experimental [constant-force crash kick](docs/CRASH-EFFECTS.md),
+Version 0.2.6 added an experimental [constant-force crash kick](docs/CRASH-EFFECTS.md),
 off by default at strength **50** with range **0–100**. Landing stays on by
 default at strength **5**, range **0–40**. Saved settings are preserved. Crash
 feel varies by hardware; a higher nominal setting does not guarantee spare
 wheel headroom. Both effects are separate from SimHub telemetry.
+
+Version 0.2.7 improves USB binding recovery and adds optional shift vibration,
+off by default. Fresh T300/TSS binding and physical shift feel still need
+feedback; see the [0.2.7 release notes](docs/releases/0.2.7.md).
 
 [Build instructions](docs/BUILDING.md) · [Documentation index](docs/README.md) ·
 [Roadmap](docs/ROADMAP.md) · [Release procedure](docs/RELEASING.md)

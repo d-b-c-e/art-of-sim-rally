@@ -1,7 +1,7 @@
 # Setup guide
 
 Start with the [four install steps](../README.md#install). This guide covers
-custom folders, controls and optional rig setup for **0.2.6**. The settings have
+custom folders, controls and optional rig setup for **0.2.7**. The settings have
 Simple and Advanced views, with Controls, FFB, Cameras, Telemetry and Help pages.
 Pause before changing devices or bindings. [Local deployment](LOCAL-DEPLOYMENT.md)
 identifies the owner's exact installed build.
@@ -9,7 +9,7 @@ identifies the owner's exact installed build.
 ## Check the installation
 
 Launch through Steam, press **F6** for Wheel settings or **Ctrl+F10** for UMM,
-and find **art of sim rally 0.2.6**. If the entry is absent or red, follow
+and find **art of sim rally 0.2.7**. If the entry is absent or red, follow
 [installation troubleshooting](TROUBLESHOOTING.md#installation-or-settings-panel-missing).
 
 The game folder contains `artofrally.exe`. Our mod goes in
@@ -135,7 +135,7 @@ it to request a short wheel rumble when the player's gear engages. It starts at
 5% nominal force with a 0–20% range, independent of steering strength. It does
 not change shifting or gamepad rumble. Landing and crash cues take priority;
 check the feel on your own wheel before leaving it enabled. This feature first
-appears in the 0.2.7 test candidate, not the 0.2.6 public release.
+appears in 0.2.7; it has not been accepted on a physical wheel yet.
 
 Leave **Disable steering limiter on car spawn (legacy)** off. It is not a live
 override of the game's assist slider; use the game's assist settings instead.

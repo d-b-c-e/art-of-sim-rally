@@ -5,6 +5,16 @@ Notable changes to art of sim rally.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7] - 2026-09-30
+
+Promotes the 0.2.7-rc.2 behavior to the regular release. USB Bind now keeps
+healthy readers open, retries failed readers and calibrates the saved axis.
+Optional 25 Hz/120 ms shift vibration is off by default, with an independent
+5% default and 0–20% range. Steering, crash waveform, landing and telemetry
+remain unchanged. The owner's MOZA handbrake rebound successfully; fresh
+T300/TSS binding, shift feel and crash response at 50% still need hardware
+feedback. All 16 local gates passed on the final-labelled package.
+
 ## [0.2.7-rc.2] - 2026-09-30 (prerelease)
 
 ### Added
@@ -465,6 +475,7 @@ First release. Turns art of rally into something you can drive on a wheel.
   motion rigs.
 
 [0.2.0]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.0
+[0.2.7]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.7
 [0.2.7-rc.2]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.7-rc.2
 [0.2.3]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3
 [0.2.2]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.2

@@ -79,7 +79,7 @@ Simple is the first view; Advanced adds tuning to the same saved values.
   These controls do not scale telemetry or the ButtKicker; tune that in SimHub.
   Shift vibration (experimental) is off by default at 5 (range 0-20). It adds
   a short wheel rumble when the player's gear engages, without changing the
-  gearbox. Landing and crash cues take priority. This is a 0.2.7 test feature;
+  gearbox. Landing and crash cues take priority. This is new in 0.2.7;
   its feel on real wheels has not yet been accepted.
 
 Leave the legacy steering limiter override Off; use the game's assist settings.
