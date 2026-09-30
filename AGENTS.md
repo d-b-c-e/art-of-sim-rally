@@ -8,7 +8,16 @@
 
 ## Repository Purpose
 
-**Current release and local install: 0.2.6**, clean source
+**Current local install: 0.2.7-rc.1** (public release: 0.2.6), clean source
+`48033d395a3b2de8a6d1bc3266d43c812d92654c`, installed 2026-09-30
+02:24:47 UTC after all 16 local gates passed. It improves USB Bind reader
+preservation/retry, saved-axis Calibrate, and paused/assigned-controls guidance
+for the new T300/TSS binding report (KI-43). Six payloads, the second native
+copy and six protected files were hash-checked; settings were retained. No
+live TSS binding or game drive has occurred on this candidate. Public 0.2.6
+remains the stable download. See `docs/LOCAL-DEPLOYMENT.md`.
+
+**Previous release and local install: 0.2.6**, clean source
 `8fc5c4da3ff3e8228281bf46dc49e052b166f0ea`, published and installed
 2026-09-27 06:02:52 UTC. All 16 final local gates passed; the published download
 matches the tested ZIP, and six mod payloads plus the second native copy match

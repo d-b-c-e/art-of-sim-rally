@@ -6,7 +6,29 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Current release and installation — 0.2.6
+## Current installation — 0.2.7-rc.1 (public release remains 0.2.6)
+
+Installed **2026-09-30 02:24:47 UTC** with the game closed, following the
+0.2.6 T300/TSS binding report. The candidate retains the previous settings and
+does not change steering, crash, landing, telemetry or toolkit payloads. It
+keeps healthy USB readers open during routine Bind, retries an initially failed
+reader, keeps Calibrate on the saved axis, and makes paused/assigned-controls
+state visible at the top of Controls. This is an offline-validated candidate,
+not a T300/TSS hardware fix confirmation. See [KI-43](KNOWN-ISSUES.md#ki-43--026-binding-and-calibration-may-not-capture-a-separate-tss-handbrake).
+
+- Identity: `0.2.7-rc.1+48033d395a3b2de8a6d1bc3266d43c812d92654c.clean`.
+- ZIP SHA-256: `6F59A0575AD390B2D8A4C65B49117473E758283EB6ACF043D5CE7002BE9999AE`.
+- [Complete local gate](../results/rc-0.2.7-rc.1-bd73f449b8f442dab18c0884c1c2f76e/automated.json),
+  SHA-256 `5FA8BFA7E677C606AF6D296935438248E92E354657F63A18CB79D9DDB7E1C950`:
+  all 16 checks passed from a clean source; both recorded-drive cases passed.
+- [Install receipt and 0.2.6 backup](../results/binding-027-rc1-install-9fecf946f0214f819912e9a330c83c48/receipt.json):
+  six payloads plus the second native plugin match the tested ZIP. Settings and
+  five other protected game/probe files kept their pre-install hashes.
+- No game launch, live TSS binding test, physical-force acceptance or release
+  publication is implied. The [attended checklist](../results/rc-0.2.7-rc.1-bd73f449b8f442dab18c0884c1c2f76e/manual.json)
+  is pending.
+
+## Previous public release and installation — 0.2.6
 
 Published [0.2.6](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.6)
 and installed **2026-09-27 06:02:52 UTC** with the game closed. The owner
