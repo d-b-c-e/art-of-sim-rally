@@ -19,7 +19,8 @@ namespace ArtOfSimRally.Mod
             return true;
         }
         public static bool CustomFfb(Settings c) => c.Smoothing != .2f || c.Invert || c.FyReference != 11500f ||
-            !c.LandingEffectsEnabled || c.LandingStrength != 5 || c.CrashEffectsEnabled || c.CrashStrength != 50;
+            !c.LandingEffectsEnabled || c.LandingStrength != 5 || c.CrashEffectsEnabled || c.CrashStrength != 50 ||
+            c.ShiftEffectsEnabled || c.ShiftStrength != 5;
         public static bool CustomControls(Settings c) => !c.DirectSteering || !c.ZeroAxisDeadzone ||
             !c.BindAnyDevice || !c.GlyphTextFallback || c.DisableSteerAssist;
         public static bool CustomCamera(Settings c) => c.BonnetHeight != .95f || c.BonnetForward != 1f || c.BonnetSide != 0 ||

@@ -109,6 +109,16 @@ Rewired UI; Raw Input-unreadable devices need keyboard/pad for those actions.
 
 ### KI-38 — Accepted RC3/RC4 crash commands have no distinct felt effect
 
+**Current lead, 2026-09-29:** the latest installed 0.2.7-rc.1 game log shows
+five accepted crash cues with ordinary expiry at roughly 121–130 ms. The
+strongest was a full-intensity 25.4 m/s normal-speed contact, but the owner's
+preserved setting was **19.52381%**, so the request was only **0.1952** nominal
+force. The 50% value is a default for new settings, not a migration. Test the
+same constant-pulse implementation with Crash strength manually set to 50
+before changing waveform, duration, collision thresholds or toolkit output.
+Driver acceptance and log timing are not physical torque measurements. See
+[current investigation](research/2026-09-29-crash-shift-feedback.md).
+
 **Owner-confirmed feel failure in RC3 and shaped RC4 (2026-09-17 UTC).**
 RC3 logs contain 13 accepted crash cues, six at full configured intensity and
 about 19.5% nominal amplitude. Owner felt no distinct crash effect. This is not

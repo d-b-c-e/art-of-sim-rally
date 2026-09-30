@@ -105,6 +105,11 @@ namespace ArtOfSimRally.Mod
         public bool CrashEffectsEnabled = false;
         public float CrashStrength = 50f;
 
+        // Optional gear-engagement cue. Saved settings from earlier releases
+        // remain silent until the player explicitly enables it.
+        public bool ShiftEffectsEnabled = false;
+        public float ShiftStrength = 5f;
+
         public bool DiagnosticLogging = false;
 
         // Set by the device picker in the settings panel, not drawn directly.
@@ -259,6 +264,7 @@ namespace ArtOfSimRally.Mod
             FyReference = defaults.FyReference;
             LandingEffectsEnabled = defaults.LandingEffectsEnabled; LandingStrength = defaults.LandingStrength;
             CrashEffectsEnabled = defaults.CrashEffectsEnabled; CrashStrength = defaults.CrashStrength;
+            ShiftEffectsEnabled = defaults.ShiftEffectsEnabled; ShiftStrength = defaults.ShiftStrength;
             // Preserve the saved Off/On preference, device and all non-FFB settings.
         }
 

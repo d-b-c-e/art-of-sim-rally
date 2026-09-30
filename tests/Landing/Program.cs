@@ -198,7 +198,7 @@ static class Program
     static int Main(string[] args)
     {
         try{ImpactController.MonotonicNow=()=>UnityEngine.Time.realtimeSinceStartup;
-            Detector();Delivery();GameIntegration();TimingDiagnostics();assertions+=CrashTests.Run();assertions+=ImpactPlaybackTests.Run();object capture=args.Length==1?Capture(args[0]):null;
+            Detector();Delivery();GameIntegration();TimingDiagnostics();assertions+=CrashTests.Run();assertions+=ImpactPlaybackTests.Run();assertions+=ShiftTests.Run();object capture=args.Length==1?Capture(args[0]):null;
             Console.WriteLine(JsonSerializer.Serialize(new{status="passed",assertions,capture}));return 0;}
         catch(Exception e){Console.Error.WriteLine(e);return 1;}
     }

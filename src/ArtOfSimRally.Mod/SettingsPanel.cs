@@ -319,6 +319,9 @@ namespace ArtOfSimRally.Mod
             c.CrashEffectsEnabled = Toggle(c.CrashEffectsEnabled, "Crash kick (experimental)");
             c.CrashStrength = Slider(c.CrashStrength, 0, 100, 50, "Crash strength", 1, "%");
             Help("Short constant push/release, separate from steering and telemetry. Full nominal force can saturate alongside steering. " + CrashController.Status);
+            c.ShiftEffectsEnabled = Toggle(c.ShiftEffectsEnabled, "Shift vibration (experimental)");
+            c.ShiftStrength = Slider(c.ShiftStrength, 0, 20, 5, "Shift strength", 1, "%");
+            Help("A short wheel rumble when the player's gear engages. Landing and crash cues take priority. " + ImpactController.Status(ImpactKind.Shift));
             if (CommandRow("Keeps FFB Off/On, the device and all other settings.", "Reset FFB tuning", 150))
             { c.ResetFfbTuning(); Main.MarkSettingsDirty(); }
         }

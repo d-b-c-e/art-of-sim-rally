@@ -30,12 +30,13 @@ good drive on installed 0.2.7-rc.1; its saved binding is confirmed. Test paused
 Bind, full-travel/release/Save, Calibrate, separate USB TSS handbrake and an
 existing saved profile. Resolve the ambiguous "not assigned" label report.
 
-**Gear-shift wheel cue (request):** the same user likes the PS5 controller's
-small shift rumble and asks for an optional wheel equivalent. Investigate the
-game's shift event and the existing landing/crash effect owner, then capture
-and compare real shifts before choosing an amplitude or waveform. Keep it
-independent of steering and avoid adding an effect based on gear-number changes
-alone, which can also occur during resets or menus.
+**Gear-shift wheel cue (0.2.7 candidate):** an opt-in 25 Hz/120 ms wheel cue at
+gear engagement, initially 5% nominal force with a 0–20% range. It watches only
+the active player's drivetrain while driving, focused and outside settings or
+restart; neutral transitions are ignored. One existing finite sine slot is
+shared with landing, and landing/crash take priority. Offline hook and effect
+arbitration tests pass. Real wheel feel and event timing remain to be checked;
+see [investigation](research/2026-09-29-crash-shift-feedback.md).
 
 **Settings UX adoption (KI-39/KI-41):** Simple/Advanced pages, transactional
 calibration, USB mod/camera buttons, strict FFB follow/override, atomic connection
@@ -66,6 +67,9 @@ consumers; their tunes are not automatically changed.
 All 16 RC16 local gates pass, including both recorded corpus cases; saved owner
 strengths are preserved. The owner requested 0.2.6 publication while stronger
 crash-specific physical acceptance remains open.
+The subsequent 0.2.7-rc.1 drive log contains a full-intensity head-on command,
+but the saved crash slider was still 19.52381%; its submitted magnitude was
+0.1952. Compare the unchanged crash cue at 50% before retuning it.
 See [implementation and evidence](reviews/2026-09-17-constant-crash.md) and the latest
 [gate/install receipt](LOCAL-DEPLOYMENT.md). Next: retest crash feel and ordinary
 landing/steering/lifecycle behavior. The consumer now pins official toolkit

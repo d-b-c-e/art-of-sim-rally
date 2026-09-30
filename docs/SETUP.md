@@ -130,6 +130,13 @@ full nominal force but does not guarantee headroom alongside steering. These
 controls affect wheel effects; the wheelbase driver's global game FFB gain scales
 them too. SimHub motion and ButtKicker gains are separate.
 
+**Shift vibration (experimental):** off by default. In Advanced > FFB, enable
+it to request a short wheel rumble when the player's gear engages. It starts at
+5% nominal force with a 0–20% range, independent of steering strength. It does
+not change shifting or gamepad rumble. Landing and crash cues take priority;
+check the feel on your own wheel before leaving it enabled. This feature first
+appears in the 0.2.7 test candidate, not the 0.2.6 public release.
+
 Leave **Disable steering limiter on car spawn (legacy)** off. It is not a live
 override of the game's assist slider; use the game's assist settings instead.
 

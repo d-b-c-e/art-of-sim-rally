@@ -34,6 +34,7 @@ namespace HarmonyLib
 {
     public class HarmonyPatch : Attribute { public HarmonyPatch(Type type,string name) { } }
     public class HarmonyPrefix : Attribute { }
+    public class HarmonyPostfix : Attribute { }
 }
 public class PlayerCollider
 {
@@ -41,18 +42,19 @@ public class PlayerCollider
     public T GetComponent<T>() where T:class => body as T;
 }
 public class EventManager { public PlayerManager playerManager=new(); }
-public class PlayerManager { public UnityEngine.Rigidbody playerRigidBody; }
+public class PlayerManager { public UnityEngine.Rigidbody playerRigidBody; public CarDynamics carcontroller; }
+public class Drivetrain { public int gear=2,neutral=1; }
 public class Wheel { public bool onGroundDown=true; public float compression,suspensionTravel=.25f; }
 public class Axle { public Wheel leftWheel=new(),rightWheel=new(); }
 public class Axles { public Axle frontAxle=new(),rearAxle=new(); }
 public class CarDynamics
 {
-    public Axles axles=new(); public UnityEngine.Rigidbody body=new();
-    public T GetComponent<T>() where T:class => body as T;
+    public Axles axles=new(); public UnityEngine.Rigidbody body=new(); public Drivetrain drivetrain=new();
+    public T GetComponent<T>() where T:class => (body as T) ?? (drivetrain as T);
 }
 namespace ArtOfSimRally.Mod
 {
-    internal class Settings { public bool ForceFeedbackEnabled=true,LandingEffectsEnabled=true,DiagnosticLogging=true,CrashEffectsEnabled; public float LandingStrength=5,CrashStrength=50; }
+    internal class Settings { public bool ForceFeedbackEnabled=true,LandingEffectsEnabled=true,DiagnosticLogging=true,CrashEffectsEnabled,ShiftEffectsEnabled; public float LandingStrength=5,CrashStrength=50,ShiftStrength=5; }
     internal static class Main { public static Settings Settings=new(); public static bool Enabled=true, SettingsVisible; }
     internal static class GameState { public static bool IsDriving,IsRestarting; public static EventManager ExistingManager=new(); }
     internal static class FfbNative { public static bool Ready=true; }

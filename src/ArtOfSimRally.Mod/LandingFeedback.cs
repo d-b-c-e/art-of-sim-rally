@@ -27,6 +27,7 @@ namespace ArtOfSimRally.Mod
         // The scale remains percent of nominal force: existing values keep their output.
         public const float MaximumStrengthPercent = 40f;
         public const float MaximumCrashStrengthPercent = 100f, DefaultCrashStrengthPercent = 50f;
+        public const float MaximumShiftStrengthPercent = 20f, DefaultShiftStrengthPercent = 5f;
         private readonly ILandingOutput _output;
         private readonly Func<double> _clock;
         private readonly Action<ImpactDelivery> _observe;
@@ -45,6 +46,7 @@ namespace ArtOfSimRally.Mod
         public bool CrashAvailable => _crashSlot >= 0 && !_crashFailed;
         private string _crashStatus = "Off";
         public string CrashStatus => _crashFailed ? "Crash kick unavailable. Toggle crash off/on while paused to retry; create a support file" : _crashStatus;
+        public string ShiftStatus => _slot >= 0 ? "Ready" : Status;
 
         // Production supplies Stopwatch time, independent of Unity's cached frame
         // time. Tests may supply a deterministic clock, or use the observed time.
@@ -55,21 +57,23 @@ namespace ArtOfSimRally.Mod
         public void Prepare(bool enabled, bool ready, bool idle)
             => Prepare(enabled, false, ready, idle);
         public void Prepare(bool landing, bool crash, bool ready, bool idle)
+            => Prepare(landing, crash, false, ready, idle);
+        public void Prepare(bool landing, bool crash, bool shift, bool ready, bool idle)
         {
-            bool enabled = landing || crash;
+            bool enabled = landing || crash || shift;
             if (!enabled || !ready)
             {
                 Shutdown(enabled ? "device-unavailable" : "disabled");
                 Status = _crashStatus = enabled ? "Waiting for wheel force feedback" : "Off"; return;
             }
-            if (landing && _slot < 0 && !_attempted)
+            if ((landing || shift) && _slot < 0 && !_attempted)
             {
-                Status = "Pause to prepare landing vibration";
+                Status = landing ? "Pause to prepare landing vibration" : "Pause to prepare shift vibration";
                 if (idle)
                 {
                     _attempted = true;
                     _slot = _output.Create(ImpactKind.Landing, Frequency, DurationMs);
-                    Status = _slot >= 0 ? "Ready" : "Landing setup unavailable; toggle both impact features off, then on to retry or create a support file";
+                    Status = _slot >= 0 ? "Ready" : "Sine effect unavailable; toggle landing and shift off, then on to retry or create a support file";
                 }
             }
             if (crash && _crashSlot < 0 && !_crashAttempted && !_crashFailed)
@@ -106,7 +110,7 @@ namespace ArtOfSimRally.Mod
             Events++; LastMagnitude = magnitude;
             before = Clock;
             if (!Finite(before) || before < 0) return false;
-            bool accepted = _output.Play(kind, Slot(kind), magnitude, kind == ImpactKind.Landing ? Frequency : 0);
+            bool accepted = _output.Play(kind, Slot(kind), magnitude, kind == ImpactKind.Crash ? 0 : Frequency);
             double after = Clock;
             _playLatencyMs = Finite(after) && after >= before ? (after - before) * 1000 : -1;
             if (_playLatencyMs < 0) accepted = false;
@@ -117,6 +121,7 @@ namespace ArtOfSimRally.Mod
                 Accepted++; _active = true; _startedAt = after; _gameTime = now;
                 _endsAt = after + DurationMs / 1000.0;
                 if (kind == ImpactKind.Landing) Status = "Ready (last landing accepted by wheel driver)";
+                else if (kind == ImpactKind.Shift) Status = "Ready (last shift accepted by wheel driver)";
                 else _crashStatus = "Ready (last crash accepted by wheel driver)";
                 Report("start", "driver-accepted", after);
             }
@@ -187,7 +192,8 @@ namespace ArtOfSimRally.Mod
         }
         // Callers validate finite, positive inputs before evaluating this mapping.
         internal static float MagnitudeFor(ImpactKind kind, float intensity, float strengthPercent)
-            => Math.Min(1f, intensity) * Math.Min(kind == ImpactKind.Crash ? MaximumCrashStrengthPercent : MaximumStrengthPercent, strengthPercent) / 100f;
+            => Math.Min(1f, intensity) * Math.Min(kind == ImpactKind.Crash ? MaximumCrashStrengthPercent :
+                kind == ImpactKind.Shift ? MaximumShiftStrengthPercent : MaximumStrengthPercent, strengthPercent) / 100f;
         private static bool Finite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);
     }
 }

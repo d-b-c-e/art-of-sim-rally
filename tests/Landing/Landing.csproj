@@ -13,5 +13,6 @@
     <Compile Include="../../src/ArtOfSimRally.Mod/ImpactController.cs" Link="ImpactController.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/CrashSignal.cs" Link="CrashSignal.cs" />
     <Compile Include="../../src/ArtOfSimRally.Mod/CrashController.cs" Link="CrashController.cs" />
+    <Compile Include="../../src/ArtOfSimRally.Mod/ShiftController.cs" Link="ShiftController.cs" />
   </ItemGroup>
 </Project>

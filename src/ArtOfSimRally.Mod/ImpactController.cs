@@ -33,7 +33,8 @@ namespace ArtOfSimRally.Mod
         public static bool Enabled(ImpactKind kind) => Main.Enabled && Main.Settings != null &&
             Main.Settings.ForceFeedbackEnabled && (kind == ImpactKind.Landing
                 ? Main.Settings.LandingEffectsEnabled && Main.Settings.LandingStrength > 0
-                : Main.Settings.CrashEffectsEnabled && Main.Settings.CrashStrength > 0);
+                : kind == ImpactKind.Crash ? Main.Settings.CrashEffectsEnabled && Main.Settings.CrashStrength > 0
+                : Main.Settings.ShiftEffectsEnabled && Main.Settings.ShiftStrength > 0);
         public static bool Available(ImpactKind kind) => !Main.SettingsVisible && Enabled(kind) && Mixer.Available(kind);
         public static string Status(ImpactKind kind) => Enabled(kind) ? Mixer.Status(kind) : "Off";
         public static ImpactResult Trigger(ImpactKind kind, float intensity, float strength, double now)
@@ -47,9 +48,9 @@ namespace ArtOfSimRally.Mod
             string stop = !Main.Enabled ? "mod-disabled" : Main.Settings == null || !Main.Settings.ForceFeedbackEnabled ? "ffb-disabled" :
                 !FfbNative.Ready ? "device-unavailable" : Main.SettingsVisible ? "settings-open" : !Application.isFocused ? "focus-lost" :
                 GameState.IsRestarting ? "restart" : !driving ? "not-driving" :
-                (!Enabled(ImpactKind.Landing) && !Enabled(ImpactKind.Crash)) ? "impacts-disabled" : null;
+                (!Enabled(ImpactKind.Landing) && !Enabled(ImpactKind.Crash) && !Enabled(ImpactKind.Shift)) ? "impacts-disabled" : null;
             if (stop != null) Reset(stop);
-            Mixer.Prepare(Enabled(ImpactKind.Landing), Enabled(ImpactKind.Crash), FfbNative.Ready,
+            Mixer.Prepare(Enabled(ImpactKind.Landing), Enabled(ImpactKind.Crash), Enabled(ImpactKind.Shift), FfbNative.Ready,
                 !driving && Application.isFocused);
             if (!Enabled(ImpactKind.Landing)) LandingController.Reset();
             if (!Enabled(ImpactKind.Crash)) CrashController.Reset();
@@ -60,7 +61,7 @@ namespace ArtOfSimRally.Mod
         public static void Shutdown() { Reset("shutdown"); Mixer.Shutdown(); }
         public static void AppendSupport(StringBuilder text)
         {
-            foreach (var kind in new[] { ImpactKind.Landing, ImpactKind.Crash })
+            foreach (var kind in new[] { ImpactKind.Landing, ImpactKind.Crash, ImpactKind.Shift })
             {
                 var c = Mixer.Counts(kind);
                 text.AppendLine("=== " + kind + " vibration ===");
@@ -72,9 +73,9 @@ namespace ArtOfSimRally.Mod
                 if (c.HasDelivery)
                     text.AppendLine($"Last delivery: {c.Delivery.Action}/{c.Delivery.Reason}; native play call {c.Delivery.PlayLatencyMs:F2} ms; elapsed after return {c.Delivery.ElapsedMs:F2} ms; stops before 120 ms: {c.EarlyStops} (includes intended interrupts/replacements)");
             }
-            text.AppendLine("One active impact; separate cached sine/constant handles; strongest cue wins and stops the old effect before replacement. Driver acceptance is not measured wheel motion.");
+            text.AppendLine("One active cue; separate cached sine/constant handles. Shift yields to landing/crash; landing/crash retain strongest-cue arbitration. Driver acceptance is not measured wheel motion.");
             text.AppendLine("Crash requests require exact finite-duration readback; rejection disables crashes until toggled off/on while paused, preserving landing availability.");
-            text.AppendLine($"Strength scale: percent of nominal wheel force; landing maximum {LandingFeedback.MaximumStrengthPercent}; crash maximum {LandingFeedback.MaximumCrashStrengthPercent}, new-settings default {LandingFeedback.DefaultCrashStrengthPercent}. Separate from steering and SimHub gains.");
+            text.AppendLine($"Strength scale: percent of nominal wheel force; landing maximum {LandingFeedback.MaximumStrengthPercent}; crash maximum {LandingFeedback.MaximumCrashStrengthPercent}, new-settings default {LandingFeedback.DefaultCrashStrengthPercent}; shift maximum {LandingFeedback.MaximumShiftStrengthPercent}, default {LandingFeedback.DefaultShiftStrengthPercent}. Separate from steering and SimHub gains.");
             text.AppendLine("Nominal caps do not guarantee headroom when steering and impacts mix. Steering capture does not record either separate impact output.");
             text.AppendLine();
             LandingController.AppendSupport(text);
