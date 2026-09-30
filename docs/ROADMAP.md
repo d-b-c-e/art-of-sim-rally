@@ -25,8 +25,10 @@ Remaining feature priorities:
 bindings but could not capture new ones after the handbrake stopped working.
 The next candidate improves reader preservation/retry and saved-axis
 calibration; obtain a failed-state support file and attended TSS retest before
-claiming this fixed. Test paused Bind, full-travel/release/Save, Calibrate,
-separate USB handbrake, and an existing saved profile.
+claiming this fixed. The owner cleared/rebound a MOZA handbrake and reported a
+good drive on installed 0.2.7-rc.1; its saved binding is confirmed. Test paused
+Bind, full-travel/release/Save, Calibrate, separate USB TSS handbrake and an
+existing saved profile. Resolve the ambiguous "not assigned" label report.
 
 **Gear-shift wheel cue (request):** the same user likes the PS5 controller's
 small shift rumble and asks for an optional wheel equivalent. Investigate the

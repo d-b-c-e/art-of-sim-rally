@@ -40,7 +40,13 @@ working USB readers, while Calibrate rediscovered an axis instead of keeping
 the saved one. A subsequent candidate keeps responsive readers, retries a
 listed reader that failed to open, fixes Calibrate to the saved axis, and puts
 the paused/assigned-controls status at the top of Controls. Fixture tests pass;
-T300/TSS and in-game UI retest remain pending. Ask for a support file **while
+the owner cleared and rebound a MOZA handbrake on installed 0.2.7-rc.1, then
+reported a good drive. The game log recorded a successful bind and Settings.xml
+contained the saved axis. The owner initially saw "not assigned" after Save;
+the panel also has a separate, unused **Handbrake (button)** row, but which row
+showed that text has not been confirmed. This is evidence for MOZA persistence,
+not a T300/TSS fresh-bind pass. T300/TSS and the in-game label retest remain
+pending. Ask for a support file **while
 the failure is present, before reinstalling** and note pause state, the top
 status text, and whether the TSS axis preview moves. See
 [troubleshooting](TROUBLESHOOTING.md#bindings-do-not-detect-a-wheel-pedal-or-separate-handbrake).

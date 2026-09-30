@@ -24,9 +24,13 @@ not a T300/TSS hardware fix confirmation. See [KI-43](KNOWN-ISSUES.md#ki-43--026
 - [Install receipt and 0.2.6 backup](../results/binding-027-rc1-install-9fecf946f0214f819912e9a330c83c48/receipt.json):
   six payloads plus the second native plugin match the tested ZIP. Settings and
   five other protected game/probe files kept their pre-install hashes.
-- No game launch, live TSS binding test, physical-force acceptance or release
-  publication is implied. The [attended checklist](../results/rc-0.2.7-rc.1-bd73f449b8f442dab18c0884c1c2f76e/manual.json)
-  is pending.
+- **Post-install owner test:** cleared and rebound the MOZA handbrake, then
+  reported that the drive played well. The current game log recorded the bind;
+  Settings.xml contains `MOZA R12 Base` axis 7 with explicit calibration and
+  assigned controls enabled. This does not establish T300/TSS behavior, crash
+  effect feel, complete UI layout or the full hardware matrix. The
+  [attended checklist](../results/rc-0.2.7-rc.1-bd73f449b8f442dab18c0884c1c2f76e/manual.json)
+  remains pending. No release publication is implied.
 
 ## Previous public release and installation — 0.2.6
 

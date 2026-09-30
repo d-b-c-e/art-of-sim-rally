@@ -1,9 +1,12 @@
 # Release readiness — 2026-09-27
 
 **0.2.7-rc.1 is installed for binding regression testing; public 0.2.6 remains
-the stable release.** KI-43 needs a paused T300/TSS fresh-bind and saved-axis
-recalibration retest before its fix can be accepted. All 16 local gates passed,
-but the installed candidate has not been driven. See [the install record](LOCAL-DEPLOYMENT.md).
+the stable release.** The owner cleared and rebound a MOZA handbrake, and reports
+that the subsequent drive played well. The log and Settings.xml confirm the
+new binding was saved; a possible axis/button row-label misunderstanding is
+unresolved. KI-43 still needs a paused T300/TSS fresh-bind and saved-axis
+recalibration retest before its fix can be accepted. All 16 local gates passed;
+the broader attended matrix remains pending. See [the install record](LOCAL-DEPLOYMENT.md).
 
 **0.2.6 was published and installed.** Official toolkit v0.15.0 matches the
 RC16-tested binaries; the final-labelled clean-source build passed all 16 local
