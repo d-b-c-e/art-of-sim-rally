@@ -12,7 +12,7 @@ Drive [art of rally](https://store.steampowered.com/app/550320/) with a racing
 wheel, pedals and a shifter. Adds force feedback from the game's tyre forces,
 direct USB controls, bonnet/bumper cameras and telemetry for SimHub.
 
-**[Download 0.2.7](https://github.com/d-b-c-e/art-of-sim-rally/releases/latest)** ·
+**[Download 0.2.7](https://github.com/d-b-c-e/dbce-mods-art-of-rally/releases/tag/v0.2.7)** ·
 [Setup guide](docs/SETUP.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) ·
 [Changelog](CHANGELOG.md)
 
