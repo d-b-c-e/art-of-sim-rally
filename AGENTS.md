@@ -8,7 +8,7 @@
 
 ## Repository Purpose
 
-**Current local install: 0.2.7-rc.2** (public release: 0.2.6), clean source
+**Current local install and published prerelease: 0.2.7-rc.2** (stable: 0.2.6), clean source
 `c12a826d6ad31a9948c88a7b3861d3e4e52c7678`, installed 2026-09-30
 04:00:36 UTC after all 16 local gates passed. It retains RC1's USB Bind fixes
 and adds an opt-in 25 Hz/120 ms shift cue, default 5% with range 0–20%.
@@ -17,7 +17,8 @@ second native copy and six protected files were hash-checked; owner settings
 were retained. The owner previously rebound the MOZA handbrake and drove RC1
 successfully, but RC2 has not been launched or physically tested. Saved crash
 strength is still 19.52381% despite the new-settings default of 50%; test 50%
-manually before retuning. Public 0.2.6 remains stable. See
+manually before retuning. The published prerelease ZIP and checksum were
+downloaded and verified against the tested files. Public 0.2.6 remains stable. See
 `docs/LOCAL-DEPLOYMENT.md` and `docs/research/2026-09-29-crash-shift-feedback.md`.
 
 **Previous release and local install: 0.2.6**, clean source

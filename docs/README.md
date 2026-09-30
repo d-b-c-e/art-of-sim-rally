@@ -8,6 +8,8 @@
 - [Troubleshooting](TROUBLESHOOTING.md): fixes by symptom and support-file steps.
 - [Landing vibration](LANDING-EFFECTS.md): wheel effect, settings and limits.
 - [Changelog](../CHANGELOG.md): what each release includes.
+- [0.2.7-rc.2 test release](releases/0.2.7-rc.2.md): binding recovery and
+  optional shift rumble; physical feedback is pending.
 
 ## Development and validation
 

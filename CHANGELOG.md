@@ -5,6 +5,24 @@ Notable changes to art of sim rally.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7-rc.2] - 2026-09-30 (prerelease)
+
+### Added
+
+- Optional gear-engagement wheel rumble, off by default at 5% with a 0–20%
+  range. It shares the finite sine handle with landing; landing and crash cues
+  take priority. Real-wheel feel and timing remain to be tested.
+
+### Fixed
+
+- Routine Bind keeps healthy USB readers open and retries a reader that initially
+  failed. Calibrate stays on the saved axis, and Controls shows paused/assigned
+  status more clearly. A MOZA handbrake rebound successfully; the T300/TSS
+  report still needs a hardware retest.
+
+Crash output, telemetry, steering and the pinned toolkit are unchanged. Existing
+saved crash strengths are retained; 50% applies only to new settings.
+
 ## [0.2.6] - 2026-09-27
 
 ### Added
@@ -447,6 +465,7 @@ First release. Turns art of rally into something you can drive on a wheel.
   motion rigs.
 
 [0.2.0]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.0
+[0.2.7-rc.2]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.7-rc.2
 [0.2.3]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.3
 [0.2.2]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.2
 [0.1.2]: https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.1.2

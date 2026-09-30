@@ -6,7 +6,7 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Current installation — 0.2.7-rc.2 (public release remains 0.2.6)
+## Current installation and prerelease — 0.2.7-rc.2 (stable release remains 0.2.6)
 
 Installed **2026-09-30 04:00:36 UTC** with the game closed. This candidate adds
 an **off-by-default** gear-engagement wheel rumble, initial strength 5% and
@@ -25,7 +25,11 @@ next physical comparison. See the [current investigation](research/2026-09-29-cr
   and five other protected game/probe files retain their pre-install hashes.
 - **Attended status:** not launched or driven after installation. Shift feel,
   real shift timing and crash strength 50% remain to be tested, as do T300/TSS
-  and the broader hardware/layout matrix. No public release is implied.
+  and the broader hardware/layout matrix. This is a published test prerelease,
+  not a stable-release hardware acceptance.
+- [GitHub prerelease](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.7-rc.2):
+  both published assets were downloaded and matched the tested local ZIP and
+  SHA-256 file. Tag `v0.2.7-rc.2` points to the clean source commit above.
 
 ## Previous local installation — 0.2.7-rc.1
 

@@ -28,7 +28,7 @@ with an unused candidate number; these are placeholders, not literal labels.
 ./tools/testing/Test-Rc.ps1 -Version X.Y.Z -Final
 ```
 
-Published 0.2.5 and its earlier RCs are historical evidence; do not overwrite
+Published 0.2.6 and its earlier RCs are historical evidence; do not overwrite
 them. Choose a new RC number for every rebuild. Existing ZIPs/staging directories are
 never overwritten. The script writes `dist/ArtOfSimRally-<version>.zip`, its SHA-256,
 and a unique `results/rc-*` folder containing logs, `source.json`, `automated.json`
@@ -41,7 +41,7 @@ removal, missing/corrupt files, locked-file failure/retry and paths with spaces
 and square brackets. Run this subset with
 `./tools/testing/Test-Installer.ps1 -PackageDirectory <extracted-package>`.
 
-`Version.props` and Info.json hold numeric UMM version 0.2.5. The assembly also
+`Version.props` and Info.json hold numeric UMM version 0.2.7. The assembly also
 embeds the RC label, full Git revision and source state. `build.json` and the
 allowlisted package manifest identify its bytes. Hashes detect changes; they are
 not signatures. An omitted corpus is reported as `recordedCorpus.status="not supplied"`
