@@ -1,5 +1,7 @@
 # Release procedure
 
+From the consolidated repository root, run `cd components/triple` before the commands below. All component-relative paths in this guide are relative to that directory.
+
 The repository can have a private GitHub release before its visibility changes. Publishing the repo and creating a GitHub release are separate actions. The current **0.3.11** build is a tested prototype with [open Surround tearing](KNOWN-ISSUES.md); do not describe it as fully qualified on other rigs.
 
 ## Source and license

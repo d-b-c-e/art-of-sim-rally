@@ -1,5 +1,7 @@
 # Building from source
 
+From the consolidated repository root, run `cd components/triple` before the commands below. All component-relative paths in this guide are relative to that directory.
+
 Players should use the release ZIP when one is published. Source builds require Windows, .NET 8 SDK, the local 64-bit art of rally game, and Unity Mod Manager (UMM) installed for that game. The adapter targets .NET Framework 4.8; install its developer targeting pack if MSBuild reports missing reference assemblies.
 
 The projects compile against game, Unity, Json.NET, and UMM assemblies in the local installation. Those inputs are read-only and never copied into the release ZIP. The reusable geometry project has no Unity, Windows, UMM, or optimizer dependency. The repository has no private toolkit dependency.

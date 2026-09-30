@@ -1,6 +1,7 @@
 <# Coordinator for existing component installers. Never launches games/devices.
    All selected packages are preflighted before any installer runs. Component
-   installers retain their own backup/rollback policies; this is not an atomic bundle. #>
+   installers preserve settings but overwrite payloads without automatic backup
+   or restoration; this is not an atomic bundle. #>
 [CmdletBinding()]
 param([Parameter(Mandatory)][string]$GameDir,
  [Parameter(Mandatory)][string]$WheelPackage,
@@ -28,7 +29,7 @@ foreach($component in $selected){
  $verified=Assert-Payload $packages[$component]
  if($verified.release -ne $spec.version){throw "$component version mismatch"}
 }
-$receipt=[ordered]@{schema=1;game='art-of-rally';gamePath=$game;action=$(if($Uninstall){'uninstall'}else{'install'});dryRun=[bool]$DryRun;status='PREFLIGHT PASS';components=@();limits='Component rollback only; no joint transaction, game launch, device/FFB test or build acceptance.'}
+$receipt=[ordered]@{schema=1;game='art-of-rally';gamePath=$game;action=$(if($Uninstall){'uninstall'}else{'install'});dryRun=[bool]$DryRun;status='PREFLIGHT PASS';components=@();limits='No automatic backup or restoration; failed copies may leave partial payloads. Preserve settings and manually reinstall a retained prior package or uninstall each component. No game/device acceptance.'}
 foreach($component in $selected){
  if($DryRun){$receipt.components+=@{name=$component;version=$release.components.$component.version;status='NOT RUN';reason='Dry-run: existing installer not invoked'};continue}
  $shell=Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
@@ -37,7 +38,11 @@ foreach($component in $selected){
  & $shell @args
  $code=$LASTEXITCODE
  $receipt.components+=@{name=$component;version=$release.components.$component.version;status=$(if($code -eq 0){'PASS'}else{'FAIL'});exitCode=$code}
- if($code -ne 0){$receipt.status='PARTIAL OR FAILED';$receipt|ConvertTo-Json -Depth 6;throw "$component installer failed; prior successful components remain installed. Use documented component rollback; no automatic cross-component overwrite."}
+ if($code -ne 0){
+  foreach($pending in $selected){if($pending -notin @($receipt.components|ForEach-Object name)){$receipt.components+=@{name=$pending;version=$release.components.$pending.version;status='NOT RUN';reason='Stopped after earlier installer failure'}}}
+  $receipt.status='PARTIAL OR FAILED';$receipt|ConvertTo-Json -Depth 6
+  throw "$component installer failed and may have partially copied files; prior successful components remain installed. No automatic backup or restoration. Retain settings and manually reinstall a known package or use component uninstall."
+ }
 }
 if(-not $DryRun){$receipt.status='PASS'}
 $receipt|ConvertTo-Json -Depth 6
