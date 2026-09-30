@@ -1,10 +1,10 @@
 # Roadmap
 
-Status reviewed 2026-09-30 after the 0.2.6 release and local RC2 install. The owner accepted RC16
-overall; official toolkit v0.15.0, the final local gate, installation and
-published-download verification are complete. The final package has not been
-driven, and the full attended matrix remains open. See [release review](reviews/2026-09-27-release-0.2.6.md),
-[0.2.6 release notes](releases/0.2.6.md)
+Status reviewed 2026-09-30 after the 0.2.7 stable release. Official toolkit
+v0.15.0, the final local gate, installation and published-download verification
+are complete. The final package has not been driven, and the full attended
+matrix remains open. See [release review](reviews/2026-09-30-release-0.2.7.md),
+[0.2.7 release notes](releases/0.2.7.md)
 and [installed identity](LOCAL-DEPLOYMENT.md).
 The defect register is [KNOWN-ISSUES.md](KNOWN-ISSUES.md); the implementation review
 is [2026-09-06-rc-review.md](reviews/2026-09-06-rc-review.md).
@@ -23,14 +23,14 @@ Remaining feature priorities:
 
 **Binding regression (KI-43):** a T300/TSS user reports that 0.2.6 kept old
 bindings but could not capture new ones after the handbrake stopped working.
-The next candidate improves reader preservation/retry and saved-axis
-calibration; obtain a failed-state support file and attended TSS retest before
-claiming this fixed. The owner cleared/rebound a MOZA handbrake and reported a
+Version 0.2.7 improves reader preservation/retry and saved-axis calibration;
+obtain a failed-state support file and attended TSS retest before claiming the
+report fixed. The owner cleared/rebound a MOZA handbrake and reported a
 good drive on installed 0.2.7-rc.1; its saved binding is confirmed. Test paused
 Bind, full-travel/release/Save, Calibrate, separate USB TSS handbrake and an
 existing saved profile. Resolve the ambiguous "not assigned" label report.
 
-**Gear-shift wheel cue (0.2.7 candidate):** an opt-in 25 Hz/120 ms wheel cue at
+**Gear-shift wheel cue (0.2.7 release):** an opt-in 25 Hz/120 ms wheel cue at
 gear engagement, initially 5% nominal force with a 0–20% range. It watches only
 the active player's drivetrain while driving, focused and outside settings or
 restart; neutral transitions are ignored. One existing finite sine slot is

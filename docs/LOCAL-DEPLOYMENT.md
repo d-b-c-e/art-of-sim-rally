@@ -6,7 +6,29 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Current installation and prerelease — 0.2.7-rc.2 (stable release remains 0.2.6)
+## Current installation and stable release — 0.2.7
+
+Published and installed **2026-09-30 04:40:57 UTC** with the game closed. This
+final-labelled release promotes RC2's runtime behavior. The USB Bind recovery,
+off-by-default shift vibration and all other settings are unchanged. The owner
+requested stable promotion while physical shift feel, crash at strength 50%
+and fresh T300/TSS binding remain unverified. The full attended matrix is open.
+
+- Identity: `0.2.7+255c6f94d1e5ffeea3a6c95d5c7f3828231c3b3d.clean`.
+- ZIP SHA-256: `4C0BC7C053F71206DAFD23EFE8F9D621DA673EAECD057C9CDAE01D7E81302577`.
+- [Complete final local gate](../results/rc-0.2.7-81f05a57c0ca4f728ac80da0b2831bc4/automated.json):
+  all 16 checks passed from clean source, including two recorded-drive cases,
+  Unity Mono checks and installer tests. The generated manual checklist remains
+  pending; no hardware cases were fabricated as passed.
+- [Install receipt and RC2 backup](../results/release-027-install-e4dfcd0e6ae64b9cb3795c4b9e9e57d7/receipt.json):
+  six payloads and the second native plugin copy match the tested ZIP. The
+  settings file and five other protected files retained their pre-install
+  hashes. The game was not launched during installation.
+- [GitHub stable release](https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.7):
+  the release is marked Latest. Independently downloaded ZIP and checksum match
+  the tested local files; tag `v0.2.7` points to the clean source commit above.
+
+## Previous installation and prerelease — 0.2.7-rc.2
 
 Installed **2026-09-30 04:00:36 UTC** with the game closed. This candidate adds
 an **off-by-default** gear-engagement wheel rumble, initial strength 5% and

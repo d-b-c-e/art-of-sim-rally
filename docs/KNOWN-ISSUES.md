@@ -37,7 +37,7 @@ was pressed.
 The 0.2.6 Bind action changed from immediate assignment to a full-travel,
 release and Save calibration flow. Review found a routine Bind closed all
 working USB readers, while Calibrate rediscovered an axis instead of keeping
-the saved one. A subsequent candidate keeps responsive readers, retries a
+the saved one. Version 0.2.7 keeps responsive readers, retries a
 listed reader that failed to open, fixes Calibrate to the saved axis, and puts
 the paused/assigned-controls status at the top of Controls. Fixture tests pass;
 the owner cleared and rebound a MOZA handbrake on installed 0.2.7-rc.1, then

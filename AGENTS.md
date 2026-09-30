@@ -8,18 +8,25 @@
 
 ## Repository Purpose
 
-**Current local install and published prerelease: 0.2.7-rc.2** (stable: 0.2.6), clean source
-`c12a826d6ad31a9948c88a7b3861d3e4e52c7678`, installed 2026-09-30
-04:00:36 UTC after all 16 local gates passed. It retains RC1's USB Bind fixes
-and adds an opt-in 25 Hz/120 ms shift cue, default 5% with range 0–20%.
-Landing/crash take priority; crash output is unchanged. Six payloads, the
-second native copy and six protected files were hash-checked; owner settings
-were retained. The owner previously rebound the MOZA handbrake and drove RC1
-successfully, but RC2 has not been launched or physically tested. Saved crash
-strength is still 19.52381% despite the new-settings default of 50%; test 50%
-manually before retuning. The published prerelease ZIP and checksum were
-downloaded and verified against the tested files. Public 0.2.6 remains stable. See
-`docs/LOCAL-DEPLOYMENT.md` and `docs/research/2026-09-29-crash-shift-feedback.md`.
+**Current stable release and local install: 0.2.7**, clean source
+`255c6f94d1e5ffeea3a6c95d5c7f3828231c3b3d`, installed 2026-09-30
+04:40:57 UTC after all 16 final local gates passed. The GitHub ZIP and checksum
+were downloaded and matched to the tested local files; all six mod payloads,
+the second native copy and six protected files were hash-checked on install.
+Settings were retained. This promotes RC2's USB Bind fixes and opt-in 25 Hz/
+120 ms shift cue, default 5% with range 0–20%; no steering, crash waveform,
+landing, telemetry or toolkit change. The owner rebound a MOZA handbrake and
+drove RC1 successfully, but RC2 and the final-labelled artifact have not been
+physically tested. Saved crash strength is still 19.52381% despite the
+new-settings default of 50%; test 50% manually before retuning. T300/TSS
+fresh binding, shift feel and the broader matrix remain open. See
+`docs/reviews/2026-09-30-release-0.2.7.md` and `docs/LOCAL-DEPLOYMENT.md`.
+
+**Previous published test prerelease: 0.2.7-rc.2**, clean source
+`c12a826d6ad31a9948c88a7b3861d3e4e52c7678`. Its exact tested ZIP and
+checksum remain on GitHub; it is superseded by the final-labelled 0.2.7
+release with the same runtime behavior. See
+`docs/reviews/2026-09-30-release-0.2.7-rc.2.md`.
 
 **Previous release and local install: 0.2.6**, clean source
 `8fc5c4da3ff3e8228281bf46dc49e052b166f0ea`, published and installed

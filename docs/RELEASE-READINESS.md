@@ -1,7 +1,17 @@
-# Release readiness — 2026-09-27
+# Release readiness — 2026-09-30
 
-**0.2.7-rc.1 is installed for binding regression testing; public 0.2.6 remains
-the stable release.** The owner cleared and rebound a MOZA handbrake, and reports
+**0.2.7 is the stable release and installed copy.** The final-labelled clean-
+source build passed all 16 local gates. The installed files and independently
+downloaded GitHub ZIP/checksum match the tested package. The owner requested
+promotion of RC2's behavior; this is not item-by-item hardware acceptance.
+Fresh T300/TSS binding, physical shift feel, crash kick at 50%, and the broader
+camera/device/motion matrix remain open. The final package has not been driven.
+See the [0.2.7 release record](reviews/2026-09-30-release-0.2.7.md),
+[known issues](KNOWN-ISSUES.md) and [installed identity](LOCAL-DEPLOYMENT.md).
+
+## Previous candidates and releases
+
+**0.2.7-rc.1 was installed for binding regression testing.** The owner cleared and rebound a MOZA handbrake, and reports
 that the subsequent drive played well. The log and Settings.xml confirm the
 new binding was saved; a possible axis/button row-label misunderstanding is
 unresolved. KI-43 still needs a paused T300/TSS fresh-bind and saved-axis
