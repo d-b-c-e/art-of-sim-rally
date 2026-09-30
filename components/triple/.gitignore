@@ -1,0 +1,59 @@
+## Based on https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
+
+# User-specific IDE files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Local secrets and machine configuration
+*.env
+*.local.json
+
+# .NET and Visual Studio build output
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+[Oo]bj/
+[Oo]ut/
+**/[Bb]in/*
+artifacts/
+.artifacts/
+TestResults/
+*.trx
+*.binlog
+*.pdb
+*.cache
+
+# Packages and publishing
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nupkg
+*.snupkg
+publish/
+dist/
+
+# Never commit copied game/mod-loader binaries or decompiler output
+lib/
+decompiled/
+game-files/
+
+# Attended experiment output stays local unless deliberately curated
+captures/
+results/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+Desktop.ini
+*~
+~$*

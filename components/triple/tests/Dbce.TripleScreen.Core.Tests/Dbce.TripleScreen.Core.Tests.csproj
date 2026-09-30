@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Dbce.TripleScreen.Core.Tests</AssemblyName>
+    <RootNamespace>Dbce.TripleScreen.Tests</RootNamespace>
+    <GameDir Condition="'$(GameDir)' == ''">$(ART_OF_RALLY_DIR)</GameDir>
+    <ManagedDir>$(GameDir)\artofrally_Data\Managed</ManagedDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Dbce.TripleScreen.Core\Dbce.TripleScreen.Core.csproj" />
+    <ProjectReference Include="..\..\src\Dbce.TripleScreen.Protocol\Dbce.TripleScreen.Protocol.csproj" />
+    <Compile Include="..\..\src\ArtOfRally.TripleScreen.Mod\AdapterConstants.cs" Link="AdapterConstants.cs" />
+    <Compile Include="..\..\src\ArtOfRally.TripleScreen.Mod\FovPreference.cs" Link="FovPreference.cs" />
+    <Compile Include="..\..\src\ArtOfRally.TripleScreen.Mod\StageCameraEligibility.cs" Link="StageCameraEligibility.cs" />
+    <Compile Include="..\..\src\ArtOfRally.TripleScreen.Mod\LayoutSource.cs" Link="LayoutSource.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(ManagedDir)\Newtonsoft.Json.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

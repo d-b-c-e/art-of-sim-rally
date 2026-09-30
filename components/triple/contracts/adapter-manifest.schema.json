@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/d-b-c-e/triple-screen-optimizer/contracts/adapter-manifest.schema.json",
+  "title": "DBCE triple-screen adapter manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "adapterId",
+    "adapterVersion",
+    "gameId",
+    "layoutContractVersions",
+    "topologies",
+    "capabilities",
+    "onlineSafety",
+    "ownedFiles"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "adapterId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "adapterVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+    },
+    "gameId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "layoutContractVersions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum", "maximum"],
+      "properties": {
+        "minimum": { "type": "integer", "minimum": 1 },
+        "maximum": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "supportedGameBuilds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "default": []
+    },
+    "topologies": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": ["nvidia-surround", "borderless-span", "separate-displays"]
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "three-projections",
+          "asymmetric-frustum",
+          "bezel-gap",
+          "centered-ui",
+          "separate-windows",
+          "surround-compositor",
+          "camera-stabilization"
+        ]
+      }
+    },
+    "loader": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "minimumVersion": { "type": ["string", "null"] }
+      }
+    },
+    "onlineSafety": {
+      "enum": ["offline-only", "rendering-only", "unknown"]
+    },
+    "ownedFiles": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Path relative to the game or loader root; absolute paths are forbidden."
+      }
+    }
+  }
+}

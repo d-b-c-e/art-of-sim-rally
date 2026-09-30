@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "adapterId": "dbce-triple-mod-art-of-rally",
+  "adapterVersion": "0.3.12",
+  "gameId": "art-of-rally",
+  "layoutContractVersions": {
+    "minimum": 1,
+    "maximum": 1
+  },
+  "supportedGameBuilds": [],
+  "topologies": [
+    "nvidia-surround",
+    "borderless-span",
+    "separate-displays"
+  ],
+  "capabilities": [
+    "asymmetric-frustum"
+  ],
+  "loader": {
+    "name": "Unity Mod Manager",
+    "minimumVersion": "0.27.0"
+  },
+  "onlineSafety": "rendering-only",
+  "ownedFiles": [
+    "Mods/DbceTripleScreenArtOfRally/ArtOfRally.TripleScreen.Mod.dll",
+    "Mods/DbceTripleScreenArtOfRally/Dbce.TripleScreen.Core.dll",
+    "Mods/DbceTripleScreenArtOfRally/Dbce.TripleScreen.Protocol.dll",
+    "Mods/DbceTripleScreenArtOfRally/Info.json",
+    "Mods/DbceTripleScreenArtOfRally/manifest.json",
+    "Mods/DbceTripleScreenArtOfRally/desired-layout.json"
+  ]
+}

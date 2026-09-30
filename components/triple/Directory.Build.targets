@@ -1,0 +1,9 @@
+<Project>
+  <Target Name="ValidateArtOfRallyReferences" BeforeTargets="ResolveReferences"
+          Condition="'$(MSBuildProjectName)' != 'Dbce.TripleScreen.Core'">
+    <Error Condition="'$(GameDir)' == ''"
+           Text="Set ART_OF_RALLY_DIR or pass -p:GameDir=&lt;folder containing artofrally.exe&gt;." />
+    <Error Condition="'$(GameDir)' != '' and !Exists('$(GameDir)\artofrally.exe')"
+           Text="GameDir must point to the folder containing artofrally.exe: $(GameDir)" />
+  </Target>
+</Project>

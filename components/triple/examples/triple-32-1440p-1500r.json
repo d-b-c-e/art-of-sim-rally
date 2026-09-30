@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "panel": {
+    "count": 3,
+    "nativeWidthPx": 2560,
+    "nativeHeightPx": 1440,
+    "physicalWidthMm": 708.4,
+    "physicalHeightMm": 398.5,
+    "curveRadiusMm": 1500,
+    "bezelWidthMm": 8
+  },
+  "geometry": {
+    "eyeDistanceMm": 660,
+    "eyeHeightAbovePanelCenterMm": 0,
+    "leftYawDegrees": 70,
+    "rightYawDegrees": 70
+  },
+  "output": {
+    "mode": "nvidia-surround",
+    "combinedWidthPx": 7680,
+    "combinedHeightPx": 1440
+  }
+}

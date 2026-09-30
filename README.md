@@ -1,4 +1,12 @@
-# art of sim rally
+# DBCE mods for art of rally
+
+Consolidation candidate: wheel support remains at its established source paths;
+the independent triple adapter lives under `components/triple`. Start with the
+[combined setup guide](docs/GAME-SETUP.md) and [release structure](docs/RELEASE-STRUCTURE.md).
+Existing public downloads and component IDs remain unchanged. This source candidate
+has not been published or deployed; triple 0.3.12 is not the released 0.3.11 package.
+
+## Wheel component: art of sim rally
 
 Drive [art of rally](https://store.steampowered.com/app/550320/) with a racing
 wheel, pedals and a shifter. Adds force feedback from the game's tyre forces,

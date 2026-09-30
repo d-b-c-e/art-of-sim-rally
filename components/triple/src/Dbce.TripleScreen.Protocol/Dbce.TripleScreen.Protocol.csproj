@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Dbce.TripleScreen.Protocol</AssemblyName>
+    <RootNamespace>Dbce.TripleScreen.Protocol</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <GameDir Condition="'$(GameDir)' == ''">$(ART_OF_RALLY_DIR)</GameDir>
+    <ManagedDir>$(GameDir)\artofrally_Data\Managed</ManagedDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Match the Json.NET assembly already loaded by the shipped game. Do not
+         copy a second version beside the mod. Parsing is capped at 64 KiB and
+         depth 16 before deserialization. -->
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(ManagedDir)\Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

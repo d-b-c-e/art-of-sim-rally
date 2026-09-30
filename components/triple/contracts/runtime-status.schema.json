@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/d-b-c-e/triple-screen-optimizer/contracts/runtime-status.schema.json",
+  "title": "DBCE triple-screen adapter runtime status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "adapterId",
+    "adapterVersion",
+    "gameId",
+    "state",
+    "activeCapabilities",
+    "diagnostics"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "adapterId": { "type": "string", "minLength": 1 },
+    "adapterVersion": { "type": "string", "minLength": 1 },
+    "gameId": { "type": "string", "minLength": 1 },
+    "gameBuild": { "type": ["string", "null"] },
+    "state": {
+      "enum": ["inactive", "starting", "active", "degraded", "rejected", "error"]
+    },
+    "acceptedLayoutSha256": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "layoutContractVersion": { "type": ["integer", "null"], "minimum": 1 },
+    "topology": {
+      "type": ["string", "null"],
+      "enum": ["nvidia-surround", "borderless-span", "separate-displays", null]
+    },
+    "activeCameraCount": { "type": "integer", "minimum": 0, "default": 0 },
+    "activeCapabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "lastSuccessfulFrameUtc": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "severity", "message"],
+        "properties": {
+          "code": { "type": "string", "pattern": "^[A-Z0-9_]+$" },
+          "severity": { "enum": ["info", "warning", "error"] },
+          "message": { "type": "string", "minLength": 1, "maxLength": 500 }
+        }
+      }
+    }
+  }
+}

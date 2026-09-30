@@ -1,0 +1,27 @@
+{
+  "source": {
+    "triple": "f8b0f816cd3bdbe9db3c251f31b3e8d59933d37a",
+    "wheel": "d6ed997ceeaf8de88c50677c7d0d860fe134fd09"
+  },
+  "published": false,
+  "schema": 1,
+  "bundleVersion": "0.1.0-pilot",
+  "game": "art-of-rally",
+  "components": {
+    "triple": {
+      "packageManifest": "package-manifest.json",
+      "releaseUrl": "https://github.com/d-b-c-e/dbce-triple-mod-art-of-rally/releases/tag/v0.3.11",
+      "version": "0.3.11",
+      "packageManifestSha256": "16FE9EC7D88EB86B616E53B49F8ABB7EA52BAAD3DB0067CEF2276858C122666D",
+      "status": "Verified prototype routes; Surround tearing remains; 0.3.12 source not this package"
+    },
+    "wheel": {
+      "packageManifest": "manifest.json",
+      "releaseUrl": "https://github.com/d-b-c-e/art-of-sim-rally/releases/tag/v0.2.7",
+      "version": "0.2.7",
+      "packageManifestSha256": "193C092359C477D934E565658D903C08E803BA3AA3672189F5CC17A27EDB8AD9",
+      "status": "Needs UAT for final artifact hardware matrix"
+    }
+  },
+  "visibility": "public-existing-material"
+}
