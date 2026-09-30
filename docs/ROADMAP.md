@@ -21,6 +21,20 @@ See [implementation, limits and A/B drive](LANDING-EFFECTS.md).
 
 Remaining feature priorities:
 
+**Binding regression (KI-43):** a T300/TSS user reports that 0.2.6 kept old
+bindings but could not capture new ones after the handbrake stopped working.
+The next candidate improves reader preservation/retry and saved-axis
+calibration; obtain a failed-state support file and attended TSS retest before
+claiming this fixed. Test paused Bind, full-travel/release/Save, Calibrate,
+separate USB handbrake, and an existing saved profile.
+
+**Gear-shift wheel cue (request):** the same user likes the PS5 controller's
+small shift rumble and asks for an optional wheel equivalent. Investigate the
+game's shift event and the existing landing/crash effect owner, then capture
+and compare real shifts before choosing an amplitude or waveform. Keep it
+independent of steering and avoid adding an effect based on gear-number changes
+alone, which can also occur during resets or menus.
+
 **Settings UX adoption (KI-39/KI-41):** Simple/Advanced pages, transactional
 calibration, USB mod/camera buttons, strict FFB follow/override, atomic connection
 drafts and support guidance are integrated and installed as RC16. The owner

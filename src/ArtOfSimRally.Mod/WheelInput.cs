@@ -358,6 +358,14 @@ namespace ArtOfSimRally.Mod
         private static bool NeedsRefresh()
         {
             foreach (var d in _devices) if (!d.Ok) return true;
+            // A reader can fail to open before the user has bound anything on
+            // that USB device. Keep retrying it while paused.
+            foreach (var device in _catalog)
+            {
+                bool opened = false;
+                foreach (var d in _devices) if (d.Index == device.Index) { opened = true; break; }
+                if (!opened) return true;
+            }
             foreach (var b in _bindings.Values)
                 if (Resolve(b) == null && (b.InstanceGuid.HasValue || NameCount(b.Device) == 0)) return true;
             return false;
@@ -368,8 +376,16 @@ namespace ArtOfSimRally.Mod
         public static void BeginAssign(Channel c)
         {
             if (GameState.IsDriving) { Status = "Pause before assigning a wheel input."; return; }
-            // Explicit assignment discovers newly attached unbound devices too.
-            Close(); Open();
+            // Keep healthy readers alive during a routine rebind. Closing and
+            // reopening every device can lose a reader that was already showing
+            // valid input, especially on separate USB wheels/pedals/levers.
+            // Still refresh when the attached-device list changed so a newly
+            // plugged-in unbound device can be assigned without restarting.
+            var attached = WheelFfbNative.ListAllDevices();
+            // The wrapper reports an enumeration error as an empty list. Keep
+            // still-responsive readers rather than dropping them on that error.
+            if (!_open || NeedsRefresh() || (attached.Length > 0 && CatalogChanged(attached)))
+            { Close(); Open(); }
             if (!_open) return;
             foreach (var d in _devices)
             {
@@ -384,6 +400,15 @@ namespace ArtOfSimRally.Mod
             _assigning = c;
             _assignDeadline = Time.realtimeSinceStartup + 10f;
             Status = "Move the control you want for " + c + " (or press a button) - 10 seconds.";
+        }
+
+        private static bool CatalogChanged(WheelFfbNative.DeviceInfo[] attached)
+        {
+            if (attached == null || attached.Length != _catalog.Length) return true;
+            for (int i = 0; i < attached.Length; i++)
+                if (attached[i].Index != _catalog[i].Index || attached[i].Name != _catalog[i].Name ||
+                    attached[i].InstanceGuid != _catalog[i].InstanceGuid) return true;
+            return false;
         }
 
         public static void CancelAssign()

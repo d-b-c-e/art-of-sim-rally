@@ -29,12 +29,36 @@ namespace ArtOfSimRally.Mod
             return "Invert: " + (b.Inverted ? "On" : "Off") + "; deadzone: " + (b.Deadzone * 100).ToString("0.#") + "%. Adjust with Calibrate.";
         }
 
-        public static void BeginCalibration(Channel channel)
+        public static void BeginCalibration(Channel channel, bool existingAxis = false)
         {
             BeginAssign(channel);
             if (_assigning != channel) return;
             _calibration = new Calibration();
             _assignDeadline = Time.realtimeSinceStartup + 45;
+            if (existingAxis && _bindings.TryGetValue(channel, out var current) && !current.IsButton)
+            {
+                var device = Resolve(current);
+                if (device == null || !device.HasAssignBaseline || current.Element >= AxisCount)
+                {
+                    CancelAssign();
+                    Status = "Saved device is unavailable. Reconnect it, or use Bind to choose another device.";
+                    return;
+                }
+                // Calibrate means adjust this saved axis, even if another axis
+                // also moves. Bind is the action that chooses a new device/axis.
+                var candidate = Binding.Parse(current.ToString());
+                int rest = device.BaseAxes[current.Element];
+                candidate.Rest = rest;
+                candidate.Far = rest;
+                candidate.Left = rest;
+                candidate.Calibrated = true;
+                _calibration.Candidate = candidate;
+                _calibration.Minimum = rest;
+                _calibration.Maximum = rest;
+                _calibration.Raw = rest;
+                Status = candidate.Describe() + ": move through full travel and release, then Save calibration.";
+                return;
+            }
             Status = channel == Channel.Steer ? "Centre the wheel before Bind, then turn fully left, fully right, and centre it."
                 : IsButtonChannel(channel) ? "Press and release a button."
                 : "Release the control before Bind, then press/pull fully and release. Save calibration when ready.";

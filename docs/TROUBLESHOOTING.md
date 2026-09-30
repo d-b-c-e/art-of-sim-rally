@@ -111,6 +111,21 @@ then Save calibration.
 
 ## Separate handbrake (TSS or other USB device)
 
+### Bindings do not detect a wheel, pedal or separate handbrake
+
+Pause the stage first; opening Wheel settings alone does not pause it. In
+**Controls**, keep **Use assigned controls** On for a separate USB handbrake.
+**Bind** chooses a device/axis: start released or centred, move just that
+control through full travel, release, then choose **Save calibration**.
+**Calibrate** adjusts the already saved axis. Check the status at the top of
+Controls if no device appears. The game may still drive through its own
+wheel/pedal assignments even when the mod's assigned controls are Off; that
+does not establish that the TSS binding is active. If binding still fails,
+create a support file **before reinstalling or clearing settings**, and include
+the pause state, status text, device mode, and whether the preview moves.
+The 0.2.6 T300/TSS fresh-bind report is tracked as
+[KI-43](KNOWN-ISSUES.md#ki-43--026-binding-and-calibration-may-not-capture-a-separate-tss-handbrake).
+
 Version 0.2.5 identifies newly assigned axes/buttons by device instance GUID
 and retries unavailable readers while paused. If an old binding reports identical
 devices, pause and use Bind again for that row. Bind also discovers devices
@@ -140,7 +155,8 @@ travel; pedal Flip has a known defect. Live numeric values below are a 0.2.4 add
    Clear conflicting shift bindings if pulling the lever also changes gear.
 
 The direct axis supplies an analog float to the game; a button binding is on/off.
-Actual TSS travel and braking response still await hardware confirmation. If it
+One T300/TSS user confirmed the analog preview and working handbrake with a
+saved 0.2.5 binding on 0.2.6; fresh binding remains in investigation. If it
 does not bind or shows only 0/1, create a support file and record the device mode,
 binding and displayed values at rest, partial pull and full pull.
 

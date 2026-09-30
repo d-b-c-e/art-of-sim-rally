@@ -26,11 +26,22 @@ static class CalibrationTests
     public static int Run()
     {
         Start(); string previous=Main.Settings.HandbrakeBinding;
+        int readerCloses = Device.Closes;
         WheelInput.BeginCalibration(WheelInput.Channel.Handbrake);
+        Check(Device.Closes==readerCloses,"binding discarded healthy USB readers");
         Device.Axes[2]=33000; WheelInput.Update();
         Check(WheelInput.PendingCalibration!=null && Main.Settings.HandbrakeBinding==previous,"candidate committed before save");
         Check(!WheelInput.CanSaveCalibration,"held candidate can be saved");
         WheelInput.CancelAssign(); Check(Main.Settings.HandbrakeBinding==previous,"cancel changed prior calibration");
+        Start();
+        var stillReadable = Device.Devices;
+        Device.Devices = Array.Empty<Device.DeviceInfo>(); // transient empty enumeration; existing slot still reads
+        readerCloses = Device.Closes;
+        WheelInput.BeginCalibration(WheelInput.Channel.Handbrake);
+        Check(Device.Closes==readerCloses && WheelInput.Assigning.HasValue,
+            "empty scan dropped a responsive reader");
+        Device.Devices = stillReadable;
+        WheelInput.CancelAssign();
         Device.Axes[2]=0; WheelInput.Update(); WheelInput.BeginCalibration(WheelInput.Channel.Handbrake);
         Device.Axes[2]=60000; WheelInput.Update(); Device.Axes[2]=0; WheelInput.Update();
         Check(WheelInput.CanSaveCalibration && WheelInput.SaveCalibration(),"full-release calibration did not save");
@@ -96,6 +107,15 @@ static class CalibrationTests
         Device.Axes[2]=0;WheelInput.Update();Check(WheelInput.SaveCalibration(),"calibration could not retry after write failure");
         Device.Axes[2]=25000;WheelInput.Update();Same(Handbrake(),.5f,"successful retry did not swap calibration");
         Check(WheelInput.Clear(WheelInput.Channel.Handbrake)&&!WheelInput.IsBound(WheelInput.Channel.Handbrake),"clear retry failed");
+        // Recalibrate targets the saved axis, even if another axis moves too.
+        Start();
+        WheelInput.BeginCalibration(WheelInput.Channel.Handbrake, true);
+        Check(WheelInput.PendingCalibration?.Element==2,"Calibrate did not keep the saved axis");
+        Device.Axes[1]=40000; Device.Axes[2]=60000; WheelInput.Update();
+        Check(WheelInput.PendingCalibration?.Element==2,"another moving axis stole calibration");
+        Device.Axes[1]=0; Device.Axes[2]=0; WheelInput.Update();
+        Check(WheelInput.CanSaveCalibration&&WheelInput.SaveCalibration(),"saved-axis calibration failed after release");
+        Check(WheelInput.Binding.Parse(Main.Settings.HandbrakeBinding)?.Element==2,"recalibration changed the assigned axis");
         // Mod buttons remain usable independently of direct driving controls.
         Start();Main.Settings.WheelInputEnabled=false;Main.Settings.ForceFeedbackEnabled=false;
         WheelInput.BeginCalibration(WheelInput.Channel.SettingsButton);

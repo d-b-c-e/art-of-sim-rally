@@ -3,7 +3,7 @@ art of sim rally - @RELEASE@
 
 Wheel force feedback, direct USB controls, bonnet/bumper views and SimHub telemetry
 for the 64-bit Windows game. Tested on Steam; other stores are not confirmed.
-Version 0.2.6 includes Simple/Advanced settings. No SDK, separate toolkit
+Version @RELEASE@ includes Simple/Advanced settings. No SDK, separate toolkit
 download or SimHub helper is needed. Some hardware scenarios remain untested.
 
 INSTALL / UPDATE
@@ -40,6 +40,9 @@ Simple is the first view; Advanced adds tuning to the same saved values.
   Steering needs both full locks and centre. Check the preview, inversion and
   deadzone, then Save calibration. Cancel/timeout/save failure keeps the old
   binding. Explicitly calibrated ranges do not learn themselves during a drive.
+  Calibrate adjusts the saved axis; Bind chooses a new one. Check the status at
+  the top of Controls if no input appears. Use assigned controls must remain On
+  when driving with a separately bound USB handbrake.
 
 * Separate USB handbrake/TSS: select handbrake mode on the device, then bind
   Handbrake (axis) as above. It should read 0-100% with partial travel. If the

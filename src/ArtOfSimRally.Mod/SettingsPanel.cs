@@ -148,8 +148,13 @@ namespace ArtOfSimRally.Mod
         }
         private static void Controls(Settings c)
         {
+            if (GameState.IsDriving)
+                Help("Pause the stage before binding, calibrating or clearing controls. Opening Wheel settings does not pause the game.");
             bool active = Toggle(c.WheelInputEnabled, "Use assigned controls");
             if (active != c.WheelInputEnabled) { c.WheelInputEnabled = active; if (!active) WheelInput.CancelAssign(); }
+            if (!c.WheelInputEnabled)
+                Help("Assigned USB controls are Off, including a separate handbrake. Game-bound wheel and pedals may still work. Turn On to use the handbrake.");
+            if (!WheelInput.Assigning.HasValue) Help(WheelInput.Status);
             Axis(c, WheelInput.Channel.Steer, "Steering"); Axis(c, WheelInput.Channel.Throttle, "Throttle");
             Axis(c, WheelInput.Channel.Brake, "Brake"); Axis(c, WheelInput.Channel.Handbrake, "Handbrake (axis)");
             Axis(c, WheelInput.Channel.HandbrakeButton, "Handbrake (button)");
@@ -157,7 +162,6 @@ namespace ArtOfSimRally.Mod
             Help("Handbrake axis, button and game controls use the greater value; a held button contributes 100%.");
             _clutch = Disclosure(_clutch, "clutch binding");
             if (_clutch) Axis(c, WheelInput.Channel.Clutch, "Clutch");
-            if (!WheelInput.Assigning.HasValue) Help(WheelInput.Status);
             _shifter = Disclosure(_shifter, "shifter bindings");
             if (_shifter)
             {
@@ -220,15 +224,15 @@ namespace ArtOfSimRally.Mod
             string hint = !WheelInput.IsButtonChannel(channel)
                 ? channel == WheelInput.Channel.Steer ? "Centre first, then bind or calibrate." : "Release first, then bind or calibrate."
                 : "Release the button first, then bind.";
-            bool enabled = GUI.enabled; GUI.enabled = enabled && !Editing;
+            bool enabled = GUI.enabled; GUI.enabled = enabled && !Editing && !GameState.IsDriving;
             bool stack = StackRows;
             if (!stack) { GUILayout.BeginHorizontal(); GUILayout.Label(hint, _help, GUILayout.ExpandWidth(true)); }
             else Help(hint);
             if (GUILayout.Button(stack ? "Bind " + label.ToLowerInvariant() : "Bind",
                 stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(78))) WheelInput.BeginCalibration(channel);
-            GUI.enabled = enabled && !Editing && bound;
+            GUI.enabled = enabled && !Editing && !GameState.IsDriving && bound;
             if (!WheelInput.IsButtonChannel(channel) && GUILayout.Button(stack ? "Calibrate " + label.ToLowerInvariant() : "Calibrate",
-                stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(100))) WheelInput.BeginCalibration(channel);
+                stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(100))) WheelInput.BeginCalibration(channel, true);
             if (GUILayout.Button(stack ? "Clear " + label.ToLowerInvariant() : "Clear",
                 stack ? GUILayout.ExpandWidth(true) : SettingsPresentation.Width(70)))
             { if (WheelInput.Clear(channel) && channel == WheelInput.Channel.Steer && FfbSelection.FollowsSteering(c)) Main.SelectForceDevice(); }

@@ -1,5 +1,20 @@
 # User feedback and support follow-up
 
+**2026-09-29 T300/TSS report on 0.2.6:** the new UI is much easier to use.
+Existing wheel/pedal/TSS bindings carried over; the inverted TSS handbrake
+showed an analog 0–100% preview. After experimenting with Bind, the handbrake
+stopped working and no new Bind/Calibrate input appeared for any axis. Returning
+to 0.2.5 to rebind the handbrake, then reinstalling 0.2.6, restored it.
+Track as [KI-43](KNOWN-ISSUES.md#ki-43--026-binding-and-calibration-may-not-capture-a-separate-tss-handbrake);
+the exact action and failed-state support file are missing. Landing at 40 now
+feels pronounced to this user. Crash at 100 was enabled but not assessed.
+Requested an optional subtle shift cue, recorded in [ROADMAP.md](ROADMAP.md).
+Occasional tight-corner understeer at steering assist 20, wheel rotation 700
+degrees and steering status are questions, not proven mod defects. Avoid
+claiming a game-designed rotation angle or that a support file proves physical
+steering lock. A useful follow-up asks for pause/assigned-controls state and
+the support file before another reinstall.
+
 **2026-09-27 release follow-up:** 0.2.6 is public. The GitHub issue audit found
 no new report or comment after 2026-09-06. Issue #1 remains open with the
 reporter's PS5-controller workaround; it still needs a paired controller

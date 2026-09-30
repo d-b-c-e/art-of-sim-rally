@@ -91,13 +91,17 @@ shifter. Select its handbrake mode in the device setup before assigning it here.
 3. Move through full travel once, then release. Check the live preview at rest,
    partial pull and full pull: an axis should vary gradually from 0 to 100%.
    Adjust inversion if backwards, then **Save calibration**.
+   **Bind** chooses a new device and axis; **Calibrate** adjusts the saved axis.
+   If no candidate appears, check the status at the top of Controls while still
+   paused. Keep **Use assigned controls** On when driving with a separate lever.
 4. Leave working wheel/pedal rows unbound. Clear conflicting game or separate
    shifter bindings if pulling the handbrake also shifts gear.
 
 An axis binding is analog; a button is on/off. Seeing the TSS as **button 2**
 in the Shifter panel only confirms a button, not analog travel. **No profile**
 describes the game's recognition and does not mean the mod cannot read it.
-Actual TSS travel/braking behavior still needs user confirmation.
+One T300/TSS user confirmed partial-travel preview and working handbrake using
+saved bindings in 0.2.6. Fresh 0.2.6 binding on that rig needs retesting.
 [More handbrake troubleshooting](TROUBLESHOOTING.md#separate-handbrake-tss-or-other-usb-device).
 
 ## Steering force and landing vibration

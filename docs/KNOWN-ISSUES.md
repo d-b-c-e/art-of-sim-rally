@@ -21,6 +21,30 @@ Severity is about the effect on driving, not on how annoying it looks:
 
 ## Open
 
+### KI-43 — 0.2.6 binding and calibration may not capture a separate TSS handbrake
+
+**T300/TSS user report, 2026-09-29; major, unconfirmed root cause.** Existing
+0.2.5 assignments, including an inverted analog TSS handbrake, worked after
+upgrading to 0.2.6; the handbrake preview travelled 0–100%. After changing
+bindings, attempts to Bind/Calibrate wheel, pedals and handbrake showed no
+new input. Wheel/pedals still drove, but the separate handbrake did not. The
+reporter restored the handbrake in 0.2.5, then reused that setting in 0.2.6.
+Do not infer that the 0.2.6 reader cannot read TSS: it demonstrably read the
+saved binding. We lack a support file from the failed state and do not know
+whether the stage was paused, **Use assigned controls** was Off, or **Clear**
+was pressed.
+
+The 0.2.6 Bind action changed from immediate assignment to a full-travel,
+release and Save calibration flow. Review found a routine Bind closed all
+working USB readers, while Calibrate rediscovered an axis instead of keeping
+the saved one. A subsequent candidate keeps responsive readers, retries a
+listed reader that failed to open, fixes Calibrate to the saved axis, and puts
+the paused/assigned-controls status at the top of Controls. Fixture tests pass;
+T300/TSS and in-game UI retest remain pending. Ask for a support file **while
+the failure is present, before reinstalling** and note pause state, the top
+status text, and whether the TSS axis preview moves. See
+[troubleshooting](TROUBLESHOOTING.md#bindings-do-not-detect-a-wheel-pedal-or-separate-handbrake).
+
 ### KI-41 — Simple binding layout lacks clear visual ownership
 
 **Owner-reported, 2026-09-21; RC13/RC14 review extended 2026-09-22.** RC12's axis

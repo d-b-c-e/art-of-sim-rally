@@ -182,6 +182,13 @@ static class Program
         Setup(""); Devices(wheel); Device.Devices=new[] {wheel,Lever(2,LeverB,0)};
         WheelInput.BeginAssign(WheelInput.Channel.Handbrake); Device.Devices[1].StateAxes[2]=20000;
         WheelInput.Update(); Check(Host.Settings.HandbrakeBinding.EndsWith("|guid:"+LeverB),"Assign missed late USB device");
+        // A separate unbound lever may be listed but fail its first reader open.
+        // A later Bind must retry it even though the attached catalog is unchanged.
+        Setup(""); var retryLever=Lever(2,LeverB,0); retryLever.CannotOpen=true;
+        Devices(wheel,retryLever); retryLever.CannotOpen=false;
+        WheelInput.BeginAssign(WheelInput.Channel.Handbrake);
+        retryLever.StateAxes[2]=24000; WheelInput.Update();
+        Check(Host.Settings.HandbrakeBinding.EndsWith("|guid:"+LeverB),"Bind did not reopen previously failed USB reader");
         GameState.IsDriving=true; WheelInput.BeginAssign(WheelInput.Channel.Brake);
         Check(!WheelInput.Assigning.HasValue,"assignment refreshed readers during driving");
     }
