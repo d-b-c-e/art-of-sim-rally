@@ -8,14 +8,17 @@
 
 ## Repository Purpose
 
-**Current local install: 0.2.7-rc.1** (public release: 0.2.6), clean source
-`48033d395a3b2de8a6d1bc3266d43c812d92654c`, installed 2026-09-30
-02:24:47 UTC after all 16 local gates passed. It improves USB Bind reader
-preservation/retry, saved-axis Calibrate, and paused/assigned-controls guidance
-for the new T300/TSS binding report (KI-43). Six payloads, the second native
-copy and six protected files were hash-checked; settings were retained. No
-live TSS binding or game drive has occurred on this candidate. Public 0.2.6
-remains the stable download. See `docs/LOCAL-DEPLOYMENT.md`.
+**Current local install: 0.2.7-rc.2** (public release: 0.2.6), clean source
+`c12a826d6ad31a9948c88a7b3861d3e4e52c7678`, installed 2026-09-30
+04:00:36 UTC after all 16 local gates passed. It retains RC1's USB Bind fixes
+and adds an opt-in 25 Hz/120 ms shift cue, default 5% with range 0–20%.
+Landing/crash take priority; crash output is unchanged. Six payloads, the
+second native copy and six protected files were hash-checked; owner settings
+were retained. The owner previously rebound the MOZA handbrake and drove RC1
+successfully, but RC2 has not been launched or physically tested. Saved crash
+strength is still 19.52381% despite the new-settings default of 50%; test 50%
+manually before retuning. Public 0.2.6 remains stable. See
+`docs/LOCAL-DEPLOYMENT.md` and `docs/research/2026-09-29-crash-shift-feedback.md`.
 
 **Previous release and local install: 0.2.6**, clean source
 `8fc5c4da3ff3e8228281bf46dc49e052b166f0ea`, published and installed

@@ -8,6 +8,18 @@ Nothing in this document is inferred from forum posts. Where something is
 Re-deriving these costs an hour of assembly spelunking, so treat this file as
 the source of truth and don't repeat the work.
 
+## Gear-shift signal addendum — 2026-09-29
+
+The installed game's `Drivetrain.DoGearShifting` sets neutral partway through
+a delayed shift, engages `nextGear` later, then calls the controller vibrator
+for its small shift cue. Immediate shifter changes engage the gear but skip
+that vibrator call. `shiftTriggered` is set but not reliably cleared, so a
+completed player gear transition observed across `Drivetrain.FixedUpdate` is
+the shared cue point. Guard it by active player, driving/focus, pause/settings
+and restart state; ignore transitions into neutral. This is an on-disk code
+finding, not a completed hardware validation. See the
+[candidate investigation](research/2026-09-29-crash-shift-feedback.md).
+
 ## Landing timing addendum — 2026-09-16
 
 Build 17584229 updates wheel contact in `Wheel.FixedUpdate` (raycast length

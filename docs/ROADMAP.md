@@ -1,6 +1,6 @@
 # Roadmap
 
-Status reviewed 2026-09-27 after the 0.2.6 release. The owner accepted RC16
+Status reviewed 2026-09-30 after the 0.2.6 release and local RC2 install. The owner accepted RC16
 overall; official toolkit v0.15.0, the final local gate, installation and
 published-download verification are complete. The final package has not been
 driven, and the full attended matrix remains open. See [release review](reviews/2026-09-27-release-0.2.6.md),

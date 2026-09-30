@@ -6,7 +6,28 @@ feature or bug fix. After its candidate or final artifact passes the complete
 local automated gate, deploy it for testing without asking again. Public release
 publication and attended sign-off remain separate.
 
-## Current installation — 0.2.7-rc.1 (public release remains 0.2.6)
+## Current installation — 0.2.7-rc.2 (public release remains 0.2.6)
+
+Installed **2026-09-30 04:00:36 UTC** with the game closed. This candidate adds
+an **off-by-default** gear-engagement wheel rumble, initial strength 5% and
+range 0–20%, with a shared sine handle and landing/crash priority. The crash
+waveform, saved crash strength, steering, telemetry and toolkit remain unchanged.
+The owner's saved crash strength is 19.52381%: manually choose 50% for the
+next physical comparison. See the [current investigation](research/2026-09-29-crash-shift-feedback.md).
+
+- Identity: `0.2.7-rc.2+c12a826d6ad31a9948c88a7b3861d3e4e52c7678.clean`.
+- ZIP SHA-256: `939F0FBA9D1327540F561B9809E21B46041EA0860484E620E1963E13B4878F8D`.
+- [Complete local gate](../results/rc-0.2.7-rc.2-f1fa4f2f3f4a4e349b30a6272a010ece/automated.json):
+  all 16 checks passed from clean source, including both recorded-drive cases,
+  actual Unity Mono hook checks and installer tests.
+- [Install receipt and RC1 backup](../results/shift-027-rc2-install-fdc1713154884071822df3e14839e28d/receipt.json):
+  six payloads and the second native copy match the tested ZIP. Settings.xml
+  and five other protected game/probe files retain their pre-install hashes.
+- **Attended status:** not launched or driven after installation. Shift feel,
+  real shift timing and crash strength 50% remain to be tested, as do T300/TSS
+  and the broader hardware/layout matrix. No public release is implied.
+
+## Previous local installation — 0.2.7-rc.1
 
 Installed **2026-09-30 02:24:47 UTC** with the game closed, following the
 0.2.6 T300/TSS binding report. The candidate retains the previous settings and
