@@ -48,6 +48,11 @@ private capture/replay corpora. Those still require the separately authorized
 local release gate and its proprietary read-only inputs. No new release automation
 or release credentials are introduced.
 
+The gate does not scan all tracked files for private assets or certify that future
+commits contain no personal settings, recordings, proprietary assemblies, or secrets.
+Its selected inputs avoid those dependencies; maintainers must still review the
+tracked publication diff for private data before pushing.
+
 The CI-only Json.NET version does not certify the game's supplied serializer ABI.
 Synthetic hashes cannot establish shipping binary identity or UMM/runtime loading.
 Neither passing CI nor configured geometry establishes physical FFB, rendered
