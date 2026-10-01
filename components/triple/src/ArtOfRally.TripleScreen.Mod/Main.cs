@@ -21,6 +21,8 @@ internal static class Main
     private static ProjectionOutcome _lastOutcome;
     private static bool _showAdvanced;
 
+    internal static bool LoadFeature(UnityModManager.ModEntry modEntry) => Load(modEntry);
+
     private static bool Load(UnityModManager.ModEntry modEntry)
     {
         _modEntry = modEntry;

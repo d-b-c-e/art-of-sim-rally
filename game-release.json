@@ -25,5 +25,14 @@
       "sourceDirectory": "components/wheel"
     }
   },
-  "visibility": "public-existing-material"
+  "visibility": "public-existing-material",
+  "unifiedCandidate": {
+    "packageId": "dbce-mods-art-of-rally",
+    "version": "0.4.0-rc.1",
+    "published": false,
+    "loadOwner": "ArtOfSimRally",
+    "settingsPolicy": "Retain original feature storage paths",
+    "optimizerPolicy": "Legacy metadata bridge; proposed unified discovery not adopted",
+    "documentation": "docs/UNIFIED-MIGRATION.md"
+  }
 }

@@ -32,6 +32,7 @@
     beside the mod.
   -->
   <ItemGroup>
+    <ProjectReference Include="../../../triple/src/ArtOfRally.TripleScreen.Mod/ArtOfRally.TripleScreen.Mod.csproj" />
     <Reference Include="Dbce.Wheel.Ffb">
       <HintPath>..\..\lib\toolkit\dotnet\Dbce.Wheel.Ffb.dll</HintPath>
       <Private>true</Private>
@@ -74,6 +75,10 @@
     errors at runtime.
   -->
   <ItemGroup>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>$(ManagedDir)\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(ManagedDir)\Assembly-CSharp.dll</HintPath>
       <Private>false</Private>
