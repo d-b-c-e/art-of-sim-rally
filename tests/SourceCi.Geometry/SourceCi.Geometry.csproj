@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../components/triple/src/Dbce.TripleScreen.Core/Dbce.TripleScreen.Core.csproj" />
+    <!-- Test-only public Json.NET. Production still references the game's assembly. -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <Compile Include="../../components/triple/src/Dbce.TripleScreen.Protocol/*.cs" Link="Protocol/%(Filename)%(Extension)" />
+    <Compile Include="../../components/triple/tests/Dbce.TripleScreen.Core.Tests/Program.cs" Link="Program.cs" />
+    <Compile Include="../../components/triple/src/ArtOfRally.TripleScreen.Mod/AdapterConstants.cs" Link="AdapterConstants.cs" />
+    <Compile Include="../../components/triple/src/ArtOfRally.TripleScreen.Mod/FovPreference.cs" Link="FovPreference.cs" />
+    <Compile Include="../../components/triple/src/ArtOfRally.TripleScreen.Mod/StageCameraEligibility.cs" Link="StageCameraEligibility.cs" />
+    <Compile Include="../../components/triple/src/ArtOfRally.TripleScreen.Mod/LayoutSource.cs" Link="LayoutSource.cs" />
+  </ItemGroup>
+</Project>

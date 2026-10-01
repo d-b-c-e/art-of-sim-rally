@@ -1,5 +1,9 @@
 # DBCE mods for art of rally
 
+[Source-only CI](docs/SOURCE-CI.md) checks pure managed suites, geometry/protocol,
+and disposable installer policy without game assemblies or private recordings.
+It does not build or publish releases or certify runtime acceptance.
+
 The local [unified product candidate](docs/UNIFIED-MIGRATION.md) supplies wheel,
 FFB, telemetry and triple-screen features in one installable package with one
 code load owner and release version. It is unreleased; existing downloads below
