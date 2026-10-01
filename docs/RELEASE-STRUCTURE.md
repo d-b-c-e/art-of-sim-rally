@@ -1,11 +1,46 @@
-# Component releases and game-ready bundles
+# Unified package and release policy
 
-Keep wheel and triple versions/pins independent. Existing tags, ZIP names, component mod IDs, release links and installer receipts remain compatible. Wheel build/package scripts now live under `components/wheel`; triple scripts under `components/triple`. Run each from its component folder. Root `tools/game` remains the shared setup entry point.
+## Current release policy
 
-`game-release.json` is the authoritative candidate combination of exact previously published artifacts. It records public visibility, release URLs, package-manifest identities, source checkpoints and acceptance limits. It is not a new binary release or evidence that unpublished 0.3.12 source was installed.
+The authoritative product direction is the [unified product candidate](UNIFIED-MIGRATION.md):
+one installable package, one setup, and one package release version per game.
+Internal wheel/triple source directories and provenance versions do not define
+separate new product release streams. The stable package ID is
+`dbce-mods-art-of-rally`; its source repository is
+[the public Art repository](https://github.com/d-b-c-e/dbce-mods-art-of-rally).
 
-Future bundles may use `dbce-mods-art-of-rally-<bundle-version>-windows-x64.zip`, containing independent component packages, checksums, notices and one setup/readiness guide. New tags can use `wheel/vX.Y.Z`, `triple/vX.Y.Z`, `bundle/vX.Y.Z`; retain historical wheel tags and triple origin refs. Publish only a frozen, tested archive; do not rebuild during publication. No proprietary Unity/game assemblies, owner settings, ROMs, credentials or recordings enter packages.
+`tools/unified/package.ps1` stages the local `0.4.0-rc.1` candidate as
+`dbce-mods-art-of-rally-0.4.0-rc.1.zip`. This candidate is **unreleased** and has
+no unified binary release tag. Source publication and CI do not publish binaries
+or establish runtime acceptance. Future product releases use the single unified
+version; no new wheel/triple/bundle release streams are recommended.
 
-Readiness records each feature as native, verified adapter, needs UAT, explicit fallback or blocked, tied to exact source/binary/settings identities. Offline installer/projection results do not establish torque, comfort, rendering or panel alignment. Unknown game versions fail compatibility policy; do not enable unsupported probes as everyday components.
+Freeze and verify an exact candidate archive before any separately authorized
+binary publication. Preserve settings, ownership receipts and migration backups.
+Keep the metadata-only optimizer bridge, its legacy adapter ID/path and canonical
+layout contract; it is compatibility metadata, not a second product. Its second
+visible UMM row and supported loader-version qualification remain explicit limits.
+Unknown installed triple 0.3.12 payloads are not automatically adopted.
 
-GitHub mapping: reuse public `d-b-c-e/art-of-sim-rally` as public `d-b-c-e/dbce-mods-art-of-rally`. Never reuse the old name, because that removes redirects. No GitHub Pages or hosted action entry point exists in the inspected repos. The old triple repository is archived with a migration notice; its existing releases remain available. Historical release links remain; update live documentation links after verified rename. No standalone updater URL was found in the inspected Art plugin/installer sources.
+Record implementation, packaged contents and accepted scope separately. The
+maintainer's rig acceptance of his installed wheel 0.2.7/triple 0.3.12 does not
+accept the unified candidate or prove byte identity. Offline checks do not certify
+physical FFB, displayed three-view rendering, seams, tearing or performance.
+Existing diagnostic recording/replay is separate from the unified release payload.
+No proprietary game/Unity/UMM assemblies, owner settings, recordings or credentials
+belong in published source or packages. Source CI is not a blanket private-asset scan.
+
+## Legacy component routes (historical support only)
+
+Retain all existing tags, ZIP names, release metadata, download links and component
+mod IDs. Public wheel 0.2.7 and triple 0.3.11 downloads remain unchanged. The old
+triple repository remains archived with its releases available. Preserve the old
+repository-name redirect; do not reuse `art-of-sim-rally`.
+
+`game-release.json`, root `tools/game`, and component build/package commands retain
+the historical independent-package pilot and exact artifact pins. That inventory
+is not the authoritative unified release manifest, nor a current recommendation
+for separate installs or new component streams. The historical pilot's unaccepted
+0.3.12 wording does not override acceptance of the maintainer's installed binaries;
+their exact triple source identity remains unknown. See [current setup](GAME-SETUP.md)
+and the migration guide for the unified route and qualification limits.

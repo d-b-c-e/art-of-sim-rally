@@ -1,17 +1,59 @@
-# art of rally: one setup, independent components
+# art of rally: unified setup candidate
 
-This consolidation candidate keeps wheel and triple source under `components/wheel` and `components/triple`, preserving both histories. Existing release payloads and in-game mod IDs stay unchanged. No consolidated bundle has been published.
+## Current setup
 
-The wheel release is [**0.2.7**](https://github.com/d-b-c-e/dbce-mods-art-of-rally/releases/tag/v0.2.7). The released triple prototype is [**0.3.11**](https://github.com/d-b-c-e/dbce-triple-mod-art-of-rally/releases/tag/v0.3.11); **0.3.12** source remains a separate unaccepted candidate. `game-release.json` identifies the exact released package manifests; setup never substitutes a newer source build for those artifacts.
+The authoritative setup route is the [unified product candidate](UNIFIED-MIGRATION.md):
+one package, one setup, one code load owner, and one package release version.
+The candidate is **unreleased**. Source publication and offline tests do not qualify
+its runtime behavior or make it an accepted replacement for installed binaries.
 
-For a normal single-component install, use the existing component ZIP's Install.bat. Steam discovery and an explicit game path remain available there. Both components require Unity Mod Manager; neither requires the other or Triple Screen Optimizer.
-
-The candidate joint entry point requires an explicit game folder and both extracted package locations, with optional `-Components wheel` or `-Components triple`. It checks every selected package before invoking an installer. `-DryRun` verifies and prints a plan without installation; `-Uninstall` delegates owned-file removal. Close the game normally first. No script launches the game, opens a device, changes profiles or tests force.
+Build a local candidate with `tools/unified/package.ps1` using the retained exact
+legacy packages to generate the migration hash catalog. This requires local game
+build references; source CI does not produce a shipping package. Extract the
+checked candidate ZIP, install Unity Mod Manager for Art first, close the game,
+and use the ZIP's single `Install.bat` with an explicit game directory. Start with
+its dry run:
 
 ```powershell
-./tools/game/Install-Game.ps1 -GameDir 'D:/Games/artofrally' -WheelPackage 'D:/Downloads/ArtOfSimRally-0.2.7' -TriplePackage 'D:/Downloads/Triple-0.3.11' -DryRun
+./Install.bat -GameDir 'D:/Games/artofrally' -DryRun
 ```
 
-The existing installers preserve settings, measurements and other mods. They overwrite owned payload files without automatic backup or restoration. A failed or interrupted copy can leave a partially updated component. Joint setup is **not an atomic transaction**: if a later component fails, earlier successful changes remain and the receipt identifies them. Keep known prior packages. After resolving the write failure, manually reinstall the retained prior package or uninstall the affected component; settings remain separate. Joint uninstall requires intact pinned selected packages: a missing or damaged package is refused before any removal. Re-extract the exact release package first, or use the retained component Uninstall.bat according to its instructions. Do not delete the whole mod folder or settings. The pilot validates disposable fixture installs; it does not certify a new game build or current rendered/physical acceptance.
+Direct UMM ZIP import is unsupported for this transactional candidate. The unified
+installer backs up and verifies owned payloads, journals pending changes, and
+commits an ownership receipt only after verification. Use its `Rollback.bat` for
+interrupted migration and `Uninstall.bat` for receipt-owned removal. Changed or
+unknown files block destructive operations. Settings and backups remain; never
+delete entire mod directories. See the migration guide for the full transaction
+and recovery contract.
 
-Wheel: [setup](../components/wheel/docs/SETUP.md), [troubleshooting](../components/wheel/docs/TROUBLESHOOTING.md), [exact deployment](../components/wheel/docs/LOCAL-DEPLOYMENT.md). Triple: [setup](../components/triple/docs/SETUP.md), [known issues](../components/triple/docs/KNOWN-ISSUES.md). Art's current wheel final artifact still needs its pending hardware checks; triple 0.3.12 needs slider-return/finish handoff and separate tearing measurement. A wide fallback is not true triples.
+Wheel settings remain `Mods/ArtOfSimRally/Settings.xml`; triple settings remain
+`Mods/DbceTripleScreenArtOfRally/Settings.xml`. The metadata-only triple optimizer
+bridge preserves its legacy ID, discovery path and canonical layout files. It
+has no code load entry and is not a second installable product. It remains a second
+visible UMM row; supported loader-version qualification is pending.
+
+Only exact recognized legacy payload hashes can migrate automatically. Public
+wheel 0.2.7 and triple 0.3.11 are cataloged. The maintainer's installed triple 0.3.12
+has unknown exact source provenance and is refused if its payload is unrecognized.
+His acceptance applies only to his installed wheel 0.2.7/triple 0.3.12 and rig,
+not to the unified candidate. Physical FFB, rendering, seams, tearing, performance
+and specific handoff checks remain separately qualified. A wide fallback is not
+true triples. Existing diagnostic recording/replay stays separate from the unified
+payload; no duplicate recorder is added.
+
+## Legacy component routes (historical support only)
+
+[Wheel 0.2.7](https://github.com/d-b-c-e/dbce-mods-art-of-rally/releases/tag/v0.2.7)
+and [triple 0.3.11](https://github.com/d-b-c-e/dbce-triple-mod-art-of-rally/releases/tag/v0.3.11)
+downloads, release metadata and installed settings remain unchanged. Their own
+installers and the old `tools/game` joint installer are retained for historical
+support; they are not the current unified setup recommendation. The old joint
+installer was non-atomic and could leave earlier component changes applied after
+a later failure. Keep exact prior packages for legacy recovery.
+
+Component documentation remains reference material for those historical installs:
+wheel [setup](../components/wheel/docs/SETUP.md),
+[troubleshooting](../components/wheel/docs/TROUBLESHOOTING.md),
+[deployment history](../components/wheel/docs/LOCAL-DEPLOYMENT.md);
+triple [setup](../components/triple/docs/SETUP.md) and
+[known issues](../components/triple/docs/KNOWN-ISSUES.md).

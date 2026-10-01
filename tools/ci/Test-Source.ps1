@@ -10,6 +10,11 @@ if(Test-Path -LiteralPath $out){throw 'Keep previous CI evidence; choose another
 New-Item -ItemType Directory -Path $out|Out-Null
 $watch=[Diagnostics.Stopwatch]::StartNew()
 $checks=@()
+$documentation=& (Join-Path $PSScriptRoot 'Test-Documentation.ps1') -RepositoryRoot $root
+$docResult=$documentation|ConvertFrom-Json
+if($docResult.status -ne 'PASS'){throw 'Documentation consistency gate failed'}
+$checks += [ordered]@{name='documentation-consistency';status='PASS';documents=$docResult.documents;rejectedRegressions=$docResult.rejectedRegressions}
+Write-Output 'Documentation consistency PASS'
 function Run-Command([string]$Name,[string[]]$Arguments){
  $output=& dotnet @Arguments 2>&1;$code=$LASTEXITCODE
  $output|Out-File -LiteralPath (Join-Path $out ($Name+'.log')) -Encoding utf8

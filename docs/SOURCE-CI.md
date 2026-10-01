@@ -66,3 +66,7 @@ The current public repository's standard hosted runner minutes are free under
 [GitHub's billing policy](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
 No Actions artifacts or caches are stored by this workflow. This estimate is not
 a measured hosted run; the workflow must be reviewed and published before one occurs.
+
+Documentation consistency checks enforce unified setup/release navigation and
+reject the superseded component recommendations in current guidance. Six mutation
+cases prove the guard catches those policies and broken README navigation.
