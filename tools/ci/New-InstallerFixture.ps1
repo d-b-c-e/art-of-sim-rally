@@ -4,6 +4,10 @@ param([Parameter(Mandatory)][string]$OutputDirectory)
 $ErrorActionPreference='Stop'
 $root=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 . (Join-Path $root 'tools/unified/verify.ps1')
+$revision=(& git -c "safe.directory=$root" -C $root rev-parse HEAD).Trim()
+$tree=(& git -c "safe.directory=$root" -C $root rev-parse ($revision+'^{tree}')).Trim()
+$sourceState=if(& git -c "safe.directory=$root" -C $root status --porcelain){'dirty'}else{'clean'}
+if($LASTEXITCODE -or $revision -cnotmatch '^[a-f0-9]{40}$' -or $tree -cnotmatch '^[a-f0-9]{40}$'){throw 'Cannot identify fixture generator source'}
 $out=[IO.Path]::GetFullPath($OutputDirectory)
 if(Test-Path -LiteralPath $out){throw 'Fixture output already exists; preserve prior evidence'}
 New-Item -ItemType Directory -Path $out|Out-Null
@@ -22,7 +26,7 @@ Write-Fixture $stage 'payload/Mods/ArtOfSimRally/Info.json' ($info|ConvertTo-Jso
 $bridge=[ordered]@{Id='DbceTripleScreenArtOfRally';Version='0.3.12';AssemblyName='';EntryMethod='';DisplayName='SYNTHETIC CI compatibility metadata'}
 Write-Fixture $stage 'payload/Mods/DbceTripleScreenArtOfRally/Info.json' ($bridge|ConvertTo-Json)
 Copy-Item -LiteralPath (Join-Path $root 'components/triple/adapter-manifest.json') -Destination (Join-Path $stage 'payload/Mods/DbceTripleScreenArtOfRally/manifest.json')
-Write-Fixture $stage 'payload/Mods/ArtOfSimRally/build.json' ([ordered]@{fixtureOnly=$true;release=$version;modVersion='0.2.7'}|ConvertTo-Json)
+Write-Fixture $stage 'payload/Mods/ArtOfSimRally/build.json' ([ordered]@{fixtureOnly=$true;release=$version;modVersion='0.2.7';sourceRevision=$revision;sourceTree=$tree;sourceState=$sourceState}|ConvertTo-Json)
 Write-Fixture $stage 'payload/Mods/ArtOfSimRally/features.json' '{"fixtureOnly":true}'
 foreach($name in $PackageExtras | Where-Object {$_ -ne 'delivery-manifest.json'}){
  $source=if($name -in @('delivery-validator.ps1','delivery-parser.cs')){Join-Path $root ('tools/delivery/v1/'+$name)}elseif($name -eq 'LICENSE'){Join-Path $root 'LICENSE'}else{Join-Path $root ('tools/unified/'+$name)}
@@ -43,11 +47,9 @@ foreach($component in @('wheel','triple')){
  if($component -eq 'wheel'){$files['artofrally_Data/Plugins/x86_64/UnityForceFeedback.dll']=$files['Mods/ArtOfSimRally/UnityForceFeedback.dll']}
  $profiles += [ordered]@{component=$component;version=$oldInfo.Version;fixtureOnly=$true;files=$files}
 }
-$revision=(& git -c "safe.directory=$root" -C $root rev-parse HEAD).Trim()
-$tree=(& git -c "safe.directory=$root" -C $root rev-parse ($revision+'^{tree}')).Trim()
-& (Join-Path $root 'tools/unified/New-DeliveryManifest.ps1') -PackageRoot $stage -Version $version -SourceCommit $revision -SourceTree $tree -Dirty $true -FixtureOnly
+& (Join-Path $root 'tools/unified/New-DeliveryManifest.ps1') -PackageRoot $stage -Version $version -SourceCommit $revision -SourceTree $tree -Dirty ($sourceState -eq 'dirty') -FixtureOnly
 $files=[ordered]@{}
 foreach($p in @($OwnedPaths|ForEach-Object {'payload/'+$_})+$PackageExtras){$files[$p]=Hash (Join-Path $stage $p)}
-[ordered]@{schema=1;packageId='dbce-mods-art-of-rally';version=$version;fixtureOnly=$true;files=$files;legacyProfiles=$profiles}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $stage 'package-manifest.json') -Encoding UTF8
+[ordered]@{schema=1;packageId='dbce-mods-art-of-rally';version=$version;fixtureOnly=$true;sourceRevision=$revision;sourceTree=$tree;sourceState=$sourceState;files=$files;legacyProfiles=$profiles}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $stage 'package-manifest.json') -Encoding UTF8
 $null=Assert-UnifiedPackage $stage
 [pscustomobject]@{PackageDirectory=$stage;LegacyPackageDirectories=$legacyDirectories;FixtureOnly=$true}

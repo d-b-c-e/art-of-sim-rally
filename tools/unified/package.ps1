@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$Version='0.4.0-rc.2',[Parameter(Mandatory)][string]$OutputDirectory,[Parameter(Mandatory)][string[]]$LegacyPackageDirectories,[string]$GameDir='D:\Program Files (x86)\Steam\steamapps\common\artofrally',[string[]]$BuildProperties=@())
+param([string]$Version='0.4.0-rc.3',[Parameter(Mandatory)][string]$OutputDirectory,[Parameter(Mandatory)][string[]]$LegacyPackageDirectories,[string]$GameDir='D:\Program Files (x86)\Steam\steamapps\common\artofrally',[string[]]$BuildProperties=@())
 $ErrorActionPreference='Stop'
 $root=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 if($Version -notmatch '^\d+\.\d+\.\d+-rc\.[1-9]\d*$'){throw 'This milestone packages local RC candidates only'}
@@ -8,6 +8,8 @@ if(Test-Path -LiteralPath $stage){throw 'Keep previous candidate evidence; choos
 . (Join-Path $PSScriptRoot 'verify.ps1')
 $revision=(& git -c "safe.directory=$root" -C $root rev-parse HEAD).Trim()
 if($LASTEXITCODE){throw 'Cannot identify candidate revision'}
+$tree=(& git -c "safe.directory=$root" -C $root rev-parse ($revision+'^{tree}')).Trim()
+if($LASTEXITCODE -or $tree -cnotmatch '^[a-f0-9]{40}$'){throw 'Cannot identify candidate source tree'}
 $sourceState=if(& git -c "safe.directory=$root" -C $root status --porcelain){'dirty'}else{'clean'}
 if($LASTEXITCODE){throw 'Cannot identify candidate source state'}
 & dotnet build (Join-Path $root 'components/wheel/src/ArtOfSimRally.Mod/ArtOfSimRally.Mod.csproj') -c Release --nologo -warnaserror -v q "-p:GameDir=$GameDir" "-p:ReleaseLabel=$Version" "-p:SourceRevisionId=$revision" "-p:BuildSourceState=$sourceState" @BuildProperties
@@ -30,7 +32,7 @@ $info|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $owner 'Info.json') -En
 $bridge=Join-Path $stage 'payload/Mods/DbceTripleScreenArtOfRally'
 [ordered]@{Id='DbceTripleScreenArtOfRally';DisplayName='Triple optimizer compatibility metadata';Version='0.3.12';AssemblyName='';EntryMethod='';ManagerVersion='0.27.0'}|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $bridge 'Info.json') -Encoding UTF8
 Copy-Item -LiteralPath (Join-Path $root 'components/triple/adapter-manifest.json') -Destination (Join-Path $bridge 'manifest.json')
-[ordered]@{schema=1;release=$Version;modVersion='0.2.7';sourceRevision=$revision;sourceState=$sourceState;wheelBase='d6ed997ceeaf8de88c50677c7d0d860fe134fd09';tripleBase='f8b0f816cd3bdbe9db3c251f31b3e8d59933d37a'}|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $owner 'build.json') -Encoding UTF8
+[ordered]@{schema=1;release=$Version;modVersion='0.2.7';sourceRevision=$revision;sourceTree=$tree;sourceState=$sourceState;wheelBase='d6ed997ceeaf8de88c50677c7d0d860fe134fd09';tripleBase='f8b0f816cd3bdbe9db3c251f31b3e8d59933d37a'}|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $owner 'build.json') -Encoding UTF8
 [ordered]@{schemaVersion=1;packageId='dbce-mods-art-of-rally';gameId='art-of-rally';version=$Version;contractStatus='local-candidate-not-adopted-by-optimizer';features=@(
  [ordered]@{featureId='wheel';available=$true;capabilities=@('wheel-input','force-feedback')},
  [ordered]@{featureId='telemetry';available=$true;capabilities=@('forza-udp')},
@@ -38,7 +40,6 @@ Copy-Item -LiteralPath (Join-Path $root 'components/triple/adapter-manifest.json
 )}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $owner 'features.json') -Encoding UTF8
 Copy-Item -LiteralPath (Join-Path $root 'LICENSE') -Destination $stage
 foreach($name in @('install.ps1','verify.ps1','README.txt','Install.bat','Uninstall.bat','Rollback.bat')){Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination $stage}
-$tree=(& git -c "safe.directory=$root" -C $root rev-parse ($revision+'^{tree}')).Trim()
 foreach($name in @('delivery-validator.ps1','delivery-parser.cs')){Copy-Item -LiteralPath (Join-Path $root ('tools/delivery/v1/'+$name)) -Destination $stage}
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'delivery-art.ps1') -Destination $stage
 & (Join-Path $PSScriptRoot 'New-DeliveryManifest.ps1') -PackageRoot $stage -Version $Version -SourceCommit $revision -SourceTree $tree -Dirty ($sourceState -eq 'dirty')
@@ -64,7 +65,7 @@ foreach($dir in $LegacyPackageDirectories){
 }
 $files=[ordered]@{}
 foreach($p in @($OwnedPaths|ForEach-Object {'payload/'+$_})+$PackageExtras){$files[$p]=Hash (Join-Path $stage $p)}
-[ordered]@{schema=1;packageId='dbce-mods-art-of-rally';version=$Version;sourceRevision=$revision;sourceState=$sourceState;files=$files;legacyProfiles=$profiles}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $stage 'package-manifest.json') -Encoding UTF8
+[ordered]@{schema=1;packageId='dbce-mods-art-of-rally';version=$Version;sourceRevision=$revision;sourceTree=$tree;sourceState=$sourceState;files=$files;legacyProfiles=$profiles}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $stage 'package-manifest.json') -Encoding UTF8
 $null=Assert-UnifiedPackage $stage
 $zip=Join-Path $OutputDirectory ('dbce-mods-art-of-rally-'+$Version+'.zip')
 Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip

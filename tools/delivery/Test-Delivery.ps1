@@ -47,6 +47,21 @@ Test-Reject 'D13 missing entrypoint' {param($d,$p)Remove-Item -LiteralPath (Join
 Test-Reject 'D13 invented check flag' {param($d,$p)$d.setup.operations.check.arguments=@('-GameDir','<game-directory>')}
 Test-Reject 'D13 missing legacy doc' {param($d,$p)$d.compatibility.legacyDescriptors+=@('excluded/source/README.md')}
 Test-Reject 'D14 configured mapping promoted verified' {param($d,$p)$d.repository.mappingStatus='verified'}
+# Exact independently reported mutations are rehashed, so these exercise semantic
+# validation rather than relying on an integrity mismatch to reject the lie.
+Test-Reject 'Review unsupported-telemetry-capability' {param($d,$p)($d.features|Where-Object featureId -eq telemetry).capabilities=@('game-input-replay')}
+Test-Reject 'Review false-source-tree all roles' {param($d,$p)foreach($source in $d.provenance.sources){$source.tree=('a'*40)}}
+Test-Reject 'Review unsupported-engine-operation' {param($d,$p)$d.extensions.'dbce.art'.engineOperations.gameInputReplay='supported'}
+foreach($id in @('wheel','ffb','telemetry','triple','recording','playback')){Test-Reject ('Art extra unsupported capability '+$id) {param($d,$p)($d.features|Where-Object featureId -eq $id).capabilities+=@('unsupported-capability')}.GetNewClosure()}
+Test-Reject 'Art capability case alias' {param($d,$p)($d.features|Where-Object featureId -eq telemetry).capabilities=@('FORZA-UDP')}
+Test-Reject 'Art device playback promotion' {param($d,$p)$d.extensions.'dbce.art'.engineOperations.devicePlayback='supported'}
+Test-Reject 'Art renderer qualification promotion' {param($d,$p)$d.extensions.'dbce.art'.engineOperations.rendererQualification='accepted'}
+Test-Reject 'Art undeclared engine operation' {param($d,$p)$d.extensions.'dbce.art'.engineOperations|Add-Member autoLaunch 'supported'}
+Test-Reject 'Art missing engine operations' {param($d,$p)$d.extensions.'dbce.art'.PSObject.Properties.Remove('engineOperations')}
+Test-Reject 'Package tree anchor conflicts build' {param($d,$p)$m=Get-Content (Join-Path $p 'package-manifest.json') -Raw|ConvertFrom-Json;$m.sourceTree=('a'*40);$m|ConvertTo-Json -Depth 15|Set-Content (Join-Path $p 'package-manifest.json')}
+Test-Reject 'Build tree anchor conflicts package' {param($d,$p)$file=Join-Path $p 'payload/Mods/ArtOfSimRally/build.json';$build=Get-Content $file -Raw|ConvertFrom-Json;$build.sourceTree=('a'*40);$build|ConvertTo-Json|Set-Content $file;$m=Get-Content (Join-Path $p 'package-manifest.json') -Raw|ConvertFrom-Json;$m.files.'payload/Mods/ArtOfSimRally/build.json'=Hash $file;$m|ConvertTo-Json -Depth 15|Set-Content (Join-Path $p 'package-manifest.json')}
+Test-Reject 'Missing package tree anchor' {param($d,$p)$m=Get-Content (Join-Path $p 'package-manifest.json') -Raw|ConvertFrom-Json;$m.PSObject.Properties.Remove('sourceTree');$m|ConvertTo-Json -Depth 15|Set-Content (Join-Path $p 'package-manifest.json')}
+Test-Reject 'Missing build tree anchor' {param($d,$p)$file=Join-Path $p 'payload/Mods/ArtOfSimRally/build.json';$build=Get-Content $file -Raw|ConvertFrom-Json;$build.PSObject.Properties.Remove('sourceTree');$build|ConvertTo-Json|Set-Content $file;$m=Get-Content (Join-Path $p 'package-manifest.json') -Raw|ConvertFrom-Json;$m.files.'payload/Mods/ArtOfSimRally/build.json'=Hash $file;$m|ConvertTo-Json -Depth 15|Set-Content (Join-Path $p 'package-manifest.json')}
 Test-Reject 'Art recording falsely packaged' {param($d,$p)$d.features[4].packaged=$true;$d.features[4].defaultState='off';$d.features[4].acceptance.status='pending'}
 Test-Reject 'Art physical playback advertised' {param($d,$p)$d.recording.physicalOutput='allowed'}
 Test-Reject 'Art legacy adapter renamed' {param($d,$p)($d.compatibility.retainedIdentities|Where-Object kind -eq adapter).value='new-adapter'}

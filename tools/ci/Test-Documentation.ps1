@@ -18,7 +18,7 @@ function Assert-Documentation([hashtable]$Documents){
   if($Documents['README.md'] -notmatch ([regex]::Escape(']('+ $target + ')'))){throw "Missing authoritative README navigation: $target"}
  }
  if($Documents['docs/GAME-SETUP.md'] -notmatch 'tools/unified/package\.ps1' -or $Documents['docs/GAME-SETUP.md'] -notmatch 'Install\.bat -GameDir' -or $Documents['docs/GAME-SETUP.md'] -notmatch '-DryRun'){throw 'Unified setup route missing'}
- if($Documents['docs/RELEASE-STRUCTURE.md'] -notmatch 'dbce-mods-art-of-rally-0\.4\.0-rc\.2\.zip'){throw 'Unified package naming missing'}
+ if($Documents['docs/RELEASE-STRUCTURE.md'] -notmatch 'dbce-mods-art-of-rally-0\.4\.0-rc\.3\.zip'){throw 'Unified package naming missing'}
 }
 $documents=@{}
 foreach($path in @('README.md','docs/GAME-SETUP.md','docs/RELEASE-STRUCTURE.md')){$documents[$path]=Get-Content -LiteralPath (Join-Path $RepositoryRoot $path) -Raw}

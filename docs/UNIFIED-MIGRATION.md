@@ -1,7 +1,7 @@
 # Unified Art product candidate
 
 Local, unreleased candidate based on `09c9b20d750cdfe9c5c57d03bcc820462ba189b7`.
-One package ID (`dbce-mods-art-of-rally`), version (`0.4.0-rc.2`), and installer
+One package ID (`dbce-mods-art-of-rally`), version (`0.4.0-rc.3`), and installer
 provide wheel input, FFB, telemetry, and triple-screen features. This proposed
 version is a migration candidate, not a published successor or runtime acceptance.
 Gameplay is in maintenance pending feedback; this change does not retune forces,

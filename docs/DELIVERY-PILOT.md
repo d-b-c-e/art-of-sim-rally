@@ -23,8 +23,8 @@ scripts also stay at the package root. None enter `OwnedPaths`, installed receip
 The existing allowlist remains exact and rejects added private/unowned package bytes.
 This gate is not a general detector for arbitrary secrets embedded in allowed text.
 
-This metadata change uses a new local candidate identity `0.4.0-rc.2`; prior
-`0.4.0-rc.1` evidence/archives and all public releases remain immutable. No new
+This metadata change uses a new local candidate identity `0.4.0-rc.3`; prior
+`0.4.0-rc.1` and `0.4.0-rc.2` evidence/archives and all public releases remain immutable. No new
 binary release is authorized. Fresh package builds still require local external
 game/Unity/UMM references and never redistribute them. Vendored toolkit 0.15.0
 hashes and native byte identity are retained; the upstream commit is not recorded
@@ -62,3 +62,17 @@ The pilot does not newly certify exhaustive S04/S05 transaction-boundary failure
 injection, S06 concurrent races, or a mocked running-game predicate. R01-R06
 recording/session/signal gates remain external owners' work because those tools
 are not shipped. These are explicit limits, not successful skipped fixtures.
+
+The source tree is captured from `git rev-parse <commit>^{tree}` before compilation
+and recorded independently in the existing `build.json` and package integrity
+manifest. All delivery source roles must match both anchors' commit, tree and dirty
+state. Synthetic fixtures record their generator snapshot in those same records
+and remain explicitly inert. This is cross-record provenance consistency, not
+compiler attestation, a signature, or proof against coordinated falsification of
+all records. The external reviewed ZIP hash pins the selected package bytes.
+
+Art's six capability sets and all three engine operation declarations are checked
+exactly. Unsupported game-input replay/device playback and pending renderer
+qualification cannot be promoted by changing and rehashing delivery metadata.
+The three independent-review mutations plus extra-capability, missing-operation,
+source-tree anchor mismatch and missing-anchor cases are explicit regressions.

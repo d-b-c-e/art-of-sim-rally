@@ -6,10 +6,20 @@ function Assert-ArtDelivery($Root,$Inventory,$Delivery){
  $fixture=[bool]$Inventory.fixtureOnly
  if($d.extensions.'dbce.art'.fixtureOnly -isnot [bool] -or $d.extensions.'dbce.art'.fixtureOnly -ne $fixture){throw 'Fixture designation conflict'}
  $build=Get-Content -LiteralPath (Join-Path $Root 'payload/Mods/ArtOfSimRally/build.json') -Raw|ConvertFrom-Json
- if(-not $fixture){foreach($source in $d.provenance.sources){if($source.commit -ne $Inventory.sourceRevision -or $source.commit -ne $build.sourceRevision -or $source.dirty -ne ($Inventory.sourceState -eq 'dirty')){throw 'Build/source provenance conflict'}}}
+ # Build and integrity records are generated from the actual Git snapshot, separately
+ # from delivery claims. Cross-record agreement is consistency, not compiler attestation.
+ if($Inventory.sourceRevision -cnotmatch '^[a-f0-9]{40}$' -or $Inventory.sourceTree -cnotmatch '^[a-f0-9]{40}$' -or $build.sourceTree -cnotmatch '^[a-f0-9]{40}$' -or $Inventory.sourceState -cnotin @('clean','dirty')){throw 'Missing or invalid package/build source anchor'}
+ if($build.sourceRevision -cne $Inventory.sourceRevision -or $build.sourceTree -cne $Inventory.sourceTree -or $build.sourceState -cne $Inventory.sourceState){throw 'Build/package provenance anchor conflict'}
+ foreach($source in $d.provenance.sources){if($source.commit -cne $Inventory.sourceRevision -or $source.tree -cne $Inventory.sourceTree -or $source.dirty -ne ($Inventory.sourceState -eq 'dirty')){throw 'Delivery source does not match build/package provenance anchor'}}
+ $capabilitySets=@{wheel=@('wheel-input');ffb=@('directinput-force-requests');telemetry=@('forza-udp');triple=@('asymmetric-frustum');recording=@('external-development-diagnostic-capture');playback=@('offline-force-analysis')}
+ $engine=$d.extensions.'dbce.art'.engineOperations
+ $engineExpected=@{gameInputReplay='unsupported';devicePlayback='unsupported';rendererQualification='pending'}
+ if($engine -isnot [pscustomobject] -or @($engine.PSObject.Properties).Count -ne $engineExpected.Count){throw 'Art engine operation declaration shape conflict'}
+ foreach($name in $engine.PSObject.Properties.Name){if($name -cnotin @($engineExpected.Keys) -or $engine.$name -isnot [string] -or $engine.$name -cne $engineExpected[$name]){throw 'Unsupported Art engine operation claim'}}
  foreach($f in $d.features){
   $shipping=$f.featureId -in @('wheel','ffb','telemetry','triple')
   if(-not $f.implemented -or $f.packaged -ne $shipping){throw 'Art feature distribution conflict'}
+  if($f.capabilities.Count -ne $capabilitySets[$f.featureId].Count -or ($f.capabilities -join '|') -cne ($capabilitySets[$f.featureId] -join '|')){throw 'Unsupported Art feature capability claim'}
   if($shipping){if($f.acceptance.status -ne 'pending' -or $f.defaultState -ne 'preserve-existing' -or $f.freshInstallDefault -ne $(if($f.featureId -eq 'ffb'){'on'}else{'off'})){throw 'Candidate acceptance/default promotion'};if($f.acceptance.evidence.Count){throw 'No exact unified candidate UAT exists'}}
   elseif($f.acceptance.status -ne 'not-applicable' -or $f.defaultState -ne 'unavailable'){throw 'Excluded diagnostics promoted'}
  }
