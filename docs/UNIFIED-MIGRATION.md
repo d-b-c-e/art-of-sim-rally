@@ -20,6 +20,8 @@ triple settings remain `Mods/DbceTripleScreenArtOfRally/Settings.xml`.
 The legacy triple directory retains Info.json with an empty AssemblyName and
 EntryMethod, and its existing adapter manifest. UMM supports assembly-free
 metadata entries: this compatibility row has no code, hooks, or settings page.
+It remains a second visible UMM row. Its assembly-free behavior was inspected in
+the locally installed loader; qualification across supported UMM versions is pending.
 The triple implementation DLL and its geometry/protocol dependencies ship beside
 the unified owner, not beside the compatibility metadata. The two original
 component implementations remain separate internal assemblies and retain their
@@ -85,7 +87,7 @@ including spaces/brackets, migration from each component and both, repeat instal
 uninstall, rollback, corrupt/changed files, copy failure, interrupted recovery,
 and linked targets. Preserve resulting logs outside Git.
 
-Anthony reported overall acceptance of his installed wheel 0.2.7/triple 0.3.12
+The maintainer reported overall acceptance of his installed wheel 0.2.7/triple 0.3.12
 combination. That applies only to his rig and those installed binaries. The exact
 installed triple 0.3.12 source revision is unknown; this candidate must not claim
 byte equivalence or automatically adopt an unrecognized installed DLL. The older
@@ -94,5 +96,6 @@ cases remain separately tracked. Offline gates do not replace them.
 
 Existing recorder/replay and private corpus intake are reused, not duplicated or
 included in the release payload. Historical releases, tags, downloads, settings,
-and source history remain unchanged. No remote publication, installed changes,
-game launch, device operation, or display change belongs to this milestone.
+and source history remain unchanged. Source publication follows independent review
+and explicit authorization. No new binary release, installed changes, game launch,
+device operation, or display change belongs to this milestone.
