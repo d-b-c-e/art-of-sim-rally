@@ -33,7 +33,6 @@ jobs:
         id: dotnet
         with:
           dotnet-version: '8.0.x'
-          check-latest: false
       - name: Run committed-source checks
         working-directory: tools/ci
         run: |
