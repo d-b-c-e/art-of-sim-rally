@@ -24,7 +24,7 @@ foreach($component in $selected){
  $manifestPath=Join-Path $packages[$component] $spec.packageManifest
  if((Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash -ne $spec.packageManifestSha256){throw "$component package manifest differs from selected release"}
  # Verify through our audited source, not a script supplied by the caller's package.
- $validator=if($component -eq 'wheel'){Join-Path $root 'tools/installer/verify.ps1'}else{Join-Path $root 'components/triple/tools/installer/verify.ps1'}
+ $validator=if($component -eq 'wheel'){Join-Path $root 'components/wheel/tools/installer/verify.ps1'}else{Join-Path $root 'components/triple/tools/installer/verify.ps1'}
  . $validator
  $verified=Assert-Payload $packages[$component]
  if($verified.release -ne $spec.version){throw "$component version mismatch"}
