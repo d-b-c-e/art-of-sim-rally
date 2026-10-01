@@ -33,13 +33,19 @@ function Read-Receipt([string]$Path){
  foreach($p in $all){if($r.before.$p -and $r.before.$p -notmatch '^[A-Fa-f0-9]{64}$'){throw 'Invalid backup hash'}}
  return $r
 }
-function Restore-Transaction($r){
- # Verify all targets and backups before the first restore, including interrupted operations.
+function Assert-RollbackPreflight($r){
+ # Read-only validation shared by dry-run, explicit restore, and failure recovery.
  foreach($p in $all){
   $target=Assert-Path $game $p; $current=Hash $target
   if($current -ne $r.before.$p -and $current -ne $r.after.$p){throw "Changed file blocks rollback: $p"}
   if($r.before.$p){$backup=Assert-Path $game ('.dbce-art-unified/backups/'+$r.backupId+'/'+$p); if((Hash $backup) -ne $r.before.$p){throw "Damaged backup: $p"}}
  }
+ $prior=Assert-Path $game ('.dbce-art-unified/backups/'+$r.backupId+'/previous-receipt.json')
+ if($r.previousReceiptSha256){if((Hash $prior) -ne $r.previousReceiptSha256){throw 'Previous receipt backup is damaged'};$null=Read-Receipt $prior}
+ elseif(Test-Path -LiteralPath $prior){throw 'Unexpected previous receipt backup'}
+}
+function Restore-Transaction($r){
+ Assert-RollbackPreflight $r
  foreach($p in $all){
   $target=Assert-Path $game $p
   if((Hash $target) -eq $r.before.$p){continue}
@@ -62,10 +68,8 @@ if($Rollback){
  $path=if(Test-Path -LiteralPath $pending){$pending}else{$state}
  if(-not(Test-Path -LiteralPath $path)){throw 'No transaction to roll back'}
  $r=Read-Receipt $path
- $prior=Assert-Path $game ('.dbce-art-unified/backups/'+$r.backupId+'/previous-receipt.json')
- if($r.previousReceiptSha256){if((Hash $prior) -ne $r.previousReceiptSha256){throw 'Previous receipt backup is damaged'};$null=Read-Receipt $prior}
- elseif(Test-Path -LiteralPath $prior){throw 'Unexpected previous receipt backup'}
- if($DryRun){Write-Output 'Rollback inventory available; no files changed';return}
+ Assert-RollbackPreflight $r
+ if($DryRun){Write-Output 'Rollback payload and backup integrity validated; no files changed';return}
  Restore-Transaction $r
  Restore-PreviousReceipt $r
  if(Test-Path -LiteralPath $pending){Remove-Item -LiteralPath $pending -Force}

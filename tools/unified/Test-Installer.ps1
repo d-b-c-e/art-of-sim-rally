@@ -5,7 +5,7 @@ $ErrorActionPreference='Stop'
 $m=Assert-UnifiedPackage $PackageDirectory
 $checks=0;$cases=@()
 function Check([bool]$Value,[string]$Message){$script:checks++;if(-not $Value){throw $Message}}
-function Snapshot([string]$Root){$map=[ordered]@{};Get-ChildItem -LiteralPath $Root -Recurse -File -Force|ForEach-Object {$map[$_.FullName.Substring($Root.Length+1)]=Hash $_.FullName};return ($map|ConvertTo-Json -Compress)}
+function Snapshot([string]$Root){$map=[ordered]@{};Get-ChildItem -LiteralPath $Root -Recurse -Force|ForEach-Object {$map[$_.FullName.Substring($Root.Length+1)]=if($_.PSIsContainer){'<directory>'}else{Hash $_.FullName}};return ($map|ConvertTo-Json -Compress)}
 function New-Game([string]$Name,[string]$Mode){
  $game=[IO.Path]::GetFullPath((Join-Path $OutputDirectory ($Name+' [game] with spaces')))
  New-Item -ItemType Directory -Path (Join-Path $game 'artofrally_Data/Managed/UnityModManager') -Force|Out-Null
@@ -50,6 +50,7 @@ foreach($mode in @('fresh','wheel','triple','both')){
  foreach($p in $OwnedPaths){Check ((Hash (Join-Path $game $p)) -eq $m.files.('payload/'+$p)) "Unified payload mismatch: $p"}
  foreach($p in $LegacyPaths){Check (-not(Test-Path -LiteralPath (Join-Path $game $p))) 'Legacy renderer still present'}
  Check-Protected $game $protected
+ $rollbackBefore=Snapshot $game;Invoke-Setup $game @('-Rollback','-DryRun');Check ((Snapshot $game) -eq $rollbackBefore) 'Valid rollback dry-run wrote files'
  Invoke-Setup $game @('-Rollback')
  foreach($p in $OwnedPaths+$LegacyPaths){Check ((Hash (Join-Path $game $p)) -eq $original[$p]) 'Rollback differs from original owned bytes'}
  Check-Protected $game $protected
@@ -62,7 +63,21 @@ foreach($mode in @('fresh','wheel','triple','both')){
 $game=New-Game 'changed-legacy' 'both';'changed'|Set-Content -LiteralPath (Join-Path $game 'Mods/DbceTripleScreenArtOfRally/ArtOfRally.TripleScreen.Mod.dll');$before=Snapshot $game
 Invoke-Setup $game @() $true;Check ((Snapshot $game) -eq $before) 'Changed legacy rejection wrote files';$cases+='changed legacy blocked'
 $game=New-Game 'changed-unified' 'fresh';Invoke-Setup $game;'user edited payload'|Set-Content -LiteralPath (Join-Path $game 'Mods/ArtOfSimRally/ArtOfSimRally.Mod.dll');$before=Snapshot $game
-foreach($flags in @(@('-Uninstall'),@('-Rollback'),@())){Invoke-Setup $game $flags $true;Check ((Snapshot $game) -eq $before) 'Changed unified rejection wrote files'};$cases+='changed unified blocked'
+foreach($flags in @(@('-Uninstall'),@('-Rollback'),@('-Rollback','-DryRun'),@())){Invoke-Setup $game $flags $true;Check ((Snapshot $game) -eq $before) 'Changed unified rejection wrote files'};$cases+='changed unified blocked'
+foreach($damage in @('corrupt','missing','modified')){
+ $game=New-Game ('rollback-backup-'+$damage) 'both';Invoke-Setup $game
+ $receipt=Get-Content -LiteralPath (Join-Path $game '.dbce-art-unified/receipt.json') -Raw|ConvertFrom-Json
+ $backup=Join-Path $game ('.dbce-art-unified/backups/'+$receipt.backupId+'/Mods/DbceTripleScreenArtOfRally/ArtOfRally.TripleScreen.Mod.dll')
+ if($damage -eq 'missing'){Remove-Item -LiteralPath $backup}
+ elseif($damage -eq 'corrupt'){[IO.File]::WriteAllBytes($backup,[byte[]](0,1,2))}
+ else{[IO.File]::AppendAllText($backup,'modified after backup')}
+ $before=Snapshot $game
+ foreach($flags in @(@('-Rollback','-DryRun'),@('-Rollback'))){
+  Invoke-Setup $game $flags $true
+  Check ((Snapshot $game) -eq $before) "Rollback $damage backup refusal wrote files"
+ }
+ $cases += "rollback $damage backup blocked in dry-run and actual"
+}
 $game=New-Game 'copy-failure' 'both';$before=@{};foreach($p in $OwnedPaths+$LegacyPaths){$before[$p]=Hash (Join-Path $game $p)};$protected=Protected $game
 $global:ArtUnifiedTestFault=$false
 function Copy-Item {
