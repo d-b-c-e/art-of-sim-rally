@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$Version='0.4.0-rc.1',[Parameter(Mandatory)][string]$OutputDirectory,[Parameter(Mandatory)][string[]]$LegacyPackageDirectories,[string]$GameDir='D:\Program Files (x86)\Steam\steamapps\common\artofrally',[string[]]$BuildProperties=@())
+param([string]$Version='0.4.0-rc.2',[Parameter(Mandatory)][string]$OutputDirectory,[Parameter(Mandatory)][string[]]$LegacyPackageDirectories,[string]$GameDir='D:\Program Files (x86)\Steam\steamapps\common\artofrally',[string[]]$BuildProperties=@())
 $ErrorActionPreference='Stop'
 $root=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 if($Version -notmatch '^\d+\.\d+\.\d+-rc\.[1-9]\d*$'){throw 'This milestone packages local RC candidates only'}
@@ -38,6 +38,10 @@ Copy-Item -LiteralPath (Join-Path $root 'components/triple/adapter-manifest.json
 )}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $owner 'features.json') -Encoding UTF8
 Copy-Item -LiteralPath (Join-Path $root 'LICENSE') -Destination $stage
 foreach($name in @('install.ps1','verify.ps1','README.txt','Install.bat','Uninstall.bat','Rollback.bat')){Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination $stage}
+$tree=(& git -c "safe.directory=$root" -C $root rev-parse ($revision+'^{tree}')).Trim()
+foreach($name in @('delivery-validator.ps1','delivery-parser.cs')){Copy-Item -LiteralPath (Join-Path $root ('tools/delivery/v1/'+$name)) -Destination $stage}
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'delivery-art.ps1') -Destination $stage
+& (Join-Path $PSScriptRoot 'New-DeliveryManifest.ps1') -PackageRoot $stage -Version $Version -SourceCommit $revision -SourceTree $tree -Dirty ($sourceState -eq 'dirty')
 $profiles=@()
 foreach($dir in $LegacyPackageDirectories){
  $isWheel=Test-Path -LiteralPath (Join-Path $dir 'ArtOfSimRally/Info.json')

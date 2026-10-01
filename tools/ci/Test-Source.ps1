@@ -51,6 +51,9 @@ foreach($relative in $projects){
 }
 $fixture=& (Join-Path $PSScriptRoot 'New-InstallerFixture.ps1') -OutputDirectory (Join-Path $out 'fixtures')
 & (Join-Path $root 'tools/unified/Test-Installer.ps1') -PackageDirectory $fixture.PackageDirectory -LegacyPackageDirectories $fixture.LegacyPackageDirectories -OutputDirectory (Join-Path $out 'installer')
+& (Join-Path $root 'tools/delivery/Test-Delivery.ps1') -PackageDirectory $fixture.PackageDirectory -OutputDirectory (Join-Path $out 'delivery')
+$delivery=Get-Content -LiteralPath (Join-Path $out 'delivery/result.json') -Raw|ConvertFrom-Json
+$checks += [ordered]@{name='delivery-contract-v1';status=$delivery.status;assertions=$delivery.assertions}
 $installer=Get-Content -LiteralPath (Join-Path $out 'installer/result.json') -Raw|ConvertFrom-Json
 if($installer.status -ne 'PASS' -or $installer.assertions -le 0){throw 'Installer fixture gate ran no successful assertions'}
 $checks += [ordered]@{name='synthetic-installer-policy';status='PASS';assertions=$installer.assertions;cases=$installer.cases}

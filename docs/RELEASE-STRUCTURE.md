@@ -9,8 +9,8 @@ separate new product release streams. The stable package ID is
 `dbce-mods-art-of-rally`; its source repository is
 [the public Art repository](https://github.com/d-b-c-e/dbce-mods-art-of-rally).
 
-`tools/unified/package.ps1` stages the local `0.4.0-rc.1` candidate as
-`dbce-mods-art-of-rally-0.4.0-rc.1.zip`. This candidate is **unreleased** and has
+`tools/unified/package.ps1` stages the local `0.4.0-rc.2` candidate as
+`dbce-mods-art-of-rally-0.4.0-rc.2.zip`. This candidate is **unreleased** and has
 no unified binary release tag. Source publication and CI do not publish binaries
 or establish runtime acceptance. Future product releases use the single unified
 version; no new wheel/triple/bundle release streams are recommended.

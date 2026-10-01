@@ -19,7 +19,7 @@ $LegacyPaths = @(
  'Mods/DbceTripleScreenArtOfRally/Dbce.TripleScreen.Core.dll',
  'Mods/DbceTripleScreenArtOfRally/Dbce.TripleScreen.Protocol.dll'
 )
-$PackageExtras = @('Install.bat','Uninstall.bat','Rollback.bat','install.ps1','verify.ps1','README.txt','LICENSE')
+$PackageExtras = @('Install.bat','Uninstall.bat','Rollback.bat','install.ps1','verify.ps1','README.txt','LICENSE','delivery-manifest.json','delivery-validator.ps1','delivery-parser.cs','delivery-art.ps1')
 function Assert-Path([string]$Root,[string]$Relative) {
  if ($Relative -notmatch '^[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)+$' -or $Relative.Split('/') -contains '..') { throw 'Unsafe relative path' }
  $base=[IO.Path]::GetFullPath($Root).TrimEnd('\','/')
@@ -53,5 +53,10 @@ function Assert-UnifiedPackage([string]$Root) {
  $bridge=Get-Content -LiteralPath (Join-Path $Root 'payload/Mods/DbceTripleScreenArtOfRally/Info.json') -Raw|ConvertFrom-Json
  if($info.Id -ne 'ArtOfSimRally' -or $info.EntryMethod -ne 'ArtOfSimRally.Mod.UnifiedEntry.Load' -or $info.Version -ne ($m.version -split '-')[0]){throw 'Invalid load owner'}
  if($bridge.Id -ne 'DbceTripleScreenArtOfRally' -or $bridge.AssemblyName -or $bridge.EntryMethod){throw 'Bridge must have no load entry point'}
+ # Delivery bytes are package extras only, never installed OwnedPaths.
+ . (Join-Path $Root 'delivery-validator.ps1')
+ . (Join-Path $Root 'delivery-art.ps1')
+ $delivery=Assert-DeliveryManifest -PackageRoot $Root
+ $null=Assert-ArtDelivery $Root $m $delivery
  return $m
 }

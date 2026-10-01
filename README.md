@@ -16,6 +16,9 @@ preserved. Diagnostic recording/replay remains separate from the unified payload
 disposable installer policy and documentation consistency. It does not build or
 publish releases, certify runtime acceptance, or scan all future private assets.
 
+The [package delivery pilot](docs/DELIVERY-PILOT.md) adds validated package-only
+metadata; it does not change runtime discovery or promote UAT.
+
 ## Legacy component routes (historical support only)
 
 - [Wheel 0.2.7](https://github.com/d-b-c-e/dbce-mods-art-of-rally/releases/tag/v0.2.7): retained wheel/pedals, force feedback, cameras and telemetry download.

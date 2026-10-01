@@ -24,8 +24,8 @@ Write-Fixture $stage 'payload/Mods/DbceTripleScreenArtOfRally/Info.json' ($bridg
 Copy-Item -LiteralPath (Join-Path $root 'components/triple/adapter-manifest.json') -Destination (Join-Path $stage 'payload/Mods/DbceTripleScreenArtOfRally/manifest.json')
 Write-Fixture $stage 'payload/Mods/ArtOfSimRally/build.json' ([ordered]@{fixtureOnly=$true;release=$version;modVersion='0.2.7'}|ConvertTo-Json)
 Write-Fixture $stage 'payload/Mods/ArtOfSimRally/features.json' '{"fixtureOnly":true}'
-foreach($name in $PackageExtras){
- $source=if($name -eq 'LICENSE'){Join-Path $root 'LICENSE'}else{Join-Path $root ('tools/unified/'+$name)}
+foreach($name in $PackageExtras | Where-Object {$_ -ne 'delivery-manifest.json'}){
+ $source=if($name -in @('delivery-validator.ps1','delivery-parser.cs')){Join-Path $root ('tools/delivery/v1/'+$name)}elseif($name -eq 'LICENSE'){Join-Path $root 'LICENSE'}else{Join-Path $root ('tools/unified/'+$name)}
  Copy-Item -LiteralPath $source -Destination (Join-Path $stage $name)
 }
 Write-Fixture $stage 'README.txt' 'SYNTHETIC CI FIXTURE. NOT A MOD. NEVER INSTALL IN A REAL GAME.'
@@ -43,6 +43,9 @@ foreach($component in @('wheel','triple')){
  if($component -eq 'wheel'){$files['artofrally_Data/Plugins/x86_64/UnityForceFeedback.dll']=$files['Mods/ArtOfSimRally/UnityForceFeedback.dll']}
  $profiles += [ordered]@{component=$component;version=$oldInfo.Version;fixtureOnly=$true;files=$files}
 }
+$revision=(& git -c "safe.directory=$root" -C $root rev-parse HEAD).Trim()
+$tree=(& git -c "safe.directory=$root" -C $root rev-parse ($revision+'^{tree}')).Trim()
+& (Join-Path $root 'tools/unified/New-DeliveryManifest.ps1') -PackageRoot $stage -Version $version -SourceCommit $revision -SourceTree $tree -Dirty $true -FixtureOnly
 $files=[ordered]@{}
 foreach($p in @($OwnedPaths|ForEach-Object {'payload/'+$_})+$PackageExtras){$files[$p]=Hash (Join-Path $stage $p)}
 [ordered]@{schema=1;packageId='dbce-mods-art-of-rally';version=$version;fixtureOnly=$true;files=$files;legacyProfiles=$profiles}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $stage 'package-manifest.json') -Encoding UTF8

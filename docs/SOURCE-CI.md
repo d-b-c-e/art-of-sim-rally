@@ -70,3 +70,7 @@ a measured hosted run; the workflow must be reviewed and published before one oc
 Documentation consistency checks enforce unified setup/release navigation and
 reject the superseded component recommendations in current guidance. Six mutation
 cases prove the guard catches those policies and broken README navigation.
+
+The delivery-contract v1 gate checks inert package metadata and Art truthfulness
+fixtures. Its compiled-artifact provenance and package/runtime qualification limits
+are described in [DELIVERY-PILOT.md](DELIVERY-PILOT.md).
