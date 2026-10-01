@@ -4,6 +4,7 @@ param([Parameter(Mandatory)][string]$PackageDirectory,[Parameter(Mandatory)][str
 $ErrorActionPreference='Stop'
 $root=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 . (Join-Path $root 'tools/unified/verify.ps1')
+. (Join-Path $root 'tools/ci/Assert-ExpectedNativeRejection.ps1')
 $null=Assert-UnifiedPackage $PackageDirectory
 New-Item -ItemType Directory -Path $OutputDirectory|Out-Null
 $cases=@();$index=0
@@ -27,8 +28,7 @@ function Test-Reject([string]$Name,[scriptblock]$Mutation,[switch]$LeaveHashStal
    [string[]]$flags=if($operation -eq 'check'){@('-DryRun')}else{@()}
    $output=& "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $p 'install.ps1') -GameDir $game @flags 2>&1
    $code=$LASTEXITCODE;$output|Out-File -LiteralPath (Join-Path $OutputDirectory ('preflight-'+$script:index+'-'+$operation+'.log')) -Encoding utf8
-   if($code -eq 0 -or ($output -join "`n") -notmatch [regex]::Escape($why)){throw 'Production installer did not reject the same semantic defect'}
-   if((Target-Snapshot) -cne $before){throw 'Semantic rejection mutated disposable target'}
+   Assert-ExpectedNativeRejection -ExitCode $code -Output $output -ExpectedReason $why -TargetUnchanged ((Target-Snapshot) -ceq $before)
    $installerChecks++
   }
  }

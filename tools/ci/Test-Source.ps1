@@ -15,6 +15,10 @@ $docResult=$documentation|ConvertFrom-Json
 if($docResult.status -ne 'PASS'){throw 'Documentation consistency gate failed'}
 $checks += [ordered]@{name='documentation-consistency';status='PASS';documents=$docResult.documents;rejectedRegressions=$docResult.rejectedRegressions}
 Write-Output 'Documentation consistency PASS'
+& (Join-Path $PSScriptRoot 'Test-NativeExitStatus.ps1') -OutputDirectory (Join-Path $out 'native-exit-status')
+$exitStatus=Get-Content -LiteralPath (Join-Path $out 'native-exit-status/result.json') -Raw|ConvertFrom-Json
+if($exitStatus.status -ne 'PASS' -or $exitStatus.assertions -ne 7){throw 'Native exit-status regression gate failed'}
+$checks += [ordered]@{name='native-exit-status';status='PASS';assertions=$exitStatus.assertions}
 function Run-Command([string]$Name,[string[]]$Arguments){
  $output=& dotnet @Arguments 2>&1;$code=$LASTEXITCODE
  $output|Out-File -LiteralPath (Join-Path $out ($Name+'.log')) -Encoding utf8
@@ -53,6 +57,7 @@ $fixture=& (Join-Path $PSScriptRoot 'New-InstallerFixture.ps1') -OutputDirectory
 & (Join-Path $root 'tools/unified/Test-Installer.ps1') -PackageDirectory $fixture.PackageDirectory -LegacyPackageDirectories $fixture.LegacyPackageDirectories -OutputDirectory (Join-Path $out 'installer')
 & (Join-Path $root 'tools/delivery/Test-Delivery.ps1') -PackageDirectory $fixture.PackageDirectory -OutputDirectory (Join-Path $out 'delivery')
 $delivery=Get-Content -LiteralPath (Join-Path $out 'delivery/result.json') -Raw|ConvertFrom-Json
+if($delivery.status -ne 'PASS' -or $delivery.assertions -le 0){throw 'Delivery fixture gate ran no successful assertions'}
 $checks += [ordered]@{name='delivery-contract-v1';status=$delivery.status;assertions=$delivery.assertions}
 $installer=Get-Content -LiteralPath (Join-Path $out 'installer/result.json') -Raw|ConvertFrom-Json
 if($installer.status -ne 'PASS' -or $installer.assertions -le 0){throw 'Installer fixture gate ran no successful assertions'}

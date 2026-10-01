@@ -74,3 +74,10 @@ cases prove the guard catches those policies and broken README navigation.
 The delivery-contract v1 gate checks inert package metadata and Art truthfulness
 fixtures. Its compiled-artifact provenance and package/runtime qualification limits
 are described in [DELIVERY-PILOT.md](DELIVERY-PILOT.md).
+
+Expected failing native preflight processes must exit with code 1, report the
+verified semantic rejection, and leave target bytes unchanged. Only after those
+assertions does the test helper contain that subprocess's LASTEXITCODE. There is
+no unconditional success exit on the source gate. Unexpected exits, wrong reasons,
+changed targets and later native/terminating failures remain job failures. Seven
+child-shell regressions reproduce GitHub's built-in PowerShell wrapper semantics.
