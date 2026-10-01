@@ -1,3 +1,4 @@
+Import-Module ([IO.Path]::Combine($PSHOME, 'Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1')) -ErrorAction Stop
 $OwnedPaths = @(
  'Mods/ArtOfSimRally/ArtOfSimRally.Mod.dll',
  'Mods/ArtOfSimRally/ArtOfRally.TripleScreen.Mod.dll',

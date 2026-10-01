@@ -97,5 +97,14 @@ Invoke-Setup $game @('-Rollback');Check-Protected $game $protected;$cases+='post
 $game=New-Game 'dual-install' 'fresh';Invoke-Setup $game
 Copy-Item -LiteralPath (Join-Path $LegacyPackageDirectories[1] 'DbceTripleScreenArtOfRally/ArtOfRally.TripleScreen.Mod.dll') -Destination (Join-Path $game 'Mods/DbceTripleScreenArtOfRally/ArtOfRally.TripleScreen.Mod.dll')
 $before=Snapshot $game;Invoke-Setup $game @() $true;Check ((Snapshot $game) -eq $before) 'Dual install rejection wrote files';$cases+='dual installed renderer blocked'
+$game=New-Game 'batch-entrypoints' 'fresh';$protected=Protected $game
+foreach($operation in @('Install','Uninstall','Rollback')){
+ $log=& (Join-Path $PackageDirectory ($operation+'.bat')) -GameDir $game 2>&1
+ $code=$LASTEXITCODE;$log|Out-File -LiteralPath (Join-Path $OutputDirectory ('batch-'+$operation+'.log'))
+ Check ($code -eq 0) "Batch $operation failed: $log"
+ Check ((Test-Path -LiteralPath (Join-Path $game 'Mods/ArtOfSimRally/ArtOfSimRally.Mod.dll')) -eq ($operation -ne 'Uninstall')) "Batch $operation had wrong outcome"
+ Check-Protected $game $protected
+}
+$cases+='actual batch entry points'
 [ordered]@{status='PASS';assertions=$checks;cases=$cases;packageVersion=$m.version;scope='Disposable game folders; real Windows PowerShell installer; no game/device execution'}|ConvertTo-Json -Depth 5|Set-Content -LiteralPath (Join-Path $OutputDirectory 'result.json') -Encoding UTF8
 Get-Content -LiteralPath (Join-Path $OutputDirectory 'result.json')
