@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$Version='0.4.0-rc.3',[Parameter(Mandatory)][string]$OutputDirectory,[Parameter(Mandatory)][string[]]$LegacyPackageDirectories,[string]$GameDir='D:\Program Files (x86)\Steam\steamapps\common\artofrally',[string[]]$BuildProperties=@())
+param([string]$Version='0.4.0-rc.4',[Parameter(Mandatory)][string]$OutputDirectory,[Parameter(Mandatory)][string[]]$LegacyPackageDirectories,[string]$GameDir='D:\Program Files (x86)\Steam\steamapps\common\artofrally',[string[]]$BuildProperties=@())
 $ErrorActionPreference='Stop'
 $root=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 if($Version -notmatch '^\d+\.\d+\.\d+-rc\.[1-9]\d*$'){throw 'This milestone packages local RC candidates only'}

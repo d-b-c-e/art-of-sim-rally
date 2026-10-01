@@ -28,7 +28,7 @@
   "visibility": "public-existing-material",
   "unifiedCandidate": {
     "packageId": "dbce-mods-art-of-rally",
-    "version": "0.4.0-rc.3",
+    "version": "0.4.0-rc.4",
     "published": false,
     "loadOwner": "ArtOfSimRally",
     "settingsPolicy": "Retain original feature storage paths",

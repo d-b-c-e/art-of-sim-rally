@@ -23,8 +23,8 @@ scripts also stay at the package root. None enter `OwnedPaths`, installed receip
 The existing allowlist remains exact and rejects added private/unowned package bytes.
 This gate is not a general detector for arbitrary secrets embedded in allowed text.
 
-This metadata change uses a new local candidate identity `0.4.0-rc.3`; prior
-`0.4.0-rc.1` and `0.4.0-rc.2` evidence/archives and all public releases remain immutable. No new
+This metadata change uses a new local candidate identity `0.4.0-rc.4`; prior
+`0.4.0-rc.1`, `0.4.0-rc.2` and `0.4.0-rc.3` evidence/archives and all public releases remain immutable. No new
 binary release is authorized. Fresh package builds still require local external
 game/Unity/UMM references and never redistribute them. Vendored toolkit 0.15.0
 hashes and native byte identity are retained; the upstream commit is not recorded
@@ -76,3 +76,9 @@ exactly. Unsupported game-input replay/device playback and pending renderer
 qualification cannot be promoted by changing and rehashing delivery metadata.
 The three independent-review mutations plus extra-capability, missing-operation,
 source-tree anchor mismatch and missing-anchor cases are explicit regressions.
+
+Production semantic validation never trusts fixture labels as authority. Inert
+source CI packages contain the same legacy feature/bridge metadata as production
+and pass the same checks. Matching labels cannot bypass identity, availability,
+capability or optimizer-bridge checks; tampering tests also verify stock PowerShell
+check/install reject before changing disposable settings/capture targets.

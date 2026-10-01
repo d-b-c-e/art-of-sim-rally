@@ -23,11 +23,16 @@ $version=$release.unifiedCandidate.version
 $info=Get-Content -LiteralPath (Join-Path $root 'components/wheel/src/ArtOfSimRally.Mod/Info.json') -Raw|ConvertFrom-Json
 $info.Version=($version -split '-')[0];$info.EntryMethod='ArtOfSimRally.Mod.UnifiedEntry.Load'
 Write-Fixture $stage 'payload/Mods/ArtOfSimRally/Info.json' ($info|ConvertTo-Json)
-$bridge=[ordered]@{Id='DbceTripleScreenArtOfRally';Version='0.3.12';AssemblyName='';EntryMethod='';DisplayName='SYNTHETIC CI compatibility metadata'}
+$bridge=[ordered]@{Id='DbceTripleScreenArtOfRally';Version='0.3.12';ManagerVersion='0.27.0';AssemblyName='';EntryMethod='';DisplayName='SYNTHETIC CI compatibility metadata'}
 Write-Fixture $stage 'payload/Mods/DbceTripleScreenArtOfRally/Info.json' ($bridge|ConvertTo-Json)
 Copy-Item -LiteralPath (Join-Path $root 'components/triple/adapter-manifest.json') -Destination (Join-Path $stage 'payload/Mods/DbceTripleScreenArtOfRally/manifest.json')
 Write-Fixture $stage 'payload/Mods/ArtOfSimRally/build.json' ([ordered]@{fixtureOnly=$true;release=$version;modVersion='0.2.7';sourceRevision=$revision;sourceTree=$tree;sourceState=$sourceState}|ConvertTo-Json)
-Write-Fixture $stage 'payload/Mods/ArtOfSimRally/features.json' '{"fixtureOnly":true}'
+$owner=Join-Path $stage 'payload/Mods/ArtOfSimRally'
+[ordered]@{schemaVersion=1;packageId='dbce-mods-art-of-rally';gameId='art-of-rally';version=$Version;contractStatus='local-candidate-not-adopted-by-optimizer';features=@(
+ [ordered]@{featureId='wheel';available=$true;capabilities=@('wheel-input','force-feedback')},
+ [ordered]@{featureId='telemetry';available=$true;capabilities=@('forza-udp')},
+ [ordered]@{featureId='triple';available=$true;adapterId='dbce-triple-mod-art-of-rally';adapterVersion='0.3.12';capabilities=@('asymmetric-frustum');communication=[ordered]@{layoutContractVersion=1;userRoot='%LOCALAPPDATA%/DBCE/TripleScreen/games/art-of-rally';requestPath='desired-layout.json';statusPath='status.json';supportedTopologies=@('nvidia-surround','borderless-span','separate-displays')}}
+)}|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $owner 'features.json') -Encoding UTF8
 foreach($name in $PackageExtras | Where-Object {$_ -ne 'delivery-manifest.json'}){
  $source=if($name -in @('delivery-validator.ps1','delivery-parser.cs')){Join-Path $root ('tools/delivery/v1/'+$name)}elseif($name -eq 'LICENSE'){Join-Path $root 'LICENSE'}else{Join-Path $root ('tools/unified/'+$name)}
  Copy-Item -LiteralPath $source -Destination (Join-Path $stage $name)

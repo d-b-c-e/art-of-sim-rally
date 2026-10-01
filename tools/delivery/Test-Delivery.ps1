@@ -7,13 +7,32 @@ $root=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $null=Assert-UnifiedPackage $PackageDirectory
 New-Item -ItemType Directory -Path $OutputDirectory|Out-Null
 $cases=@();$index=0
-function Test-Reject([string]$Name,[scriptblock]$Mutation,[switch]$LeaveHashStale){
+function Test-Reject([string]$Name,[scriptblock]$Mutation,[switch]$LeaveHashStale,[switch]$CheckInstallBoundary){
  $script:index++;$p=Join-Path $OutputDirectory ('case-'+$script:index);Copy-Item -LiteralPath $PackageDirectory -Destination $p -Recurse
  $file=Join-Path $p 'delivery-manifest.json';$d=Get-Content $file -Raw|ConvertFrom-Json
  & $Mutation $d $p
  if(Test-Path -LiteralPath $file){if($Name -notmatch 'duplicate JSON|invalid JSON'){$d|ConvertTo-Json -Depth 25|Set-Content $file -Encoding utf8};if(-not $LeaveHashStale){$m=Get-Content (Join-Path $p 'package-manifest.json') -Raw|ConvertFrom-Json;$m.files.'delivery-manifest.json'=Hash $file;$m|ConvertTo-Json -Depth 15|Set-Content (Join-Path $p 'package-manifest.json') -Encoding utf8}}
  $rejected=$false;$why='';try{$null=Assert-UnifiedPackage $p}catch{$rejected=$true;$why=$_.Exception.Message}
- if(-not $rejected){throw "Fixture incorrectly accepted: $Name"};$script:cases += [ordered]@{name=$Name;status='PASS';rejection=$why}
+ if(-not $rejected){throw "Fixture incorrectly accepted: $Name"}
+ $installerChecks=0
+ if($CheckInstallBoundary){
+  $game=Join-Path $OutputDirectory ('target-'+$script:index+' [game]')
+  New-Item -ItemType Directory -Force (Join-Path $game 'Mods/ArtOfSimRally')|Out-Null
+  [IO.File]::WriteAllText((Join-Path $game 'artofrally.exe'),'INERT game sentinel')
+  [IO.File]::WriteAllBytes((Join-Path $game 'Mods/ArtOfSimRally/Settings.xml'),[byte[]](0,255,13,10))
+  [IO.File]::WriteAllText((Join-Path $game 'private-capture.jsonl'),'INERT private capture sentinel')
+  function Target-Snapshot {(@(Get-ChildItem -LiteralPath $game -Recurse -Force|Sort-Object FullName|ForEach-Object {[ordered]@{path=$_.FullName.Substring($game.Length+1);value=$(if($_.PSIsContainer){'<directory>'}else{Hash $_.FullName})}})|ConvertTo-Json -Depth 5 -Compress)}
+  $before=Target-Snapshot
+  foreach($operation in @('check','install')){
+   [string[]]$flags=if($operation -eq 'check'){@('-DryRun')}else{@()}
+   $output=& "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File (Join-Path $p 'install.ps1') -GameDir $game @flags 2>&1
+   $code=$LASTEXITCODE;$output|Out-File -LiteralPath (Join-Path $OutputDirectory ('preflight-'+$script:index+'-'+$operation+'.log')) -Encoding utf8
+   if($code -eq 0 -or ($output -join "`n") -notmatch [regex]::Escape($why)){throw 'Production installer did not reject the same semantic defect'}
+   if((Target-Snapshot) -cne $before){throw 'Semantic rejection mutated disposable target'}
+   $installerChecks++
+  }
+ }
+ $script:cases += [ordered]@{name=$Name;status='PASS';rejection=$why;stockPowerShellInstallerRejections=$installerChecks}
 }
 Test-Reject 'D04 schema version' {param($d,$p)$d.schemaVersion=2}
 Test-Reject 'D04 unknown field' {param($d,$p)$d|Add-Member foo 1}
@@ -66,6 +85,29 @@ Test-Reject 'Art recording falsely packaged' {param($d,$p)$d.features[4].package
 Test-Reject 'Art physical playback advertised' {param($d,$p)$d.recording.physicalOutput='allowed'}
 Test-Reject 'Art legacy adapter renamed' {param($d,$p)($d.compatibility.retainedIdentities|Where-Object kind -eq adapter).value='new-adapter'}
 Test-Reject 'Self referential integrity hash' {param($d,$p)$a=$d.provenance.artifacts[0].PSObject.Copy();$a.path='delivery-manifest.json';$d.provenance.artifacts+=@($a)}
+# Rehash changed legacy bytes and matching package labels to reproduce the reviewed
+# production bypass. Labels must never exempt semantic mapping or setup preflight.
+function Rewrite-PayloadJson($Package,[string]$Relative,[scriptblock]$Edit){
+ $file=Join-Path $Package $Relative;$json=Get-Content -LiteralPath $file -Raw|ConvertFrom-Json;& $Edit $json
+ $json|ConvertTo-Json -Depth 15|Set-Content -LiteralPath $file -Encoding utf8
+ $inventoryFile=Join-Path $Package 'package-manifest.json';$inventory=Get-Content -LiteralPath $inventoryFile -Raw|ConvertFrom-Json;$inventory.files.$Relative=Hash $file;$inventory|ConvertTo-Json -Depth 15|Set-Content -LiteralPath $inventoryFile -Encoding utf8
+}
+function Match-FixtureLabels($Delivery,$Package,[bool]$Value){
+ $Delivery.extensions.'dbce.art'.fixtureOnly=$Value
+ $file=Join-Path $Package 'package-manifest.json';$inventory=Get-Content -LiteralPath $file -Raw|ConvertFrom-Json;$inventory|Add-Member -NotePropertyName fixtureOnly -NotePropertyValue $Value -Force;$inventory|ConvertTo-Json -Depth 15|Set-Content -LiteralPath $file -Encoding utf8
+}
+foreach($label in @($false,$true)){
+ Test-Reject ('Fixture label '+$label+' cannot bypass feature identity') {param($d,$p)Match-FixtureLabels $d $p $label;Rewrite-PayloadJson $p 'payload/Mods/ArtOfSimRally/features.json' {param($f)$f.packageId='wrong-package'}} -CheckInstallBoundary
+ Test-Reject ('Fixture label '+$label+' cannot bypass feature availability') {param($d,$p)Match-FixtureLabels $d $p $label;Rewrite-PayloadJson $p 'payload/Mods/ArtOfSimRally/features.json' {param($f)($f.features|Where-Object featureId -eq telemetry).available=$false}}
+ Test-Reject ('Fixture label '+$label+' cannot bypass adapter identity') {param($d,$p)Match-FixtureLabels $d $p $label;Rewrite-PayloadJson $p 'payload/Mods/ArtOfSimRally/features.json' {param($f)($f.features|Where-Object featureId -eq triple).adapterId='wrong-adapter'}} -CheckInstallBoundary
+ Test-Reject ('Fixture label '+$label+' cannot bypass bridge manifest') {param($d,$p)Match-FixtureLabels $d $p $label;Rewrite-PayloadJson $p 'payload/Mods/DbceTripleScreenArtOfRally/manifest.json' {param($m)$m.adapterId='wrong-adapter'}} -CheckInstallBoundary
+ Test-Reject ('Fixture label '+$label+' cannot bypass bridge version') {param($d,$p)Match-FixtureLabels $d $p $label;Rewrite-PayloadJson $p 'payload/Mods/DbceTripleScreenArtOfRally/Info.json' {param($m)$m.Version='99.0.0'}} -CheckInstallBoundary
+}
+Test-Reject 'Legacy telemetry capabilities conflict' {param($d,$p)Rewrite-PayloadJson $p 'payload/Mods/ArtOfSimRally/features.json' {param($f)($f.features|Where-Object featureId -eq telemetry).capabilities=@('game-input-replay')}}
+Test-Reject 'Legacy communication request path conflict' {param($d,$p)Rewrite-PayloadJson $p 'payload/Mods/ArtOfSimRally/features.json' {param($f)($f.features|Where-Object featureId -eq triple).communication.requestPath='wrong.json'}}
+Test-Reject 'Adapter game mapping conflict' {param($d,$p)Rewrite-PayloadJson $p 'payload/Mods/DbceTripleScreenArtOfRally/manifest.json' {param($m)$m.gameId='other-game'}}
+Test-Reject 'Adapter layout contract conflict' {param($d,$p)Rewrite-PayloadJson $p 'payload/Mods/DbceTripleScreenArtOfRally/manifest.json' {param($m)$m.layoutContractVersions.maximum=2}}
+Test-Reject 'Fixture label string is not authority' {param($d,$p)$file=Join-Path $p 'package-manifest.json';$m=Get-Content $file -Raw|ConvertFrom-Json;$m|Add-Member -NotePropertyName fixtureOnly -NotePropertyValue 'true' -Force;$m|ConvertTo-Json -Depth 15|Set-Content $file}
 # Honest inherited defaults are verified against source, not invented by metadata adoption.
 $settings=Get-Content (Join-Path $root 'components/wheel/src/ArtOfSimRally.Mod/Settings.cs') -Raw
 foreach($declaration in @('WheelInputEnabled = false','ForceFeedbackEnabled = true','TelemetryEnabled = false')){if($settings -notmatch [regex]::Escape($declaration)){throw 'Actual default changed: update owner-reviewed mapping'}}
@@ -73,10 +115,8 @@ $cases += [ordered]@{name='Art defaults source mapping';status='PASS'}
 $owned=($OwnedPaths -join '|');if($owned -match 'delivery-manifest|delivery-validator|delivery-parser|delivery-art'){throw 'Delivery metadata entered installed ownership'}
 $cases += [ordered]@{name='Delivery package-only ownership boundary';status='PASS'}
 $manifest=Get-Content (Join-Path $PackageDirectory 'delivery-manifest.json') -Raw|ConvertFrom-Json
-if(-not $manifest.extensions.'dbce.art'.fixtureOnly){
  Test-Reject 'D11 runtime pin changes on real package' {param($d,$p)$d.provenance.sources[0].commit=('a'*40)}
  Test-Reject 'D08 legacy features contradict' {param($d,$p)$file=Join-Path $p 'payload/Mods/ArtOfSimRally/features.json';$f=Get-Content $file -Raw|ConvertFrom-Json;$f.version='99.0.0';$f|ConvertTo-Json -Depth 10|Set-Content $file;$m=Get-Content (Join-Path $p 'package-manifest.json') -Raw|ConvertFrom-Json;$m.files.'payload/Mods/ArtOfSimRally/features.json'=Hash $file;$m|ConvertTo-Json -Depth 15|Set-Content (Join-Path $p 'package-manifest.json')}
-}
-$result=[ordered]@{status='PASS';cases=$cases;assertions=$cases.Count;scope='Package validation and inert metadata mutations; no entrypoint/device/game execution';notCovered=@('D02 F-Zero fresh-folder owner and D03 OutRun retained runtime repack require their adoption fixtures','D09 recognized legacy packages retain their existing verifiers; new Art delivery verifier does not replace them','D10 live junction creation not repeated here; existing Art installer linked-target fixture retained','S04/S05 exhaustive transaction-boundary injection, S06 concurrent race and mocked running-game predicate are not newly certified by this metadata pilot','R01-R06 runtime recording/signal fixtures belong to external diagnostic owners; no recording/playback shipped')}
+$result=[ordered]@{status='PASS';cases=$cases;assertions=$cases.Count;scope='Package validation and inert metadata mutations plus stock PowerShell installer preflight in disposable targets; no game/device execution';notCovered=@('D02 F-Zero fresh-folder owner and D03 OutRun retained runtime repack require their adoption fixtures','D09 recognized legacy packages retain their existing verifiers; new Art delivery verifier does not replace them','D10 live junction creation not repeated here; existing Art installer linked-target fixture retained','S04/S05 exhaustive transaction-boundary injection, S06 concurrent race and mocked running-game predicate are not newly certified by this metadata pilot','R01-R06 runtime recording/signal fixtures belong to external diagnostic owners; no recording/playback shipped')}
 $result|ConvertTo-Json -Depth 8|Set-Content (Join-Path $OutputDirectory 'result.json')
 Write-Output "Delivery fixtures PASS: $($cases.Count)"
