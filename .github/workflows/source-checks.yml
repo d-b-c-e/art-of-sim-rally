@@ -30,8 +30,13 @@ jobs:
         with:
           persist-credentials: false
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6, resolved 2026-10-01
+        id: dotnet
         with:
           dotnet-version: '8.0.x'
           check-latest: false
       - name: Run committed-source checks
-        run: ./tools/ci/Test-Source.ps1
+        working-directory: tools/ci
+        run: |
+          @{sdk = @{version = '${{ steps.dotnet.outputs.dotnet-version }}'; rollForward = 'disable'}} |
+            ConvertTo-Json | Set-Content -LiteralPath global.json -Encoding utf8
+          ./Test-Source.ps1

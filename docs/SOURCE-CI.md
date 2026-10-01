@@ -6,6 +6,9 @@ newer runs cancel stale runs for the same ref. It grants only `contents: read`,
 does not persist checkout credentials, and has no secrets, publishing, release,
 deployment, scheduled runs, artifact uploads, or shared caches. Official checkout
 and .NET setup actions are pinned to the resolved commit hashes.
+An ephemeral SDK selector in `tools/ci/global.json` keeps the job on the installed
+.NET 8 SDK even when the hosted image also includes newer SDKs. It is not committed
+and does not change the game's production SDK policy.
 
 Run the equivalent gate in PowerShell 7 on Windows with .NET 8 installed:
 
